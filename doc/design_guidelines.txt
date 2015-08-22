@@ -1,0 +1,26 @@
+The golden rule used when designing Mafia is as follows:
+
+Players should be greatly rewarded for correctly deducing information related to the game, and for deceiving others into believing false information.
+
+When I use the term "information", I mean it in a very general sense. For instance, one of the most critical sources of information (and a defining characteristic of the game) is that the Mafia know whom each other are, whereas the other players know only their own identities. Thus it becomes a pivotal gameplay element for the villagers to determine the roles of other players, and for the Mafia to attempt to deceive the village. Related to this, another critical source of information (both factual and fictitious) is what other players say during the day. This is where the majority obtain relevant information, and is why roles which specifically control this exchange of information (such as the Blackmailer and the Actor) should be used sparingly.
+
+Of course, if such an emphasis is to be put on the value of information, then it follows that accurate information should be difficult to obtain reliably. Indeed, other than the sources mentioned above, and in addition the daily news, the roles of lynched players, and the abilities that a player themself uses, there are very few direct sources of information for a player. As a consequence, a large proportion of roles are designed with the purpose of either attempting to obtain accurate information, or spreading false information.
+
+Whilst the gameplay is centred around information, the actual goal is survival for the vast majority of roles. As such, the primary use of information is in choosing whom to kill, (or at least, whom to case a lynch vote against,) and most players will be attempting to convince others that they are "innocent", which usually amounts to claiming that they are sided with the village, so that they are not killed or voted against in the lynch. It naturally follows that of the roles not directly related to the spread of information, many have the purpose of either killing other players, or protecting players from death. (or even both.)
+
+This focus on survival means that the ability to kill is extremely powerful (even more so than the ability to obtain accurate information), and so care needs to be taken when giving a role such an ability. As a rule of thumb, the greater the number of players that a role is sided with, the weaker it should be. For instance, the Vigilante is sided with the village, who often form a majority, and so the Vigilante only gets to use their kill ability once. The Mafia are in a minority, often of only a few players, and so they get to kill somebody each night. The Serial Killer is completely without peers, and so not only do they get to kill somebody each night, but their kill is also the strongest in the game. At the other extreme, the Coward is sided with both the village and the Mafia, and so in addition to having no abilities, they also have the negative trait of appearing suspicious upon investigation.
+
+The use of random elements should be avoided, unless there is good reason otherwise. The more that the game depends on luck, the more likely it is that information gained is false, and hence the less valuable information becomes. Furthermore, with randomness often comes a sense of injustice, whereby a player is not in control of their own fate. On the other hand, randomness helps prevent the game from becoming too tactical and "unsocial", and helps to level the playing field between novices and veterans. As such, randomness should be used sparingly, to freshen up the game as opposed to underpinning a fundamental mechanic. In general, a sense of chaos should be the result of other players' actions, not from the throw of some dice.
+
+
+
+
+
+
+Roles aligned to the village should be good at protecting other people, in various ways. However, they should be weak at directly killing other players, since the village are supposed to use the daily lynch to remove threats, which forms the pivotal social aspect of the game. They should also be reasonable at uncovering intelligence, so that the game is well paced by putting the Mafia and other threats under pressure - . Of course, there should be occasions under which false positives/negatives are discovered
+
+In general, roles aligned to the village should fulfil a particular purpose or function, and as such they should usually be named after professions relating to their abilities or abnormal traits.
+
+
+
+Roles aligned to the Mafia should be weak at protecting other members of the Mafia, such as by preventing their deaths or causing them to appear as innocent. However, members of the Mafia can have "selfish" abilities and traits which benefit themself personally. The Mafia should be reasonably strong at generally deceiving the village, and tampering with their abilities.

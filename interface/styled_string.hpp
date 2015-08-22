@@ -1,0 +1,50 @@
+#ifndef MAFIA_STYLED_STRING_H
+#define MAFIA_STYLED_STRING_H
+
+#include <string>
+#include <vector>
+
+namespace mafia {
+   // A string coupled with a suggested style.
+   // A style is intended to entail such formatting properties as typeface,
+   // font size, colour, etc.
+   struct Styled_string {
+      enum class Style {
+         game,        // Default style during game.
+         game_title,  // Title during game. A maximum of one title can occur
+                      // per message, as the first item.
+         game_italic, // Italic style during game. Used for descriptive text.
+         help,        // Game set-up and general help.
+         help_title,  // Title for game set-up and general help. A maximum of
+                      // one title can occur per message, as the first item.
+         command      // Commands that can be inputted into the console.
+      };
+
+      std::string string{};
+      Style style{Style::game};
+
+      Styled_string() = default;
+
+      Styled_string(std::string string, Style style)
+         : string{string}, style{style} { }
+   };
+
+   // A vector of styled strings, used to form a block of text.
+   using Styled_text = std::vector<Styled_string>;
+
+   // Create some styled text from a string containing a series of tags.
+   // The following tags are possible:
+   //    ^g = game,
+   //    ^G = game_title,
+   //    ^i = game_italic,
+   //    ^h = help,
+   //    ^H = help_title,
+   //    ^c = command.
+   // ^^ prints a single '^' character. The appearance of any other two-
+   // character substring of the form "^x" results in an exception.
+   // Note that the default string style is "game", and hence game-styled
+   // strings need not be prepended with ^g.
+   Styled_text to_styled_text(const std::string &tagged_str);
+}
+
+#endif
