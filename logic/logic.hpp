@@ -1,7 +1,6 @@
-#ifndef MAFIA_LOGIC_H
-#define MAFIA_LOGIC_H
+#ifndef MAFIA_LOGIC
+#define MAFIA_LOGIC
 
-#include "exception.hpp"
 #include "game.hpp"
 
 #endif

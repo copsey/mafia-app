@@ -24,6 +24,10 @@
    }
 }
 
+- (void)clearInput {
+   self.input.stringValue = @"";
+}
+
 - (void)showOutput {
    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] init];
 

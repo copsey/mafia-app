@@ -3,18 +3,22 @@
 
 #include "styled_string.hpp"
 
-mafia::Styled_text mafia::to_styled_text(const std::string &tagged_str) {
+mafia::Styled_text mafia::styled_text_from(const std::string &tagged_s) {
+   std::istringstream iss{tagged_s};
+   return styled_text_from(iss);
+}
+
+mafia::Styled_text mafia::styled_text_from(std::istream &is) {
    Styled_text text{};
 
    std::string str{};
    std::string str_piece{};
    Styled_string::Style style{Styled_string::Style::game};
-   std::istringstream ss{tagged_str};
 
-   while (std::getline(ss, str_piece, '^')) {
+   while (std::getline(is, str_piece, '^')) {
       Styled_string::Style new_style{style};
-      auto x = ss.get();
-      switch (x) {
+
+      switch (auto x = is.get()) {
          case 'g':
             new_style = Styled_string::Style::game;
             break;
@@ -43,23 +47,35 @@ mafia::Styled_text mafia::to_styled_text(const std::string &tagged_str) {
             str_piece += '^';
             break;
 
-         case std::istringstream::traits_type::eof():
-            if (tagged_str.back() == '^') {
-               std::ostringstream err_ss{};
-               err_ss << "An odd number of '^' must not end a tagged string, "
-                      << "and this happens in the following tagged string:\n"
-                      << tagged_str;
+         case std::istream::traits_type::eof(): {
+            auto state = is.rdstate();
+            is.clear();
 
-               throw std::invalid_argument{err_ss.str()};
+            is.unget();
+            if (is.get() == '^') {
+               is.seekg(0);
+
+               std::ostringstream err{};
+               err << "There is a dangling '^' at the end of the following tagged string:\n"
+                   << is.rdbuf();
+
+               throw std::invalid_argument(err.str());
             }
+
+            is.setstate(state);
             break;
+         }
 
          default: {
-            std::ostringstream err_ss{};
-            err_ss << "The tag ^" << static_cast<char>(x) << " is invalid, and "
-            << "appears in the following tagged string:\n" << tagged_str;
+            is.seekg(0);
 
-            throw std::invalid_argument{err_ss.str()};
+            std::ostringstream err{};
+            err << "The tag ^"
+                << static_cast<char>(x)
+                << " is invalid, and appears in the following tagged string:\n"
+                << is.rdbuf();
+
+            throw std::invalid_argument(err.str());
          }
       }
 
@@ -70,11 +86,11 @@ mafia::Styled_text mafia::to_styled_text(const std::string &tagged_str) {
             text.emplace_back(str, style);
             str.clear();
          }
-
+         
          style = new_style;
       }
    }
-   
+
    if (!str.empty()) text.emplace_back(str, style);
 
    return text;

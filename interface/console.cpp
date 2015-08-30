@@ -6,351 +6,464 @@
 #include "../riketi/algorithm.hpp"
 #include "../riketi/char.hpp"
 #include "../riketi/enum.hpp"
+#include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
-#include "alias.hpp"
+#include "names.hpp"
 #include "console.hpp"
 
+const std::array<mafia::Console::Game_parameters, mafia::Console::num_presets> mafia::Console::_presets{
+   mafia::Console::Game_parameters{
+      {"Augustus", "Brutus", "Claudius", "Drusilla"},
+      {mafia::Role::ID::peasant, mafia::Role::ID::racketeer, mafia::Role::ID::coward},
+      {mafia::Wildcard::ID::village_basic},
+      mafia::Rulebook{}
+   }
+};
+
+bool mafia::commands_match(const std::vector<std::string> &v1,
+                           const std::vector<std::string> &v2) {
+   return rkt::equal(v1, v2, [](const std::string &s1, const std::string &s2) {
+      return s1.empty() || s2.empty() || s1 == s2;
+   });
+}
+
+mafia::Console::Console() {
+   refresh_output();
+}
+
 bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
-   std::ostringstream err_ss{}; // Write an error here if something goes wrong.
+   std::stringstream err{}; // Write an error here if something goes wrong.
 
    try {
-      if (commands_match(commands, {})) {
-         // 0 commands is equivalent to refreshing the output.
-      } else if (commands_match(commands, {"ok"})) {
-         /* fix-me: move game_is_in_progress() test to seperate function. */
-
-         if (!game_is_in_progress()) {
-            err_ss << "^HNo game in progress!^hThere is no game in progress to "
-            "continue.";
-         } else {
-            _game_log_ptr->advance();
-         }
-      } else if (commands_match(commands, {"yes"})) {
-         switch (_question) {
-            case Question::none:
-               err_ss << "^HInvalid input!^hThere is no question to answer "
-                         "right now.";
-               break;
-               
-            case Question::confirm_end_game:
-               _question = Question::none;
-               terminate_game();
-               break;
-         }
-      } else if (commands_match(commands, {"no"})) {
-         switch (_question) {
-            case Question::none:
-               err_ss << "^HInvalid input!^hThere is no question to answer "
-                         "right now.";
-               break;
-
-            case Question::confirm_end_game:
-               _question = Question::none;
-               break;
-         }
-      } else if (commands_match(commands, {"begin"})) {
-         if (game_is_in_progress()) {
-            err_ss << "^HGame in progress!^hA new game cannot begin until the "
-            "current game ends.\nEnter ^cend^h to force the game to end "
-            "early, or enter ^cok^h if the game has already ended and you want "
-            "to return to the game setup screen.";
-         } else {
-            begin_new_game();
-         }
-      } else if (commands_match(commands, {"end"})) {
-         if (!game_is_in_progress()) {
-            err_ss << "^HNo game in progress!^hThere is no game in progress to "
-            "end.";
-         } else {
-            _question = Question::confirm_end_game;
-         }
-      } else if (commands_match(commands, {"add", "p", ""})) {
-         /* fix-me: make sure that no ^ characters appear in the name! */
-
-         const std::string &name = commands[2];
-         if (has_pending_player(name)) {
-            err_ss << "^HPlayer already exists!^hA player named ^c"
-                   << name
-                   << "^h has already been selected to play in the next game. "
-                      "(note: names are case-insensitive.)";
-         } else {
-            _pending_player_names.push_back(std::move(name));
-         }
-      } else if (commands_match(commands, {"add", "r", ""})) {
-         /* fix-me: make sure that a role can be added right now, i.e. that no
-          game is in progress currently. */
-
-         _pending_role_ids.push_back(find_role(commands[2]).id());
-      } else if (commands_match(commands, {"take", "r", ""})) {
-         /* fix-me: make sure that a role can be removed right now, i.e. that no
-          game is in progress currently. */
-
-
-      } else if (commands_match(commands, {"vote", "", ""})) {
-         /* fix-me: check game is in progress. */
-
-         const Player &caster = find_player(commands[1]);
-         const Player &target = find_player(commands[2]);
-
-         _game_log_ptr->cast_lynch_vote(caster, target);
-         _game_log_ptr->advance();
-      } else if (commands_match(commands, {"abstain", ""})) {
-         /* fix-me: check game is in progress. */
-
-         const Player &caster = find_player(commands[1]);
-         
-         _game_log_ptr->clear_lynch_vote(caster);
-         _game_log_ptr->advance();
-      } else if (commands_match(commands, {"lynch"})) {
-         /* fix-me: check that game is in progress and lynch can occur. */
-
-         _game_log_ptr->process_lynch_votes();
-         _game_log_ptr->advance();
-      } else if (commands_match(commands, {"preset"})) {
-         if (game_is_in_progress()) {
-            show_error_message("^HGame in progress!^hA new game cannot begin until the current game ends.\n(Enter ^cend^h to force the game to end early, or enter ^cok^h if the game has already ended and you want to return to the game setup screen.)");
-            return false;
-         } else {
-            /* fix-me: the command "preset x" should choose preset x, a pre-defined test setup.
-             (here, x should be an integer constant.) It is an error if preset x doesn't exist.
-             The command "preset" should choose a randomly-selected preset from those available. */
-
-            std::vector<std::string> player_names{"Augustus", "Brutus", "Claudius", "Drusilla"};
-            std::vector<Role::ID> role_ids{Role::ID::peasant, Role::ID::racketeer, Role::ID::coward};
-            std::vector<Joker::ID> joker_ids{Joker::ID::village_basic};
-            Rulebook rulebook{};
-
-            begin_new_game(player_names, role_ids, joker_ids, rulebook);
-         }
-      } else {
-         err_ss << "^HUnrecognised input!^hThe text that you entered couldn't "
-                   "be recognised.\n(enter ^chelp^h if you're unsure what to "
-                   "do, or ^clist c^h for a full list of commands.)";
+      if (commands.size() == 0) {
+         err << "^HMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
       }
+      else if (commands_match(commands, {"help"})) {
+         if (has_game()) {
+            store_help_screen(new Event_help_screen{_game_log->current_event()});
+         } else {
+            store_help_screen(new Setup_help_screen());
+         }
+      }
+      else if (commands_match(commands, {"help", "r", ""})) {
+         const Role &r = active_rulebook().get_role(commands[2]);
+         store_help_screen(new Role_info_screen(r));
+      }
+      else if (commands_match(commands, {"list", "r"})) {
+         store_help_screen(new List_roles_screen(active_rulebook()));
+      }
+      else if (commands_match(commands, {"list", "r", "v"})) {
+         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::village));
+      }
+      else if (commands_match(commands, {"list", "r", "m"})) {
+         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::mafia));
+      }
+      else if (commands_match(commands, {"list", "r", "f"})) {
+         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::freelance));
+      }
+      else if (has_help_screen()) {
+         if (commands_match(commands, {"ok"})) {
+            clear_help_screen();
+         } else {
+            err << "^HInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+         }
+      }
+      else if (has_question()) {
+         if (_question->do_commands(commands, *this)) {
+            clear_question();
+         }
+      }
+      else if (commands_match(commands, {"end"})) {
+         if (!has_game()) {
+            err << "^HNo game in progress!^hThere is no game in progress to end.";
+         } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
+            end_game();
+         } else {
+            store_question(new Confirm_end_game());
+         }
+      }
+      else if (has_game()) {
+         _game_log->do_commands(commands);
+      }
+      else if (commands_match(commands, {"begin"})) {
+         begin_pending_game();
+      }
+      else if (commands_match(commands, {"preset"})) {
+         std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
+         begin_preset(uid(rkt::random_engine));
+      }
+      else if (commands_match(commands, {"preset", ""})) {
+         int i = 0;
+         bool i_is_valid = true;
+
+         try {
+            i = std::stoi(commands[1]);
+         } catch (...) {
+            err << "^HInvalid input!^hThe string ^c"
+                << commands[1]
+                << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+            i_is_valid = false;
+         }
+
+         if (i_is_valid) begin_preset(i);
+      }
+      else {
+         _setup_screen.do_commands(commands);
+      }
+
+      /* fix-me: add  "list w", "list w v", "list w m", "list w f". */
+
+      /* fix-me: "add p A B C" should result in players A, B, C all being chosen. */
+
+      /* fix-me: typing in "preset" should begin a random preset. */
+
+      /* fix-me: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
 
       /* fix-me: list p random, a utility command to generate a list of the players in a game, in a random order.
-       (for example, when asking people to choose their lynch votes, without the option to change.) */
+       (for example, when asking people to choose their lynch votes, without the option to change.)
+       list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
+
+      /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
+
+      /* fix-me: enter "info name" to get a help screen containing information that the player with the given name should know, as a reminder.
+       (i.e. this should include things like their role, but not things like whether or not they are infected.) */
    }
-
-   catch (const player_not_found &e) {
-      err_ss << "^HPlayer not found!^hA player named ^c"
-             << e.name()
-             << "^h could not be found.";
+   catch (const Rulebook::Missing_role_alias &e) {
+      err << "^HInvalid alias!^hNo role could be found whose alias is ^c"
+      << e.alias
+      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
    }
-
-   catch (const no_role_for_alias &e) {
-      err_ss << "^HInvalid role alias!^hNo role could be found whose alias is "
-                "^c"
-             << e.alias()
-             << "^h. (note: aliases are case-sensitive.)\nFor a full list of "
-                "role aliases, enter ^clist r^h.";
+   catch (const Rulebook::Missing_wildcard_alias &e) {
+      err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c"
+      << e.alias
+      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
-
-   catch (const players_to_cards_mismatch &e) {
-      err_ss << "^HMismatch!^hYou attempted to start a game with "
-             << e.num_players()
-             << " player(s) and "
-             << e.num_cards()
-             << " role(s)/joker(s). These numbers must be equal.";
+   catch (const Game_log::Player_not_found &e) {
+      err << "^HPlayer not found!^hA player named ^c"
+      << e.name
+      << "^h could not be found.";
    }
+   catch (const Event::Bad_commands &e) {
+      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+   }
+   catch (const Setup_screen::Bad_player_name &e) {
+      err << "^HInvalid name!^hThe name of a player can only contain letters and numbers.";
+   }
+   catch (const Setup_screen::Player_already_exists &e) {
+      err << "^HPlayer already exists!^hA player named ^c"
+          << e.name
+          << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
+   }
+   catch (const Setup_screen::Player_missing &e) {
+      err << "^HMissing player!^hA player named ^c"
+          << e.name
+          << "^h could not be found.";
+   }
+   catch (const Setup_screen::Rolecard_unselected &e) {
+      err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c"
+          << e.role.get().alias()
+          << "^h have been selected.";
+   }
+   catch (const Setup_screen::Wildcard_unselected &e) {
+      err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c"
+      << e.wildcard.get().alias()
+      << "^h have been selected.";
+   }
+   catch (const Setup_screen::Bad_commands &e) {
+      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+   }
+   catch (const Question::Bad_commands &e) {
+      err << "^HInvalid input!^hPlease answer the question being shown before trying to do anything else.";
+   }
+   catch (const No_game_in_progress &e) {
+      err << "^HNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
+   }
+   catch (const Begin_game_failed &e) {
+      switch (e.reason) {
+         case Begin_game_failed::Reason::game_already_in_progress:
+             err << "^HGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
+            break;
+      }
+   }
+   catch (const Missing_preset &e) {
+      err << "^HMissing preset!^hThere is no preset defined for the index "
+      << e.index
+      << ".";
+   }
+   catch (const Game::Players_to_cards_mismatch &e) {
+      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+   }
+   catch (const Game::Cannot_continue &e) {
+      err << "^HCannot continue!^h";
 
-   catch (const Game_cannot_continue &e) {
-      err_ss << "^HCannot continue!^h";
+      switch (e.reason) {
+         case Game::Cannot_continue::Reason::game_ended:
+            err << "The game has ended, and so cannot be continued.\n(enter ^cend^h to return to the game setup screen.)";
+            break;
 
-      switch (e.reason()) {
-         case Game_cannot_continue::Reason::lynch_can_occur:
-            err_ss << "The game cannot continue until a lynching has taken "
-                      "place.\nEnter ^clynch^h to submit the current lynch "
-                      "votes.";
+         case Game::Cannot_continue::Reason::lynch_can_occur:
+            err << "The game cannot continue until a lynching has taken place.\n(enter ^clynch^h to submit the current lynch votes.)";
+            break;
+
+         case Game::Cannot_continue::Reason::mafia_can_use_kill:
+            err << "The game cannot continue until the mafia have chosen a target to kill.\n(enter ^cskip^h to target nobody.)";
+            break;
+      }
+   }
+   catch (const Game::Lynch_failed &e) {
+      err << "^HLynch failed!^h";
+
+      switch (e.reason) {
+         case Game::Lynch_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Lynch_failed::Reason::bad_timing:
+            err << "A lynch cannot occur at this moment in time.";
+            break;
+      }
+   }
+   catch (const Game::Lynch_vote_failed &e) {
+      err << "^HLynch vote failed!^h";
+
+      switch (e.reason) {
+         case Game::Lynch_vote_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::bad_timing:
+            err << "No lynch votes can be cast at this moment in time.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::caster_is_not_present:
+            err << e.caster.get().name()
+                << " is unable to cast a lynch vote, as they are no longer present in the game.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+                << " cannot cast a lynch vote against "
+                << e.target->name()
+                << ", because "
+                << e.target->name()
+                << " is no longer present in the game.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::caster_is_target:
+            err << "A player cannot cast a lynch vote against themself.";
+            break;
+      }
+   }
+   catch (const Game::Duel_failed &e) {
+      err << "^HDuel failed!^h";
+
+      switch (e.reason) {
+         case Game::Duel_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Duel_failed::Reason::bad_timing:
+            err << "A duel can only take place during the day.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_is_not_present:
+            err << e.caster.get().name()
+            << " is unable to initiate a duel, as they are no longer present in the game.";
+            break;
+
+         case Game::Duel_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+            << " cannot initiate a duel against "
+            << e.target.get().name()
+            << ", because "
+            << e.target.get().name()
+            << " is no longer present in the game.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_is_target:
+            err << "A player cannot duel themself.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_has_no_duel:
+            err << e.caster.get().name()
+            << " has no duel ability to use.";
+            break;
+      }
+   }
+   catch (const Game::Mafia_kill_failed &e) {
+      err << "^HMafia kill failed!^h";
+
+      switch (e.reason) {
+         case Game::Mafia_kill_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+         case Game::Mafia_kill_failed::Reason::bad_timing:
+            err << "The mafia can only use their kill during the night.";
+            break;
+         case Game::Mafia_kill_failed::Reason::already_used:
+            err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_not_present:
+            err << e.caster.get().name()
+            << " cannot perform the mafia's kill, as they are no longer in the game.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
+            err << e.caster.get().name()
+            << " cannot perform the mafia's kill, as they are not part of the mafia.";
+            break;
+         case Game::Mafia_kill_failed::Reason::target_is_not_present:
+            err << e.target.get().name()
+            << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_target:
+            err << e.caster.get().name()
+            << " cannot use the mafia's kill on themself.";
             break;
       }
    }
 
-   catch (const lynch_vote_failed &e) {
-      err_ss << "^HLynch vote failed!^h";
-
-      switch (e.reason()) {
-         case lynch_vote_failed::Reason::bad_timing:
-            err_ss << "No lynch votes can be cast at this moment in time.";
-            break;
-
-         case lynch_vote_failed::Reason::caster_is_not_present:
-            err_ss << e.caster().name()
-                   << " is unable to cast a lynch vote, as they are no longer "
-                      "present in the game.";
-            break;
-
-         case lynch_vote_failed::Reason::target_is_not_present:
-            err_ss << e.caster().name()
-                   << " cannot cast a lynch vote against "
-                   << e.target()->name()
-                   << ", because "
-                   << e.target()->name()
-                   << " is no longer present in the game.";
-            break;
-
-         case lynch_vote_failed::Reason::caster_is_target:
-            err_ss << "A player cannot cast a lynch vote against themself.";
-            break;
-      }
-   }
-
-   catch (const badly_timed_lynch &e) {
-      err_ss << "^HLynch not allowed!^hA lynch cannot occur at this moment in "
-                "time.";
-   }
-
-   std::string err{err_ss.str()};
-   if (err.length() == 0) {
+   if (err.tellp() == 0) {
       refresh_output();
       clear_error_message();
       return true;
    } else {
-      show_error_message(err);
+      read_error_message(err);
       return false;
    }
 }
 
 bool mafia::Console::input(const std::string& input) {
-   return do_commands(rkt::split_if_and_prune(input, [](char ch) {
-      return std::isspace(ch);
-   }));
+   auto commands = rkt::split_if_and_prune(input, [](char c) {
+      return std::isspace(c);
+   });
+   return do_commands(commands);
 }
 
-bool mafia::Console::commands_match(const std::vector<std::string> &v1,
-                                    const std::vector<std::string> &v2) {
-   return rkt::equal(v1, v2,
-                     [](const std::string &s1, const std::string &s2) {
-                        return s1.empty() || s2.empty() || s1 == s2;
-                     });
+const mafia::Styled_text & mafia::Console::output() const {
+   return _output;
 }
 
-void mafia::Console::show_output(const std::string &s) {
-   _output = to_styled_text(s);
-}
-
-void mafia::Console::show_game_setup() {
-   /* fix-me */
-
-   std::string str{"^HGame Setup^hHere, you can choose the players and roles/jokers that will feature in the next game."};
-
-   if (_pending_player_names.size() == 0) {
-      if (_pending_role_ids.size() + _pending_joker_ids.size() == 0) {
-         str += "\n\nNo players or roles/jokers have been selected.";
-      } else {
-         str += "\n\nNo players have been selected.";
-      }
-   } else {
-
-   }
-
-   show_output(str);
-}
-
-void mafia::Console::show_question(Question q) {
-   switch (q) {
-      case Question::none:
-         throw std::invalid_argument("Attempted to show a non-existent"
-                                     "question!");
-
-      case Question::confirm_end_game:
-         show_output("^HEnd Game?^hYou are about to end the current game.\n"
-                     "Are you sure that you want to do this? "
-                     "(^cyes^h or ^cno^h)");
-         break;
-   }
-}
-
-void mafia::Console::show_current_question() {
-   show_question(_question);
-}
-
-void mafia::Console::show_event(const mafia::Event &event) {
-   show_output(event.description());
-}
-
-void mafia::Console::show_current_event() {
-   show_event(current_event());
+void mafia::Console::read_output(std::istream &is) {
+   _output = styled_text_from(is);
 }
 
 void mafia::Console::refresh_output() {
-   switch (_question) {
-      case Question::none:
-         if (game_is_in_progress()) {
-            show_current_event();
-         } else {
-            show_game_setup();
-         }
-         break;
+   std::stringstream ss{};
 
-      default:
-         show_current_question();
+   if (has_help_screen()) {
+      _help_screen->write(ss);
+   } else if (has_question()) {
+      _question->write(ss);
+   } else if (has_game()) {
+      _game_log->current_event().write_full(ss);
+   } else {
+      _setup_screen.write(ss);
    }
+
+   read_output(ss);
 }
 
-void mafia::Console::show_error_message(const std::string &s) {
-   _error_message = to_styled_text(s);
+const mafia::Styled_text & mafia::Console::error_message() const {
+   return _error_message;
+}
+
+void mafia::Console::read_error_message(std::istream &is) {
+   _error_message = styled_text_from(is);
 }
 
 void mafia::Console::clear_error_message() {
    _error_message.clear();
 }
 
-void mafia::Console::begin_new_game(const std::vector<std::string> &pl_names,
-                                    const std::vector<Role::ID> &r_ids,
-                                    const std::vector<Joker::ID> &j_ids,
-                                    const mafia::Rulebook &rulebook) {
-   // Create a new pointer seperately, in case creating a new game results in an
-   // exception being thrown.
-   auto ptr = std::make_unique<Game_log>(pl_names, r_ids, j_ids, rulebook);
-   _game_log_ptr = std::move(ptr);
+const mafia::Help_screen * mafia::Console::help_screen() const {
+   return _help_screen.get();
 }
 
-void mafia::Console::begin_new_game() {
-   begin_new_game(_pending_player_names,
-                  _pending_role_ids,
-                  _pending_joker_ids,
-                  _pending_rulebook);
+bool mafia::Console::has_help_screen() const {
+   return static_cast<bool>(_help_screen);
 }
 
-void mafia::Console::terminate_game() {
+void mafia::Console::store_help_screen(mafia::Help_screen *hs) {
+   _help_screen.reset(hs);
+}
+
+void mafia::Console::clear_help_screen() {
+   _help_screen.reset();
+}
+
+const mafia::Question * mafia::Console::question() const {
+   return _question.get();
+}
+
+bool mafia::Console::has_question() const {
+   return static_cast<bool>(_question);
+}
+
+void mafia::Console::store_question(mafia::Question *q) {
+   _question.reset(q);
+}
+
+void mafia::Console::clear_question() {
+   _question.reset();
+}
+
+const mafia::Game & mafia::Console::game() const {
+   if (!has_game()) throw No_game_in_progress();
+   return _game_log->game();
+}
+
+const mafia::Game_log & mafia::Console::game_log() const {
+   if (!has_game()) throw No_game_in_progress();
+   return *_game_log;
+}
+
+bool mafia::Console::has_game() const {
+   return (bool)_game_log;
+}
+
+void mafia::Console::end_game() {
    /* fix-me: set location where history is saved. */
 
-   std::time_t t = std::time(nullptr);
-   std::tm tm = *std::localtime(&t);
+   if (has_game()) {
+      std::time_t t = std::time(nullptr);
 
-   std::ofstream fs{"game_history.txt", std::ios_base::app};
-   fs << "\n\n====== ";
-   fs << std::put_time(&tm, "%F %T");
-   fs << " ======\n\n";
-   fs << _game_log_ptr->transcript();
-   fs.close();
+      std::ofstream ofs{"/Users/Jack_Copsey/dev/mafia/misc/game_history.txt", std::ofstream::app};
+      ofs << "\n====== ";
+      ofs << std::put_time(std::localtime(&t), "%F %T");
+      ofs << " ======\n\n";
+      _game_log->write_transcript(ofs);
 
-   _game_log_ptr.reset();
+      _game_log.reset();
+   }
 }
 
-bool mafia::Console::has_pending_player(const std::string &name) const {
-   for (const std::string &existing_name : _pending_player_names) {
-      if (rkt::equal_up_to_case(existing_name, name)) {
-         return true;
-      }
+const mafia::Rulebook & mafia::Console::active_rulebook() const {
+   if (has_game()) {
+      return _game_log->game().rulebook();
+   } else {
+      return _setup_screen.rulebook();
    }
-   return false;
 }
 
-const mafia::Player & mafia::Console::find_player(const std::string &s) const {
-   for (const Player &p : _game_log_ptr->game().players()) {
-      if (rkt::equal_up_to_case(s, p.name())) return p;
-   }
-
-   throw player_not_found(s);
+void mafia::Console::begin_game(const std::vector<std::string> &pl_names,
+                                const std::vector<Role::ID> &r_ids,
+                                const std::vector<Wildcard::ID> &w_ids,
+                                const mafia::Rulebook &rulebook) {
+   if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
+   _game_log.reset(new Game_log{pl_names, r_ids, w_ids, rulebook});
 }
 
-const mafia::Role & mafia::Console::find_role(const std::string &alias) const {
-   for (const auto &r : _pending_rulebook.roles()) {
-      if (mafia::alias(r) == alias) return r;
-   }
+void mafia::Console::begin_pending_game() {
+   if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
+   _game_log = _setup_screen.new_game_log();
+}
 
-   throw no_role_for_alias(alias);
+void mafia::Console::begin_preset(int i) {
+   if (i >= 0 && i < num_presets) {
+      Game_parameters params = _presets[i];
+      begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
+   } else {
+      throw Missing_preset{i};
+   }
 }

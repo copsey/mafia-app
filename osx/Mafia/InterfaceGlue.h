@@ -20,6 +20,7 @@
 - (void)awakeFromNib;
 
 - (IBAction)readInput:(id)sender;
+- (void)clearInput;
 
 - (void)showOutput;
 - (void)showErrorMessage;

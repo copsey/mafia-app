@@ -11,21 +11,27 @@
 		F84FE0651AF3B9DF00BF4992 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0641AF3B9DF00BF4992 /* main.m */; };
 		F84FE0671AF3B9DF00BF4992 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F84FE0661AF3B9DF00BF4992 /* Images.xcassets */; };
 		F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0811AF3BB1A00BF4992 /* game.cpp */; };
-		F84FE0941AF3BB1A00BF4992 /* joker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0831AF3BB1A00BF4992 /* joker.cpp */; };
 		F84FE0961AF3BB1A00BF4992 /* rulebook.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */; };
 		F84FE0971AF3BB1A00BF4992 /* random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0911AF3BB1A00BF4992 /* random.cpp */; };
-		F858FAD41AFF5A16004D7058 /* alias.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F858FAD21AFF5A16004D7058 /* alias.cpp */; };
+		F858FAD41AFF5A16004D7058 /* names.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F858FAD21AFF5A16004D7058 /* names.cpp */; };
+		F880CA051B89BEC600144257 /* help_screens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F880CA031B89BEC600144257 /* help_screens.cpp */; };
+		F880CA0B1B8A606300144257 /* questions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F880CA091B8A606300144257 /* questions.cpp */; };
 		F886CDEF1B87014200915D2D /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F886CDEE1B87014200915D2D /* player.cpp */; };
+		F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8882E591B8CE4E6009166BB /* wildcard.cpp */; };
+		F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */; };
+		F8A27DD31B887AA600A50614 /* role.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8A27DD21B887AA600A50614 /* role.cpp */; };
 		F8C84C011AF7ED05007243BA /* Application.xib in Resources */ = {isa = PBXBuildFile; fileRef = F8C84C001AF7ED05007243BA /* Application.xib */; };
 		F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */; };
 		F8D3F4B11B859F91007D134B /* styled_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D3F4B01B859F91007D134B /* styled_string.cpp */; };
-		F8D5DB351B84E43B00D032D6 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* event.cpp */; };
+		F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* events.cpp */; };
 		F8D646E71B85F36200E72222 /* game_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D646E51B85F36200E72222 /* game_log.cpp */; };
 		F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D772D51AF4B42100E16BB6 /* console.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F811CB881B6AB07C002EF3E1 /* string.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
+		F828BC791B91069800439CA0 /* ref.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ref.hpp; sourceTree = "<group>"; };
+		F8454CDF1B8DE939005CD124 /* box.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = box.hpp; sourceTree = "<group>"; };
 		F84FE05C1AF3B9DF00BF4992 /* Mafia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mafia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F84FE0601AF3B9DF00BF4992 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F84FE0611AF3B9DF00BF4992 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -34,21 +40,27 @@
 		F84FE0661AF3B9DF00BF4992 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F84FE0811AF3BB1A00BF4992 /* game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game.cpp; sourceTree = "<group>"; };
 		F84FE0821AF3BB1A00BF4992 /* game.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game.hpp; sourceTree = "<group>"; };
-		F84FE0831AF3BB1A00BF4992 /* joker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = joker.cpp; sourceTree = "<group>"; };
-		F84FE0841AF3BB1A00BF4992 /* joker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = joker.hpp; sourceTree = "<group>"; };
 		F84FE0851AF3BB1A00BF4992 /* logic.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logic.hpp; sourceTree = "<group>"; };
 		F84FE0891AF3BB1A00BF4992 /* player.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = player.hpp; sourceTree = "<group>"; };
 		F84FE08A1AF3BB1A00BF4992 /* role.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = role.hpp; sourceTree = "<group>"; };
 		F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rulebook.cpp; sourceTree = "<group>"; };
 		F84FE08D1AF3BB1A00BF4992 /* rulebook.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rulebook.hpp; sourceTree = "<group>"; };
 		F84FE08F1AF3BB1A00BF4992 /* enum.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = enum.hpp; sourceTree = "<group>"; };
-		F84FE0901AF3BB1A00BF4992 /* map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = map.hpp; sourceTree = "<group>"; };
 		F84FE0911AF3BB1A00BF4992 /* random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = random.cpp; sourceTree = "<group>"; };
 		F84FE0921AF3BB1A00BF4992 /* random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = random.hpp; sourceTree = "<group>"; };
-		F858FAD21AFF5A16004D7058 /* alias.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alias.cpp; sourceTree = "<group>"; };
-		F858FAD31AFF5A16004D7058 /* alias.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = alias.hpp; sourceTree = "<group>"; };
+		F858FAD21AFF5A16004D7058 /* names.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = names.cpp; sourceTree = "<group>"; };
+		F858FAD31AFF5A16004D7058 /* names.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = names.hpp; sourceTree = "<group>"; };
+		F880CA031B89BEC600144257 /* help_screens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = help_screens.cpp; sourceTree = "<group>"; };
+		F880CA041B89BEC600144257 /* help_screens.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = help_screens.hpp; sourceTree = "<group>"; };
+		F880CA091B8A606300144257 /* questions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = questions.cpp; sourceTree = "<group>"; };
+		F880CA0A1B8A606300144257 /* questions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = questions.hpp; sourceTree = "<group>"; };
 		F886CDEE1B87014200915D2D /* player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = player.cpp; sourceTree = "<group>"; };
-		F886CDF01B8757E800915D2D /* exception.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = exception.hpp; sourceTree = "<group>"; };
+		F8882E591B8CE4E6009166BB /* wildcard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wildcard.cpp; sourceTree = "<group>"; };
+		F8882E5A1B8CE4E6009166BB /* wildcard.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = wildcard.hpp; sourceTree = "<group>"; };
+		F8882E5C1B8CE995009166BB /* map.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = map.hpp; sourceTree = "<group>"; };
+		F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setup_screen.cpp; sourceTree = "<group>"; };
+		F88A4DF01B8C9D1D0033A040 /* setup_screen.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = setup_screen.hpp; sourceTree = "<group>"; };
+		F8A27DD21B887AA600A50614 /* role.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = role.cpp; sourceTree = "<group>"; };
 		F8A431881B5113A700155991 /* char.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = char.hpp; sourceTree = "<group>"; };
 		F8AA931F1B4ECD1E00A66DD0 /* algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = algorithm.hpp; sourceTree = "<group>"; };
 		F8C765E61B7F371F008BC683 /* container.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = container.hpp; sourceTree = "<group>"; };
@@ -57,8 +69,8 @@
 		F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = InterfaceGlue.mm; sourceTree = "<group>"; };
 		F8D3F4AE1B859D39007D134B /* styled_string.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = styled_string.hpp; sourceTree = "<group>"; };
 		F8D3F4B01B859F91007D134B /* styled_string.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = styled_string.cpp; sourceTree = "<group>"; };
-		F8D5DB331B84E43B00D032D6 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event.cpp; sourceTree = "<group>"; };
-		F8D5DB341B84E43B00D032D6 /* event.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = event.hpp; sourceTree = "<group>"; };
+		F8D5DB331B84E43B00D032D6 /* events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = events.cpp; sourceTree = "<group>"; };
+		F8D5DB341B84E43B00D032D6 /* events.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = events.hpp; sourceTree = "<group>"; };
 		F8D646E51B85F36200E72222 /* game_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_log.cpp; sourceTree = "<group>"; };
 		F8D646E61B85F36200E72222 /* game_log.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game_log.hpp; sourceTree = "<group>"; };
 		F8D646E81B85F4F800E72222 /* iTunes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
@@ -124,14 +136,20 @@
 		F84FE07F1AF3BB1A00BF4992 /* interface */ = {
 			isa = PBXGroup;
 			children = (
-				F858FAD31AFF5A16004D7058 /* alias.hpp */,
-				F858FAD21AFF5A16004D7058 /* alias.cpp */,
+				F858FAD31AFF5A16004D7058 /* names.hpp */,
+				F858FAD21AFF5A16004D7058 /* names.cpp */,
 				F8D3F4AE1B859D39007D134B /* styled_string.hpp */,
 				F8D3F4B01B859F91007D134B /* styled_string.cpp */,
-				F8D5DB341B84E43B00D032D6 /* event.hpp */,
-				F8D5DB331B84E43B00D032D6 /* event.cpp */,
 				F8D646E61B85F36200E72222 /* game_log.hpp */,
 				F8D646E51B85F36200E72222 /* game_log.cpp */,
+				F8D5DB341B84E43B00D032D6 /* events.hpp */,
+				F8D5DB331B84E43B00D032D6 /* events.cpp */,
+				F88A4DF01B8C9D1D0033A040 /* setup_screen.hpp */,
+				F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */,
+				F880CA041B89BEC600144257 /* help_screens.hpp */,
+				F880CA031B89BEC600144257 /* help_screens.cpp */,
+				F880CA0A1B8A606300144257 /* questions.hpp */,
+				F880CA091B8A606300144257 /* questions.cpp */,
 				F8D772D61AF4B42100E16BB6 /* console.hpp */,
 				F8D772D51AF4B42100E16BB6 /* console.cpp */,
 			);
@@ -143,15 +161,15 @@
 			isa = PBXGroup;
 			children = (
 				F84FE08A1AF3BB1A00BF4992 /* role.hpp */,
-				F84FE0841AF3BB1A00BF4992 /* joker.hpp */,
-				F84FE0831AF3BB1A00BF4992 /* joker.cpp */,
+				F8A27DD21B887AA600A50614 /* role.cpp */,
+				F8882E5A1B8CE4E6009166BB /* wildcard.hpp */,
+				F8882E591B8CE4E6009166BB /* wildcard.cpp */,
 				F84FE08D1AF3BB1A00BF4992 /* rulebook.hpp */,
 				F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */,
 				F84FE0891AF3BB1A00BF4992 /* player.hpp */,
 				F886CDEE1B87014200915D2D /* player.cpp */,
 				F84FE0821AF3BB1A00BF4992 /* game.hpp */,
 				F84FE0811AF3BB1A00BF4992 /* game.cpp */,
-				F886CDF01B8757E800915D2D /* exception.hpp */,
 				F84FE0851AF3BB1A00BF4992 /* logic.hpp */,
 			);
 			name = logic;
@@ -162,12 +180,14 @@
 			isa = PBXGroup;
 			children = (
 				F8AA931F1B4ECD1E00A66DD0 /* algorithm.hpp */,
+				F8454CDF1B8DE939005CD124 /* box.hpp */,
 				F8A431881B5113A700155991 /* char.hpp */,
 				F8C765E61B7F371F008BC683 /* container.hpp */,
 				F84FE08F1AF3BB1A00BF4992 /* enum.hpp */,
-				F84FE0901AF3BB1A00BF4992 /* map.hpp */,
+				F8882E5C1B8CE995009166BB /* map.hpp */,
 				F84FE0921AF3BB1A00BF4992 /* random.hpp */,
 				F84FE0911AF3BB1A00BF4992 /* random.cpp */,
+				F828BC791B91069800439CA0 /* ref.hpp */,
 				F811CB881B6AB07C002EF3E1 /* string.hpp */,
 			);
 			name = riketi;
@@ -243,17 +263,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8D646E71B85F36200E72222 /* game_log.cpp in Sources */,
+				F8A27DD31B887AA600A50614 /* role.cpp in Sources */,
 				F84FE0961AF3BB1A00BF4992 /* rulebook.cpp in Sources */,
 				F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */,
-				F8D5DB351B84E43B00D032D6 /* event.cpp in Sources */,
+				F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */,
+				F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */,
+				F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */,
 				F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */,
 				F8D3F4B11B859F91007D134B /* styled_string.cpp in Sources */,
 				F84FE0971AF3BB1A00BF4992 /* random.cpp in Sources */,
+				F880CA051B89BEC600144257 /* help_screens.cpp in Sources */,
+				F880CA0B1B8A606300144257 /* questions.cpp in Sources */,
 				F84FE0651AF3B9DF00BF4992 /* main.m in Sources */,
 				F886CDEF1B87014200915D2D /* player.cpp in Sources */,
 				F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */,
-				F84FE0941AF3BB1A00BF4992 /* joker.cpp in Sources */,
-				F858FAD41AFF5A16004D7058 /* alias.cpp in Sources */,
+				F858FAD41AFF5A16004D7058 /* names.cpp in Sources */,
 				F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

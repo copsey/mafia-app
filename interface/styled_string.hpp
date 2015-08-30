@@ -1,6 +1,7 @@
 #ifndef MAFIA_STYLED_STRING_H
 #define MAFIA_STYLED_STRING_H
 
+#include <istream>
 #include <string>
 #include <vector>
 
@@ -32,7 +33,8 @@ namespace mafia {
    // A vector of styled strings, used to form a block of text.
    using Styled_text = std::vector<Styled_string>;
 
-   // Create some styled text from a string containing a series of tags.
+   // Often, styled text is created from what is called a tagged string: this is
+   // simply a std::string containing formatting codes of the form ^x.
    // The following tags are possible:
    //    ^g = game,
    //    ^G = game_title,
@@ -41,10 +43,16 @@ namespace mafia {
    //    ^H = help_title,
    //    ^c = command.
    // ^^ prints a single '^' character. The appearance of any other two-
-   // character substring of the form "^x" results in an exception.
-   // Note that the default string style is "game", and hence game-styled
+   // character substring of the form ^x results in an exception.
+   // Note that the default string style is Style::game, and hence game-styled
    // strings need not be prepended with ^g.
-   Styled_text to_styled_text(const std::string &tagged_str);
+
+   // Convert a tagged string into some styled text.
+   Styled_text styled_text_from(const std::string &tagged_s);
+
+   // Convert the tagged string obtained from is into some styled text.
+   // is.tellg() is assumed to be 0.
+   Styled_text styled_text_from(std::istream &is);
 }
 
 #endif

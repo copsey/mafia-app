@@ -12,8 +12,6 @@ namespace rkt {
    // Automatically seeded when the program starts.
    extern std::default_random_engine random_engine;
 
-
-
    // Pick a random position in [b,e) using g.
    // Returns e if b == e.
    template <class Iter, class RNG>
@@ -21,8 +19,9 @@ namespace rkt {
       if (b == e) return e;
 
       auto n = std::distance(b, e);
-      std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
-      std::advance(b, dist(g));
+      std::uniform_int_distribution<decltype(n)> uid{0, n - 1};
+      std::advance(b, uid(g));
+      return b;
    }
 
    // Pick a random position in c using g.
@@ -31,7 +30,6 @@ namespace rkt {
    iterator_type<Cont> pick_with(Cont &c, RNG &&g) {
       return pick_with(std::begin(c), std::end(c), g);
    }
-
    template <class Cont, class RNG>
    const_iterator_type<Cont> pick_with(const Cont &c, RNG &&g) {
       return pick_with(std::begin(c), std::end(c), g);
@@ -50,13 +48,10 @@ namespace rkt {
    iterator_type<Cont> pick(Cont &c) {
       return rkt::pick_with(c, random_engine);
    }
-
    template <class Cont>
    const_iterator_type<Cont> pick(const Cont &c) {
       return rkt::pick_with(c, random_engine);
    }
-
-
 
    // Shuffle [b,e) using g.
    template <class Iter, class RNG>

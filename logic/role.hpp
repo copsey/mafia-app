@@ -1,16 +1,18 @@
-#ifndef MAFIA_ROLE_H
-#define MAFIA_ROLE_H
+#ifndef MAFIA_LOGIC_ROLE
+#define MAFIA_LOGIC_ROLE
+
+#include <string>
+
+#include "../riketi/box.hpp"
 
 namespace mafia {
-   class Rulebook;
-
    struct Role {
-      friend class Rulebook;
-
       enum class ID {
          peasant,
          racketeer,
-         coward
+         coward,
+         serial_killer,
+         musketeer
       };
 
       enum class Alignment {
@@ -19,8 +21,20 @@ namespace mafia {
          freelance
       };
 
+      struct Ability {
+         enum class ID {
+            kill,
+            duel
+         };
+
+         ID id;
+      };
+
       enum class Win_condition {
-         survive
+         survive,
+         village_remains,
+         mafia_remains,
+         win_duel
       };
 
       enum class Peace_condition {
@@ -30,22 +44,29 @@ namespace mafia {
          last_survivor
       };
 
-      // Create a role with the given ID, and all other traits default.
-      Role(ID id): _id{id} { }
+      // Creates a role with the given ID.
+      // All other traits are given their default values.
+      Role(ID id);
 
-      ID id() const { return _id; }
-      Alignment alignment() const { return _alignment; }
-      Peace_condition peace_condition() const { return _peace_condition; }
-      Win_condition win_condition() const { return _win_condition; }
-      bool is_suspicious() const { return _is_suspicious; }
+      // The ID of the role.
+      ID id() const;
+      // The alias of the role, which is fully determined from its ID.
+      std::string alias() const;
+
+      // The various traits of the role.
+      Alignment alignment{Alignment::freelance};
+      rkt::box<Ability> ability{};
+      Win_condition win_condition{Win_condition::survive};
+      Peace_condition peace_condition{Peace_condition::always_peaceful};
+      bool is_suspicious{false};
+      double duel_strength{1};
 
    private:
       ID _id;
-      Alignment _alignment{Alignment::freelance};
-      Peace_condition _peace_condition{Peace_condition::always_peaceful};
-      Win_condition _win_condition{Win_condition::survive};
-      bool _is_suspicious{false};
    };
+
+   // Get the alias corresponding to the given role ID.
+   std::string alias(Role::ID id);
 }
 
 #endif
