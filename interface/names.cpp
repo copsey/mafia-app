@@ -8,8 +8,14 @@ std::string mafia::full_name(Role::ID id) {
    switch (id) {
       case Role::ID::peasant:
          return "Peasant";
+      case Role::ID::doctor:
+         return "Doctor";
+      case Role::ID::detective:
+         return "Detective";
       case Role::ID::racketeer:
          return "Racketeer";
+      case Role::ID::dealer:
+         return "Dealer";
       case Role::ID::coward:
          return "Coward";
       case Role::ID::serial_killer:

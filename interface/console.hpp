@@ -118,7 +118,7 @@ namespace mafia {
          Rulebook rulebook;
       };
 
-      static constexpr std::size_t num_presets{1};
+      static constexpr std::size_t num_presets{2};
       static const std::array<Game_parameters, num_presets> _presets;
 
       Styled_text _output{};

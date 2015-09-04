@@ -31,8 +31,9 @@ void mafia::Player_given_initial_role::write_full(std::ostream &os) const {
 
       if (_w != nullptr) {
          /* fix-me */
-         os << "\nYou were randomly given this role from a wildcard in the "
-         << "[Insert Category Here]" << " category.";
+         os << "\nYou were randomly given this role from the ^c"
+         << _w->alias()
+         << "^g wildcard.";
       }
 
       os << "^h\n\nTo see a full description of your role, enter ^chelp r "
@@ -127,14 +128,16 @@ void mafia::Obituary::write_summary(std::ostream &os) const {
 void mafia::Town_meeting::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
    if (_lynch_can_occur) {
       if (commands_match(commands, {"vote", "", ""})) {
-         const Player &caster = game_log.find_player(commands[1]);
+         const Player &voter = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
-         game_log.cast_lynch_vote(caster, target);
+
+         game_log.cast_lynch_vote(voter.id(), target.id());
          game_log.advance();
       }
       else if (commands_match(commands, {"abstain", ""})) {
-         const Player &caster = game_log.find_player(commands[1]);
-         game_log.clear_lynch_vote(caster);
+         const Player &voter = game_log.find_player(commands[1]);
+
+         game_log.clear_lynch_vote(voter.id());
          game_log.advance();
       }
       else if (commands_match(commands, {"lynch"})) {
@@ -144,7 +147,8 @@ void mafia::Town_meeting::do_commands(const std::vector<std::string> &commands, 
       else if (commands_match(commands, {"duel", "", ""})) {
          const Player &caster = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
-         game_log.stage_duel(caster, target);
+
+         game_log.stage_duel(caster.id(), target.id());
          game_log.advance();
       }
       else {
@@ -158,7 +162,9 @@ void mafia::Town_meeting::do_commands(const std::vector<std::string> &commands, 
       else if (commands_match(commands, {"duel", "", ""})) {
          const Player &caster = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
-         game_log.stage_duel(caster, target);
+
+         game_log.stage_duel(caster.id(), target.id());
+         game_log.advance();
       }
       else {
          throw Bad_commands{};
@@ -172,7 +178,7 @@ void mafia::Town_meeting::write_full(std::ostream &os) const {
    if (_lynch_can_occur) {
       os << "^GDay "
       << _date
-      << "^i...\n\n^gGathered outside the town hall are:\n";
+      << "^gGathered outside the town hall are:\n";
 
       for (auto it = _players.begin(); it != _players.end(); ) {
          const Player &p = *it;
@@ -185,7 +191,9 @@ void mafia::Town_meeting::write_full(std::ostream &os) const {
          os << ((++it == _players.end()) ? "." : ",\n");
       }
 
-      os << "\n\nAs it stands, blah will be lynched.^h\n\nEnter ^clynch^h to submit the current lynch votes. Daytime abilities may also be used at this point.";
+      os << "\n\nAs it stands, "
+      << (_next_lynch_victim ? _next_lynch_victim->name() : "nobody")
+      << " will be lynched.^h\n\nEnter ^clynch^h to submit the current lynch votes. Daytime abilities may also be used at this point.";
    } else {
       os << "^GDay "
       << _date
@@ -251,7 +259,26 @@ void mafia::Duel_result::do_commands(const std::vector<std::string> &commands, m
 }
 
 void mafia::Duel_result::write_full(std::ostream &os) const {
-   /* fix-me */
+   const Player &winner = (caster.get().is_alive() ? caster : target);
+   const Player &loser = (caster.get().is_alive() ? target : caster);
+
+   os << "^GDuel^g"
+   << caster.get().name()
+   << " has challenged "
+   << target.get().name()
+   << " to a duel!^i\n\nThe pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!^g\n\nThe lifeless body of "
+   << loser.name()
+   << " falls to the ground. "
+   << winner.name()
+   << " lets out a sigh of relief.";
+
+   if (!winner.is_present()) {
+      os << "\n\nWith that, "
+      << winner.name()
+      << " throws their gun to the ground and flees from the village.";
+   }
+
+   os << "^h\n\nWhen you have finished with this screen, enter ^cok^h.";
 }
 
 void mafia::Duel_result::write_summary(std::ostream &os) const {
@@ -263,9 +290,15 @@ void mafia::Duel_result::write_summary(std::ostream &os) const {
 }
 
 void mafia::Mafia_meeting::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
-   if (_initial) {
+   if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else if (_initial) {
+      if (commands_match(commands, {"ok"})) {
+         _go_to_sleep = true;
       } else {
          throw Bad_commands{};
       }
@@ -273,12 +306,13 @@ void mafia::Mafia_meeting::do_commands(const std::vector<std::string> &commands,
       if (commands_match(commands, {"kill", "", ""})) {
          const Player &caster = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
-         game_log.cast_mafia_kill(caster, target);
-         game_log.advance();
+
+         game_log.cast_mafia_kill(caster.id(), target.id());
+         _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
          /* fix-me: show "confirm skip?" screen. */
          game_log.skip_mafia_kill();
-         game_log.advance();
+         _go_to_sleep = true;
       } else {
          throw Bad_commands{};
       }
@@ -287,7 +321,11 @@ void mafia::Mafia_meeting::do_commands(const std::vector<std::string> &commands,
 
 void mafia::Mafia_meeting::write_full(std::ostream &os) const {
    /* fix-me */
-   if (_initial) {
+   if (_go_to_sleep) {
+      os << "^GNight "
+      << _date
+      << "^gThe mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^h when you are ready to continue.";
+   } else if (_initial) {
       os << "^GNight ";
       os << _date;
       os << "^gThe mafia consists of:\n";
@@ -298,11 +336,11 @@ void mafia::Mafia_meeting::write_full(std::ostream &os) const {
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 
-      os << "\n\nStarting tomorrow, you can choose a target to kill each night.";
+      os << "\n\nThere is not enough time left to organise a murder.";
    } else {
       os << "^GNight ";
       os << _date;
-      os << "^iIt is close to midnight. The members of th^gSeated around a large walnut table are:\n";
+      os << "^gSeated around a polished walnut table are:\n";
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
          const Player &p = *it;
@@ -310,7 +348,143 @@ void mafia::Mafia_meeting::write_full(std::ostream &os) const {
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 
-      os << "\n\nThe mafia are ready to choose their next victim.^h\n\nEntering ^ckill abc xyz^h will make player abc attempt to kill player xyz.";
+      os << "\n\nThe mafia are ready to choose their next victim.^h\n\nEntering ^ckill A B^h will make player A attempt to kill player B. Player A must be a member of the mafia.\n\nIf the mafia have chosen not to kill anybody this night, enter ^cskip^h.";
+   }
+}
+
+void mafia::Kill_use::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"kill", ""})) {
+         const Player &target = game_log.find_player(commands[1]);
+
+         game_log.cast_kill(_caster->id(), target.id());
+         _go_to_sleep = true;
+      } else if (commands_match(commands, {"skip"})) {
+         game_log.skip_kill(_caster->id());
+         _go_to_sleep = true;
+      } else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Kill_use::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os <<"^GKill Use^g"
+      << _caster->name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GKill Use^g"
+      << _caster->name()
+      << ", you can choose to kill somebody this night.^h\n\nEnter ^ckill A^h to kill player A, or enter ^cskip^h if you don't wish to kill anybody.";
+   }
+}
+
+void mafia::Heal_use::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"heal", ""})) {
+         const Player &target = game_log.find_player(commands[1]);
+
+         game_log.cast_heal(_caster->id(), target.id());
+         _go_to_sleep = true;
+      } else if (commands_match(commands, {"skip"})) {
+         game_log.skip_heal(_caster->id());
+         _go_to_sleep = true;
+      } else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Heal_use::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os <<"^GHeal Use^g"
+      << _caster->name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GHeal Use^g"
+      << _caster->name()
+      << ", you can choose to heal somebody this night.^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
+   }
+}
+
+void mafia::Investigate_use::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"check", ""})) {
+         const Player &target = game_log.find_player(commands[1]);
+
+         game_log.cast_investigate(_caster->id(), target.id());
+         _go_to_sleep = true;
+      } else if (commands_match(commands, {"skip"})) {
+         game_log.skip_investigate(_caster->id());
+         _go_to_sleep = true;
+      } else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Investigate_use::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os <<"^GInvestigation^g"
+      << _caster->name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GInvestigation^g"
+      << _caster->name()
+      << ", you can choose to investigate somebody this night.^h\n\nEnter ^ccheck A^h to investigate player A, or enter ^cskip^h if you don't wish to investigate anybody.";
+   }
+}
+
+void mafia::Peddle_use::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"target", ""})) {
+         const Player &target = game_log.find_player(commands[1]);
+
+         game_log.cast_peddle(_caster->id(), target.id());
+         _go_to_sleep = true;
+      } else if (commands_match(commands, {"skip"})) {
+         game_log.skip_peddle(_caster->id());
+         _go_to_sleep = true;
+      } else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Peddle_use::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os <<"^GPeddle^g"
+      << _caster->name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GPeddle^g"
+      << _caster->name()
+      << ", you can choose to peddle drugs to somebody this night.^h\n\nEnter ^ctarget A^h to peddle drugs to player A, or enter ^cskip^h if you don't wish to peddle drugs to anybody.";
    }
 }
 
@@ -326,7 +500,59 @@ void mafia::Boring_night::do_commands(const std::vector<std::string> &commands, 
 void mafia::Boring_night::write_full(std::ostream &os) const {
    os << "^GNight "
       << date
-      << "^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.";
+      << "^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
+}
+
+void mafia::Investigation_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      }
+      else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"ok"})) {
+         _go_to_sleep = true;
+      }
+      else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Investigation_result::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os << "^GInvestigation Result^g"
+      << investigation.caster.get().name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GInvestigation Result^g"
+      << investigation.caster.get().name()
+      << ", you have completed your investigation of "
+      << investigation.target.get().name()
+      << ".\n\n";
+
+      if (investigation.target_is_suspicious) {
+         os << investigation.target.get().name()
+         << " was behaving very suspiciously this night!";
+      } else {
+         os << "The investigation was fruitless. "
+         << investigation.target.get().name()
+         << " appears to be innocent.";
+      }
+
+      os << "^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   }
+}
+
+void mafia::Investigation_result::write_summary(std::ostream &os) const {
+   os << investigation.caster.get().name()
+   << " decided that "
+   << investigation.target.get().name()
+   << " was "
+   << (investigation.target_is_suspicious ? "suspicious" : "innocent")
+   << ".";
 }
 
 void mafia::Game_ended::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
@@ -334,6 +560,51 @@ void mafia::Game_ended::do_commands(const std::vector<std::string> &commands, Ga
 }
 
 void mafia::Game_ended::write_full(std::ostream &os) const {
-   /* fix-me */
-   os << "^GGame Over^gThe game has ended!\nThe following players won:...\n\nThe following players lost:...^h\n\nTo return to the setup screen, enter ^cend^h.";
+   std::vector<const Player *> winners{};
+   std::vector<const Player *> losers{};
+   for (const Player &player: _game_ptr->players()) {
+      if (player.has_won()) {
+         winners.push_back(&player);
+      } else {
+         losers.push_back(&player);
+      }
+   }
+
+   os << "^GGame Over^gThe game has ended!";
+
+   if (winners.size() > 0) {
+      os << "\n\nThe following players won:\n";
+
+      for (auto it = winners.begin(); it != winners.end(); ) {
+         const Player &player = **it;
+         os << "   " << player.name() << ", the " << full_name(player.role());
+         os << ((++it == winners.end()) ? "." : ",\n");
+      }
+   } else {
+      os << "\n\nNobody won.";
+   }
+
+   if (losers.size() > 0) {
+      os << "\n\nCommiserations go out to:\n";
+
+      for (auto it = losers.begin(); it != losers.end(); ) {
+         const Player &player = **it;
+         os << "   " << player.name() << ", the " << full_name(player.role());
+         os << ((++it == losers.end()) ? "." : ",\n");
+      }
+   } else {
+      os << "\n\nNobody lost.";
+   }
+
+   os << "^h\n\nTo return to the setup screen, enter ^cend^h.";
+}
+
+void mafia::Game_ended::write_summary(std::ostream &os) const {
+   for (auto it = _game_ptr->players().begin(); it != _game_ptr->players().end(); ) {
+      const Player &player = *it;
+      os << player.name() << (player.has_won() ? " won." : " lost.");
+      if (++it != _game_ptr->players().end()) {
+         os << "\n";
+      }
+   }
 }

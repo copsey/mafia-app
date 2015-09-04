@@ -82,9 +82,11 @@ namespace mafia {
       Town_meeting(std::vector<rkt::ref<const Player>> players,
                    Date date,
                    bool lynch_can_occur,
+                   const Player *next_lynch_victim,
                    const Player *recent_lynch_vote_caster,
                    const Player *recent_lynch_vote_target)
       : _players{players}, _date{date}, _lynch_can_occur{lynch_can_occur},
+      _next_lynch_victim{next_lynch_victim},
       _recent_vote_caster{recent_lynch_vote_caster},
       _recent_vote_target{recent_lynch_vote_target} { }
 
@@ -97,6 +99,7 @@ namespace mafia {
       std::vector<rkt::ref<const Player>> _players;
       Date _date;
       bool _lynch_can_occur;
+      const Player *_next_lynch_victim;
       const Player *_recent_vote_caster;
       const Player *_recent_vote_target;
    };
@@ -146,6 +149,59 @@ namespace mafia {
       std::vector<rkt::ref<const Player>> _mafiosi;
       Date _date;
       bool _initial;
+      bool _go_to_sleep{false};
+   };
+
+
+   struct Kill_use: Event {
+      Kill_use(const Player &caster): _caster{&caster} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+
+   private:
+      const Player *_caster;
+      bool _go_to_sleep{false};
+   };
+
+
+   struct Heal_use: Event {
+      Heal_use(const Player &caster): _caster{&caster} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+
+   private:
+      const Player *_caster;
+      bool _go_to_sleep{false};
+   };
+
+
+   struct Investigate_use: Event {
+      Investigate_use(const Player &caster): _caster{&caster} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+
+   private:
+      const Player *_caster;
+      bool _go_to_sleep{false};
+   };
+
+
+   struct Peddle_use: Event {
+      Peddle_use(const Player &caster): _caster{&caster} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+
+   private:
+      const Player *_caster;
+      bool _go_to_sleep{false};
    };
 
 
@@ -160,13 +216,29 @@ namespace mafia {
    };
 
 
+   struct Investigation_result: Event {
+      Investigation_result(Game::Investigation investigation)
+      : investigation{investigation} { }
+
+      Game::Investigation investigation;
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+      void write_summary(std::ostream &os) const override;
+
+   private:
+      bool _go_to_sleep{false};
+   };
+
+
    struct Game_ended: Event {
       Game_ended(const Game &game) : _game_ptr{&game} { }
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
 
       void write_full(std::ostream &os) const override;
-      /* fix-me: write_summary */
+      void write_summary(std::ostream &os) const override;
 
    private:
       const Game *_game_ptr;

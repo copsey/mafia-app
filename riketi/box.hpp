@@ -19,7 +19,7 @@ namespace rkt {
          const char * what() const noexcept override;
       };
 
-      // The type of object being contained in the box.
+      // The type of object contained in the box.
       using type = T;
 
       // Creates an empty box.
@@ -34,7 +34,7 @@ namespace rkt {
       // Destroys the box and its contents.
       ~box() = default;
 
-      // Assigns to this box the contents of another box.
+      // Assigns to this box the contents of b.
       box & operator= (const box &b) = default;
       box & operator= (box &&b);
 
@@ -42,7 +42,7 @@ namespace rkt {
       bool is_empty() const;
       bool is_full() const;
 
-      // Checks whether two boxes are equal.
+      // Checks whether this box and b are equal.
       // Equality holds iff both boxes are empty or both boxes contain equal
       // objects.
       bool operator== (const box &b) const;
@@ -80,7 +80,7 @@ namespace rkt {
       void throw_if_empty() const;
    };
 
-   // Swaps the contents of two boxes.
+   // Swaps the contents of b1 and b2.
    template <class T>
    void swap(box<T> &b1, box<T> &b2);
 }

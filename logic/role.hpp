@@ -9,7 +9,10 @@ namespace mafia {
    struct Role {
       enum class ID {
          peasant,
+         doctor,
+         detective,
          racketeer,
+         dealer,
          coward,
          serial_killer,
          musketeer
@@ -24,6 +27,9 @@ namespace mafia {
       struct Ability {
          enum class ID {
             kill,
+            heal,
+            investigate,
+            peddle,
             duel
          };
 

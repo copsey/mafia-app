@@ -7,8 +7,15 @@
 
 namespace mafia {
    struct Rulebook {
+      // An edition of the rules.
+      using Edition = int;
       // The most recent edition of the rules.
-      static constexpr int latest_edition{1};
+      static constexpr Edition latest_edition{1};
+
+      // An exception signifying that no rulebook with the given edition exists.
+      struct Bad_edition {
+         Edition edition;
+      };
 
       // Signifies that the rulebook doesn't contain a role with the given ID.
       struct Missing_role_ID {
@@ -38,7 +45,10 @@ namespace mafia {
       // Creates a rulebook of the latest edition.
       Rulebook();
       // Creates a rulebook of the specified edition.
-      Rulebook(int edition);
+      Rulebook(Edition edition);
+
+      // Gets the edition of the rules being used.
+      Edition edition() const;
 
       // A vector containing every role defined in the rulebook.
       const std::vector<Role> & roles() const;
@@ -109,7 +119,7 @@ namespace mafia {
                               const std::map<Role::ID, double> &weights);
 
    private:
-      int _edition;
+      Edition _edition;
       std::vector<Role> _roles{};
       std::vector<Wildcard> _wildcards{};
    };

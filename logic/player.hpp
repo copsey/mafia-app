@@ -1,8 +1,6 @@
 #ifndef MAFIA_LOGIC_PLAYER
 #define MAFIA_LOGIC_PLAYER
 
-#include "../riketi/ref.hpp"
-
 #include "wildcard.hpp"
 
 namespace mafia {
@@ -12,53 +10,53 @@ namespace mafia {
    // A period of in-game time.
    enum class Time { day, night };
 
-   // A card which can be assigned to a player.
-   using Card = std::pair<rkt::ref<const Role>, const Wildcard *>;
-
    // A player in a game of Mafia.
    struct Player {
-      // Creates a new player with the given name, assigning them the given
-      // card.
-      Player(std::string name, Card card);
+      using ID = std::size_t;
 
-      // The name of the player.
-      const std::string& name() const;
+      Player(std::string name, ID id);
+
+      // The player's name.
+      const std::string & name() const;
+      // The unique ID given to the player for the game that they are in.
+      ID id() const;
 
       // The current role of the player.
       const Role & role() const;
+      // Assigns the player the given role.
+      void assign_role(const Role &role);
       // The wildcard from which the player obtained their current role, or
       // nullptr if none exists.
       const Wildcard * wildcard() const;
-      // Assigns the player the given role.
-      void assign(const Role &role);
-      // Assigns the player the role on the given card, also storing the
-      // wildcard.
-      void assign(const Card &card);
+      // Sets the wildcard which picked the player's current role.
+      void set_wildcard(const Wildcard &wildcard);
 
       // Whether the player is still alive.
       bool is_alive() const;
       bool is_dead() const;
-      // Whether the player is still present in the town.
-      bool is_present() const;
-      // The time at which the player died, if they are dead.
-      Time time_of_death() const;
       // The date on which the player died, if they are dead.
       Date date_of_death() const;
-
-      // Kills the player, through a generic death, on the given date at the given time.
+      // The time at which the player died, if they are dead.
+      Time time_of_death() const;
+      // Kills the player, on the given date and at the given time.
+      // The player will count as both dead and not present after killing them.
       void kill(Date date, Time time);
-      // Kills the player via the mafia's nightly kill.
-      void kill_by_mafia(Date date, Time time);
-      // Lynches the player.
-      void lynch(Date date, Time time);
-      // Kills the player in a duel.
-      void kill_in_duel(Date date, Time time);
-      // Makes the player leave, without killing them.
+
+      // Whether the player is still present in the town.
+      bool is_present() const;
+      // Makes the player leave town, without killing them.
       void leave();
 
       // Clears all temporary modifiers from the player, so that they are in a
       // fresh state ready for the next day.
       void refresh();
+
+      // The abilities that the player must respond to before the game can
+      // continue.
+      const std::vector<Role::Ability> & compulsory_abilities() const;
+      // Add/remove a compulsory ability.
+      void add_compulsory_ability(Role::Ability ability);
+      void remove_compulsory_ability(Role::Ability ability);
 
       // The player's current lynch vote.
       const Player * lynch_vote() const;
@@ -67,37 +65,48 @@ namespace mafia {
       // Removes the player's current lynch vote.
       void clear_lynch_vote();
 
-      // Makes the player win a duel.
-      void win_duel();
-      // Makes the player lose a duel, killing them in the process.
-      void lose_duel(Date date, Time time);
       // Whether the player has won a duel at any point.
       bool has_won_duel() const;
-      // Stage a duel between this player and the given player.
-      // Returns the player that won the duel.
-      Player & duel(Player &target, Date date, Time time);
+      // Makes the player win a duel.
+      void win_duel();
+
+      // Whether the player has been healed this night.
+      bool is_healed() const;
+      // Heals the player for the current night.
+      void heal();
+
+      // Whether the player appears as suspicious this night.
+      bool is_suspicious() const;
+      // Give the player some drugs for the current night.
+      // This forces the player to appear as suspicious.
+      void give_drugs();
 
       // Whether the player has won the game they are in.
       bool has_won() const;
-      // Makes the player win the game they are in.
+      // Makes the player win/lose the game they are in.
       void win();
-      // Makes the player lose the game they are in.
       void lose();
 
    private:
       std::string _name;
+      ID _id;
 
       const Role *_role{nullptr};
       const Wildcard *_wildcard{nullptr};
 
       bool _is_alive{true};
       bool _is_present{true};
-      Time _time_of_death;
       Date _date_of_death;
+      Time _time_of_death;
+
+      std::vector<Role::Ability> _compulsory_abilities{};
 
       const Player *_lynch_vote{nullptr};
 
       bool _has_won_duel{false};
+
+      bool _is_healed{false};
+      bool _is_high{false};
 
       bool _has_won{false};
    };

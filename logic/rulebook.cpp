@@ -7,26 +7,33 @@
 
 mafia::Rulebook::Rulebook(): Rulebook{latest_edition} { }
 
-mafia::Rulebook::Rulebook(int edition)
+mafia::Rulebook::Rulebook(Edition edition)
 : _edition{edition} {
-   if (edition != 1) {
-      std::ostringstream err{};
-      err << "No rulebook of edition " << edition << " is defined.";
-
-      throw std::invalid_argument(err.str());
-   }
+   if (edition != 1) throw Bad_edition{edition};
 
    Role &peasant = new_village_role(Role::ID::peasant);
    peasant.duel_strength = 0.333333333;
 
+   Role &doctor = new_village_role(Role::ID::doctor);
+   doctor.ability.put({Role::Ability::ID::heal});
+   doctor.duel_strength = 0.1;
+
+   Role &detective = new_village_role(Role::ID::detective);
+   detective.ability.put({Role::Ability::ID::investigate});
+   detective.duel_strength = 4;
+
    Role &racketeer = new_mafia_role(Role::ID::racketeer);
    racketeer.duel_strength = 9;
+
+   Role &dealer = new_mafia_role(Role::ID::dealer);
+   dealer.ability.put({Role::Ability::ID::peddle});
 
    Role &coward = new_freelance_role(Role::ID::coward);
    coward.is_suspicious = true;
    coward.duel_strength = 0.000000001;
 
    Role &serial_killer = new_freelance_role(Role::ID::serial_killer);
+   serial_killer.ability.put({Role::Ability::ID::kill});
    serial_killer.peace_condition = Role::Peace_condition::last_survivor;
    serial_killer.is_suspicious = true;
    serial_killer.duel_strength = 999999999;
@@ -36,36 +43,30 @@ mafia::Rulebook::Rulebook(int edition)
    musketeer.win_condition = Role::Win_condition::win_duel;
 
    new_wildcard(Wildcard::ID::any, [](const Role &) {
-      return 1.0;
+      return 1;
    });
 
    new_wildcard(Wildcard::ID::village, [](const Role &r) {
-      if (r.alignment == Role::Alignment::village) {
-         return 1.0;
-      } else {
-         return 0.0;
-      }
+      return (r.alignment == Role::Alignment::village) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::village_basic, {
-      {Role::ID::peasant, 1.0}
+      {Role::ID::peasant, 5},
+      {Role::ID::doctor, 2},
+      {Role::ID::detective, 2}
    });
 
    new_wildcard(Wildcard::ID::mafia, [](const Role &r) {
-      if (r.alignment == Role::Alignment::mafia) {
-         return 1.0;
-      } else {
-         return 0.0;
-      }
+      return (r.alignment == Role::Alignment::mafia) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::freelance, [](const Role &r) {
-      if (r.alignment == Role::Alignment::freelance) {
-         return 1.0;
-      } else {
-         return 0.0;
-      }
+      return (r.alignment == Role::Alignment::freelance) ? 1 : 0;
    });
+}
+
+mafia::Rulebook::Edition mafia::Rulebook::edition() const {
+   return _edition;
 }
 
 const std::vector<mafia::Role> & mafia::Rulebook::roles() const {
@@ -234,8 +235,9 @@ mafia::Role & mafia::Rulebook::new_village_role(Role::ID id) {
 mafia::Role & mafia::Rulebook::new_mafia_role(Role::ID id) {
    Role &role = new_role(id);
    role.alignment = Role::Alignment::mafia;
-   role.is_suspicious = true;
    role.peace_condition = Role::Peace_condition::village_eliminated;
+   role.is_suspicious = true;
+   role.duel_strength = 4;
    return role;
 }
 

@@ -18,6 +18,12 @@ const std::array<mafia::Console::Game_parameters, mafia::Console::num_presets> m
       {mafia::Role::ID::peasant, mafia::Role::ID::racketeer, mafia::Role::ID::coward},
       {mafia::Wildcard::ID::village_basic},
       mafia::Rulebook{}
+   },
+   mafia::Console::Game_parameters{
+      {"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
+      {mafia::Role::ID::peasant, mafia::Role::ID::peasant,mafia::Role::ID::doctor, mafia::Role::ID::detective, mafia::Role::ID::dealer, mafia::Role::ID::musketeer},
+      {},
+      mafia::Rulebook{}
    }
 };
 
@@ -139,6 +145,214 @@ bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
       << e.alias
       << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
+   catch (const Game::Players_to_cards_mismatch &e) {
+      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+   }
+   catch (const Game::Lynch_failed &e) {
+      err << "^HLynch failed!^h";
+
+      switch (e.reason) {
+         case Game::Lynch_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Lynch_failed::Reason::bad_timing:
+            err << "A lynch cannot occur at this moment in time.";
+            break;
+      }
+   }
+   catch (const Game::Lynch_vote_failed &e) {
+      err << "^HLynch vote failed!^h";
+
+      switch (e.reason) {
+         case Game::Lynch_vote_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::bad_timing:
+            err << "No lynch votes can be cast at this moment in time.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::voter_is_not_present:
+            err << e.voter.get().name()
+            << " is unable to cast a lynch vote, as they are no longer present in the game.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::target_is_not_present:
+            err << e.voter.get().name()
+            << " cannot cast a lynch vote against "
+            << e.target->name()
+            << ", because "
+            << e.target->name()
+            << " is no longer present in the game.";
+            break;
+
+         case Game::Lynch_vote_failed::Reason::voter_is_target:
+            err << "A player cannot cast a lynch vote against themself.";
+            break;
+      }
+   }
+   catch (const Game::Duel_failed &e) {
+      err << "^HDuel failed!^h";
+
+      switch (e.reason) {
+         case Game::Duel_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Duel_failed::Reason::bad_timing:
+            err << "A duel can only take place during the day.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_is_not_present:
+            err << e.caster.get().name()
+            << " is unable to initiate a duel, as they are no longer present in the game.";
+            break;
+
+         case Game::Duel_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+            << " cannot initiate a duel against "
+            << e.target.get().name()
+            << ", because "
+            << e.target.get().name()
+            << " is no longer present in the game.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_is_target:
+            err << "A player cannot duel themself.";
+            break;
+
+         case Game::Duel_failed::Reason::caster_has_no_duel:
+            err << e.caster.get().name()
+            << " has no duel ability to use.";
+            break;
+      }
+   }
+   catch (const Game::Begin_night_failed &e) {
+      err << "^HCannot begin night!^h";
+
+      switch (e.reason) {
+         case Game::Begin_night_failed::Reason::game_ended:
+            err << "The game has ended, and so cannot be continued.\n(enter ^cend^h to return to the game setup screen.)";
+            break;
+
+         case Game::Begin_night_failed::Reason::already_night:
+            err << "It is already nighttime.";
+
+         case Game::Begin_night_failed::Reason::lynch_can_occur:
+            err << "The next night cannot begin until a lynch has taken place.\n(enter ^clynch^h to submit the current lynch votes.)";
+            break;
+      }
+   }
+   catch (const Game::Mafia_kill_failed &e) {
+      err << "^HMafia kill failed!^h";
+
+      switch (e.reason) {
+         case Game::Mafia_kill_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+         case Game::Mafia_kill_failed::Reason::bad_timing:
+            err << "The mafia can only use their kill during the night.";
+            break;
+         case Game::Mafia_kill_failed::Reason::already_used:
+            err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_not_present:
+            err << e.caster.get().name()
+            << " cannot perform the mafia's kill, as they are no longer in the game.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
+            err << e.caster.get().name()
+            << " cannot perform the mafia's kill, as they are not part of the mafia.";
+            break;
+         case Game::Mafia_kill_failed::Reason::target_is_not_present:
+            err << e.target.get().name()
+            << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
+            break;
+         case Game::Mafia_kill_failed::Reason::caster_is_target:
+            err << e.caster.get().name()
+            << " cannot use the mafia's kill on themself.";
+            break;
+      }
+   }
+   catch (const Game::Kill_failed &e) {
+      err << "^HKill failed!^h";
+
+      switch (e.reason) {
+         case Game::Kill_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+         case Game::Kill_failed::Reason::caster_cannot_kill:
+            err << e.caster.get().name()
+            << " cannot use a kill ability right now.";
+            break;
+         case Game::Kill_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+            << " cannot kill "
+            << e.target.get().name()
+            << ", because "
+            << e.target.get().name()
+            << " is no longer present in the game.";
+            break;
+         case Game::Kill_failed::Reason::caster_is_target:
+            err << e.caster.get().name()
+            << " is not allowed to kill themself.\n(nice try.)";
+            break;
+      }
+   }
+   catch (const Game::Heal_failed &e) {
+      err << "^HHeal failed!^h";
+
+      switch (e.reason) {
+         case Game::Heal_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+         case Game::Heal_failed::Reason::caster_cannot_heal:
+            err << e.caster.get().name()
+            << " cannot use a heal ability right now.";
+            break;
+         case Game::Heal_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+            << " cannot heal "
+            << e.target.get().name()
+            << ", because "
+            << e.target.get().name()
+            << " is no longer present in the game.";
+            break;
+         case Game::Heal_failed::Reason::caster_is_target:
+            err << e.caster.get().name()
+            << " cannot heal themself.";
+            break;
+      }
+   }
+   catch (const Game::Investigate_failed &e) {
+      err << "^HInvestigation failed!^h";
+
+      switch (e.reason) {
+         case Game::Investigate_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+         case Game::Investigate_failed::Reason::caster_cannot_investigate:
+            err << e.caster.get().name()
+            << " cannot investigate anybody right now.";
+            break;
+         case Game::Investigate_failed::Reason::target_is_not_present:
+            err << e.caster.get().name()
+            << " cannot investigate "
+            << e.target.get().name()
+            << ", because "
+            << e.target.get().name()
+            << " is no longer present in the game.";
+            break;
+         case Game::Investigate_failed::Reason::caster_is_target:
+            err << e.caster.get().name()
+            << " cannot investigate themself.";
+            break;
+      }
+   }
+   catch (const Game::Skip_failed &e) {
+      err << "^HSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
+   }
    catch (const Game_log::Player_not_found &e) {
       err << "^HPlayer not found!^hA player named ^c"
       << e.name
@@ -190,137 +404,6 @@ bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
       err << "^HMissing preset!^hThere is no preset defined for the index "
       << e.index
       << ".";
-   }
-   catch (const Game::Players_to_cards_mismatch &e) {
-      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
-   }
-   catch (const Game::Cannot_continue &e) {
-      err << "^HCannot continue!^h";
-
-      switch (e.reason) {
-         case Game::Cannot_continue::Reason::game_ended:
-            err << "The game has ended, and so cannot be continued.\n(enter ^cend^h to return to the game setup screen.)";
-            break;
-
-         case Game::Cannot_continue::Reason::lynch_can_occur:
-            err << "The game cannot continue until a lynching has taken place.\n(enter ^clynch^h to submit the current lynch votes.)";
-            break;
-
-         case Game::Cannot_continue::Reason::mafia_can_use_kill:
-            err << "The game cannot continue until the mafia have chosen a target to kill.\n(enter ^cskip^h to target nobody.)";
-            break;
-      }
-   }
-   catch (const Game::Lynch_failed &e) {
-      err << "^HLynch failed!^h";
-
-      switch (e.reason) {
-         case Game::Lynch_failed::Reason::game_ended:
-            err << "The game has already ended.";
-            break;
-
-         case Game::Lynch_failed::Reason::bad_timing:
-            err << "A lynch cannot occur at this moment in time.";
-            break;
-      }
-   }
-   catch (const Game::Lynch_vote_failed &e) {
-      err << "^HLynch vote failed!^h";
-
-      switch (e.reason) {
-         case Game::Lynch_vote_failed::Reason::game_ended:
-            err << "The game has already ended.";
-            break;
-
-         case Game::Lynch_vote_failed::Reason::bad_timing:
-            err << "No lynch votes can be cast at this moment in time.";
-            break;
-
-         case Game::Lynch_vote_failed::Reason::caster_is_not_present:
-            err << e.caster.get().name()
-                << " is unable to cast a lynch vote, as they are no longer present in the game.";
-            break;
-
-         case Game::Lynch_vote_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
-                << " cannot cast a lynch vote against "
-                << e.target->name()
-                << ", because "
-                << e.target->name()
-                << " is no longer present in the game.";
-            break;
-
-         case Game::Lynch_vote_failed::Reason::caster_is_target:
-            err << "A player cannot cast a lynch vote against themself.";
-            break;
-      }
-   }
-   catch (const Game::Duel_failed &e) {
-      err << "^HDuel failed!^h";
-
-      switch (e.reason) {
-         case Game::Duel_failed::Reason::game_ended:
-            err << "The game has already ended.";
-            break;
-
-         case Game::Duel_failed::Reason::bad_timing:
-            err << "A duel can only take place during the day.";
-            break;
-
-         case Game::Duel_failed::Reason::caster_is_not_present:
-            err << e.caster.get().name()
-            << " is unable to initiate a duel, as they are no longer present in the game.";
-            break;
-
-         case Game::Duel_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
-            << " cannot initiate a duel against "
-            << e.target.get().name()
-            << ", because "
-            << e.target.get().name()
-            << " is no longer present in the game.";
-            break;
-
-         case Game::Duel_failed::Reason::caster_is_target:
-            err << "A player cannot duel themself.";
-            break;
-
-         case Game::Duel_failed::Reason::caster_has_no_duel:
-            err << e.caster.get().name()
-            << " has no duel ability to use.";
-            break;
-      }
-   }
-   catch (const Game::Mafia_kill_failed &e) {
-      err << "^HMafia kill failed!^h";
-
-      switch (e.reason) {
-         case Game::Mafia_kill_failed::Reason::game_ended:
-            err << "The game has already ended.";
-            break;
-         case Game::Mafia_kill_failed::Reason::bad_timing:
-            err << "The mafia can only use their kill during the night.";
-            break;
-         case Game::Mafia_kill_failed::Reason::already_used:
-            err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
-            break;
-         case Game::Mafia_kill_failed::Reason::caster_is_not_present:
-            err << e.caster.get().name()
-            << " cannot perform the mafia's kill, as they are no longer in the game.";
-            break;
-         case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
-            err << e.caster.get().name()
-            << " cannot perform the mafia's kill, as they are not part of the mafia.";
-            break;
-         case Game::Mafia_kill_failed::Reason::target_is_not_present:
-            err << e.target.get().name()
-            << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
-            break;
-         case Game::Mafia_kill_failed::Reason::caster_is_target:
-            err << e.caster.get().name()
-            << " cannot use the mafia's kill on themself.";
-            break;
-      }
    }
 
    if (err.tellp() == 0) {

@@ -1,32 +1,32 @@
-#include "../riketi/random.hpp"
-
 #include "player.hpp"
 
-mafia::Player::Player(std::string name, Card card)
-: _name{name} {
-   assign(card);
+mafia::Player::Player(std::string name, ID id)
+ : _name{name}, _id{id} {
+
 }
 
 const std::string & mafia::Player::name() const {
    return _name;
 }
 
+mafia::Player::ID mafia::Player::id() const {
+   return _id;
+}
+
 const mafia::Role & mafia::Player::role() const {
    return *_role;
+}
+
+void mafia::Player::assign_role(const Role &role) {
+   _role = &role;
 }
 
 const mafia::Wildcard * mafia::Player::wildcard() const {
    return _wildcard;
 }
 
-void mafia::Player::assign(const mafia::Role &role) {
-   _role = &role;
-   _wildcard = nullptr;
-}
-
-void mafia::Player::assign(const Card &card) {
-   assign(card.first);
-   _wildcard = card.second;
+void mafia::Player::set_wildcard(const Wildcard &wildcard) {
+   _wildcard = &wildcard;
 }
 
 bool mafia::Player::is_alive() const {
@@ -37,16 +37,12 @@ bool mafia::Player::is_dead() const {
    return !_is_alive;
 }
 
-bool mafia::Player::is_present() const {
-   return _is_present;
+mafia::Date mafia::Player::date_of_death() const {
+   return _date_of_death;
 }
 
 mafia::Time mafia::Player::time_of_death() const {
    return _time_of_death;
-}
-
-mafia::Date mafia::Player::date_of_death() const {
-   return _date_of_death;
 }
 
 void mafia::Player::kill(Date date, Time time) {
@@ -56,16 +52,8 @@ void mafia::Player::kill(Date date, Time time) {
    _time_of_death = time;
 }
 
-void mafia::Player::kill_by_mafia(Date date, Time time) {
-   kill(date, time);
-}
-
-void mafia::Player::lynch(Date date, Time time) {
-   kill(date, time);
-}
-
-void mafia::Player::kill_in_duel(Date date, Time time) {
-   kill(date, time);
+bool mafia::Player::is_present() const {
+   return _is_present;
 }
 
 void mafia::Player::leave() {
@@ -73,7 +61,30 @@ void mafia::Player::leave() {
 }
 
 void mafia::Player::refresh() {
+   _compulsory_abilities.clear();
+
    _lynch_vote = nullptr;
+   
+   _is_healed = false;
+   _is_high = false;
+}
+
+const std::vector<mafia::Role::Ability> & mafia::Player::compulsory_abilities() const {
+   return _compulsory_abilities;
+}
+
+void mafia::Player::add_compulsory_ability(Role::Ability ability) {
+   _compulsory_abilities.push_back(ability);
+}
+
+void mafia::Player::remove_compulsory_ability(Role::Ability ability) {
+   for (auto it = _compulsory_abilities.begin(); it != _compulsory_abilities.end(); ++it) {
+      if ((*it).id == ability.id) {
+         _compulsory_abilities.erase(it);
+         return;
+      }
+   }
+   /* fix-me: throw exception if compulsory ability is not currently stored. */
 }
 
 const mafia::Player * mafia::Player::lynch_vote() const {
@@ -88,41 +99,28 @@ void mafia::Player::clear_lynch_vote() {
    _lynch_vote = nullptr;
 }
 
-void mafia::Player::win_duel() {
-   _has_won_duel = true;
-   if (role().win_condition == Role::Win_condition::win_duel) {
-      leave();
-   }
-}
-
-void mafia::Player::lose_duel(Date date, Time time) {
-   kill_in_duel(date, time);
-}
-
 bool mafia::Player::has_won_duel() const {
    return _has_won_duel;
 }
 
-mafia::Player & mafia::Player::duel(Player &target, Date date, Time time) {
-   double s = role().duel_strength + target.role().duel_strength;
-   /* fix-me: throw exception if s <= 0 */
-   double p = role().duel_strength / s;
+void mafia::Player::win_duel() {
+   _has_won_duel = true;
+}
 
-   std::bernoulli_distribution bd{p};
+bool mafia::Player::is_healed() const {
+   return _is_healed;
+}
 
-   Player *winner, *loser;
-   if (bd(rkt::random_engine)) {
-      winner = this;
-      loser = &target;
-   } else {
-      winner = &target;
-      loser = this;
-   }
+void mafia::Player::heal() {
+   _is_healed = true;
+}
 
-   winner->win_duel();
-   loser->lose_duel(date, time);
+bool mafia::Player::is_suspicious() const {
+   return role().is_suspicious || _is_high;
+}
 
-   return *winner;
+void mafia::Player::give_drugs() {
+   _is_high = true;
 }
 
 bool mafia::Player::has_won() const {
