@@ -25,6 +25,10 @@ mafia::Rulebook::Rulebook(Edition edition)
    Role &racketeer = new_mafia_role(Role::ID::racketeer);
    racketeer.duel_strength = 9;
 
+   Role &godfather = new_mafia_role(Role::ID::godfather);
+   godfather.is_suspicious = false;
+   godfather.duel_strength = 0.2;
+
    Role &dealer = new_mafia_role(Role::ID::dealer);
    dealer.ability.put({Role::Ability::ID::peddle});
 

@@ -14,6 +14,8 @@ std::string mafia::full_name(Role::ID id) {
          return "Detective";
       case Role::ID::racketeer:
          return "Racketeer";
+      case Role::ID::godfather:
+         return "Godfather";
       case Role::ID::dealer:
          return "Dealer";
       case Role::ID::coward:

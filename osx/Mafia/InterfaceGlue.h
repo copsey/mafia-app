@@ -6,14 +6,17 @@
 //  Copyright (c) 2015 Ponderous Programs. All rights reserved.
 //
 
+#include "console.hpp"
+
 #import <Cocoa/Cocoa.h>
 
-#include "console.hpp"
+#import "AppDelegate.h"
 
 @interface InterfaceGlue : NSObject {
    mafia::Console _console;
 }
 
+@property (weak) IBOutlet AppDelegate *delegate;
 @property (unsafe_unretained) IBOutlet NSTextView *output;
 @property (weak) IBOutlet NSTextField *input;
 

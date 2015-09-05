@@ -8,8 +8,16 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "MafiaPlaylist.h"
+
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
+@property (nonatomic, getter = shouldPlayMusic) BOOL playsMusic;
+@property (assign) IBOutlet NSButton *togglePlaysMusicButton;
+
+- (IBAction)togglePlaysMusic:(id)sender;
+- (void)playMusic:(MafiaPlaylistItem)aMafiaPlaylistItem;
+- (void)fadeOutMusic;
 
 @end
 

@@ -18,6 +18,13 @@
    std::string str{[self.input.stringValue cStringUsingEncoding:NSUTF8StringEncoding]};
 
    if (_console.input(str)) {
+      /* fix-me: make more reliable, i.e. "preset i" doesn't work with this method. */
+      if (str == "begin" || str == "preset") {
+         [_delegate playMusic:MafiaPlaylistItem_Beginning];
+      } else if (str == "end") {
+         [_delegate playMusic:MafiaPlaylistItem_None];
+      }
+
       [self showOutput];
    } else {
       [self showErrorMessage];
@@ -67,6 +74,38 @@
    }
 
    self.output.textStorage.attributedString = attributedString;
+
+   // Play some music.
+   if (_console.has_game()) {
+      const mafia::Event *event = &_console.game_log().current_event();
+
+      if (auto e = dynamic_cast<const mafia::Time_changed *>(event)) {
+         if (e->time == mafia::Time::day) {
+            [_delegate playMusic:MafiaPlaylistItem_Daytime];
+         } else {
+            switch (e->date % 2) {
+               case 0:
+                  [_delegate playMusic:MafiaPlaylistItem_Nighttime1];
+                  break;
+
+               case 1:
+                  [_delegate playMusic:MafiaPlaylistItem_Nighttime2];
+                  break;
+            }
+         }
+      }
+      else if (auto e = dynamic_cast<const mafia::Lynch_result *>(event)) {
+         if (e->victim && e->victim_role->is_troll) {
+            [_delegate playMusic:MafiaPlaylistItem_TrollLynch];
+         }
+      }
+      else if (auto e = dynamic_cast<const mafia::Game_ended *>(event)) {
+         // Hide compiler warning that e is unused
+         e = nullptr;
+
+         [_delegate playMusic:MafiaPlaylistItem_GameEnded];
+      }
+   }
 }
 
 - (void)showErrorMessage {

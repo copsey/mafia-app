@@ -23,6 +23,8 @@ std::string mafia::alias(Role::ID id) {
          return "det";
       case Role::ID::racketeer:
          return "rack";
+      case Role::ID::godfather:
+         return "gf";
       case Role::ID::dealer:
          return "dealer";
       case Role::ID::coward:

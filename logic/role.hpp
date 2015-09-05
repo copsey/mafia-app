@@ -12,6 +12,7 @@ namespace mafia {
          doctor,
          detective,
          racketeer,
+         godfather,
          dealer,
          coward,
          actor,

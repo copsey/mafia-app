@@ -423,13 +423,9 @@ void mafia::Mafia_meeting::do_commands(const std::vector<std::string> &commands,
 void mafia::Mafia_meeting::write_full(std::ostream &os) const {
    /* fix-me */
    if (_go_to_sleep) {
-      os << "^GNight "
-      << _date
-      << "^gThe mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^h when you are ready to continue.";
+      os << "^GMafia Meeting^gThe mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^h when you are ready to continue.";
    } else if (_initial) {
-      os << "^GNight ";
-      os << _date;
-      os << "^gThe mafia consists of:\n";
+      os << "^GMafia Meeting^gThe mafia consists of:\n";
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
          const Player &p = *it;
@@ -439,9 +435,7 @@ void mafia::Mafia_meeting::write_full(std::ostream &os) const {
 
       os << "\n\nThere is not enough time left to organise a murder.";
    } else {
-      os << "^GNight ";
-      os << _date;
-      os << "^gSeated around a polished walnut table are:\n";
+      os << "^GMafia Meeting^gSeated around a polished walnut table are:\n";
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
          const Player &p = *it;
@@ -599,9 +593,9 @@ void mafia::Boring_night::do_commands(const std::vector<std::string> &commands, 
 }
 
 void mafia::Boring_night::write_full(std::ostream &os) const {
-   os << "^GNight "
-      << date
-      << "^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
+   /* fix-me: show current date in title. (e.g. "Night 1") */
+
+   os << "^GCalm Night^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
 }
 
 void mafia::Investigation_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {

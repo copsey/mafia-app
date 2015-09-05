@@ -167,9 +167,8 @@ namespace mafia {
 
    struct Mafia_meeting: Event {
       Mafia_meeting(std::vector<rkt::ref<const Player>> mafiosi,
-                    Date date,
                     bool is_initial_meeting)
-      : _mafiosi{mafiosi}, _date{date}, _initial{is_initial_meeting} { }
+      : _mafiosi{mafiosi}, _initial{is_initial_meeting} { }
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
 
@@ -177,7 +176,6 @@ namespace mafia {
 
    private:
       std::vector<rkt::ref<const Player>> _mafiosi;
-      Date _date;
       bool _initial;
       bool _go_to_sleep{false};
    };
@@ -236,9 +234,7 @@ namespace mafia {
 
 
    struct Boring_night: Event {
-      Boring_night(Date date): date{date} { }
-
-      Date date;
+      Boring_night() { }
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
 

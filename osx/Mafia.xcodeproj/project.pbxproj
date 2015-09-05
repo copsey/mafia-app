@@ -48,6 +48,7 @@
 		F84FE08F1AF3BB1A00BF4992 /* enum.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = enum.hpp; sourceTree = "<group>"; };
 		F84FE0911AF3BB1A00BF4992 /* random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = random.cpp; sourceTree = "<group>"; };
 		F84FE0921AF3BB1A00BF4992 /* random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = random.hpp; sourceTree = "<group>"; };
+		F857A1771B9AECE500BF7C83 /* MafiaPlaylist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MafiaPlaylist.h; sourceTree = "<group>"; };
 		F858FAD21AFF5A16004D7058 /* names.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = names.cpp; sourceTree = "<group>"; };
 		F858FAD31AFF5A16004D7058 /* names.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = names.hpp; sourceTree = "<group>"; };
 		F880CA031B89BEC600144257 /* help_screens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = help_screens.cpp; sourceTree = "<group>"; };
@@ -114,6 +115,7 @@
 				F84FE0611AF3B9DF00BF4992 /* AppDelegate.h */,
 				F84FE0621AF3B9DF00BF4992 /* AppDelegate.m */,
 				F8D646E81B85F4F800E72222 /* iTunes.h */,
+				F857A1771B9AECE500BF7C83 /* MafiaPlaylist.h */,
 				F8C84C901AF4F80A00B40E54 /* InterfaceGlue.h */,
 				F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */,
 				F8C84C001AF7ED05007243BA /* Application.xib */,

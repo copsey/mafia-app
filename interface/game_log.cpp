@@ -27,7 +27,7 @@ mafia::Game_log::Game_log(const std::vector<std::string> &player_names,
    std::vector<Event *> new_events{};
 
    if (_game.num_players_left(Role::Alignment::mafia) > 0) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), _game.date(), true});
+      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), true});
    }
 
    for (const Player &player: _game.remaining_players()) {
@@ -148,7 +148,7 @@ void mafia::Game_log::begin_night() {
    std::vector<Event *> new_events{};
 
    if (_game.mafia_can_use_kill()) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), _game.date(), false});
+      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), false});
    }
 
    /* fix-me: minimise number of events when a player has multiple things to do this night. */
@@ -274,7 +274,7 @@ void mafia::Game_log::log_duel_result(const mafia::Player &caster, const mafia::
 }
 
 void mafia::Game_log::log_boring_night() {
-   store_event(new Boring_night{_game.date()});
+   store_event(new Boring_night{});
 }
 
 void mafia::Game_log::log_investigation_result(Game::Investigation investigation) {
