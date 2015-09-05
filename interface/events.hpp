@@ -105,6 +105,20 @@ namespace mafia {
    };
 
 
+   struct Player_kicked: Event {
+      Player_kicked(const Player &player, const Role &player_role)
+      : player{player}, player_role{player_role} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+      void write_summary(std::ostream &os) const override;
+
+      rkt::ref<const Player> player;
+      rkt::ref<const Role> player_role;
+   };
+
+
    struct Lynch_result: Event {
       Lynch_result(const Player *victim, const Role *victim_role)
       : victim{victim}, victim_role{victim_role} { }
@@ -132,6 +146,22 @@ namespace mafia {
 
       rkt::ref<const Player> caster;
       rkt::ref<const Player> target;
+   };
+
+
+   struct Choose_fake_role: Event {
+      Choose_fake_role(const Player &player)
+      : _player{&player} { }
+
+      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+
+      void write_full(std::ostream &os) const override;
+      void write_summary(std::ostream &os) const override;
+
+   private:
+      const Player *_player;
+      const Role *_fake_role{nullptr};
+      bool _go_to_sleep{false};
    };
 
 

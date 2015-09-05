@@ -9,7 +9,7 @@ mafia::Game_log::Game_log(const std::vector<std::string> &player_names,
                           const std::vector<Role::ID> &role_ids,
                           const std::vector<Wildcard::ID> &wildcard_ids,
                           const Rulebook &rulebook)
- : _game{player_names, role_ids, wildcard_ids, rulebook} {
+: _game{player_names, role_ids, wildcard_ids, rulebook} {
    for (const Player &player: _game.players()) {
       store_event(new Player_given_initial_role{
          player, player.role(), player.wildcard()
@@ -21,17 +21,29 @@ mafia::Game_log::Game_log(const std::vector<std::string> &player_names,
       return;
    }
 
-   log_time_changed();
+   _game.begin_night();
+   store_event(new Time_changed{0, Time::night});
+
+   std::vector<Event *> new_events{};
 
    if (_game.num_players_left(Role::Alignment::mafia) > 0) {
-      store_event(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), _game.date(), true});
-   } else {
-      log_boring_night();
+      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), _game.date(), true});
    }
 
-   _game.begin_day();
-   log_time_changed();
-   log_town_meeting();
+   for (const Player &player: _game.remaining_players()) {
+      if (player.role().is_role_faker && !player.has_fake_role()) {
+         new_events.push_back(new Choose_fake_role{player});
+      }
+   }
+
+   rkt::shuffle(new_events);
+   if (new_events.size() == 0) {
+      log_boring_night();
+   } else {
+      for (Event *event: new_events) _log.emplace_back(event);
+   }
+
+   try_to_log_night_ended();
 }
 
 const mafia::Game & mafia::Game_log::game() const {
@@ -77,10 +89,16 @@ const mafia::Player & mafia::Game_log::find_player(const std::string &name) cons
    throw Player_not_found{name};
 }
 
-void mafia::Game_log::begin_day() {
-   _game.begin_day();
-   log_time_changed();
-   log_town_meeting();
+void mafia::Game_log::kick_player(Player::ID id) {
+   _game.kick_player(id);
+   const Player &player = find_player(id);
+   store_event(new Player_kicked{player, player.role()});
+
+   if (_game.has_ended()) {
+      log_game_ended();
+   } else {
+      log_town_meeting();
+   }
 }
 
 void mafia::Game_log::cast_lynch_vote(Player::ID voter_id, Player::ID target_Id) {
@@ -133,7 +151,7 @@ void mafia::Game_log::begin_night() {
       new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), _game.date(), false});
    }
 
-   /* fix-me: minimise number of events when player has multiple ability uses this night. */
+   /* fix-me: minimise number of events when a player has multiple things to do this night. */
    for (const Player &player: _game.players()) {
       for (Role::Ability ability: player.compulsory_abilities()) {
          switch (ability.id) {
@@ -163,10 +181,16 @@ void mafia::Game_log::begin_night() {
 
    if (new_events.size() == 0) {
       log_boring_night();
-      try_to_log_night_ended();
    } else {
       for (Event *event: new_events) _log.emplace_back(event);
    }
+
+   try_to_log_night_ended();
+}
+
+void mafia::Game_log::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
+   _game.choose_fake_role(player_id, fake_role_id);
+   try_to_log_night_ended();
 }
 
 void mafia::Game_log::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
@@ -269,7 +293,10 @@ void mafia::Game_log::try_to_log_night_ended() {
       }
 
       log_time_changed();
-      log_obituary(_game.date() - 1);
+
+      if (_game.date() > 1) {
+         log_obituary(_game.date() - 1);
+      }
 
       if (_game.has_ended()) {
          log_game_ended();

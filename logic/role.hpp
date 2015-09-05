@@ -14,7 +14,9 @@ namespace mafia {
          racketeer,
          dealer,
          coward,
+         actor,
          serial_killer,
+         village_idiot,
          musketeer
       };
 
@@ -40,6 +42,7 @@ namespace mafia {
          survive,
          village_remains,
          mafia_remains,
+         be_lynched,
          win_duel
       };
 
@@ -65,6 +68,8 @@ namespace mafia {
       Win_condition win_condition{Win_condition::survive};
       Peace_condition peace_condition{Peace_condition::always_peaceful};
       bool is_suspicious{false};
+      bool is_role_faker{false};
+      bool is_troll{false};
       double duel_strength{1};
 
    private:

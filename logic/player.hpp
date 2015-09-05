@@ -47,6 +47,23 @@ namespace mafia {
       // Makes the player leave town, without killing them.
       void leave();
 
+      // Whether the player has been kicked from the game.
+      bool has_been_kicked() const;
+      // Kick the player from the game they are in.
+      void kick();
+
+      // Whether the player has been lynched.
+      bool has_been_lynched() const;
+      // Lynch the player, on the given date.
+      void lynch(Date date);
+
+      // The role that the player must claim to have, or nullptr if none is set.
+      const Role * fake_role() const;
+      // Whether the player has been given a fake role.
+      bool has_fake_role() const;
+      // Give the player a fake role.
+      void give_fake_role(const Role &role);
+
       // Clears all temporary modifiers from the player, so that they are in a
       // fresh state ready for the next day.
       void refresh();
@@ -81,6 +98,14 @@ namespace mafia {
       // This forces the player to appear as suspicious.
       void give_drugs();
 
+      // The player who is haunting this player, or nullptr if no such player
+      // exists.
+      const Player * haunter() const;
+      // Whether the player is being haunted.
+      bool is_haunted() const;
+      // Haunt the player with the given haunter.
+      void haunt(const Player &haunter);
+
       // Whether the player has won the game they are in.
       bool has_won() const;
       // Makes the player win/lose the game they are in.
@@ -93,9 +118,12 @@ namespace mafia {
 
       const Role *_role{nullptr};
       const Wildcard *_wildcard{nullptr};
+      
+      const Role *_fake_role{nullptr};
 
       bool _is_alive{true};
       bool _is_present{true};
+      bool _was_kicked{false};
       Date _date_of_death;
       Time _time_of_death;
 
@@ -103,10 +131,13 @@ namespace mafia {
 
       const Player *_lynch_vote{nullptr};
 
+      bool _was_lynched{false};
       bool _has_won_duel{false};
 
       bool _is_healed{false};
       bool _is_high{false};
+
+      const Player *_haunter{nullptr};
 
       bool _has_won{false};
    };

@@ -148,6 +148,25 @@ bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
    catch (const Game::Players_to_cards_mismatch &e) {
       err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
    }
+   catch (const Game::Kick_failed &e) {
+      err << "^HKick failed!^h";
+
+      switch (e.reason) {
+         case Game::Kick_failed::Reason::game_ended:
+            err << e.player.get().name()
+            << " could not be kicked from the game, because the game has already ended.";
+            break;
+
+         case Game::Kick_failed::Reason::bad_timing:
+            err << "Players can only be kicked from the game during the day.";
+            break;
+
+         case Game::Kick_failed::Reason::already_kicked:
+            err << e.player.get().name()
+            << " has already been kicked from the game";
+            break;
+      }
+   }
    catch (const Game::Lynch_failed &e) {
       err << "^HLynch failed!^h";
 
@@ -241,6 +260,29 @@ bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
 
          case Game::Begin_night_failed::Reason::lynch_can_occur:
             err << "The next night cannot begin until a lynch has taken place.\n(enter ^clynch^h to submit the current lynch votes.)";
+            break;
+      }
+   }
+   catch (const Game::Choose_fake_role_failed &e) {
+      err << "^HChoose fake role failed!^h";
+
+      switch (e.reason) {
+         case Game::Choose_fake_role_failed::Reason::game_ended:
+            err << "The game has already ended.";
+            break;
+
+         case Game::Choose_fake_role_failed::Reason::bad_timing:
+            err << "Wait until night before choosing a fake role.";
+            break;
+
+         case Game::Choose_fake_role_failed::Reason::player_is_not_faker:
+            err << e.player.get().name()
+            << " doesn't need to be given a fake role.";
+            break;
+
+         case Game::Choose_fake_role_failed::Reason::already_chosen:
+            err << e.player.get().name()
+            << " has already been given a fake role.";
             break;
       }
    }

@@ -87,19 +87,16 @@ bool mafia::Game::is_day() const {
    return time() == Time::day;
 }
 
-void mafia::Game::begin_day() {
-   /* fix-me: eventually make this function private. */
+void mafia::Game::kick_player(Player::ID id) {
+   Player &player = find_player(id);
 
-   ++_date;
-   _time = Time::day;
+   if (_has_ended) throw Kick_failed{player, Kick_failed::Reason::game_ended};
+   if (!is_day()) throw Kick_failed{player, Kick_failed::Reason::bad_timing};
+   if (player.has_been_kicked()) throw Kick_failed{player, Kick_failed::Reason::already_kicked};
 
-   _lynch_can_occur = true;
+   player.kick();
 
-   _mafia_can_use_kill = false;
-   _mafia_kill_caster = nullptr;
-   _mafia_kill_target = nullptr;
-
-   for (Player &player: _players) player.refresh();
+   try_to_end();
 }
 
 const mafia::Player * mafia::Game::next_lynch_victim() const {
@@ -157,7 +154,11 @@ const mafia::Player * mafia::Game::process_lynch_votes() {
    if (!lynch_can_occur()) throw Lynch_failed{Lynch_failed::Reason::bad_timing};
 
    auto victim = const_cast<mafia::Player *>(next_lynch_victim());
-   if (victim) victim->kill(_date, _time);
+   if (victim) {
+      victim->kill(_date, _time);
+      if (victim->role().is_troll) _pending_haunters.push_back(victim);
+   }
+
    _lynch_can_occur = false;
 
    try_to_end();
@@ -205,34 +206,51 @@ bool mafia::Game::is_night() const {
 }
 
 void mafia::Game::begin_night() {
-   /* fix-me: throw if time is not day. */
    if (has_ended()) throw Begin_night_failed{Begin_night_failed::Reason::game_ended};
    if (is_night()) throw Begin_night_failed{Begin_night_failed::Reason::already_night};
    if (lynch_can_occur()) throw Begin_night_failed{Begin_night_failed::Reason::lynch_can_occur};
 
    _time = Time::night;
 
-   _mafia_can_use_kill = (num_players_left(Role::Alignment::mafia) > 0);
+   if (_date > 0) {
+      _mafia_can_use_kill = (num_players_left(Role::Alignment::mafia) > 0);
 
-   for (Player &player: _players) {
-      if (player.role().ability.is_full()) {
-         Role::Ability ability = player.role().ability.get();
+      for (Player &player: _players) {
+         if (player.role().ability.is_full()) {
+            Role::Ability ability = player.role().ability.get();
 
-         switch (ability.id) {
-            case Role::Ability::ID::kill:
-            case Role::Ability::ID::heal:
-            case Role::Ability::ID::investigate:
-            case Role::Ability::ID::peddle:
-               player.add_compulsory_ability(ability);
-               break;
-               
-            case Role::Ability::ID::duel:
-               break;
+            switch (ability.id) {
+               case Role::Ability::ID::kill:
+               case Role::Ability::ID::heal:
+               case Role::Ability::ID::investigate:
+               case Role::Ability::ID::peddle:
+                  player.add_compulsory_ability(ability);
+                  break;
+
+               case Role::Ability::ID::duel:
+                  break;
+            }
          }
       }
    }
 
    _investigations.clear();
+
+   try_to_end_night();
+}
+
+void mafia::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
+   Player &player = find_player(player_id);
+   const Role &fake_role = _rulebook.get_role(fake_role_id);
+
+   if (_has_ended) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};
+   if (!is_night()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::bad_timing};
+   if (!player.role().is_role_faker) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::player_is_not_faker};
+   if (player.has_fake_role()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::already_chosen};
+
+   player.give_fake_role(fake_role);
+
+   try_to_end_night();
 }
 
 bool mafia::Game::mafia_can_use_kill() const {
@@ -425,6 +443,9 @@ mafia::Player & mafia::Game::find_player(Player::ID id) {
 
 bool mafia::Game::try_to_end_night() {
    if (!is_night()) return false;
+   if (rkt::any_of(_players, [](const Player &player) {
+      return player.is_present() && player.role().is_role_faker && !player.has_fake_role();
+   })) return false;
    if (mafia_can_use_kill()) return false;
    if (rkt::any_of(players(), [](const Player &player) {
       return player.compulsory_abilities().size() > 0;
@@ -449,7 +470,9 @@ bool mafia::Game::try_to_end_night() {
    /* fix-me: make kill strengths work correctly. */
    for (const auto &pair: _pending_kills) {
       Player &target = *pair.second;
-      target.kill(_date, _time);
+      if (!target.is_healed()) {
+         target.kill(_date, _time);
+      }
    }
 
    for (const auto &pair: _pending_investigations) {
@@ -458,6 +481,23 @@ bool mafia::Game::try_to_end_night() {
 
       if (caster.is_present()) {
          _investigations.emplace_back(&caster, &target, target.is_suspicious());
+      }
+   }
+
+   for (Player *haunter: _pending_haunters) {
+      std::vector<Player *> possible_victims{};
+      for (Player &player: _players) {
+         if (player.is_present() && player.lynch_vote() == haunter)  {
+            possible_victims.push_back(&player);
+         }
+      }
+
+      if (possible_victims.size() > 0) {
+         Player &victim = **rkt::pick(possible_victims);
+         victim.kill(_date, _time);
+         victim.haunt(*haunter);
+      } else {
+         break;
       }
    }
 
@@ -474,6 +514,8 @@ bool mafia::Game::try_to_end_night() {
       _pending_heals.clear();
       _pending_investigations.clear();
       _pending_peddles.clear();
+
+      _pending_haunters.clear();
 
       for (Player &player: _players) player.refresh();
    }
@@ -536,22 +578,28 @@ bool mafia::Game::try_to_end() {
    for (Player &player: _players) {
       bool has_won = false;
 
-      switch (player.role().win_condition) {
-         case Role::Win_condition::survive:
-            has_won = player.is_alive();
-            break;
+      if (!player.has_been_kicked()) {
+         switch (player.role().win_condition) {
+            case Role::Win_condition::survive:
+               has_won = player.is_alive();
+               break;
 
-         case Role::Win_condition::village_remains:
-            has_won = (num_village_left > 0);
-            break;
+            case Role::Win_condition::village_remains:
+               has_won = (num_village_left > 0);
+               break;
 
-         case Role::Win_condition::mafia_remains:
-            has_won = (num_mafia_left > 0);
-            break;
+            case Role::Win_condition::mafia_remains:
+               has_won = (num_mafia_left > 0);
+               break;
 
-         case Role::Win_condition::win_duel:
-            has_won = player.has_won_duel();
-            break;
+            case Role::Win_condition::be_lynched:
+               has_won = player.has_been_lynched();
+               break;
+
+            case Role::Win_condition::win_duel:
+               has_won = player.has_won_duel();
+               break;
+         }
       }
 
       if (has_won) player.win(); else player.lose();

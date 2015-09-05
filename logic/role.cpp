@@ -27,8 +27,12 @@ std::string mafia::alias(Role::ID id) {
          return "dealer";
       case Role::ID::coward:
          return "coward";
+      case Role::ID::actor:
+         return "actor";
       case Role::ID::serial_killer:
          return "sk";
+      case Role::ID::village_idiot:
+         return "vi";
       case Role::ID::musketeer:
          return "musk";
    }

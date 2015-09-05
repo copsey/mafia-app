@@ -112,7 +112,14 @@ void mafia::Obituary::write_full(std::ostream &os) const {
          os << "^GObituary^gIt appears that " << _deaths.size() << " of us did not survive the night...";
       }
    } else {
-      os << "^GObituary^g" << _deaths[_deaths_index].get().name() << " died during the night!";
+      const Player &death = _deaths[_deaths_index].get();
+
+      os << "^GObituary^g" << death.name() << " died during the night!";
+      if (death.is_haunted()) {
+         os << "\n\nA slip of paper was found by their bed. On it has been written the name \""
+         << death.haunter()->name()
+         << "\" over and over...";
+      }
    }
 }
 
@@ -122,12 +129,19 @@ void mafia::Obituary::write_summary(std::ostream &os) const {
    for (const Player &p: _deaths) {
       if (write_nl) os << '\n';
       os << p.name() << " died during the night.";
+      write_nl = true;
    }
 }
 
 void mafia::Town_meeting::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
    if (_lynch_can_occur) {
-      if (commands_match(commands, {"vote", "", ""})) {
+      if (commands_match(commands, {"kick", ""})) {
+         const Player &player = game_log.find_player(commands[1]);
+
+         game_log.kick_player(player.id());
+         game_log.advance();
+      }
+      else if (commands_match(commands, {"vote", "", ""})) {
          const Player &voter = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
 
@@ -157,6 +171,12 @@ void mafia::Town_meeting::do_commands(const std::vector<std::string> &commands, 
    } else {
       if (commands_match(commands, {"night"})) {
          game_log.begin_night();
+         game_log.advance();
+      }
+      else if (commands_match(commands, {"kick", ""})) {
+         const Player &player = game_log.find_player(commands[1]);
+
+         game_log.kick_player(player.id());
          game_log.advance();
       }
       else if (commands_match(commands, {"duel", "", ""})) {
@@ -220,6 +240,29 @@ void mafia::Town_meeting::write_summary(std::ostream &os) const {
    }
 }
 
+void mafia::Player_kicked::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (commands_match(commands, {"ok"})) {
+      game_log.advance();
+   }
+   else {
+      throw Bad_commands{};
+   }
+}
+
+void mafia::Player_kicked::write_full(std::ostream &os) const {
+   os << "^G"
+   << player.get().name()
+   << " kicked^g"
+   << player.get().name()
+   << " was kicked from the game!\nThey were the "
+   << full_name(player.get().role())
+   << ".";
+}
+
+void mafia::Player_kicked::write_summary(std::ostream &os) const {
+   os << player.get().name() << " was kicked.";
+}
+
 void mafia::Lynch_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
    if (commands_match(commands, {"ok"})) {
       game_log.advance();
@@ -237,6 +280,11 @@ void mafia::Lynch_result::write_full(std::ostream &os) const {
 
       if (victim_role) {
          os << "They were a " << full_name(victim_role->id()) << ".";
+         if (victim_role->is_troll) {
+            os << "^i\n\nA chill blows through the air. The townsfolk who voted to lynch "
+            << victim->name()
+            << " look nervous...";
+         }
       } else {
          os << "Their role could not be determined.";
       }
@@ -286,6 +334,59 @@ void mafia::Duel_result::write_summary(std::ostream &os) const {
       os << caster.get().name() << " won a duel against " << target.get().name() << ".";
    } else {
       os << caster.get().name() << " lost a duel against " << target.get().name() << ".";
+   }
+}
+
+void mafia::Choose_fake_role::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
+   if (_go_to_sleep) {
+      if (commands_match(commands, {"ok"})) {
+         game_log.advance();
+      } else {
+         throw Bad_commands{};
+      }
+   } else if (_fake_role) {
+      if (commands_match(commands, {"ok"})) {
+         _go_to_sleep = true;
+      } else {
+         throw Bad_commands{};
+      }
+   } else {
+      if (commands_match(commands, {"choose", ""})) {
+         const Role &fake_role = game_log.game().rulebook().get_role(commands[1]);
+
+         _fake_role = &fake_role;
+         game_log.choose_fake_role(_player->id(), fake_role.id());
+      } else {
+         throw Bad_commands{};
+      }
+   }
+}
+
+void mafia::Choose_fake_role::write_full(std::ostream &os) const {
+   if (_go_to_sleep) {
+      os << "^GChoose Fake Role^g"
+      << _player->name()
+      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+   } else if (_fake_role) {
+      os << "^GChoose Fake Role^g"
+      << _player->name()
+      << ", you have been given the "
+      << full_name(*_fake_role)
+      << " as your fake role.\n\nYou must pretend that this is your real role for the remainder of the game. Breaking this rule will result in you being kicked from the game!\n\nNow would be a good time to study your fake role.^h\n\nEnter ^chelp r "
+      << _fake_role->alias()
+      << "^h to see more information about your fake role.\nWhen you are ready, enter ^cok^h to continue.";
+   } else {
+      os << "^GChoose Fake Role^g"
+      << _player->name()
+      << " needs to be given a fake role, which they must pretend is their true role for the rest of the game.^h\n\nIf they break the rules by contradicting their fake role, then they should be kicked from the game by entering ^ckick "
+      << _player->name()
+      << "^h during the day.\n\nTo choose the role with alias ^cA^h, enter ^cchoose A^h.";
+   }
+}
+
+void mafia::Choose_fake_role::write_summary(std::ostream &os) const {
+   if (_fake_role) {
+      os << _player->name() << " was given the " << full_name(*_fake_role) << " as a fake role.";
    }
 }
 

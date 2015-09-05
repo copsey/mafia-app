@@ -19,6 +19,8 @@ const mafia::Role & mafia::Player::role() const {
 
 void mafia::Player::assign_role(const Role &role) {
    _role = &role;
+
+   _fake_role = nullptr;
 }
 
 const mafia::Wildcard * mafia::Player::wildcard() const {
@@ -58,6 +60,36 @@ bool mafia::Player::is_present() const {
 
 void mafia::Player::leave() {
    _is_present = false;
+}
+
+bool mafia::Player::has_been_kicked() const {
+   return _was_kicked;
+}
+
+void mafia::Player::kick() {
+   leave();
+   _was_kicked = true;
+}
+
+bool mafia::Player::has_been_lynched() const {
+   return _was_lynched;
+}
+
+void mafia::Player::lynch(Date date) {
+   kill(date, Time::day);
+   _was_lynched = true;
+}
+
+const mafia::Role * mafia::Player::fake_role() const {
+   return _fake_role;
+}
+
+bool mafia::Player::has_fake_role() const {
+   return _fake_role;
+}
+
+void mafia::Player::give_fake_role(const mafia::Role &role) {
+   _fake_role = &role;
 }
 
 void mafia::Player::refresh() {
@@ -121,6 +153,18 @@ bool mafia::Player::is_suspicious() const {
 
 void mafia::Player::give_drugs() {
    _is_high = true;
+}
+
+const mafia::Player * mafia::Player::haunter() const {
+   return _haunter;
+}
+
+bool mafia::Player::is_haunted() const {
+   return _haunter;
+}
+
+void mafia::Player::haunt(const mafia::Player &haunter) {
+   _haunter = &haunter;
 }
 
 bool mafia::Player::has_won() const {

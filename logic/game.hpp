@@ -18,6 +18,21 @@ namespace mafia {
          Player::ID id;
       };
 
+      // An exception signifying that the given player couldn't be kicked.
+      struct Kick_failed {
+         enum class Reason {
+            game_ended,
+            bad_timing,
+            already_kicked
+         };
+
+         Kick_failed(const Player &player, Reason reason)
+         : player{player}, reason{reason} { }
+
+         rkt::ref<const Player> player;
+         Reason reason;
+      };
+
       // Signifies that a lynch cannot occur at the moment.
       struct Lynch_failed {
          enum class Reason {
@@ -77,6 +92,23 @@ namespace mafia {
             lynch_can_occur
          };
 
+         Reason reason;
+      };
+
+      struct Choose_fake_role_failed {
+         enum class Reason {
+            game_ended,
+            bad_timing,
+            player_is_not_faker,
+            already_chosen
+         };
+
+         Choose_fake_role_failed(const Player &player, const Role &fake_role,
+                                 Reason reason)
+         : player{player}, fake_role{fake_role}, reason{reason} { }
+
+         rkt::ref<const Player> player;
+         rkt::ref<const Role> fake_role;
          Reason reason;
       };
 
@@ -216,8 +248,10 @@ namespace mafia {
 
       // Whether the time is currently day.
       bool is_day() const;
-      // Proceeds to the next day.
-      void begin_day();
+
+      // Forcibly remove the given player from the game.
+      // A player removed in this way cannot win.
+      void kick_player(Player::ID id);
 
       // The player that would be lynched if the lynch votes were to be
       // processed now, or nullptr if no player would be lynched.
@@ -239,6 +273,9 @@ namespace mafia {
       bool is_night() const;
       // Proceeds to the next night.
       void begin_night();
+
+      // Choose the given role as a fake role for the given player.
+      void choose_fake_role(Player::ID player_id, Role::ID fake_role_id);
 
       // Whether or not the mafia can cast their nightly kill right now.
       bool mafia_can_use_kill() const;
@@ -278,7 +315,7 @@ namespace mafia {
       bool _has_ended{false};
 
       Date _date{0};
-      Time _time{Time::night};
+      Time _time{Time::day};
 
       bool _lynch_can_occur{false};
 
@@ -291,6 +328,7 @@ namespace mafia {
       std::vector<std::pair<Player *, Player *>> _pending_investigations{};
       std::vector<std::pair<Player *, Player *>> _pending_peddles{};
 
+      std::vector<Player *> _pending_haunters{};
       std::vector<std::tuple<Player *, Player *, bool>> _investigations{};
 
       // Gets the player with the given ID.

@@ -64,7 +64,7 @@ namespace mafia {
 
 
 
-      void begin_day();
+      void kick_player(Player::ID id);
 
       void cast_lynch_vote(Player::ID voter_id, Player::ID target_id);
       void clear_lynch_vote(Player::ID voter_id);
@@ -73,6 +73,8 @@ namespace mafia {
       void stage_duel(Player::ID caster_id, Player::ID target_id);
 
       void begin_night();
+
+      void choose_fake_role(Player::ID player_id, Role::ID fake_role_id);
 
       void cast_mafia_kill(Player::ID caster_id, Player::ID target_id);
       void skip_mafia_kill();
@@ -88,7 +90,6 @@ namespace mafia {
 
       void cast_peddle(Player::ID caster_id, Player::ID target_id);
       void skip_peddle(Player::ID caster_id);
-
 
 
 

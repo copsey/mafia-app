@@ -32,11 +32,20 @@ mafia::Rulebook::Rulebook(Edition edition)
    coward.is_suspicious = true;
    coward.duel_strength = 0.000000001;
 
+   Role &actor = new_freelance_role(Role::ID::actor);
+   actor.is_role_faker = true;
+   actor.duel_strength = 0.333333333;
+
    Role &serial_killer = new_freelance_role(Role::ID::serial_killer);
    serial_killer.ability.put({Role::Ability::ID::kill});
    serial_killer.peace_condition = Role::Peace_condition::last_survivor;
    serial_killer.is_suspicious = true;
    serial_killer.duel_strength = 999999999;
+
+   Role &village_idiot = new_freelance_role(Role::ID::village_idiot);
+   village_idiot.win_condition = Role::Win_condition::be_lynched;
+   village_idiot.is_troll = true;
+   village_idiot.duel_strength = 0.001;
 
    Role &musketeer = new_freelance_role(Role::ID::musketeer);
    musketeer.ability.put({Role::Ability::ID::duel});
