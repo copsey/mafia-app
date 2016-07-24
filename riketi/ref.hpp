@@ -4,157 +4,116 @@
 #include <memory>
 #include <utility>
 
-/* Declarations */
-
 namespace rkt {
-   // Encapsulates a reference to an object of type T.
-   // The reference is not fixed, and can be changed to refer to a different
-   // object.
+   /// A struct encapsulating a reference to an object of type T.
+   ///
+   /// The reference is not necessarily fixed to a particular object.
    template <class T>
    struct ref {
-      // The type of object referred to.
+      /// The type of the object being referred to.
       using type = T;
 
-      // Creates a reference to t.
-      ref(T &t);
-      ref(T &&) = delete;
-      // Copies the reference stored in r.
-      ref(const ref &r) = default;
-      ref(ref &&) = delete;
+      /// Create a reference to t.
+      ref (T & t)
+       : p{std::addressof(t)} { }
 
-      // Destroys the reference, leaving the referred-to object unchanged.
-      ~ref() = default;
+      ref (T &&) = delete;
 
-      // Copies the reference in r.
-      ref & operator= (const ref &r) = default;
-      ref & operator= (ref &&) = delete;
+      /// Check whether this and r refer to the same object.
+      bool operator== (const ref & r) const {
+         return p == r.p;
+      }
 
-      // Checks whether this reference and r are equal.
-      // Equality holds iff both references refer to the same object.
-      bool operator== (const ref &r) const;
-      bool operator!= (const ref &r) const;
+      /// Check whether this and r refer to different objects.
+      bool operator!= (const ref & r) const {
+         return p != r.p;
+      }
 
-      // Gets the reference being stored.
-      operator T & () const;
-      T & get() const;
+      /// Get the stored reference.
+      T & get () const {
+         return *p;
+      }
 
-      // Stores a reference to t.
-      void set(T &t);
-      void set(T &&) = delete;
+      /// Get the stored reference.
+      operator T & () const {
+         return *p;
+      }
 
-      // Swaps the references stored by this and r.
-      void swap(ref &r);
+      /// Replace the current reference with a reference to t.
+      void set (T & t) {
+         p = std::addressof(t);
+      }
+
+      void set (T &&) = delete;
+
+      /// Act on the object being referred to.
+      T * operator-> () const {
+         return p;
+      }
+
+      /// Swap the references stored by this and r.
+      void swap (ref & r) {
+         std::swap(p, r.p);
+      }
 
    private:
-      T *_p;
+      T * p;
    };
 
-   // Swaps the references stored by r1 and r2.
+   /// Swap the references stored by r1 and r2.
    template <class T>
-   void swap(ref<T> &r1, ref<T> &r2);
+   void swap (ref<T> & r1, ref<T> & r2) {
+      r1.swap(r2);
+   }
 
 
-   // Encapsulates a reference to an object of type T.
-   // The reference is fixed, and will always refer to the same object.
+   /// A struct encapsulating a reference to a fixed object of type T.
+   ///
+   /// The reference always refers to the same object.
    template <class T>
    struct fixed_ref {
-      // The type of object referred to.
+      /// The type of the object being referred to.
       using type = T;
 
-      // Creates a reference to t.
-      fixed_ref(T &t);
-      fixed_ref(T &&) = delete;
-      // Copies the reference stored in r.
-      fixed_ref(const fixed_ref &r) = default;
-      fixed_ref(fixed_ref &&) = delete;
+      /// Create a reference to t.
+      fixed_ref (T & t)
+       : p{std::addressof(t)} { }
 
-      // Destroys the reference, leaving the referred-to object unchanged.
-      ~fixed_ref() = default;
+      fixed_ref (T &&) = delete;
 
-      // Checks whether this reference and r are equal.
-      // Equality holds iff both references refer to the same object.
-      bool operator== (const fixed_ref &r) const;
-      bool operator!= (const fixed_ref &r) const;
+      fixed_ref (const fixed_ref &) = default;
+      fixed_ref (fixed_ref &&) = default;
+      ~fixed_ref () = default;
+      // no assignment operators
 
-      // Gets the reference being stored.
-      operator T & () const;
-      T & get() const;
+      /// Check whether this and r refer to the same object.
+      bool operator== (const fixed_ref & r) const {
+         return p == r.p;
+      }
+
+      /// Check whether this and r refer to different objects.
+      bool operator!= (const fixed_ref & r) const {
+         return p != r.p;
+      }
+
+      /// Get the stored reference.
+      T & get () const {
+         return *p;
+      }
+
+      /// Get the stored reference.
+      operator T & () const {
+         return *p;
+      }
+
+      /// Act on the object being referred to.
+      T * operator-> () const {
+         return p;
+      }
 
    private:
-      T *_p;
+      T * p;
    };
-}
-
-
-
-
-/* Definitions */
-
-template <class T>
-rkt::ref<T>::ref(T &t)
- : _p{std::addressof(t)} {
-
-}
-
-template <class T>
-bool rkt::ref<T>::operator== (const ref &r) const {
-   return _p == r._p;
-}
-
-template <class T>
-bool rkt::ref<T>::operator!= (const ref &r) const {
-   return _p != r._p;
-}
-
-template <class T>
-rkt::ref<T>::operator T & () const {
-   return *_p;
-}
-
-template <class T>
-T & rkt::ref<T>::get() const {
-   return *_p;
-}
-
-template <class T>
-void rkt::ref<T>::set(T &t) {
-   _p = std::addressof(t);
-}
-
-template <class T>
-void rkt::ref<T>::swap(ref &r) {
-   std::swap(_p, r._p);
-}
-
-template <class T>
-void rkt::swap(ref<T> &r1, ref<T> &r2) {
-   r1.swap(r2);
-}
-
-template <class T>
-rkt::fixed_ref<T>::fixed_ref(T &t)
- : _p{std::addressof(t)} {
-
-}
-
-template <class T>
-bool rkt::fixed_ref<T>::operator== (const fixed_ref &r) const {
-   return _p == r._p;
-}
-
-template <class T>
-bool rkt::fixed_ref<T>::operator!= (const fixed_ref &r) const {
-   return _p != r._p;
-}
-
-template <class T>
-rkt::fixed_ref<T>::operator T & () const {
-   return *_p;
-}
-
-template <class T>
-T & rkt::fixed_ref<T>::get() const {
-   return *_p;
 }
 
 #endif

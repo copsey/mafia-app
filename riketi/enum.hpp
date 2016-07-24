@@ -4,10 +4,14 @@
 #include <type_traits>
 
 namespace rkt {
-   // Get the underlying value of x.
+   /// The underlying type of Enum.
    template <class Enum>
-   constexpr std::underlying_type_t<Enum> value(Enum x) {
-      return static_cast<std::underlying_type_t<Enum>>(x);
+   using underlying_type = typename std::underlying_type<Enum>::type;
+
+   /// The underlying value of x.
+   template <class Enum>
+   constexpr underlying_type<Enum> value (Enum x) {
+      return static_cast<underlying_type<Enum>>(x);
    }
 }
 
