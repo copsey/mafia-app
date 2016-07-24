@@ -53,7 +53,7 @@ std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players() const {
    return v;
 }
 
-std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Role::Alignment alignment) const {
+std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const {
    std::vector<rkt::ref<const Player>> v{};
    for (const Player &p: _players) {
       if (p.is_present() && p.role().alignment == alignment) {
@@ -69,7 +69,7 @@ std::size_t maf::Game::num_players_left() const {
    });
 }
 
-std::size_t maf::Game::num_players_left(Role::Alignment alignment) const {
+std::size_t maf::Game::num_players_left(Alignment alignment) const {
    return rkt::count_if(_players, [alignment](const Player &p) {
       return p.is_present() && p.role().alignment == alignment;
    });
@@ -175,7 +175,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    if (!caster.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_not_present};
    if (!target.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::target_is_not_present};
    if (&caster == &target) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_target};
-   if (caster.role().ability.is_empty() || caster.role().ability.get().id != Role::Ability::ID::duel) throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
+   if (caster.role().ability.is_empty() || caster.role().ability.get().id != Ability::ID::duel) throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
 
    double s = caster.role().duel_strength + target.role().duel_strength;
    /* fix-me: throw exception if s <= 0 */
@@ -193,7 +193,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    }
 
    winner->win_duel();
-   if (winner->role().win_condition == Role::Win_condition::win_duel) {
+   if (winner->role().win_condition == Win_condition::win_duel) {
       winner->leave();
    }
    loser->kill(_date, _time);
@@ -213,21 +213,21 @@ void maf::Game::begin_night() {
    _time = Time::night;
 
    if (_date > 0) {
-      _mafia_can_use_kill = (num_players_left(Role::Alignment::mafia) > 0);
+      _mafia_can_use_kill = (num_players_left(Alignment::mafia) > 0);
 
       for (Player &player: _players) {
          if (player.role().ability.is_full()) {
-            Role::Ability ability = player.role().ability.get();
+            Ability ability = player.role().ability.get();
 
             switch (ability.id) {
-               case Role::Ability::ID::kill:
-               case Role::Ability::ID::heal:
-               case Role::Ability::ID::investigate:
-               case Role::Ability::ID::peddle:
+               case Ability::ID::kill:
+               case Ability::ID::heal:
+               case Ability::ID::investigate:
+               case Ability::ID::peddle:
                   player.add_compulsory_ability(ability);
                   break;
 
-               case Role::Ability::ID::duel:
+               case Ability::ID::duel:
                   break;
             }
          }
@@ -265,7 +265,7 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    if (!is_night()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::bad_timing};
    if (!mafia_can_use_kill()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::already_used};
    if (!caster.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_present};
-   if (caster.role().alignment != Role::Alignment::mafia) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
+   if (caster.role().alignment != Alignment::mafia) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
    if (!target.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::target_is_not_present};
    if (&caster == &target) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_target};
 
@@ -291,8 +291,8 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
    Player &target = find_player(target_id);
 
    if (has_ended()) throw Kill_failed{caster, target, Kill_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::kill;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::kill;
    })) {
       throw Kill_failed{caster, target, Kill_failed::Reason::caster_cannot_kill};
    }
@@ -300,7 +300,7 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
    if (&caster == &target) throw Kill_failed{caster, target, Kill_failed::Reason::caster_is_target};
 
    _pending_kills.emplace_back(&caster, &target);
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::kill});
+   caster.remove_compulsory_ability(Ability{Ability::ID::kill});
 
    try_to_end_night();
 }
@@ -309,13 +309,13 @@ void maf::Game::skip_kill(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::kill;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::kill;
    })) {
       throw Skip_failed{};
    }
 
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::kill});
+   caster.remove_compulsory_ability(Ability{Ability::ID::kill});
 
    try_to_end_night();
 }
@@ -325,8 +325,8 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
    Player &target = find_player(target_id);
 
    if (has_ended()) throw Heal_failed{caster, target, Heal_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::heal;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::heal;
    })) {
       throw Heal_failed{caster, target, Heal_failed::Reason::caster_cannot_heal};
    }
@@ -334,7 +334,7 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
    if (&caster == &target) throw Heal_failed{caster, target, Heal_failed::Reason::caster_is_target};
 
    _pending_heals.emplace_back(&caster, &target);
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::heal});
+   caster.remove_compulsory_ability(Ability{Ability::ID::heal});
 
    try_to_end_night();
 }
@@ -343,13 +343,13 @@ void maf::Game::skip_heal(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::heal;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::heal;
    })) {
       throw Skip_failed{};
    }
 
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::heal});
+   caster.remove_compulsory_ability(Ability{Ability::ID::heal});
 
    try_to_end_night();
 }
@@ -359,8 +359,8 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    Player &target = find_player(target_id);
 
    if (has_ended()) throw Investigate_failed{caster, target, Investigate_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::investigate;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::investigate;
    })) {
       throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_cannot_investigate};
    }
@@ -368,7 +368,7 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    if (&caster == &target) throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_is_target};
 
    _pending_investigations.emplace_back(&caster, &target);
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::investigate});
+   caster.remove_compulsory_ability(Ability{Ability::ID::investigate});
 
    try_to_end_night();
 }
@@ -377,13 +377,13 @@ void maf::Game::skip_investigate(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::investigate;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::investigate;
    })) {
       throw Skip_failed{};
    }
 
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::investigate});
+   caster.remove_compulsory_ability(Ability{Ability::ID::investigate});
 
    try_to_end_night();
 }
@@ -393,15 +393,15 @@ void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
    Player &target = find_player(target_id);
 
    if (has_ended()) throw Peddle_failed{caster, target, Peddle_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::peddle;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::peddle;
    })) {
       throw Peddle_failed{caster, target, Peddle_failed::Reason::caster_cannot_peddle};
    }
    if (!target.is_present()) throw Peddle_failed{caster, target, Peddle_failed::Reason::target_is_not_present};
 
    _pending_peddles.emplace_back(&caster, &target);
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::peddle});
+   caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
 
    try_to_end_night();
 }
@@ -410,13 +410,13 @@ void maf::Game::skip_peddle(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Role::Ability &ability) {
-      return ability.id == Role::Ability::ID::peddle;
+   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
+      return ability.id == Ability::ID::peddle;
    })) {
       throw Skip_failed{};
    }
 
-   caster.remove_compulsory_ability(Role::Ability{Role::Ability::ID::peddle});
+   caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
 
    try_to_end_night();
 }
@@ -538,11 +538,11 @@ bool maf::Game::try_to_end() {
       if (player.is_present()) {
          ++num_players_left;
          switch (player.role().alignment) {
-         case Role::Alignment::village:
+         case Alignment::village:
             ++num_village_left;
             break;
 
-         case Role::Alignment::mafia:
+         case Alignment::mafia:
             ++num_mafia_left;
             break;
 
@@ -551,18 +551,18 @@ bool maf::Game::try_to_end() {
          }
 
          switch (player.role().peace_condition) {
-         case Role::Peace_condition::always_peaceful:
+         case Peace_condition::always_peaceful:
             break;
 
-         case Role::Peace_condition::village_eliminated:
+         case Peace_condition::village_eliminated:
             check_for_village_eliminated = true;
             break;
 
-         case Role::Peace_condition::mafia_eliminated:
+         case Peace_condition::mafia_eliminated:
             check_for_mafia_eliminated = true;
             break;
 
-         case Role::Peace_condition::last_survivor:
+         case Peace_condition::last_survivor:
             check_for_last_survivor = true;
             break;
          }
@@ -580,23 +580,23 @@ bool maf::Game::try_to_end() {
 
       if (!player.has_been_kicked()) {
          switch (player.role().win_condition) {
-            case Role::Win_condition::survive:
+            case Win_condition::survive:
                has_won = player.is_alive();
                break;
 
-            case Role::Win_condition::village_remains:
+            case Win_condition::village_remains:
                has_won = (num_village_left > 0);
                break;
 
-            case Role::Win_condition::mafia_remains:
+            case Win_condition::mafia_remains:
                has_won = (num_mafia_left > 0);
                break;
 
-            case Role::Win_condition::be_lynched:
+            case Win_condition::be_lynched:
                has_won = player.has_been_lynched();
                break;
 
-            case Role::Win_condition::win_duel:
+            case Win_condition::win_duel:
                has_won = player.has_won_duel();
                break;
          }

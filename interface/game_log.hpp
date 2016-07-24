@@ -15,7 +15,7 @@ namespace maf {
       // An exception signifying that an ability use has not been programmed in
       // yet.
       struct Unexpected_ability {
-         Role::Ability ability;
+         Ability ability;
       };
 
       // Signifies that there are no more events to advance to.

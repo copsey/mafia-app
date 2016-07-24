@@ -35,7 +35,7 @@ namespace maf {
 
       // Checks if the wildcard will only return roles of the given alignment
       // from the given rulebook.
-      bool matches_alignment(Role::Alignment alignment, const Rulebook &rulebook) const;
+      bool matches_alignment(Alignment alignment, const Rulebook &rulebook) const;
 
       // Randomly chooses a role from the given rulebook.
       const Role & pick_role(const Rulebook &rulebook);

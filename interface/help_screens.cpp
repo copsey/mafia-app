@@ -37,13 +37,13 @@ void maf::List_roles_screen::write(std::ostream &os) const {
          os << "   the " << full_name(r) << ", alias ^c" << r.alias() << "^h, ";
 
          switch (r.alignment) {
-            case Role::Alignment::village:
+            case Alignment::village:
                os << "aligned to the village";
                break;
-            case Role::Alignment::mafia:
+            case Alignment::mafia:
                os << "aligned to the mafia";
                break;
-            case Role::Alignment::freelance:
+            case Alignment::freelance:
                os << "a freelance role";
                break;
          }
@@ -55,15 +55,15 @@ void maf::List_roles_screen::write(std::ostream &os) const {
    } else {
       std::vector<rkt::ref<const Role>> v;
       switch (alignment.get()) {
-         case Role::Alignment::village:
+         case Alignment::village:
             v = rulebook.get().village_roles();
             os << "^HVillage Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
             break;
-         case Role::Alignment::mafia:
+         case Alignment::mafia:
             v = rulebook.get().mafia_roles();
             os << "^HMafia Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
             break;
-         case Role::Alignment::freelance:
+         case Alignment::freelance:
             v = rulebook.get().freelance_roles();
             os << "^HFreelance Roles^hThe following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
             break;
@@ -95,13 +95,13 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       os << "\n\nTo see more information about the role with alias ^cthat^h, enter ^chelp r that^h.\n\n";
 
       switch (alignment.get()) {
-         case Role::Alignment::village:
+         case Alignment::village:
             os << "To list the mafia roles, enter ^clist r m^h, and to list the freelance roles, enter ^clist r f^h.";
             break;
-         case Role::Alignment::mafia:
+         case Alignment::mafia:
             os << "To list the village roles, enter ^clist r v^h, and to list the freelance roles, enter ^clist r f^h.";
             break;
-         case Role::Alignment::freelance:
+         case Alignment::freelance:
             os << "To list the village roles, enter ^clist r v^h, and to list the mafia roles, enter ^clist r m^h.";
             break;
       }

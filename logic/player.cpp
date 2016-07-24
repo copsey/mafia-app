@@ -101,15 +101,15 @@ void maf::Player::refresh() {
    _is_high = false;
 }
 
-const std::vector<maf::Role::Ability> & maf::Player::compulsory_abilities() const {
+const std::vector<maf::Ability> & maf::Player::compulsory_abilities() const {
    return _compulsory_abilities;
 }
 
-void maf::Player::add_compulsory_ability(Role::Ability ability) {
+void maf::Player::add_compulsory_ability(Ability ability) {
    _compulsory_abilities.push_back(ability);
 }
 
-void maf::Player::remove_compulsory_ability(Role::Ability ability) {
+void maf::Player::remove_compulsory_ability(Ability ability) {
    for (auto it = _compulsory_abilities.begin(); it != _compulsory_abilities.end(); ++it) {
       if ((*it).id == ability.id) {
          _compulsory_abilities.erase(it);

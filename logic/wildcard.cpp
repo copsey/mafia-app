@@ -47,7 +47,7 @@ std::string maf::Wildcard::alias() const {
    return maf::alias(_id);
 }
 
-bool maf::Wildcard::matches_alignment(Role::Alignment alignment, const Rulebook &rulebook) const {
+bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook &rulebook) const {
    if (uses_evaluator()) {
       for (const Role &r: rulebook.roles()) {
          if (r.alignment != alignment) {

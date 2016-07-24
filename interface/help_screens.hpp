@@ -36,13 +36,13 @@ namespace maf {
 
 
    struct List_roles_screen: Help_screen {
-      List_roles_screen(const Rulebook &rulebook, rkt::box<Role::Alignment> alignment = {})
+      List_roles_screen(const Rulebook &rulebook, rkt::box<Alignment> alignment = {})
       : rulebook{rulebook}, alignment{alignment} { }
 
       void write(std::ostream &os) const override;
 
       rkt::ref<const Rulebook> rulebook;
-      rkt::box<Role::Alignment> alignment;
+      rkt::box<Alignment> alignment;
    };
 
 

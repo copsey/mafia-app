@@ -70,10 +70,10 @@ namespace maf {
 
       // The abilities that the player must respond to before the game can
       // continue.
-      const std::vector<Role::Ability> & compulsory_abilities() const;
+      const std::vector<Ability> & compulsory_abilities() const;
       // Add/remove a compulsory ability.
-      void add_compulsory_ability(Role::Ability ability);
-      void remove_compulsory_ability(Role::Ability ability);
+      void add_compulsory_ability(Ability ability);
+      void remove_compulsory_ability(Ability ability);
 
       // The player's current lynch vote.
       const Player * lynch_vote() const;
@@ -127,7 +127,7 @@ namespace maf {
       Date _date_of_death;
       Time _time_of_death;
 
-      std::vector<Role::Ability> _compulsory_abilities{};
+      std::vector<Ability> _compulsory_abilities{};
 
       const Player *_lynch_vote{nullptr};
 

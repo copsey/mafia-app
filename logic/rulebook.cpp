@@ -15,11 +15,11 @@ maf::Rulebook::Rulebook(Edition edition)
    peasant.duel_strength = 0.333333333;
 
    Role &doctor = new_village_role(Role::ID::doctor);
-   doctor.ability.put({Role::Ability::ID::heal});
+   doctor.ability.put({Ability::ID::heal});
    doctor.duel_strength = 0.1;
 
    Role &detective = new_village_role(Role::ID::detective);
-   detective.ability.put({Role::Ability::ID::investigate});
+   detective.ability.put({Ability::ID::investigate});
    detective.duel_strength = 4;
 
    Role &racketeer = new_mafia_role(Role::ID::racketeer);
@@ -30,7 +30,7 @@ maf::Rulebook::Rulebook(Edition edition)
    godfather.duel_strength = 0.2;
 
    Role &dealer = new_mafia_role(Role::ID::dealer);
-   dealer.ability.put({Role::Ability::ID::peddle});
+   dealer.ability.put({Ability::ID::peddle});
 
    Role &coward = new_freelance_role(Role::ID::coward);
    coward.is_suspicious = true;
@@ -41,26 +41,26 @@ maf::Rulebook::Rulebook(Edition edition)
    actor.duel_strength = 0.333333333;
 
    Role &serial_killer = new_freelance_role(Role::ID::serial_killer);
-   serial_killer.ability.put({Role::Ability::ID::kill});
-   serial_killer.peace_condition = Role::Peace_condition::last_survivor;
+   serial_killer.ability.put({Ability::ID::kill});
+   serial_killer.peace_condition = Peace_condition::last_survivor;
    serial_killer.is_suspicious = true;
    serial_killer.duel_strength = 999999999;
 
    Role &village_idiot = new_freelance_role(Role::ID::village_idiot);
-   village_idiot.win_condition = Role::Win_condition::be_lynched;
+   village_idiot.win_condition = Win_condition::be_lynched;
    village_idiot.is_troll = true;
    village_idiot.duel_strength = 0.001;
 
    Role &musketeer = new_freelance_role(Role::ID::musketeer);
-   musketeer.ability.put({Role::Ability::ID::duel});
-   musketeer.win_condition = Role::Win_condition::win_duel;
+   musketeer.ability.put({Ability::ID::duel});
+   musketeer.win_condition = Win_condition::win_duel;
 
    new_wildcard(Wildcard::ID::any, [](const Role &) {
       return 1;
    });
 
    new_wildcard(Wildcard::ID::village, [](const Role &r) {
-      return (r.alignment == Role::Alignment::village) ? 1 : 0;
+      return (r.alignment == Alignment::village) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::village_basic, {
@@ -70,11 +70,11 @@ maf::Rulebook::Rulebook(Edition edition)
    });
 
    new_wildcard(Wildcard::ID::mafia, [](const Role &r) {
-      return (r.alignment == Role::Alignment::mafia) ? 1 : 0;
+      return (r.alignment == Alignment::mafia) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::freelance, [](const Role &r) {
-      return (r.alignment == Role::Alignment::freelance) ? 1 : 0;
+      return (r.alignment == Alignment::freelance) ? 1 : 0;
    });
 }
 
@@ -89,7 +89,7 @@ const std::vector<maf::Role> & maf::Rulebook::roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Role::Alignment::village) v.emplace_back(r);
+      if (r.alignment == Alignment::village) v.emplace_back(r);
    }
    return v;
 }
@@ -97,7 +97,7 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Role::Alignment::mafia) v.emplace_back(r);
+      if (r.alignment == Alignment::mafia) v.emplace_back(r);
    }
    return v;
 }
@@ -105,7 +105,7 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Role::Alignment::freelance) v.emplace_back(r);
+      if (r.alignment == Alignment::freelance) v.emplace_back(r);
    }
    return v;
 }
@@ -113,7 +113,7 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
 std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
-      if (w.matches_alignment(Role::Alignment::village, *this)) v.emplace_back(w);
+      if (w.matches_alignment(Alignment::village, *this)) v.emplace_back(w);
    }
    return v;
 }
@@ -121,7 +121,7 @@ std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() co
 std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
-      if (w.matches_alignment(Role::Alignment::mafia, *this)) v.emplace_back(w);
+      if (w.matches_alignment(Alignment::mafia, *this)) v.emplace_back(w);
    }
    return v;
 }
@@ -129,7 +129,7 @@ std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() cons
 std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
-      if (w.matches_alignment(Role::Alignment::freelance, *this)) v.emplace_back(w);
+      if (w.matches_alignment(Alignment::freelance, *this)) v.emplace_back(w);
    }
    return v;
 }
@@ -240,15 +240,15 @@ maf::Role & maf::Rulebook::new_role(Role::ID id) {
 
 maf::Role & maf::Rulebook::new_village_role(Role::ID id) {
    Role &role = new_role(id);
-   role.alignment = Role::Alignment::village;
-   role.peace_condition = Role::Peace_condition::mafia_eliminated;
+   role.alignment = Alignment::village;
+   role.peace_condition = Peace_condition::mafia_eliminated;
    return role;
 }
 
 maf::Role & maf::Rulebook::new_mafia_role(Role::ID id) {
    Role &role = new_role(id);
-   role.alignment = Role::Alignment::mafia;
-   role.peace_condition = Role::Peace_condition::village_eliminated;
+   role.alignment = Alignment::mafia;
+   role.peace_condition = Peace_condition::village_eliminated;
    role.is_suspicious = true;
    role.duel_strength = 4;
    return role;

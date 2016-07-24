@@ -235,11 +235,11 @@ namespace maf {
       // A vector containing every player remaining.
       std::vector<rkt::ref<const Player>> remaining_players() const;
       // A vector containing every player remaining with the given alignment.
-      std::vector<rkt::ref<const Player>> remaining_players(Role::Alignment alignment) const;
+      std::vector<rkt::ref<const Player>> remaining_players(Alignment alignment) const;
       // The number of players remaining.
       std::size_t num_players_left() const;
       // The number of players remaining with the given alignment.
-      std::size_t num_players_left(Role::Alignment alignment) const;
+      std::size_t num_players_left(Alignment alignment) const;
 
       // The current in-game date.
       Date date() const;

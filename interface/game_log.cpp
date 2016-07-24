@@ -26,8 +26,8 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
 
    std::vector<Event *> new_events{};
 
-   if (_game.num_players_left(Role::Alignment::mafia) > 0) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), true});
+   if (_game.num_players_left(Alignment::mafia) > 0) {
+      new_events.push_back(new Mafia_meeting{_game.remaining_players(Alignment::mafia), true});
    }
 
    for (const Player &player: _game.remaining_players()) {
@@ -148,26 +148,26 @@ void maf::Game_log::begin_night() {
    std::vector<Event *> new_events{};
 
    if (_game.mafia_can_use_kill()) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Role::Alignment::mafia), false});
+      new_events.push_back(new Mafia_meeting{_game.remaining_players(Alignment::mafia), false});
    }
 
    /* fix-me: minimise number of events when a player has multiple things to do this night. */
    for (const Player &player: _game.players()) {
-      for (Role::Ability ability: player.compulsory_abilities()) {
+      for (Ability ability: player.compulsory_abilities()) {
          switch (ability.id) {
-            case Role::Ability::ID::kill:
+            case Ability::ID::kill:
                new_events.push_back(new Kill_use{player});
                break;
 
-            case Role::Ability::ID::heal:
+            case Ability::ID::heal:
                new_events.push_back(new Heal_use{player});
                break;
 
-            case Role::Ability::ID::investigate:
+            case Ability::ID::investigate:
                new_events.push_back(new Investigate_use{player});
                break;
 
-            case Role::Ability::ID::peddle:
+            case Ability::ID::peddle:
                new_events.push_back(new Peddle_use{player});
                break;
 

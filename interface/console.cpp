@@ -60,13 +60,13 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          store_help_screen(new List_roles_screen(active_rulebook()));
       }
       else if (commands_match(commands, {"list", "r", "v"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::village));
+         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::village));
       }
       else if (commands_match(commands, {"list", "r", "m"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::mafia));
+         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::mafia));
       }
       else if (commands_match(commands, {"list", "r", "f"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Role::Alignment::freelance));
+         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::freelance));
       }
       else if (has_help_screen()) {
          if (commands_match(commands, {"ok"})) {

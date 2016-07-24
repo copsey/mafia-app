@@ -6,6 +6,39 @@
 #include "../riketi/box.hpp"
 
 namespace maf {
+   enum class Alignment {
+      village,
+      mafia,
+      freelance
+   };
+
+   struct Ability {
+      enum class ID {
+         kill,
+         heal,
+         investigate,
+         peddle,
+         duel
+      };
+
+      ID id;
+   };
+
+   enum class Win_condition {
+      survive,
+      village_remains,
+      mafia_remains,
+      be_lynched,
+      win_duel
+   };
+
+   enum class Peace_condition {
+      always_peaceful,
+      village_eliminated,
+      mafia_eliminated,
+      last_survivor
+   };
+
    struct Role {
       enum class ID {
          peasant,
@@ -19,39 +52,6 @@ namespace maf {
          serial_killer,
          village_idiot,
          musketeer
-      };
-
-      enum class Alignment {
-         village,
-         mafia,
-         freelance
-      };
-
-      struct Ability {
-         enum class ID {
-            kill,
-            heal,
-            investigate,
-            peddle,
-            duel
-         };
-
-         ID id;
-      };
-
-      enum class Win_condition {
-         survive,
-         village_remains,
-         mafia_remains,
-         be_lynched,
-         win_duel
-      };
-
-      enum class Peace_condition {
-         always_peaceful,
-         village_eliminated,
-         mafia_eliminated,
-         last_survivor
       };
 
       // Creates a role with the given ID.
