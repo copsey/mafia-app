@@ -1,14 +1,5 @@
 #include "role.hpp"
 
-maf::Role::Role(ID id)
-: _id{id} {
-
-}
-
-maf::Role::ID maf::Role::id() const {
-   return _id;
-}
-
 std::string maf::Role::alias() const {
    return maf::alias(_id);
 }

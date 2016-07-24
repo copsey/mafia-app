@@ -56,10 +56,14 @@ namespace maf {
 
       // Creates a role with the given ID.
       // All other traits are given their default values.
-      Role(ID id);
+      Role(ID id)
+       : _id{id} { }
 
       // The ID of the role.
-      ID id() const;
+      ID id() const {
+         return _id;
+      }
+      
       // The alias of the role, which is fully determined from its ID.
       std::string alias() const;
 
