@@ -10,7 +10,7 @@
 #include "game_log.hpp"
 #include "names.hpp"
 
-namespace mafia {
+namespace maf {
    struct Setup_screen {
       // Signifies that the given name is invalid for a player.
       struct Bad_player_name {

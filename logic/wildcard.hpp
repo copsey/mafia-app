@@ -8,7 +8,7 @@
 
 #include "role.hpp"
 
-namespace mafia {
+namespace maf {
    struct Rulebook;
 
    struct Wildcard {

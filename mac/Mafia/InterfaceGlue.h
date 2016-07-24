@@ -13,7 +13,7 @@
 #import "AppDelegate.h"
 
 @interface InterfaceGlue : NSObject {
-   mafia::Console _console;
+   maf::Console _console;
 }
 
 @property (weak) IBOutlet AppDelegate *delegate;

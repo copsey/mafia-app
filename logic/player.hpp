@@ -3,7 +3,7 @@
 
 #include "wildcard.hpp"
 
-namespace mafia {
+namespace maf {
    // An integer representing the number of in-game days which have passed.
    using Date = unsigned;
 

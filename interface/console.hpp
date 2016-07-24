@@ -11,7 +11,7 @@
 #include "setup_screen.hpp"
 #include "styled_string.hpp"
 
-namespace mafia {
+namespace maf {
    // Decide whether or not the two given vectors of commands match, which is
    // true exactly when both vectors are of the same length and at each position
    // either one of the strings is empty or both strings are identical.

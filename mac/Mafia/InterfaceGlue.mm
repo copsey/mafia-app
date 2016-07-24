@@ -38,34 +38,34 @@
 - (void)showOutput {
    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] init];
 
-   for (const mafia::Styled_string &styled_str : _console.output()) {
+   for (const maf::Styled_string &styled_str : _console.output()) {
       NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 
       switch (styled_str.style) {
-         case mafia::Styled_string::Style::game_title:
-         case mafia::Styled_string::Style::help_title:
+         case maf::Styled_string::Style::game_title:
+         case maf::Styled_string::Style::help_title:
             _output.window.title = string;
             break;
 
-         case mafia::Styled_string::Style::game: {
+         case maf::Styled_string::Style::game: {
             [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
                                                                                      attributes:[InterfaceGlue gameStyleAttributes]]];
             break;
          }
 
-         case mafia::Styled_string::Style::game_italic: {
+         case maf::Styled_string::Style::game_italic: {
             [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
                                                                                      attributes:[InterfaceGlue gameItalicStyleAttributes]]];
             break;
          }
 
-         case mafia::Styled_string::Style::help: {
+         case maf::Styled_string::Style::help: {
             [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
                                                                                      attributes:[InterfaceGlue helpStyleAttributes]]];
             break;
          }
 
-         case mafia::Styled_string::Style::command: {
+         case maf::Styled_string::Style::command: {
             [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
                                                                                      attributes:[InterfaceGlue commandStyleAttributes]]];
             break;
@@ -77,10 +77,10 @@
 
    // Play some music.
    if (_console.has_game()) {
-      const mafia::Event *event = &_console.game_log().current_event();
+      const maf::Event *event = &_console.game_log().current_event();
 
-      if (auto e = dynamic_cast<const mafia::Time_changed *>(event)) {
-         if (e->time == mafia::Time::day) {
+      if (auto e = dynamic_cast<const maf::Time_changed *>(event)) {
+         if (e->time == maf::Time::day) {
             [_delegate playMusic:MafiaPlaylistItem_Daytime];
          } else {
             switch (e->date % 2) {
@@ -94,12 +94,12 @@
             }
          }
       }
-      else if (auto e = dynamic_cast<const mafia::Lynch_result *>(event)) {
+      else if (auto e = dynamic_cast<const maf::Lynch_result *>(event)) {
          if (e->victim && e->victim_role->is_troll) {
             [_delegate playMusic:MafiaPlaylistItem_TrollLynch];
          }
       }
-      else if (auto e = dynamic_cast<const mafia::Game_ended *>(event)) {
+      else if (auto e = dynamic_cast<const maf::Game_ended *>(event)) {
          // Hide compiler warning that e is unused
          e = nullptr;
 
@@ -112,15 +112,15 @@
    NSAlert *alert = [[NSAlert alloc] init];
    NSMutableString *informativeText = [NSMutableString string];
 
-   for (const mafia::Styled_string::Styled_string &styled_str : _console.error_message()) {
+   for (const maf::Styled_string::Styled_string &styled_str : _console.error_message()) {
       NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 
       switch (styled_str.style) {
-         case mafia::Styled_string::Style::help_title:
+         case maf::Styled_string::Style::help_title:
             alert.messageText = string;
             break;
 
-         case mafia::Styled_string::Style::command:
+         case maf::Styled_string::Style::command:
             [informativeText appendString:@"\""];
             [informativeText appendString:string];
             [informativeText appendString:@"\""];

@@ -1,98 +1,98 @@
 #include "player.hpp"
 
-mafia::Player::Player(std::string name, ID id)
+maf::Player::Player(std::string name, ID id)
  : _name{name}, _id{id} {
 
 }
 
-const std::string & mafia::Player::name() const {
+const std::string & maf::Player::name() const {
    return _name;
 }
 
-mafia::Player::ID mafia::Player::id() const {
+maf::Player::ID maf::Player::id() const {
    return _id;
 }
 
-const mafia::Role & mafia::Player::role() const {
+const maf::Role & maf::Player::role() const {
    return *_role;
 }
 
-void mafia::Player::assign_role(const Role &role) {
+void maf::Player::assign_role(const Role &role) {
    _role = &role;
 
    _fake_role = nullptr;
 }
 
-const mafia::Wildcard * mafia::Player::wildcard() const {
+const maf::Wildcard * maf::Player::wildcard() const {
    return _wildcard;
 }
 
-void mafia::Player::set_wildcard(const Wildcard &wildcard) {
+void maf::Player::set_wildcard(const Wildcard &wildcard) {
    _wildcard = &wildcard;
 }
 
-bool mafia::Player::is_alive() const {
+bool maf::Player::is_alive() const {
    return _is_alive;
 }
 
-bool mafia::Player::is_dead() const {
+bool maf::Player::is_dead() const {
    return !_is_alive;
 }
 
-mafia::Date mafia::Player::date_of_death() const {
+maf::Date maf::Player::date_of_death() const {
    return _date_of_death;
 }
 
-mafia::Time mafia::Player::time_of_death() const {
+maf::Time maf::Player::time_of_death() const {
    return _time_of_death;
 }
 
-void mafia::Player::kill(Date date, Time time) {
+void maf::Player::kill(Date date, Time time) {
    _is_alive = false;
    _is_present = false;
    _date_of_death = date;
    _time_of_death = time;
 }
 
-bool mafia::Player::is_present() const {
+bool maf::Player::is_present() const {
    return _is_present;
 }
 
-void mafia::Player::leave() {
+void maf::Player::leave() {
    _is_present = false;
 }
 
-bool mafia::Player::has_been_kicked() const {
+bool maf::Player::has_been_kicked() const {
    return _was_kicked;
 }
 
-void mafia::Player::kick() {
+void maf::Player::kick() {
    leave();
    _was_kicked = true;
 }
 
-bool mafia::Player::has_been_lynched() const {
+bool maf::Player::has_been_lynched() const {
    return _was_lynched;
 }
 
-void mafia::Player::lynch(Date date) {
+void maf::Player::lynch(Date date) {
    kill(date, Time::day);
    _was_lynched = true;
 }
 
-const mafia::Role * mafia::Player::fake_role() const {
+const maf::Role * maf::Player::fake_role() const {
    return _fake_role;
 }
 
-bool mafia::Player::has_fake_role() const {
+bool maf::Player::has_fake_role() const {
    return _fake_role;
 }
 
-void mafia::Player::give_fake_role(const mafia::Role &role) {
+void maf::Player::give_fake_role(const maf::Role &role) {
    _fake_role = &role;
 }
 
-void mafia::Player::refresh() {
+void maf::Player::refresh() {
    _compulsory_abilities.clear();
 
    _lynch_vote = nullptr;
@@ -101,15 +101,15 @@ void mafia::Player::refresh() {
    _is_high = false;
 }
 
-const std::vector<mafia::Role::Ability> & mafia::Player::compulsory_abilities() const {
+const std::vector<maf::Role::Ability> & maf::Player::compulsory_abilities() const {
    return _compulsory_abilities;
 }
 
-void mafia::Player::add_compulsory_ability(Role::Ability ability) {
+void maf::Player::add_compulsory_ability(Role::Ability ability) {
    _compulsory_abilities.push_back(ability);
 }
 
-void mafia::Player::remove_compulsory_ability(Role::Ability ability) {
+void maf::Player::remove_compulsory_ability(Role::Ability ability) {
    for (auto it = _compulsory_abilities.begin(); it != _compulsory_abilities.end(); ++it) {
       if ((*it).id == ability.id) {
          _compulsory_abilities.erase(it);
@@ -119,62 +119,62 @@ void mafia::Player::remove_compulsory_ability(Role::Ability ability) {
    /* fix-me: throw exception if compulsory ability is not currently stored. */
 }
 
-const mafia::Player * mafia::Player::lynch_vote() const {
+const maf::Player * maf::Player::lynch_vote() const {
    return _lynch_vote;
 }
 
-void mafia::Player::cast_lynch_vote(const mafia::Player &target) {
+void maf::Player::cast_lynch_vote(const Player &target) {
    _lynch_vote = &target;
 }
 
-void mafia::Player::clear_lynch_vote() {
+void maf::Player::clear_lynch_vote() {
    _lynch_vote = nullptr;
 }
 
-bool mafia::Player::has_won_duel() const {
+bool maf::Player::has_won_duel() const {
    return _has_won_duel;
 }
 
-void mafia::Player::win_duel() {
+void maf::Player::win_duel() {
    _has_won_duel = true;
 }
 
-bool mafia::Player::is_healed() const {
+bool maf::Player::is_healed() const {
    return _is_healed;
 }
 
-void mafia::Player::heal() {
+void maf::Player::heal() {
    _is_healed = true;
 }
 
-bool mafia::Player::is_suspicious() const {
+bool maf::Player::is_suspicious() const {
    return role().is_suspicious || _is_high;
 }
 
-void mafia::Player::give_drugs() {
+void maf::Player::give_drugs() {
    _is_high = true;
 }
 
-const mafia::Player * mafia::Player::haunter() const {
+const maf::Player * maf::Player::haunter() const {
    return _haunter;
 }
 
-bool mafia::Player::is_haunted() const {
+bool maf::Player::is_haunted() const {
    return _haunter;
 }
 
-void mafia::Player::haunt(const mafia::Player &haunter) {
+void maf::Player::haunt(const Player &haunter) {
    _haunter = &haunter;
 }
 
-bool mafia::Player::has_won() const {
+bool maf::Player::has_won() const {
    return _has_won;
 }
 
-void mafia::Player::win() {
+void maf::Player::win() {
    _has_won = true;
 }
 
-void mafia::Player::lose() {
+void maf::Player::lose() {
    _has_won = false;
 }

@@ -3,7 +3,7 @@
 
 #include "game.hpp"
 
-mafia::Game::Game(const std::vector<std::string> &player_names,
+maf::Game::Game(const std::vector<std::string> &player_names,
                   const std::vector<Role::ID> &role_ids,
                   const std::vector<Wildcard::ID> &wildcard_ids,
                   const Rulebook &rulebook)
@@ -37,15 +37,15 @@ mafia::Game::Game(const std::vector<std::string> &player_names,
    try_to_end();
 }
 
-const mafia::Rulebook & mafia::Game::rulebook() const {
+const maf::Rulebook & maf::Game::rulebook() const {
    return _rulebook;
 }
 
-const std::vector<mafia::Player> & mafia::Game::players() const {
+const std::vector<maf::Player> & maf::Game::players() const {
    return _players;
 }
 
-std::vector<rkt::ref<const mafia::Player>> mafia::Game::remaining_players() const {
+std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players() const {
    std::vector<rkt::ref<const Player>> v{};
    for (const Player &p: _players) {
       if (p.is_present()) v.emplace_back(p);
@@ -53,7 +53,7 @@ std::vector<rkt::ref<const mafia::Player>> mafia::Game::remaining_players() cons
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Player>> mafia::Game::remaining_players(Role::Alignment alignment) const {
+std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Role::Alignment alignment) const {
    std::vector<rkt::ref<const Player>> v{};
    for (const Player &p: _players) {
       if (p.is_present() && p.role().alignment == alignment) {
@@ -63,31 +63,31 @@ std::vector<rkt::ref<const mafia::Player>> mafia::Game::remaining_players(Role::
    return v;
 }
 
-std::size_t mafia::Game::num_players_left() const {
+std::size_t maf::Game::num_players_left() const {
    return rkt::count_if(_players, [](const Player &p) {
       return p.is_present();
    });
 }
 
-std::size_t mafia::Game::num_players_left(Role::Alignment alignment) const {
+std::size_t maf::Game::num_players_left(Role::Alignment alignment) const {
    return rkt::count_if(_players, [alignment](const Player &p) {
       return p.is_present() && p.role().alignment == alignment;
    });
 }
 
-mafia::Date mafia::Game::date() const {
+maf::Date maf::Game::date() const {
    return _date;
 }
 
-mafia::Time mafia::Game::time() const {
+maf::Time maf::Game::time() const {
    return _time;
 }
 
-bool mafia::Game::is_day() const {
+bool maf::Game::is_day() const {
    return time() == Time::day;
 }
 
-void mafia::Game::kick_player(Player::ID id) {
+void maf::Game::kick_player(Player::ID id) {
    Player &player = find_player(id);
 
    if (_has_ended) throw Kick_failed{player, Kick_failed::Reason::game_ended};
@@ -99,7 +99,7 @@ void mafia::Game::kick_player(Player::ID id) {
    try_to_end();
 }
 
-const mafia::Player * mafia::Game::next_lynch_victim() const {
+const maf::Player * maf::Game::next_lynch_victim() const {
    std::map<const Player *, std::size_t> votes_per_player{};
    std::size_t total_votes{0};
 
@@ -122,11 +122,11 @@ const mafia::Player * mafia::Game::next_lynch_victim() const {
    }
 }
 
-bool mafia::Game::lynch_can_occur() const {
+bool maf::Game::lynch_can_occur() const {
    return _lynch_can_occur;
 }
 
-void mafia::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id) {
+void maf::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id) {
    Player &voter = find_player(voter_id);
    Player &target = find_player(target_id);
 
@@ -139,7 +139,7 @@ void mafia::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id) {
    voter.cast_lynch_vote(target);
 }
 
-void mafia::Game::clear_lynch_vote(Player::ID voter_id) {
+void maf::Game::clear_lynch_vote(Player::ID voter_id) {
    Player &voter = find_player(voter_id);
 
    if (has_ended()) throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::game_ended};
@@ -149,11 +149,11 @@ void mafia::Game::clear_lynch_vote(Player::ID voter_id) {
    voter.clear_lynch_vote();
 }
 
-const mafia::Player * mafia::Game::process_lynch_votes() {
+const maf::Player * maf::Game::process_lynch_votes() {
    if (has_ended()) throw Lynch_failed{Lynch_failed::Reason::game_ended};
    if (!lynch_can_occur()) throw Lynch_failed{Lynch_failed::Reason::bad_timing};
 
-   auto victim = const_cast<mafia::Player *>(next_lynch_victim());
+   auto victim = const_cast<Player *>(next_lynch_victim());
    if (victim) {
       victim->kill(_date, _time);
       if (victim->role().is_troll) _pending_haunters.push_back(victim);
@@ -166,7 +166,7 @@ const mafia::Player * mafia::Game::process_lynch_votes() {
    return victim;
 }
 
-void mafia::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -201,11 +201,11 @@ void mafia::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    try_to_end();
 }
 
-bool mafia::Game::is_night() const {
+bool maf::Game::is_night() const {
    return time() == Time::night;
 }
 
-void mafia::Game::begin_night() {
+void maf::Game::begin_night() {
    if (has_ended()) throw Begin_night_failed{Begin_night_failed::Reason::game_ended};
    if (is_night()) throw Begin_night_failed{Begin_night_failed::Reason::already_night};
    if (lynch_can_occur()) throw Begin_night_failed{Begin_night_failed::Reason::lynch_can_occur};
@@ -239,7 +239,7 @@ void mafia::Game::begin_night() {
    try_to_end_night();
 }
 
-void mafia::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
+void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
    Player &player = find_player(player_id);
    const Role &fake_role = _rulebook.get_role(fake_role_id);
 
@@ -253,11 +253,11 @@ void mafia::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) 
    try_to_end_night();
 }
 
-bool mafia::Game::mafia_can_use_kill() const {
+bool maf::Game::mafia_can_use_kill() const {
    return _mafia_can_use_kill;
 }
 
-void mafia::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -276,7 +276,7 @@ void mafia::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    try_to_end_night();
 }
 
-void mafia::Game::skip_mafia_kill() {
+void maf::Game::skip_mafia_kill() {
    if (has_ended()) throw Skip_failed{};
    if (!is_night()) throw Skip_failed{};
    if (!mafia_can_use_kill()) throw Skip_failed{};
@@ -286,7 +286,7 @@ void mafia::Game::skip_mafia_kill() {
    try_to_end_night();
 }
 
-void mafia::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -305,7 +305,7 @@ void mafia::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
    try_to_end_night();
 }
 
-void mafia::Game::skip_kill(Player::ID caster_id) {
+void maf::Game::skip_kill(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
@@ -320,7 +320,7 @@ void mafia::Game::skip_kill(Player::ID caster_id) {
    try_to_end_night();
 }
 
-void mafia::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -339,7 +339,7 @@ void mafia::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
    try_to_end_night();
 }
 
-void mafia::Game::skip_heal(Player::ID caster_id) {
+void maf::Game::skip_heal(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
@@ -354,7 +354,7 @@ void mafia::Game::skip_heal(Player::ID caster_id) {
    try_to_end_night();
 }
 
-void mafia::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -373,7 +373,7 @@ void mafia::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    try_to_end_night();
 }
 
-void mafia::Game::skip_investigate(Player::ID caster_id) {
+void maf::Game::skip_investigate(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
@@ -388,7 +388,7 @@ void mafia::Game::skip_investigate(Player::ID caster_id) {
    try_to_end_night();
 }
 
-void mafia::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
+void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
@@ -406,7 +406,7 @@ void mafia::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
    try_to_end_night();
 }
 
-void mafia::Game::skip_peddle(Player::ID caster_id) {
+void maf::Game::skip_peddle(Player::ID caster_id) {
    Player &caster = find_player(caster_id);
 
    if (has_ended()) throw Skip_failed{};
@@ -421,7 +421,7 @@ void mafia::Game::skip_peddle(Player::ID caster_id) {
    try_to_end_night();
 }
 
-std::vector<mafia::Game::Investigation> mafia::Game::investigations() const {
+std::vector<maf::Game::Investigation> maf::Game::investigations() const {
    std::vector<Investigation> v{};
    for (const auto &t: _investigations) {
       v.emplace_back(*std::get<0>(t), *std::get<1>(t), std::get<2>(t));
@@ -429,11 +429,11 @@ std::vector<mafia::Game::Investigation> mafia::Game::investigations() const {
    return v;
 }
 
-bool mafia::Game::has_ended() const {
+bool maf::Game::has_ended() const {
    return _has_ended;
 }
 
-mafia::Player & mafia::Game::find_player(Player::ID id) {
+maf::Player & maf::Game::find_player(Player::ID id) {
    if (id < _players.size()) {
       return _players[id];
    } else {
@@ -441,7 +441,7 @@ mafia::Player & mafia::Game::find_player(Player::ID id) {
    }
 }
 
-bool mafia::Game::try_to_end_night() {
+bool maf::Game::try_to_end_night() {
    if (!is_night()) return false;
    if (rkt::any_of(_players, [](const Player &player) {
       return player.is_present() && player.role().is_role_faker && !player.has_fake_role();
@@ -523,7 +523,7 @@ bool mafia::Game::try_to_end_night() {
    return true;
 }
 
-bool mafia::Game::try_to_end() {
+bool maf::Game::try_to_end() {
    if (_has_ended) return true;
 
    std::size_t num_players_left = 0;

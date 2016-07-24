@@ -7,10 +7,10 @@
 #include "wildcard.hpp"
 #include "rulebook.hpp"
 
-mafia::Wildcard::Wildcard(ID id, Role_evaluator evaluator)
+maf::Wildcard::Wildcard(ID id, Role_evaluator evaluator)
 : _id{id}, _evaluator{evaluator} { }
 
-mafia::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
+maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
 : _id{id} {
    using Key_iterator = rkt::map::key_iterator<Role::ID, double>;
    using Item_iterator = rkt::map::item_const_iterator<Role::ID, double>;
@@ -39,15 +39,15 @@ mafia::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
    _dist = {Item_iterator{weights.begin()}, Item_iterator{weights.end()}};
 }
 
-mafia::Wildcard::ID mafia::Wildcard::id() const {
+maf::Wildcard::ID maf::Wildcard::id() const {
    return _id;
 }
 
-std::string mafia::Wildcard::alias() const {
-   return mafia::alias(_id);
+std::string maf::Wildcard::alias() const {
+   return maf::alias(_id);
 }
 
-bool mafia::Wildcard::matches_alignment(Role::Alignment alignment, const Rulebook &rulebook) const {
+bool maf::Wildcard::matches_alignment(Role::Alignment alignment, const Rulebook &rulebook) const {
    if (uses_evaluator()) {
       for (const Role &r: rulebook.roles()) {
          if (r.alignment != alignment) {
@@ -72,7 +72,7 @@ bool mafia::Wildcard::matches_alignment(Role::Alignment alignment, const Ruleboo
    }
 }
 
-const mafia::Role & mafia::Wildcard::pick_role(const mafia::Rulebook &rulebook) {
+const maf::Role & maf::Wildcard::pick_role(const Rulebook &rulebook) {
    if (uses_evaluator()) {
       std::vector<const Role *> role_ptrs{};
       std::vector<double> weights{};
@@ -112,7 +112,7 @@ const mafia::Role & mafia::Wildcard::pick_role(const mafia::Rulebook &rulebook) 
    }
 }
 
-std::string mafia::alias(Wildcard::ID id) {
+std::string maf::alias(Wildcard::ID id) {
    switch (id) {
       case Wildcard::ID::any:
          return "random";
@@ -127,6 +127,6 @@ std::string mafia::alias(Wildcard::ID id) {
    }
 }
 
-bool mafia::Wildcard::uses_evaluator() const {
+bool maf::Wildcard::uses_evaluator() const {
    return static_cast<bool>(_evaluator);
 }

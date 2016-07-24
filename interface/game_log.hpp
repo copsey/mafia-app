@@ -5,7 +5,7 @@
 
 #include "events.hpp"
 
-namespace mafia {
+namespace maf {
    struct Game_log {
       // Signifies that no player could be found with the given name.
       struct Player_not_found {

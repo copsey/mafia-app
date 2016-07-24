@@ -5,7 +5,7 @@
 
 #include "../riketi/box.hpp"
 
-namespace mafia {
+namespace maf {
    struct Role {
       enum class ID {
          peasant,

@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-namespace mafia {
+namespace maf {
    struct Console;
 
    

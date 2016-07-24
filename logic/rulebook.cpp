@@ -5,9 +5,9 @@
 
 #include "rulebook.hpp"
 
-mafia::Rulebook::Rulebook(): Rulebook{latest_edition} { }
+maf::Rulebook::Rulebook(): Rulebook{latest_edition} { }
 
-mafia::Rulebook::Rulebook(Edition edition)
+maf::Rulebook::Rulebook(Edition edition)
 : _edition{edition} {
    if (edition != 1) throw Bad_edition{edition};
 
@@ -78,15 +78,15 @@ mafia::Rulebook::Rulebook(Edition edition)
    });
 }
 
-mafia::Rulebook::Edition mafia::Rulebook::edition() const {
+maf::Rulebook::Edition maf::Rulebook::edition() const {
    return _edition;
 }
 
-const std::vector<mafia::Role> & mafia::Rulebook::roles() const {
+const std::vector<maf::Role> & maf::Rulebook::roles() const {
    return _roles;
 }
 
-std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::village_roles() const {
+std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
       if (r.alignment == Role::Alignment::village) v.emplace_back(r);
@@ -94,7 +94,7 @@ std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::village_roles() const 
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::mafia_roles() const {
+std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
       if (r.alignment == Role::Alignment::mafia) v.emplace_back(r);
@@ -102,7 +102,7 @@ std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::mafia_roles() const {
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::freelance_roles() const {
+std::vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
       if (r.alignment == Role::Alignment::freelance) v.emplace_back(r);
@@ -110,7 +110,7 @@ std::vector<rkt::ref<const mafia::Role>> mafia::Rulebook::freelance_roles() cons
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::village_wildcards() const {
+std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
       if (w.matches_alignment(Role::Alignment::village, *this)) v.emplace_back(w);
@@ -118,7 +118,7 @@ std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::village_wildcards(
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::mafia_wildcards() const {
+std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
       if (w.matches_alignment(Role::Alignment::mafia, *this)) v.emplace_back(w);
@@ -126,7 +126,7 @@ std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::mafia_wildcards() 
    return v;
 }
 
-std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::freelance_wildcards() const {
+std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
    std::vector<rkt::ref<const Wildcard>> v{};
    for (const Wildcard &w: _wildcards) {
       if (w.matches_alignment(Role::Alignment::freelance, *this)) v.emplace_back(w);
@@ -134,95 +134,95 @@ std::vector<rkt::ref<const mafia::Wildcard>> mafia::Rulebook::freelance_wildcard
    return v;
 }
 
-const std::vector<mafia::Wildcard> & mafia::Rulebook::wildcards() const {
+const std::vector<maf::Wildcard> & maf::Rulebook::wildcards() const {
    return _wildcards;
 }
 
-bool mafia::Rulebook::contains_role(Role::ID id) const {
+bool maf::Rulebook::contains_role(Role::ID id) const {
    for (const Role &r: _roles) {
       if (r.id() == id) return true;
    }
    return false;
 }
 
-bool mafia::Rulebook::contains_role(const std::string &alias) const {
+bool maf::Rulebook::contains_role(const std::string &alias) const {
    for (const Role &r: _roles) {
       if (r.alias() == alias) return true;
    }
    return false;
 }
 
-bool mafia::Rulebook::contains_wildcard(Wildcard::ID id) const {
+bool maf::Rulebook::contains_wildcard(Wildcard::ID id) const {
    for (const Wildcard &w: _wildcards) {
       if (w.id() == id) return true;
    }
    return false;
 }
 
-bool mafia::Rulebook::contains_wildcard(const std::string &alias) const {
+bool maf::Rulebook::contains_wildcard(const std::string &alias) const {
    for (const Wildcard &w: _wildcards) {
       if (w.alias() == alias) return true;
    }
    return false;
 }
 
-mafia::Role & mafia::Rulebook::get_role(Role::ID id) {
+maf::Role & maf::Rulebook::get_role(Role::ID id) {
    for (Role &r: _roles) {
       if (r.id() == id) return r;
    }
    throw Missing_role_ID{id};
 }
 
-const mafia::Role & mafia::Rulebook::get_role(Role::ID id) const {
+const maf::Role & maf::Rulebook::get_role(Role::ID id) const {
    for (const Role &r: _roles) {
       if (r.id() == id) return r;
    }
    throw Missing_role_ID{id};
 }
 
-mafia::Role & mafia::Rulebook::get_role(const std::string &alias) {
+maf::Role & maf::Rulebook::get_role(const std::string &alias) {
    for (Role &r: _roles) {
       if (r.alias() == alias) return r;
    }
    throw Missing_role_alias{alias};
 }
 
-const mafia::Role & mafia::Rulebook::get_role(const std::string &alias) const {
+const maf::Role & maf::Rulebook::get_role(const std::string &alias) const {
    for (const Role &r: _roles) {
       if (r.alias() == alias) return r;
    }
    throw Missing_role_alias{alias};
 }
 
-mafia::Wildcard & mafia::Rulebook::get_wildcard(Wildcard::ID id) {
+maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) {
    for (Wildcard &w: _wildcards) {
       if (w.id() == id) return w;
    }
    throw Missing_wildcard_ID{id};
 }
 
-const mafia::Wildcard & mafia::Rulebook::get_wildcard(Wildcard::ID id) const {
+const maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) const {
    for (const Wildcard &w: _wildcards) {
       if (w.id() == id) return w;
    }
    throw Missing_wildcard_ID{id};
 }
 
-mafia::Wildcard & mafia::Rulebook::get_wildcard(const std::string &alias) {
+maf::Wildcard & maf::Rulebook::get_wildcard(const std::string &alias) {
    for (Wildcard &w: _wildcards) {
       if (w.alias() == alias) return w;
    }
    throw Missing_wildcard_alias{alias};
 }
 
-const mafia::Wildcard & mafia::Rulebook::get_wildcard(const std::string &alias) const {
+const maf::Wildcard & maf::Rulebook::get_wildcard(const std::string &alias) const {
    for (const Wildcard &w: _wildcards) {
       if (w.alias() == alias) return w;
    }
    throw Missing_wildcard_alias{alias};
 }
 
-mafia::Role & mafia::Rulebook::new_role(Role::ID id) {
+maf::Role & maf::Rulebook::new_role(Role::ID id) {
    if (contains_role(id)) {
       std::ostringstream err{};
       err << "A role with ID "
@@ -238,14 +238,14 @@ mafia::Role & mafia::Rulebook::new_role(Role::ID id) {
    return _roles.back();
 }
 
-mafia::Role & mafia::Rulebook::new_village_role(Role::ID id) {
+maf::Role & maf::Rulebook::new_village_role(Role::ID id) {
    Role &role = new_role(id);
    role.alignment = Role::Alignment::village;
    role.peace_condition = Role::Peace_condition::mafia_eliminated;
    return role;
 }
 
-mafia::Role & mafia::Rulebook::new_mafia_role(Role::ID id) {
+maf::Role & maf::Rulebook::new_mafia_role(Role::ID id) {
    Role &role = new_role(id);
    role.alignment = Role::Alignment::mafia;
    role.peace_condition = Role::Peace_condition::village_eliminated;
@@ -254,11 +254,11 @@ mafia::Role & mafia::Rulebook::new_mafia_role(Role::ID id) {
    return role;
 }
 
-mafia::Role & mafia::Rulebook::new_freelance_role(Role::ID id) {
+maf::Role & maf::Rulebook::new_freelance_role(Role::ID id) {
    return new_role(id);
 }
 
-mafia::Wildcard & mafia::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator) {
+maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator) {
    if (contains_wildcard(id)) {
       std::ostringstream err{};
       err << "A wildcard with ID "
@@ -274,7 +274,7 @@ mafia::Wildcard & mafia::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_
    return _wildcards.back();
 }
 
-mafia::Wildcard & mafia::Rulebook::new_wildcard(Wildcard::ID id, const std::map<Role::ID, double> &weights) {
+maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, const std::map<Role::ID, double> &weights) {
    if (contains_wildcard(id)) {
       std::ostringstream err{};
       err << "A wildcard with ID "

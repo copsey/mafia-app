@@ -4,7 +4,7 @@
 #include "player.hpp"
 #include "rulebook.hpp"
 
-namespace mafia {
+namespace maf {
    struct Game {
       // Signifies that a game was created with an unequal number of players and
       // cards.

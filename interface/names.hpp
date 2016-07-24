@@ -3,7 +3,7 @@
 
 #include "../logic/logic.hpp"
 
-namespace mafia {
+namespace maf {
    // The full name of the given role.
    std::string full_name(const Role &role);
    std::string full_name(Role::ID id);

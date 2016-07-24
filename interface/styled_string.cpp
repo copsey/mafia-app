@@ -3,12 +3,12 @@
 
 #include "styled_string.hpp"
 
-mafia::Styled_text mafia::styled_text_from(const std::string &tagged_s) {
+maf::Styled_text maf::styled_text_from(const std::string &tagged_s) {
    std::istringstream iss{tagged_s};
    return styled_text_from(iss);
 }
 
-mafia::Styled_text mafia::styled_text_from(std::istream &is) {
+maf::Styled_text maf::styled_text_from(std::istream &is) {
    Styled_text text{};
 
    std::string str{};

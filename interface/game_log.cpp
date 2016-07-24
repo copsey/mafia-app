@@ -5,7 +5,7 @@
 
 #include "game_log.hpp"
 
-mafia::Game_log::Game_log(const std::vector<std::string> &player_names,
+maf::Game_log::Game_log(const std::vector<std::string> &player_names,
                           const std::vector<Role::ID> &role_ids,
                           const std::vector<Wildcard::ID> &wildcard_ids,
                           const Rulebook &rulebook)
@@ -46,11 +46,11 @@ mafia::Game_log::Game_log(const std::vector<std::string> &player_names,
    try_to_log_night_ended();
 }
 
-const mafia::Game & mafia::Game_log::game() const {
+const maf::Game & maf::Game_log::game() const {
    return _game;
 }
 
-void mafia::Game_log::advance() {
+void maf::Game_log::advance() {
    if (_log_index + 1 < _log.size()) {
       ++_log_index;
    } else {
@@ -58,11 +58,11 @@ void mafia::Game_log::advance() {
    }
 }
 
-void mafia::Game_log::do_commands(const std::vector<std::string> &commands) {
+void maf::Game_log::do_commands(const std::vector<std::string> &commands) {
    _log[_log_index]->do_commands(commands, *this);
 }
 
-void mafia::Game_log::write_transcript(std::ostream &os) const {
+void maf::Game_log::write_transcript(std::ostream &os) const {
    for (const auto &event: _log) {
       auto pre_pos = os.tellp();
       event->write_summary(os);
@@ -72,7 +72,7 @@ void mafia::Game_log::write_transcript(std::ostream &os) const {
    }
 }
 
-const mafia::Player & mafia::Game_log::find_player(Player::ID id) const {
+const maf::Player & maf::Game_log::find_player(Player::ID id) const {
    for (const Player &player: _game.players()) {
       if (id == player.id()) return player;
    }
@@ -81,7 +81,7 @@ const mafia::Player & mafia::Game_log::find_player(Player::ID id) const {
    throw Game::Player_not_found{id};
 }
 
-const mafia::Player & mafia::Game_log::find_player(const std::string &name) const {
+const maf::Player & maf::Game_log::find_player(const std::string &name) const {
    for (const Player &player: _game.players()) {
       if (rkt::equal_up_to_case(name, player.name())) return player;
    }
@@ -89,7 +89,7 @@ const mafia::Player & mafia::Game_log::find_player(const std::string &name) cons
    throw Player_not_found{name};
 }
 
-void mafia::Game_log::kick_player(Player::ID id) {
+void maf::Game_log::kick_player(Player::ID id) {
    _game.kick_player(id);
    const Player &player = find_player(id);
    store_event(new Player_kicked{player, player.role()});
@@ -101,7 +101,7 @@ void mafia::Game_log::kick_player(Player::ID id) {
    }
 }
 
-void mafia::Game_log::cast_lynch_vote(Player::ID voter_id, Player::ID target_Id) {
+void maf::Game_log::cast_lynch_vote(Player::ID voter_id, Player::ID target_Id) {
    const Player &voter = find_player(voter_id);
    const Player &target = find_player(target_Id);
 
@@ -109,14 +109,14 @@ void mafia::Game_log::cast_lynch_vote(Player::ID voter_id, Player::ID target_Id)
    log_town_meeting(&voter, &target);
 }
 
-void mafia::Game_log::clear_lynch_vote(Player::ID voter_id) {
+void maf::Game_log::clear_lynch_vote(Player::ID voter_id) {
    const Player &voter = find_player(voter_id);
 
    _game.clear_lynch_vote(voter.id());
    log_town_meeting(&voter);
 }
 
-void mafia::Game_log::process_lynch_votes() {
+void maf::Game_log::process_lynch_votes() {
    const Player *victim = _game.process_lynch_votes();
    log_lynch_result(victim);
 
@@ -127,7 +127,7 @@ void mafia::Game_log::process_lynch_votes() {
    }
 }
 
-void mafia::Game_log::stage_duel(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::stage_duel(Player::ID caster_id, Player::ID target_id) {
    const Player &caster = find_player(caster_id);
    const Player &target = find_player(target_id);
 
@@ -141,7 +141,7 @@ void mafia::Game_log::stage_duel(Player::ID caster_id, Player::ID target_id) {
    }
 }
 
-void mafia::Game_log::begin_night() {
+void maf::Game_log::begin_night() {
    _game.begin_night();
    log_time_changed();
 
@@ -188,70 +188,70 @@ void mafia::Game_log::begin_night() {
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
+void maf::Game_log::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
    _game.choose_fake_role(player_id, fake_role_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    _game.cast_mafia_kill(caster_id, target_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::skip_mafia_kill() {
+void maf::Game_log::skip_mafia_kill() {
    _game.skip_mafia_kill();
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::cast_kill(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::cast_kill(Player::ID caster_id, Player::ID target_id) {
    _game.cast_kill(caster_id, target_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::skip_kill(Player::ID caster_id) {
+void maf::Game_log::skip_kill(Player::ID caster_id) {
    _game.skip_kill(caster_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::cast_heal(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::cast_heal(Player::ID caster_id, Player::ID target_id) {
    _game.cast_heal(caster_id, target_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::skip_heal(Player::ID caster_id) {
+void maf::Game_log::skip_heal(Player::ID caster_id) {
    _game.skip_heal(caster_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::cast_investigate(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    _game.cast_investigate(caster_id, target_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::skip_investigate(Player::ID caster_id) {
+void maf::Game_log::skip_investigate(Player::ID caster_id) {
    _game.skip_investigate(caster_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::cast_peddle(Player::ID caster_id, Player::ID target_id) {
+void maf::Game_log::cast_peddle(Player::ID caster_id, Player::ID target_id) {
    _game.cast_peddle(caster_id, target_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::skip_peddle(Player::ID caster_id) {
+void maf::Game_log::skip_peddle(Player::ID caster_id) {
    _game.skip_peddle(caster_id);
    try_to_log_night_ended();
 }
 
-void mafia::Game_log::store_event(mafia::Event *event) {
+void maf::Game_log::store_event(Event *event) {
    _log.emplace_back(event);
 }
 
-void mafia::Game_log::log_time_changed() {
+void maf::Game_log::log_time_changed() {
    store_event(new Time_changed{_game.date(), _game.time()});
 }
 
-void mafia::Game_log::log_obituary(Date date) {
+void maf::Game_log::log_obituary(Date date) {
    std::vector<rkt::ref<const Player>> deaths{};
    for (const Player &p: _game.players()) {
       if (p.is_dead() && p.time_of_death() == Time::night && p.date_of_death() == date) {
@@ -261,31 +261,31 @@ void mafia::Game_log::log_obituary(Date date) {
    store_event(new Obituary{deaths});
 }
 
-void mafia::Game_log::log_town_meeting(const mafia::Player *recent_vote_caster, const mafia::Player *recent_vote_target) {
+void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Player *recent_vote_target) {
    store_event(new Town_meeting{_game.remaining_players(), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target});
 }
 
-void mafia::Game_log::log_lynch_result(const mafia::Player *victim) {
+void maf::Game_log::log_lynch_result(const Player *victim) {
    store_event(new Lynch_result{victim, victim ? &victim->role() : nullptr});
 }
 
-void mafia::Game_log::log_duel_result(const mafia::Player &caster, const mafia::Player &target) {
+void maf::Game_log::log_duel_result(const Player &caster, const Player &target) {
    store_event(new Duel_result{caster, target});
 }
 
-void mafia::Game_log::log_boring_night() {
+void maf::Game_log::log_boring_night() {
    store_event(new Boring_night{});
 }
 
-void mafia::Game_log::log_investigation_result(Game::Investigation investigation) {
+void maf::Game_log::log_investigation_result(Game::Investigation investigation) {
    store_event(new Investigation_result{investigation});
 }
 
-void mafia::Game_log::log_game_ended() {
+void maf::Game_log::log_game_ended() {
    store_event(new Game_ended{_game});
 }
 
-void mafia::Game_log::try_to_log_night_ended() {
+void maf::Game_log::try_to_log_night_ended() {
    if (_game.time() == Time::day) {
       auto investigations = _game.investigations();
       for (Game::Investigation investigation: investigations) {

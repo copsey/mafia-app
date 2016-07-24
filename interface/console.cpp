@@ -12,33 +12,33 @@
 #include "names.hpp"
 #include "console.hpp"
 
-const std::array<mafia::Console::Game_parameters, mafia::Console::num_presets> mafia::Console::_presets{
-   mafia::Console::Game_parameters{
+const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
+   maf::Console::Game_parameters{
       {"Augustus", "Brutus", "Claudius", "Drusilla"},
-      {mafia::Role::ID::peasant, mafia::Role::ID::racketeer, mafia::Role::ID::coward},
-      {mafia::Wildcard::ID::village_basic},
-      mafia::Rulebook{}
+      {maf::Role::ID::peasant, maf::Role::ID::racketeer, maf::Role::ID::coward},
+      {maf::Wildcard::ID::village_basic},
+      maf::Rulebook{}
    },
-   mafia::Console::Game_parameters{
+   maf::Console::Game_parameters{
       {"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
-      {mafia::Role::ID::peasant, mafia::Role::ID::peasant,mafia::Role::ID::doctor, mafia::Role::ID::detective, mafia::Role::ID::dealer, mafia::Role::ID::musketeer},
+      {maf::Role::ID::peasant, maf::Role::ID::peasant,maf::Role::ID::doctor, maf::Role::ID::detective, maf::Role::ID::dealer, maf::Role::ID::musketeer},
       {},
-      mafia::Rulebook{}
+      maf::Rulebook{}
    }
 };
 
-bool mafia::commands_match(const std::vector<std::string> &v1,
+bool maf::commands_match(const std::vector<std::string> &v1,
                            const std::vector<std::string> &v2) {
    return rkt::equal(v1, v2, [](const std::string &s1, const std::string &s2) {
       return s1.empty() || s2.empty() || s1 == s2;
    });
 }
 
-mafia::Console::Console() {
+maf::Console::Console() {
    refresh_output();
 }
 
-bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
+bool maf::Console::do_commands(const std::vector<std::string> &commands) {
    std::stringstream err{}; // Write an error here if something goes wrong.
 
    try {
@@ -458,22 +458,22 @@ bool mafia::Console::do_commands(const std::vector<std::string> &commands) {
    }
 }
 
-bool mafia::Console::input(const std::string& input) {
+bool maf::Console::input(const std::string& input) {
    auto commands = rkt::split_if_and_prune(input, [](char c) {
       return std::isspace(c);
    });
    return do_commands(commands);
 }
 
-const mafia::Styled_text & mafia::Console::output() const {
+const maf::Styled_text & maf::Console::output() const {
    return _output;
 }
 
-void mafia::Console::read_output(std::istream &is) {
+void maf::Console::read_output(std::istream &is) {
    _output = styled_text_from(is);
 }
 
-void mafia::Console::refresh_output() {
+void maf::Console::refresh_output() {
    std::stringstream ss{};
 
    if (has_help_screen()) {
@@ -489,65 +489,65 @@ void mafia::Console::refresh_output() {
    read_output(ss);
 }
 
-const mafia::Styled_text & mafia::Console::error_message() const {
+const maf::Styled_text & maf::Console::error_message() const {
    return _error_message;
 }
 
-void mafia::Console::read_error_message(std::istream &is) {
+void maf::Console::read_error_message(std::istream &is) {
    _error_message = styled_text_from(is);
 }
 
-void mafia::Console::clear_error_message() {
+void maf::Console::clear_error_message() {
    _error_message.clear();
 }
 
-const mafia::Help_screen * mafia::Console::help_screen() const {
+const maf::Help_screen * maf::Console::help_screen() const {
    return _help_screen.get();
 }
 
-bool mafia::Console::has_help_screen() const {
+bool maf::Console::has_help_screen() const {
    return static_cast<bool>(_help_screen);
 }
 
-void mafia::Console::store_help_screen(mafia::Help_screen *hs) {
+void maf::Console::store_help_screen(Help_screen *hs) {
    _help_screen.reset(hs);
 }
 
-void mafia::Console::clear_help_screen() {
+void maf::Console::clear_help_screen() {
    _help_screen.reset();
 }
 
-const mafia::Question * mafia::Console::question() const {
+const maf::Question * maf::Console::question() const {
    return _question.get();
 }
 
-bool mafia::Console::has_question() const {
+bool maf::Console::has_question() const {
    return static_cast<bool>(_question);
 }
 
-void mafia::Console::store_question(mafia::Question *q) {
+void maf::Console::store_question(Question *q) {
    _question.reset(q);
 }
 
-void mafia::Console::clear_question() {
+void maf::Console::clear_question() {
    _question.reset();
 }
 
-const mafia::Game & mafia::Console::game() const {
+const maf::Game & maf::Console::game() const {
    if (!has_game()) throw No_game_in_progress();
    return _game_log->game();
 }
 
-const mafia::Game_log & mafia::Console::game_log() const {
+const maf::Game_log & maf::Console::game_log() const {
    if (!has_game()) throw No_game_in_progress();
    return *_game_log;
 }
 
-bool mafia::Console::has_game() const {
+bool maf::Console::has_game() const {
    return (bool)_game_log;
 }
 
-void mafia::Console::end_game() {
+void maf::Console::end_game() {
    /* fix-me: set location where history is saved. */
 
    if (has_game()) {
@@ -563,7 +563,7 @@ void mafia::Console::end_game() {
    }
 }
 
-const mafia::Rulebook & mafia::Console::active_rulebook() const {
+const maf::Rulebook & maf::Console::active_rulebook() const {
    if (has_game()) {
       return _game_log->game().rulebook();
    } else {
@@ -571,20 +571,20 @@ const mafia::Rulebook & mafia::Console::active_rulebook() const {
    }
 }
 
-void mafia::Console::begin_game(const std::vector<std::string> &pl_names,
+void maf::Console::begin_game(const std::vector<std::string> &pl_names,
                                 const std::vector<Role::ID> &r_ids,
                                 const std::vector<Wildcard::ID> &w_ids,
-                                const mafia::Rulebook &rulebook) {
+                                const Rulebook &rulebook) {
    if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
    _game_log.reset(new Game_log{pl_names, r_ids, w_ids, rulebook});
 }
 
-void mafia::Console::begin_pending_game() {
+void maf::Console::begin_pending_game() {
    if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
    _game_log = _setup_screen.new_game_log();
 }
 
-void mafia::Console::begin_preset(int i) {
+void maf::Console::begin_preset(int i) {
    if (i >= 0 && i < num_presets) {
       Game_parameters params = _presets[i];
       begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);

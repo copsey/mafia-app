@@ -10,7 +10,7 @@
 
 #include "events.hpp"
 
-namespace mafia {
+namespace maf {
    struct Help_screen {
       // Write a tagged string detailing the help screen to os.
       virtual void write(std::ostream &os) const = 0;

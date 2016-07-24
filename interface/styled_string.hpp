@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace mafia {
+namespace maf {
    // A string coupled with a suggested style.
    // A style is intended to entail such formatting properties as typeface,
    // font size, colour, etc.

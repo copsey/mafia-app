@@ -5,7 +5,7 @@
 
 #include "wildcard.hpp"
 
-namespace mafia {
+namespace maf {
    struct Rulebook {
       // An edition of the rules.
       using Edition = int;

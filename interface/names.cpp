@@ -1,10 +1,10 @@
 #include "names.hpp"
 
-std::string mafia::full_name(const Role &r) {
+std::string maf::full_name(const Role &r) {
    return full_name(r.id());
 }
 
-std::string mafia::full_name(Role::ID id) {
+std::string maf::full_name(Role::ID id) {
    switch (id) {
       case Role::ID::peasant:
          return "Peasant";
@@ -31,11 +31,11 @@ std::string mafia::full_name(Role::ID id) {
    }
 }
 
-std::string mafia::category(const mafia::Wildcard &w) {
+std::string maf::category(const Wildcard &w) {
    return category(w.id());
 }
 
-std::string mafia::category(Wildcard::ID id) {
+std::string maf::category(Wildcard::ID id) {
    switch (id) {
       case Wildcard::ID::any:
          return "totally random";

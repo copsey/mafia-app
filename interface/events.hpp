@@ -6,7 +6,7 @@
 
 #include "../logic/logic.hpp"
 
-namespace mafia {
+namespace maf {
    struct Game_log;
 
    struct Event {
