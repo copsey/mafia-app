@@ -6,6 +6,7 @@
 #include "../riketi/algorithm.hpp"
 #include "../riketi/char.hpp"
 #include "../riketi/enum.hpp"
+#include "../riketi/experimental/algorithm.hpp"
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
@@ -29,7 +30,7 @@ const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::
 
 bool maf::commands_match(const std::vector<std::string> &v1,
                            const std::vector<std::string> &v2) {
-   return rkt::equal(v1, v2, [](const std::string &s1, const std::string &s2) {
+   return rkt::matches(v1, v2, [](const std::string &s1, const std::string &s2) {
       return s1.empty() || s2.empty() || s1 == s2;
    });
 }
