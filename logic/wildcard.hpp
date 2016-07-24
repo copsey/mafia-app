@@ -20,38 +20,46 @@ namespace maf {
          freelance
       };
 
-      // A function which assigns a weight to a given role.
+      /// Function type for assigning weights to roles.
       using Role_evaluator = std::function<double(const Role &)>;
 
-      // Creates a new wildcard with the given role evaluator.
+      /// Create a new wildcard with the given role evaluator.
       Wildcard(ID id, Role_evaluator evaluator);
-      // Creates a new wildcard with the given role weights.
-      Wildcard(ID id, const std::map<Role::ID, double> &weights);
 
-      // The ID of the wildcard.
+      /// Create a new wildcard with the given role weights.
+      ///
+      /// `weights` should consist entirely of non-negative values, with at
+      /// least one strictly positive value.
+      Wildcard(ID id, const std::map<Role::ID, double> & weights);
+
+      /// The ID of the wildcard.
       ID id() const;
-      // The alias of the wildcard, which is fully determined by its ID.
+
+      /// The alias of the wildcard.
+      ///
+      /// Note that this is fully determined by its ID.
       std::string alias() const;
 
-      // Checks if the wildcard will only return roles of the given alignment
-      // from the given rulebook.
-      bool matches_alignment(Alignment alignment, const Rulebook &rulebook) const;
+      /// Check whether the wildcard will only return roles of the given
+      /// alignment from `rulebook`.
+      bool matches_alignment(Alignment alignment, const Rulebook & rulebook) const;
 
-      // Randomly chooses a role from the given rulebook.
-      const Role & pick_role(const Rulebook &rulebook);
+      /// Choose a role from `rulebook`, using the wildcard's distribution.
+      const Role & pick_role(const Rulebook & rulebook);
 
    private:
       ID _id;
       Role_evaluator _evaluator{};
       std::vector<Role::ID> _role_ids{};
-      std::discrete_distribution<std::vector<Role::ID>::size_type> _dist{};
+      std::discrete_distribution<decltype(_role_ids)::size_type> _dist{};
 
-      // Whether the wildcard uses an evaluator in picking a role.
-      // If false, then predefined weights will be used instead.
+      /// Whether the wildcard uses a role evaluator when picking a role.
+      ///
+      /// If false, predefined weights are used instead.
       bool uses_evaluator() const;
    };
 
-   // Get the alias corresponding to the given wildcard ID.
+   /// The alias corresponding to the given wildcard ID.
    std::string alias(Wildcard::ID id);
 }
 
