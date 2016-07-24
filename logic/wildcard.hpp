@@ -24,7 +24,8 @@ namespace maf {
       using Role_evaluator = std::function<double(const Role &)>;
 
       /// Create a new wildcard with the given role evaluator.
-      Wildcard(ID id, Role_evaluator evaluator);
+      Wildcard(ID id, Role_evaluator evaluator)
+       : _id{id}, _evaluator{evaluator} { }
 
       /// Create a new wildcard with the given role weights.
       ///
@@ -33,7 +34,9 @@ namespace maf {
       Wildcard(ID id, const std::map<Role::ID, double> & weights);
 
       /// The ID of the wildcard.
-      ID id() const;
+      ID id() const {
+         return _id;
+      }
 
       /// The alias of the wildcard.
       ///
@@ -56,7 +59,9 @@ namespace maf {
       /// Whether the wildcard uses a role evaluator when picking a role.
       ///
       /// If false, predefined weights are used instead.
-      bool uses_evaluator() const;
+      bool uses_evaluator() const {
+         return static_cast<bool>(_evaluator);
+      }
    };
 
    /// The alias corresponding to the given wildcard ID.

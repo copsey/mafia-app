@@ -7,9 +7,6 @@
 #include "wildcard.hpp"
 #include "rulebook.hpp"
 
-maf::Wildcard::Wildcard(ID id, Role_evaluator evaluator)
-: _id{id}, _evaluator{evaluator} { }
-
 maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
 : _id{id} {
    using Key_iterator = rkt::map::key_iterator<Role::ID, double>;
@@ -37,10 +34,6 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
 
    _role_ids = {Key_iterator{weights.begin()}, Key_iterator{weights.end()}};
    _dist = {Item_iterator{weights.begin()}, Item_iterator{weights.end()}};
-}
-
-maf::Wildcard::ID maf::Wildcard::id() const {
-   return _id;
 }
 
 std::string maf::Wildcard::alias() const {
@@ -125,8 +118,4 @@ std::string maf::alias(Wildcard::ID id) {
       case Wildcard::ID::freelance:
          return "any_freelance";
    }
-}
-
-bool maf::Wildcard::uses_evaluator() const {
-   return static_cast<bool>(_evaluator);
 }
