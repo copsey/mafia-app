@@ -7,12 +7,9 @@
 #include "wildcard.hpp"
 #include "rulebook.hpp"
 
-maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
-: _id{id} {
-   using Key_iterator = rkt::map::key_iterator<Role::ID, double>;
-   using Item_iterator = rkt::map::item_const_iterator<Role::ID, double>;
-
-   if (std::any_of(Item_iterator{weights.begin()}, Item_iterator{weights.end()},
+maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights)
+ : _id{id}, _role_ids{rkt::key_begin(weights), rkt::key_end(weights)}, _dist{rkt::item_begin(weights), rkt::item_end(weights)} {
+   if (std::any_of(rkt::item_begin(weights), rkt::item_end(weights),
                    [](double w) { return w < 0.0; })) {
       std::ostringstream err{};
       err << "A joker with alias "
@@ -22,7 +19,7 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
       throw std::invalid_argument{err.str()};
    }
 
-   if (std::all_of(Item_iterator{weights.begin()}, Item_iterator{weights.end()},
+   if (std::all_of(rkt::item_begin(weights), rkt::item_end(weights),
                    [](double w) { return w == 0.0; } )) {
       std::ostringstream err{};
       err << "A joker with alias "
@@ -31,9 +28,6 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> &weights)
 
       throw std::invalid_argument{err.str()};
    }
-
-   _role_ids = {Key_iterator{weights.begin()}, Key_iterator{weights.end()}};
-   _dist = {Item_iterator{weights.begin()}, Item_iterator{weights.end()}};
 }
 
 std::string maf::Wildcard::alias() const {
