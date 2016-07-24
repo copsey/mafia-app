@@ -54,17 +54,20 @@ namespace maf {
          musketeer
       };
 
-      // Creates a role with the given ID.
-      // All other traits are given their default values.
+      /// Create a role with the given ID.
+      ///
+      /// All other traits are set to their default values.
       Role(ID id)
        : _id{id} { }
 
-      // The ID of the role.
+      /// The ID of the role.
       ID id() const {
          return _id;
       }
       
-      // The alias of the role, which is fully determined from its ID.
+      /// The alias of the role.
+      ///
+      /// Note that this is fully determined by its ID.
       std::string alias() const;
 
       // The various traits of the role.
@@ -81,7 +84,7 @@ namespace maf {
       ID _id;
    };
 
-   // Get the alias corresponding to the given role ID.
+   /// The alias corresponding to the given role ID.
    std::string alias(Role::ID id);
 }
 
