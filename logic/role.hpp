@@ -1,8 +1,6 @@
 #ifndef MAFIA_LOGIC_ROLE
 #define MAFIA_LOGIC_ROLE
 
-#include <string>
-
 #include "../riketi/box.hpp"
 
 namespace maf {
