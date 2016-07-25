@@ -151,7 +151,7 @@ void maf::Setup_screen::clear_all() {
 }
 
 std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
-   return std::make_unique<Game_log>(player_names(), rolecard_ids(), wildcard_ids(), _rulebook);
+   return std::unique_ptr<Game_log>{new Game_log{player_names(), rolecard_ids(), wildcard_ids(), _rulebook}};
 }
 
 void maf::Setup_screen::do_commands(const std::vector<std::string> &commands) {
