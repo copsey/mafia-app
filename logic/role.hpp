@@ -68,7 +68,7 @@ namespace maf {
       /// The alias of the role.
       ///
       /// Note that this is fully determined by its ID.
-      std::string alias() const;
+      const char * alias() const;
 
       // The various traits of the role.
       Alignment alignment{Alignment::freelance};
@@ -85,7 +85,7 @@ namespace maf {
    };
 
    /// The alias corresponding to the given role ID.
-   std::string alias(Role::ID id);
+   const char * alias(Role::ID id);
 }
 
 #endif

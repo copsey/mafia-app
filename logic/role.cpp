@@ -1,10 +1,10 @@
 #include "role.hpp"
 
-std::string maf::Role::alias() const {
+const char * maf::Role::alias() const {
    return maf::alias(_id);
 }
 
-std::string maf::alias(Role::ID id) {
+const char * maf::alias(Role::ID id) {
    switch (id) {
       case Role::ID::peasant:
          return "peas";

@@ -41,7 +41,7 @@ namespace maf {
       /// The alias of the wildcard.
       ///
       /// Note that this is fully determined by its ID.
-      std::string alias() const;
+      const char * alias() const;
 
       /// Check whether the wildcard will only return roles of the given
       /// alignment from `rulebook`.
@@ -72,7 +72,7 @@ namespace maf {
    };
 
    /// The alias corresponding to the given wildcard ID.
-   std::string alias(Wildcard::ID id);
+   const char * alias(Wildcard::ID id);
 }
 
 #endif

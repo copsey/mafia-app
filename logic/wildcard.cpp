@@ -27,7 +27,7 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights)
    }
 }
 
-std::string maf::Wildcard::alias() const {
+const char * maf::Wildcard::alias() const {
    return maf::alias(_id);
 }
 
@@ -96,7 +96,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
    }
 }
 
-std::string maf::alias(Wildcard::ID id) {
+const char * maf::alias(Wildcard::ID id) {
    switch (id) {
       case Wildcard::ID::any:
          return "random";
