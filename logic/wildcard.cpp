@@ -14,14 +14,14 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights)
 
    if (std::any_of(rkt::item_begin(weights), rkt::item_end(weights), is_negative)) {
       std::ostringstream err{};
-      err << "A joker with alias " << alias() << " was created with a negative role weight.";
+      err << "A wildcard with alias " << alias() << " was created with a negative role weight.";
 
       throw std::invalid_argument{err.str()};
    }
 
    if (std::all_of(rkt::item_begin(weights), rkt::item_end(weights), is_zero)) {
       std::ostringstream err{};
-      err << "A joker with alias " << alias() << " was created with every role weight set to zero.";
+      err << "A wildcard with alias " << alias() << " was created with every role weight set to zero.";
 
       throw std::invalid_argument{err.str()};
    }
@@ -65,7 +65,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
          double w = _evaluator(role);
          if (w < 0.0) {
             std::ostringstream err{};
-            err << "A joker with alias "
+            err << "A wildcard with alias "
                 << alias()
                 << " returned the negative role weight of "
                 << w
@@ -82,7 +82,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 
       if (role_ptrs.size() == 0) {
          std::ostringstream err{};
-         err << "A joker with alias "
+         err << "A wildcard with alias "
              << alias()
              << " chose zero as the weight of every role in the rulebook.";
 
