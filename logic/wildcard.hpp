@@ -29,8 +29,8 @@ namespace maf {
 
       /// Create a new wildcard with the given role weights.
       ///
-      /// `weights` should consist entirely of non-negative values, with at
-      /// least one strictly positive value.
+      /// `weights` must consist entirely of non-negative values, with at least
+      /// one strictly positive value.
       Wildcard(ID id, const std::map<Role::ID, double> & weights);
 
       /// The ID of the wildcard.
@@ -48,6 +48,13 @@ namespace maf {
       bool matches_alignment(Alignment alignment, const Rulebook & rulebook) const;
 
       /// Choose a role from `rulebook`, using the wildcard's distribution.
+      ///
+      /// If the wildcard uses an evaluator, it must be such that all of the
+      /// roles in `rulebook` are assigned non-negative values, and at least one
+      /// role in `rulebook` is assigned a strictly positive value.
+      ///
+      /// If instead the wildcard uses weights, each role with a positive weight
+      /// must be defined in `rulebook`.
       const Role & pick_role(const Rulebook & rulebook);
 
    private:
