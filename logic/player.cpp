@@ -148,7 +148,7 @@ void maf::Player::heal() {
 }
 
 bool maf::Player::is_suspicious() const {
-   return role().is_suspicious || _is_high;
+   return role().is_suspicious() || _is_high;
 }
 
 void maf::Player::give_drugs() {

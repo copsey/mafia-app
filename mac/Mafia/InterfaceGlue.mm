@@ -95,7 +95,7 @@
          }
       }
       else if (auto e = dynamic_cast<const maf::Lynch_result *>(event)) {
-         if (e->victim && e->victim_role->is_troll) {
+         if (e->victim && e->victim_role->is_troll()) {
             [_delegate playMusic:MafiaPlaylistItem_TrollLynch];
          }
       }

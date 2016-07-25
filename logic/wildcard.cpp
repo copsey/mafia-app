@@ -34,7 +34,7 @@ const char * maf::Wildcard::alias() const {
 bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rulebook) const {
    if (uses_evaluator()) {
       for (const Role & r: rulebook.roles()) {
-         if (r.alignment != alignment) {
+         if (r.alignment() != alignment) {
             double w = _evaluator(r);
             if (w > 0.0) return false;
          }
@@ -46,7 +46,7 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
       for (std::size_t i{0}; i < _role_ids.size(); ++i) {
          const Role & r = rulebook.get_role(_role_ids[i]);
-         if (r.alignment != alignment) {
+         if (r.alignment() != alignment) {
             double p = probabilities[i];
             if (p > 0.0) return false;
          }

@@ -12,55 +12,55 @@ maf::Rulebook::Rulebook(Edition edition)
    if (edition != 1) throw Bad_edition{edition};
 
    Role &peasant = new_village_role(Role::ID::peasant);
-   peasant.duel_strength = 0.333333333;
+   peasant._duel_strength = 0.333333333;
 
    Role &doctor = new_village_role(Role::ID::doctor);
-   doctor.ability.put({Ability::ID::heal});
-   doctor.duel_strength = 0.1;
+   doctor._ability_box.put({Ability::ID::heal});
+   doctor._duel_strength = 0.1;
 
    Role &detective = new_village_role(Role::ID::detective);
-   detective.ability.put({Ability::ID::investigate});
-   detective.duel_strength = 4;
+   detective._ability_box.put({Ability::ID::investigate});
+   detective._duel_strength = 4;
 
    Role &racketeer = new_mafia_role(Role::ID::racketeer);
-   racketeer.duel_strength = 9;
+   racketeer._duel_strength = 9;
 
    Role &godfather = new_mafia_role(Role::ID::godfather);
-   godfather.is_suspicious = false;
-   godfather.duel_strength = 0.2;
+   godfather._suspicious = false;
+   godfather._duel_strength = 0.2;
 
    Role &dealer = new_mafia_role(Role::ID::dealer);
-   dealer.ability.put({Ability::ID::peddle});
+   dealer._ability_box.put({Ability::ID::peddle});
 
    Role &coward = new_freelance_role(Role::ID::coward);
-   coward.is_suspicious = true;
-   coward.duel_strength = 0.000000001;
+   coward._suspicious = true;
+   coward._duel_strength = 0.000000001;
 
    Role &actor = new_freelance_role(Role::ID::actor);
-   actor.is_role_faker = true;
-   actor.duel_strength = 0.333333333;
+   actor._role_faker = true;
+   actor._duel_strength = 0.333333333;
 
    Role &serial_killer = new_freelance_role(Role::ID::serial_killer);
-   serial_killer.ability.put({Ability::ID::kill});
-   serial_killer.peace_condition = Peace_condition::last_survivor;
-   serial_killer.is_suspicious = true;
-   serial_killer.duel_strength = 999999999;
+   serial_killer._ability_box.put({Ability::ID::kill});
+   serial_killer._peace_condition = Peace_condition::last_survivor;
+   serial_killer._suspicious = true;
+   serial_killer._duel_strength = 999999999;
 
    Role &village_idiot = new_freelance_role(Role::ID::village_idiot);
-   village_idiot.win_condition = Win_condition::be_lynched;
-   village_idiot.is_troll = true;
-   village_idiot.duel_strength = 0.001;
+   village_idiot._win_condition = Win_condition::be_lynched;
+   village_idiot._troll = true;
+   village_idiot._duel_strength = 0.001;
 
    Role &musketeer = new_freelance_role(Role::ID::musketeer);
-   musketeer.ability.put({Ability::ID::duel});
-   musketeer.win_condition = Win_condition::win_duel;
+   musketeer._ability_box.put({Ability::ID::duel});
+   musketeer._win_condition = Win_condition::win_duel;
 
    new_wildcard(Wildcard::ID::any, [](const Role &) {
       return 1;
    });
 
    new_wildcard(Wildcard::ID::village, [](const Role &r) {
-      return (r.alignment == Alignment::village) ? 1 : 0;
+      return (r.alignment() == Alignment::village) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::village_basic, {
@@ -70,11 +70,11 @@ maf::Rulebook::Rulebook(Edition edition)
    });
 
    new_wildcard(Wildcard::ID::mafia, [](const Role &r) {
-      return (r.alignment == Alignment::mafia) ? 1 : 0;
+      return (r.alignment() == Alignment::mafia) ? 1 : 0;
    });
 
    new_wildcard(Wildcard::ID::freelance, [](const Role &r) {
-      return (r.alignment == Alignment::freelance) ? 1 : 0;
+      return (r.alignment() == Alignment::freelance) ? 1 : 0;
    });
 }
 
@@ -89,7 +89,7 @@ const std::vector<maf::Role> & maf::Rulebook::roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Alignment::village) v.emplace_back(r);
+      if (r.alignment() == Alignment::village) v.emplace_back(r);
    }
    return v;
 }
@@ -97,7 +97,7 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Alignment::mafia) v.emplace_back(r);
+      if (r.alignment() == Alignment::mafia) v.emplace_back(r);
    }
    return v;
 }
@@ -105,7 +105,7 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
-      if (r.alignment == Alignment::freelance) v.emplace_back(r);
+      if (r.alignment() == Alignment::freelance) v.emplace_back(r);
    }
    return v;
 }
@@ -240,17 +240,17 @@ maf::Role & maf::Rulebook::new_role(Role::ID id) {
 
 maf::Role & maf::Rulebook::new_village_role(Role::ID id) {
    Role &role = new_role(id);
-   role.alignment = Alignment::village;
-   role.peace_condition = Peace_condition::mafia_eliminated;
+   role._alignment = Alignment::village;
+   role._peace_condition = Peace_condition::mafia_eliminated;
    return role;
 }
 
 maf::Role & maf::Rulebook::new_mafia_role(Role::ID id) {
    Role &role = new_role(id);
-   role.alignment = Alignment::mafia;
-   role.peace_condition = Peace_condition::village_eliminated;
-   role.is_suspicious = true;
-   role.duel_strength = 4;
+   role._alignment = Alignment::mafia;
+   role._peace_condition = Peace_condition::village_eliminated;
+   role._suspicious = true;
+   role._duel_strength = 4;
    return role;
 }
 

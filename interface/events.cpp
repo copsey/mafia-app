@@ -280,7 +280,7 @@ void maf::Lynch_result::write_full(std::ostream &os) const {
 
       if (victim_role) {
          os << "They were a " << full_name(victim_role->id()) << ".";
-         if (victim_role->is_troll) {
+         if (victim_role->is_troll()) {
             os << "^i\n\nA chill blows through the air. The townsfolk who voted to lynch "
             << victim->name()
             << " look nervous...";

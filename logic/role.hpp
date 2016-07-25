@@ -6,6 +6,8 @@
 #include "../riketi/box.hpp"
 
 namespace maf {
+   class Rulebook;
+
    enum class Alignment {
       village,
       mafia,
@@ -64,24 +66,74 @@ namespace maf {
       ID id() const {
          return _id;
       }
-      
+
       /// The alias of the role.
       ///
       /// Note that this is fully determined by its ID.
       const char * alias() const;
 
-      // The various traits of the role.
-      Alignment alignment{Alignment::freelance};
-      rkt::box<Ability> ability{};
-      Win_condition win_condition{Win_condition::survive};
-      Peace_condition peace_condition{Peace_condition::always_peaceful};
-      bool is_suspicious{false};
-      bool is_role_faker{false};
-      bool is_troll{false};
-      double duel_strength{1};
+      /// The alignment of the role.
+      Alignment alignment() const {
+         return _alignment;
+      }
+
+      /// The ability of the role, if it has one.
+      ///
+      /// Undefined behaviour if the role has no ability.
+      Ability ability() const {
+         return _ability_box.get();
+      }
+
+      /// Whether the role has an ability.
+      bool has_ability() const {
+         return _ability_box.is_full();
+      }
+
+      /// The condition that the role needs to satisfy to win.
+      Win_condition win_condition() const {
+         return _win_condition;
+      }
+
+      /// The peace condition of the role.
+      ///
+      /// The game cannot end until all active players simultaneously have their
+      /// peace conditions satisfied.
+      Peace_condition peace_condition() const {
+         return _peace_condition;
+      }
+
+      /// Whether the role appears as suspicious when investigated.
+      bool is_suspicious() const {
+         return _suspicious;
+      }
+
+      /// Whether the role becomes a ghost and haunts another player upon death.
+      bool is_troll() const {
+         return _troll;
+      }
+
+      /// Whether the role must pretend to be another role.
+      bool is_role_faker() const {
+         return _role_faker;
+      }
+
+      /// The strength of the role in duels.
+      double duel_strength() const {
+         return _duel_strength;
+      }
 
    private:
       ID _id;
+      Alignment _alignment{Alignment::freelance};
+      rkt::box<Ability> _ability_box{};
+      Win_condition _win_condition{Win_condition::survive};
+      Peace_condition _peace_condition{Peace_condition::always_peaceful};
+      bool _suspicious{false};
+      bool _troll{false};
+      bool _role_faker{false};
+      double _duel_strength{1};
+
+      friend class Rulebook;
    };
 
    /// The alias corresponding to the given role ID.

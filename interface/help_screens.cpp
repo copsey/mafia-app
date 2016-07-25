@@ -36,7 +36,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
 
          os << "   the " << full_name(r) << ", alias ^c" << r.alias() << "^h, ";
 
-         switch (r.alignment) {
+         switch (r.alignment()) {
             case Alignment::village:
                os << "aligned to the village";
                break;

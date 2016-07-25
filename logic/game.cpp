@@ -56,7 +56,7 @@ std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players() const {
 std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const {
    std::vector<rkt::ref<const Player>> v{};
    for (const Player &p: _players) {
-      if (p.is_present() && p.role().alignment == alignment) {
+      if (p.is_present() && p.role().alignment() == alignment) {
          v.emplace_back(p);
       }
    }
@@ -71,7 +71,7 @@ std::size_t maf::Game::num_players_left() const {
 
 std::size_t maf::Game::num_players_left(Alignment alignment) const {
    return rkt::count_if(_players, [alignment](const Player &p) {
-      return p.is_present() && p.role().alignment == alignment;
+      return p.is_present() && p.role().alignment() == alignment;
    });
 }
 
@@ -156,7 +156,7 @@ const maf::Player * maf::Game::process_lynch_votes() {
    auto victim = const_cast<Player *>(next_lynch_victim());
    if (victim) {
       victim->kill(_date, _time);
-      if (victim->role().is_troll) _pending_haunters.push_back(victim);
+      if (victim->role().is_troll()) _pending_haunters.push_back(victim);
    }
 
    _lynch_can_occur = false;
@@ -175,11 +175,11 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    if (!caster.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_not_present};
    if (!target.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::target_is_not_present};
    if (&caster == &target) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_target};
-   if (caster.role().ability.is_empty() || caster.role().ability.get().id != Ability::ID::duel) throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
+   if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel) throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
 
-   double s = caster.role().duel_strength + target.role().duel_strength;
+   double s = caster.role().duel_strength() + target.role().duel_strength();
    /* fix-me: throw exception if s <= 0 */
-   double p = caster.role().duel_strength / s;
+   double p = caster.role().duel_strength() / s;
 
    std::bernoulli_distribution bd{p};
 
@@ -193,7 +193,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    }
 
    winner->win_duel();
-   if (winner->role().win_condition == Win_condition::win_duel) {
+   if (winner->role().win_condition() == Win_condition::win_duel) {
       winner->leave();
    }
    loser->kill(_date, _time);
@@ -216,8 +216,8 @@ void maf::Game::begin_night() {
       _mafia_can_use_kill = (num_players_left(Alignment::mafia) > 0);
 
       for (Player &player: _players) {
-         if (player.role().ability.is_full()) {
-            Ability ability = player.role().ability.get();
+         if (player.role().has_ability()) {
+            Ability ability = player.role().ability();
 
             switch (ability.id) {
                case Ability::ID::kill:
@@ -245,7 +245,7 @@ void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
 
    if (_has_ended) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};
    if (!is_night()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::bad_timing};
-   if (!player.role().is_role_faker) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::player_is_not_faker};
+   if (!player.role().is_role_faker()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::player_is_not_faker};
    if (player.has_fake_role()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::already_chosen};
 
    player.give_fake_role(fake_role);
@@ -265,7 +265,7 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    if (!is_night()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::bad_timing};
    if (!mafia_can_use_kill()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::already_used};
    if (!caster.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_present};
-   if (caster.role().alignment != Alignment::mafia) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
+   if (caster.role().alignment() != Alignment::mafia) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
    if (!target.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::target_is_not_present};
    if (&caster == &target) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_target};
 
@@ -444,7 +444,7 @@ maf::Player & maf::Game::find_player(Player::ID id) {
 bool maf::Game::try_to_end_night() {
    if (!is_night()) return false;
    if (rkt::any_of(_players, [](const Player &player) {
-      return player.is_present() && player.role().is_role_faker && !player.has_fake_role();
+      return player.is_present() && player.role().is_role_faker() && !player.has_fake_role();
    })) return false;
    if (mafia_can_use_kill()) return false;
    if (rkt::any_of(players(), [](const Player &player) {
@@ -537,7 +537,7 @@ bool maf::Game::try_to_end() {
    for (const Player &player : _players) {
       if (player.is_present()) {
          ++num_players_left;
-         switch (player.role().alignment) {
+         switch (player.role().alignment()) {
          case Alignment::village:
             ++num_village_left;
             break;
@@ -550,7 +550,7 @@ bool maf::Game::try_to_end() {
             break;
          }
 
-         switch (player.role().peace_condition) {
+         switch (player.role().peace_condition()) {
          case Peace_condition::always_peaceful:
             break;
 
@@ -579,7 +579,7 @@ bool maf::Game::try_to_end() {
       bool has_won = false;
 
       if (!player.has_been_kicked()) {
-         switch (player.role().win_condition) {
+         switch (player.role().win_condition()) {
             case Win_condition::survive:
                has_won = player.is_alive();
                break;
