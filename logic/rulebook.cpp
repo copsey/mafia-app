@@ -20,7 +20,7 @@ maf::Rulebook::Rulebook(Edition edition)
 
    Role & godfather = new_mafia_role(Role::ID::godfather);
    godfather._suspicious = false;
-   godfather._duel_strength = 0.2;
+   godfather._duel_strength = 0.4;
 
    Role & dealer = new_mafia_role(Role::ID::dealer);
    dealer._ability_box.put({Ability::ID::peddle});
