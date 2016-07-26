@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include "../riketi/algorithm.hpp"
 #include "../riketi/enum.hpp"
 
@@ -210,14 +208,7 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(const std::string &alias) cons
 
 maf::Role & maf::Rulebook::new_role(Role::ID id) {
    if (contains_role(id)) {
-      std::ostringstream err{};
-      err << "A role with ID "
-          << rkt::value(id)
-          << " (alias "
-          << alias(id)
-          << ") already exists in the rulebook.";
-
-      throw std::invalid_argument{err.str()};
+      throw Preexisting_role_ID{id};
    }
 
    _roles.emplace_back(id);
@@ -246,14 +237,7 @@ maf::Role & maf::Rulebook::new_freelance_role(Role::ID id) {
 
 maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator) {
    if (contains_wildcard(id)) {
-      std::ostringstream err{};
-      err << "A wildcard with ID "
-      << rkt::value(id)
-      << " (alias "
-      << alias(id)
-      << ") already exists in the rulebook.";
-
-      throw std::invalid_argument{err.str()};
+      throw Preexisting_wildcard_ID{id};
    }
 
    _wildcards.emplace_back(id, evaluator);
@@ -262,14 +246,7 @@ maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_eval
 
 maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, const std::map<Role::ID, double> &weights) {
    if (contains_wildcard(id)) {
-      std::ostringstream err{};
-      err << "A wildcard with ID "
-      << rkt::value(id)
-      << " (alias "
-      << alias(id)
-      << ") already exists in the rulebook.";
-
-      throw std::invalid_argument{err.str()};
+      throw Preexisting_wildcard_ID{id};
    }
 
    _wildcards.emplace_back(id, weights);

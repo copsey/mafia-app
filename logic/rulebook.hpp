@@ -39,6 +39,11 @@ namespace maf {
          std::string alias;
       };
 
+      /// Exception signifying that a role with the given ID already exists.
+      struct Preexisting_role_ID {
+         Role::ID id;
+      };
+
       /// Exception signifying that no wildcard could be found with
       /// the given ID.
       struct Missing_wildcard_ID {
@@ -51,6 +56,11 @@ namespace maf {
       /// This could be because the alias doesn't correspond to a wildcard ID.
       struct Missing_wildcard_alias {
          std::string alias;
+      };
+
+      /// Exception signifying that a wildcard with the given ID already exists.
+      struct Preexisting_wildcard_ID {
+         Wildcard::ID id;
       };
 
       /// Make a rulebook with the latest edition.
@@ -152,31 +162,49 @@ namespace maf {
       /// The traits of the role are set to their default values.
       ///
       /// @returns a reference to the new role.
+      ///
+      /// @throws `Preexisting_role_ID` if a role with the given ID is already
+      /// defined in the rulebook.
       Role & new_role(Role::ID id);
 
       /// Create and store a new role with the given ID, and default village traits.
       ///
       /// @returns a reference to the new role.
+      ///
+      /// @throws `Preexisting_role_ID` if a role with the given ID is already
+      /// defined in the rulebook.
       Role & new_village_role(Role::ID id);
 
       /// Create and store a new role with the given ID, and default mafia traits.
       ///
       /// @returns a reference to the new role.
+      ///
+      /// @throws `Preexisting_role_ID` if a role with the given ID is already
+      /// defined in the rulebook.
       Role & new_mafia_role(Role::ID id);
 
       /// Create and store a new role with the given ID, and default freelance traits.
       ///
       /// @returns a reference to the new role.
+      ///
+      /// @throws `Preexisting_role_ID` if a role with the given ID is already
+      /// defined in the rulebook.
       Role & new_freelance_role(Role::ID id);
 
       /// Create and store a new wildcard with the given ID and role evaluator.
       ///
       /// @returns a reference to the new wildcard.
+      ///
+      /// @throws `Preexisting_wildcard_ID` if a wildcard with the given ID is
+      /// already defined in the rulebook.
       Wildcard & new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator);
 
       /// Create and store a new wildcard with the given ID and role weights.
       ///
       /// @returns a reference to the new wildcard.
+      ///
+      /// @throws `Preexisting_wildcard_ID` if a wildcard with the given ID is
+      /// already defined in the rulebook.
       Wildcard & new_wildcard(Wildcard::ID id, const std::map<Role::ID, double> & weights);
 
    private:
