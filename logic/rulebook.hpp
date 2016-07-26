@@ -43,15 +43,22 @@ namespace maf {
       };
 
       // Creates a rulebook of the latest edition.
-      Rulebook();
+      Rulebook()
+       : Rulebook{latest_edition} { }
+
       // Creates a rulebook of the specified edition.
       Rulebook(Edition edition);
 
       // Gets the edition of the rules being used.
-      Edition edition() const;
+      Edition edition() const {
+         return _edition;
+      }
 
       // A vector containing every role defined in the rulebook.
-      const std::vector<Role> & roles() const;
+      const std::vector<Role> & roles() const {
+         return _roles;
+      }
+
       // A vector containing every village role defined in the rulebook.
       std::vector<rkt::ref<const Role>> village_roles() const;
       // A vector containing every mafia role defined in the rulebook.
@@ -60,7 +67,10 @@ namespace maf {
       std::vector<rkt::ref<const Role>> freelance_roles() const;
 
       // A vector containing every wildcard defined in the rulebook.
-      const std::vector<Wildcard> & wildcards() const;
+      const std::vector<Wildcard> & wildcards() const {
+         return _wildcards;
+      }
+
       // A vector containing every village-only wildcard defined in the
       // rulebook.
       std::vector<rkt::ref<const Wildcard>> village_wildcards() const;

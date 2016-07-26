@@ -5,8 +5,6 @@
 
 #include "rulebook.hpp"
 
-maf::Rulebook::Rulebook(): Rulebook{latest_edition} { }
-
 maf::Rulebook::Rulebook(Edition edition)
 : _edition{edition} {
    if (edition != 1) throw Bad_edition{edition};
@@ -78,14 +76,6 @@ maf::Rulebook::Rulebook(Edition edition)
    });
 }
 
-maf::Rulebook::Edition maf::Rulebook::edition() const {
-   return _edition;
-}
-
-const std::vector<maf::Role> & maf::Rulebook::roles() const {
-   return _roles;
-}
-
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (const Role &r: _roles) {
@@ -132,10 +122,6 @@ std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() 
       if (w.matches_alignment(Alignment::freelance, *this)) v.emplace_back(w);
    }
    return v;
-}
-
-const std::vector<maf::Wildcard> & maf::Rulebook::wildcards() const {
-   return _wildcards;
 }
 
 bool maf::Rulebook::contains_role(Role::ID id) const {
