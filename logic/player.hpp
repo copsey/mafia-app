@@ -1,15 +1,10 @@
 #ifndef MAFIA_LOGIC_PLAYER
 #define MAFIA_LOGIC_PLAYER
 
+#include "time.hpp"
 #include "wildcard.hpp"
 
 namespace maf {
-   // An integer representing the number of in-game days which have passed.
-   using Date = unsigned;
-
-   // A period of in-game time.
-   enum class Time { day, night };
-
    // A player in a game of Mafia.
    struct Player {
       using ID = std::size_t;
