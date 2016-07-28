@@ -123,8 +123,6 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 
       /* fix-me: "add p A B C" should result in players A, B, C all being chosen. */
 
-      /* fix-me: typing in "preset" should begin a random preset. */
-
       /* fix-me: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
 
       /* fix-me: list p random, a utility command to generate a list of the players in a game, in a random order.
