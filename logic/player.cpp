@@ -1,49 +1,12 @@
 #include "player.hpp"
 
-maf::Player::Player(std::string name, ID id)
- : _name{name}, _id{id} {
-
-}
-
-const std::string & maf::Player::name() const {
-   return _name;
-}
-
-maf::Player::ID maf::Player::id() const {
-   return _id;
-}
-
-const maf::Role & maf::Player::role() const {
-   return *_role_ptr;
-}
-
 void maf::Player::assign_role(const Role & role) {
    _role_ptr = &role;
    _fake_role_ptr = nullptr;
 }
 
-const maf::Wildcard * maf::Player::wildcard() const {
-   return _wildcard_ptr;
-}
-
 void maf::Player::set_wildcard(const Wildcard & wildcard) {
    _wildcard_ptr = &wildcard;
-}
-
-bool maf::Player::is_alive() const {
-   return _alive;
-}
-
-bool maf::Player::is_dead() const {
-   return !_alive;
-}
-
-maf::Date maf::Player::date_of_death() const {
-   return _date_of_death;
-}
-
-maf::Time maf::Player::time_of_death() const {
-   return _time_of_death;
 }
 
 void maf::Player::kill(Date date, Time time) {
@@ -53,16 +16,8 @@ void maf::Player::kill(Date date, Time time) {
    _time_of_death = time;
 }
 
-bool maf::Player::is_present() const {
-   return _present;
-}
-
 void maf::Player::leave() {
    _present = false;
-}
-
-bool maf::Player::has_been_kicked() const {
-   return _kicked;
 }
 
 void maf::Player::kick() {
@@ -77,14 +32,6 @@ bool maf::Player::has_been_lynched() const {
 void maf::Player::lynch(Date date) {
    kill(date, Time::day);
    _lynched = true;
-}
-
-const maf::Role * maf::Player::fake_role() const {
-   return _fake_role_ptr;
-}
-
-bool maf::Player::has_fake_role() const {
-   return _fake_role_ptr;
 }
 
 void maf::Player::give_fake_role(const maf::Role & role) {
@@ -118,32 +65,8 @@ void maf::Player::remove_compulsory_ability(Ability ability) {
    /* fix-me: throw exception if compulsory ability is not currently stored. */
 }
 
-const maf::Player * maf::Player::lynch_vote() const {
-   return _lynch_vote;
-}
-
 void maf::Player::cast_lynch_vote(const Player & target) {
    _lynch_vote = &target;
-}
-
-void maf::Player::clear_lynch_vote() {
-   _lynch_vote = nullptr;
-}
-
-bool maf::Player::has_won_duel() const {
-   return _won_duel;
-}
-
-void maf::Player::win_duel() {
-   _won_duel = true;
-}
-
-bool maf::Player::is_healed() const {
-   return _healed;
-}
-
-void maf::Player::heal() {
-   _healed = true;
 }
 
 bool maf::Player::is_suspicious() const {
@@ -154,26 +77,6 @@ void maf::Player::give_drugs() {
    _high = true;
 }
 
-const maf::Player * maf::Player::haunter() const {
-   return _haunter;
-}
-
-bool maf::Player::is_haunted() const {
-   return _haunter;
-}
-
 void maf::Player::haunt(const Player &haunter) {
    _haunter = &haunter;
-}
-
-bool maf::Player::has_won() const {
-   return _won_game;
-}
-
-void maf::Player::win() {
-   _won_game = true;
-}
-
-void maf::Player::lose() {
-   _won_game = false;
 }

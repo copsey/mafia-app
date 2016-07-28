@@ -11,44 +11,62 @@ namespace maf {
       /// Create a player with the given name and ID.
       ///
       /// Each status is set to its default value.
-      Player(std::string name, ID id);
+      Player(std::string name, ID id)
+       : _name{name}, _id{id} { }
 
       /// The player's name.
-      const std::string & name() const;
+      const std::string & name() const {
+         return _name;
+      }
 
       /// The unique ID given to the player for the game that they are in.
-      ID id() const;
+      ID id() const {
+         return _id;
+      }
 
       /// The current role of the player.
       ///
-      /// @warning Undefined behaviour if the player has never been assigned a role.
-      const Role & role() const;
+      /// @warning Undefined behaviour if the player has never been assigned
+      /// a role.
+      const Role & role() const {
+         return *_role_ptr;
+      }
 
       /// Assign the given role to the player.
       void assign_role(const Role & role);
 
       /// The wildcard from which the player obtained their current role, or
       /// `nullptr` if none exists.
-      const Wildcard * wildcard() const;
+      const Wildcard * wildcard() const {
+         return _wildcard_ptr;
+      }
 
       /// Set the wildcard from which the player obtained their current role.
       void set_wildcard(const Wildcard & wildcard);
 
       /// Whether the player is still alive.
-      bool is_alive() const;
+      bool is_alive() const {
+         return _alive;
+      }
 
       /// Whether the player has been killed.
-      bool is_dead() const;
+      bool is_dead() const {
+         return !_alive;
+      }
 
       /// The date on which the player died.
       ///
       /// @warning Undefined behaviour if the player is still alive.
-      Date date_of_death() const;
+      Date date_of_death() const {
+         return _date_of_death;
+      }
 
       /// The time at which the player died.
       ///
       /// @warning Undefined behaviour if the player is still alive.
-      Time time_of_death() const;
+      Time time_of_death() const {
+         return _time_of_death;
+      }
 
       /// Kill the player, effectively removing them from the game.
       ///
@@ -57,13 +75,17 @@ namespace maf {
       void kill(Date date, Time time);
 
       /// Whether the player is still present in the town.
-      bool is_present() const;
+      bool is_present() const {
+         return _present;
+      }
 
       /// Make the player leave the town, without killing them.
       void leave();
 
       /// Whether the player has been kicked from the game.
-      bool has_been_kicked() const;
+      bool has_been_kicked() const {
+         return _kicked;
+      }
 
       /// Kick the player from the game they are in.
       void kick();
@@ -78,10 +100,14 @@ namespace maf {
 
       /// The role that the player must claim to have, or `nullptr` if none
       /// has been set.
-      const Role * fake_role() const;
+      const Role * fake_role() const {
+         return _fake_role_ptr;
+      }
 
       /// Whether the player has been given a fake role.
-      bool has_fake_role() const;
+      bool has_fake_role() const {
+         return _fake_role_ptr;
+      }
 
       /// Set the given role to be the player's fake role.
       void give_fake_role(const Role & role);
@@ -106,25 +132,37 @@ namespace maf {
 
       /// The player's current lynch vote, or nullptr if the player is not
       /// voting to lynch anybody.
-      const Player * lynch_vote() const;
+      const Player * lynch_vote() const {
+         return _lynch_vote;
+      }
 
       /// Choose a target for the player to vote against in the upcoming lynch.
       void cast_lynch_vote(const Player & target);
 
       /// Remove the player's current lynch vote.
-      void clear_lynch_vote();
+      void clear_lynch_vote() {
+         _lynch_vote = nullptr;
+      }
 
       /// Whether the player has won a duel at any point.
-      bool has_won_duel() const;
+      bool has_won_duel() const {
+         return _won_duel;
+      }
 
       /// Make the player win a duel.
-      void win_duel();
+      void win_duel() {
+         _won_duel = true;
+      }
 
       /// Whether the player has been healed this night.
-      bool is_healed() const;
+      bool is_healed() const {
+         return _healed;
+      }
 
       /// Heal the player for the current night.
-      void heal();
+      void heal() {
+         _healed = true;
+      }
 
       /// Whether the player currently appears as suspicious.
       bool is_suspicious() const;
@@ -136,22 +174,32 @@ namespace maf {
 
       /// The ghost which is haunting this player, or nullptr if
       /// none exists.
-      const Player * haunter() const;
+      const Player * haunter() const {
+         return _haunter;
+      }
 
       /// Whether the player is being haunted by a ghost.
-      bool is_haunted() const;
+      bool is_haunted() const {
+         return _haunter;
+      }
 
       /// Haunt the player with a ghost!
       void haunt(const Player & haunter);
 
       /// Whether the player has won the game they are in.
-      bool has_won() const;
+      bool has_won() const {
+         return _won_game;
+      }
 
       /// Make the player win the game they are in.
-      void win();
+      void win() {
+         _won_game = true;
+      }
 
       /// Make the player lose the game they are in.
-      void lose();
+      void lose() {
+         _won_game = false;
+      }
 
    private:
       std::string _name;
