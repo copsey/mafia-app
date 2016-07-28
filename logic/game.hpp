@@ -6,13 +6,6 @@
 
 namespace maf {
    struct Game {
-      // Signifies that a game was created with an unequal number of players and
-      // cards.
-      struct Players_to_cards_mismatch {
-         std::size_t num_players;
-         std::size_t num_cards;
-      };
-
       // Signifies that no player could be found with the given ID.
       struct Player_not_found {
          Player::ID id;

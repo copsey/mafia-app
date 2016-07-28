@@ -11,7 +11,7 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
                           const Rulebook &rulebook)
 : _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names} {
    if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
-      throw Game::Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
+      throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
    }
 
    for (const Player &player: _game.players()) {

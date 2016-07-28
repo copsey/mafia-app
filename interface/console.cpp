@@ -146,9 +146,6 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
       << e.alias
       << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
-   catch (const Game::Players_to_cards_mismatch &e) {
-      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
-   }
    catch (const Game::Kick_failed &e) {
       err << "^HKick failed!^h";
 
@@ -395,6 +392,9 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
    }
    catch (const Game::Skip_failed &e) {
       err << "^HSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
+   }
+   catch (const Game_log::Players_to_cards_mismatch &e) {
+      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
    }
    catch (const Game_log::Player_not_found &e) {
       err << "^HPlayer not found!^hA player named ^c"

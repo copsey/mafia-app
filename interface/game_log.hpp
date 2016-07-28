@@ -7,6 +7,13 @@
 
 namespace maf {
    struct Game_log {
+      /// Exception signifying that an attempt was made to create a game with
+      /// an unequal number of players and cards.
+      struct Players_to_cards_mismatch {
+         std::size_t num_players;
+         std::size_t num_cards;
+      };
+
       // Signifies that no player could be found with the given name.
       struct Player_not_found {
          std::string name;
