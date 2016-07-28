@@ -215,7 +215,7 @@ void maf::Game::begin_night() {
       _mafia_can_use_kill = (num_players_left(Alignment::mafia) > 0);
 
       for (Player &player: _players) {
-         if (player.role().has_ability()) {
+         if (player.is_present() && player.role().has_ability()) {
             Ability ability = player.role().ability();
 
             switch (ability.id) {
