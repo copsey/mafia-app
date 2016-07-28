@@ -1,10 +1,52 @@
 #ifndef MAFIA_LOGIC_GAME
 #define MAFIA_LOGIC_GAME
 
+#include "../riketi/ref.hpp"
+
 #include "player.hpp"
 #include "rulebook.hpp"
 
 namespace maf {
+   /// The result of an investigation that `caster` performed on `target`.
+   ///
+   /// Note that only references to `caster` and `target` are stored, and so
+   /// the lifetime of an investigation result should not exceed the lifetime
+   /// of the players concerned.
+   struct Investigation {
+      Investigation(const Player & caster, const Player & target, Date date, bool result)
+       : _caster_ref{caster}, _target_ref{target}, _date{date}, _result{result} { }
+
+      /// The player that performed the investigation.
+      const Player & caster() const {
+         return _caster_ref;
+      }
+
+      /// The target of the investigation.
+      const Player & target() const {
+         return _target_ref;
+      }
+
+      /// The date on which the investigation occurred.
+      Date date() const {
+         return _date;
+      }
+
+      /// The result of the investigation.
+      ///
+      /// @returns `true` if the target appeared as suspicious,
+      /// `false` otherwise.
+      bool result() const {
+         return _result;
+      }
+
+   private:
+      rkt::ref<const Player> _caster_ref;
+      rkt::ref<const Player> _target_ref;
+      Date _date;
+      bool _result;
+   };
+
+
    struct Game {
       // Signifies that no player could be found with the given ID.
       struct Player_not_found {
@@ -199,19 +241,6 @@ namespace maf {
       struct Skip_failed { };
 
 
-      // The result of an investigation during the night.
-      struct Investigation {
-         Investigation(const Player &caster, const Player &target,
-                       bool target_is_suspicious)
-         : caster{caster}, target{target},
-         target_is_suspicious{target_is_suspicious} { }
-
-         rkt::ref<const Player> caster;
-         rkt::ref<const Player> target;
-         bool target_is_suspicious;
-      };
-
-
       // Start a new game with the given parameters, creating a set of players
       // and assigning each player an initial role.
       // Note that this could lead to the game immediately ending.
@@ -294,8 +323,14 @@ namespace maf {
       void cast_peddle(Player::ID caster_id, Player::ID target_id);
       void skip_peddle(Player::ID caster_id);
 
-      // The results of the previous night's investigations.
-      std::vector<Investigation> investigations() const;
+      /// The results of all of the investigations which have occurred so
+      /// far in the course of the game.
+      ///
+      /// The results are stored in chronological order, with the most
+      /// recent investigations at the end of the vector.
+      const std::vector<Investigation> & investigations() const {
+         return _investigations;
+      }
 
       // Whether or not the game has ended.
       bool has_ended() const;
@@ -321,7 +356,7 @@ namespace maf {
       std::vector<std::pair<Player *, Player *>> _pending_peddles{};
 
       std::vector<Player *> _pending_haunters{};
-      std::vector<std::tuple<Player *, Player *, bool>> _investigations{};
+      std::vector<Investigation> _investigations{};
 
       // Gets the player with the given ID.
       // Throws an exception if no such player could be found.

@@ -233,8 +233,6 @@ void maf::Game::begin_night() {
       }
    }
 
-   _investigations.clear();
-
    try_to_end_night();
 }
 
@@ -420,14 +418,6 @@ void maf::Game::skip_peddle(Player::ID caster_id) {
    try_to_end_night();
 }
 
-std::vector<maf::Game::Investigation> maf::Game::investigations() const {
-   std::vector<Investigation> v{};
-   for (const auto &t: _investigations) {
-      v.emplace_back(*std::get<0>(t), *std::get<1>(t), std::get<2>(t));
-   }
-   return v;
-}
-
 bool maf::Game::has_ended() const {
    return _has_ended;
 }
@@ -474,12 +464,12 @@ bool maf::Game::try_to_end_night() {
       }
    }
 
-   for (const auto &pair: _pending_investigations) {
-      Player &caster = *pair.first;
-      Player &target = *pair.second;
+   for (auto & pair: _pending_investigations) {
+      Player & caster = *pair.first;
+      Player & target = *pair.second;
 
       if (caster.is_present()) {
-         _investigations.emplace_back(&caster, &target, target.is_suspicious());
+         _investigations.emplace_back(caster, target, _date, target.is_suspicious());
       }
    }
 

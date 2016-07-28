@@ -126,7 +126,7 @@ namespace maf {
       void log_lynch_result(const Player *victim);
       void log_duel_result(const Player &caster, const Player &target);
       void log_boring_night();
-      void log_investigation_result(Game::Investigation investigation);
+      void log_investigation_result(Investigation investigation);
       void log_game_ended();
       // Try to log that the night has ended, if this has actually happened.
       void try_to_log_night_ended();

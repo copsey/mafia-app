@@ -633,21 +633,21 @@ void maf::Investigation_result::do_commands(const std::vector<std::string> &comm
 void maf::Investigation_result::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os << "^GInvestigation Result^g"
-      << game_log().get_name(investigation.caster)
+      << game_log().get_name(investigation.caster())
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GInvestigation Result^g"
-      << game_log().get_name(investigation.caster)
+      << game_log().get_name(investigation.caster())
       << ", you have completed your investigation of "
-      << game_log().get_name(investigation.target)
+      << game_log().get_name(investigation.target())
       << ".\n\n";
 
-      if (investigation.target_is_suspicious) {
-         os << game_log().get_name(investigation.target)
+      if (investigation.result()) {
+         os << game_log().get_name(investigation.target())
          << " was behaving very suspiciously this night!";
       } else {
          os << "The investigation was fruitless. "
-         << game_log().get_name(investigation.target)
+         << game_log().get_name(investigation.target())
          << " appears to be innocent.";
       }
 
@@ -656,11 +656,11 @@ void maf::Investigation_result::write_full(std::ostream &os) const {
 }
 
 void maf::Investigation_result::write_summary(std::ostream &os) const {
-   os << game_log().get_name(investigation.caster)
+   os << game_log().get_name(investigation.caster())
    << " decided that "
-   << game_log().get_name(investigation.target)
+   << game_log().get_name(investigation.target())
    << " was "
-   << (investigation.target_is_suspicious ? "suspicious" : "innocent")
+   << (investigation.result() ? "suspicious" : "innocent")
    << ".";
 }
 

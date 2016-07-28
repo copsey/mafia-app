@@ -267,10 +267,10 @@ namespace maf {
 
 
    struct Investigation_result: Event {
-      Investigation_result(const Game_log & game_log, Game::Investigation investigation)
+      Investigation_result(const Game_log & game_log, Investigation investigation)
       : Event{game_log}, investigation{investigation} { }
 
-      Game::Investigation investigation;
+      Investigation investigation;
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
 

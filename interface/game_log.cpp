@@ -291,7 +291,7 @@ void maf::Game_log::log_boring_night() {
    store_event(new Boring_night{*this});
 }
 
-void maf::Game_log::log_investigation_result(Game::Investigation investigation) {
+void maf::Game_log::log_investigation_result(Investigation investigation) {
    store_event(new Investigation_result{*this, investigation});
 }
 
@@ -301,9 +301,12 @@ void maf::Game_log::log_game_ended() {
 
 void maf::Game_log::try_to_log_night_ended() {
    if (_game.time() == Time::day) {
-      auto investigations = _game.investigations();
-      for (Game::Investigation investigation: investigations) {
-         log_investigation_result(investigation);
+      auto date = _game.date();
+
+      for (auto & inv: _game.investigations()) {
+         if (inv.date() + 1 == date) { // only show results from previous night
+            log_investigation_result(inv);
+         }
       }
 
       log_time_changed();
