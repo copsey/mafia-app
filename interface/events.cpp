@@ -24,9 +24,11 @@ void maf::Player_given_initial_role::do_commands(const std::vector<std::string> 
 }
 
 void maf::Player_given_initial_role::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+
    if (_is_private) {
-      os << "^G" << _p->name() << "'s Role^g"
-      << _p->name() << ", your role is the "
+      os << "^G" << glog.get_name(*_p) << "'s Role^g"
+      << glog.get_name(*_p) << ", your role is the "
       << full_name(*_r) << ".";
 
       if (_w != nullptr) {
@@ -40,13 +42,13 @@ void maf::Player_given_initial_role::write_full(std::ostream &os) const {
       << _r->alias()
       << "^h.";
    } else {
-      os << "^G" << _p->name() << "'s Role^g"
-      << _p->name() << ", you are about to be shown your role.";
+      os << "^G" << glog.get_name(*_p) << "'s Role^g"
+      << glog.get_name(*_p) << ", you are about to be shown your role.";
    }
 }
 
 void maf::Player_given_initial_role::write_summary(std::ostream &os) const {
-   os << _p->name() << " played as the " << full_name(*_r) << ".";
+   os << game_log().get_name(*_p) << " played as the " << full_name(*_r) << ".";
 }
 
 void maf::Time_changed::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
@@ -114,10 +116,10 @@ void maf::Obituary::write_full(std::ostream &os) const {
    } else {
       const Player &death = _deaths[_deaths_index].get();
 
-      os << "^GObituary^g" << death.name() << " died during the night!";
+      os << "^GObituary^g" << game_log().get_name(death) << " died during the night!";
       if (death.is_haunted()) {
          os << "\n\nA slip of paper was found by their bed. On it has been written the name \""
-         << death.haunter()->name()
+         << game_log().get_name(*death.haunter())
          << "\" over and over...";
       }
    }
@@ -128,7 +130,7 @@ void maf::Obituary::write_summary(std::ostream &os) const {
 
    for (const Player &p: _deaths) {
       if (write_nl) os << '\n';
-      os << p.name() << " died during the night.";
+      os << game_log().get_name(p) << " died during the night.";
       write_nl = true;
    }
 }
@@ -203,16 +205,16 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       for (auto it = _players.begin(); it != _players.end(); ) {
          const Player &p = *it;
          os << "   "
-         << p.name();
+         << game_log().get_name(p);
          if (p.lynch_vote() != nullptr) {
             os << ", voting to lynch "
-            << p.lynch_vote()->name();
+            << game_log().get_name(*p.lynch_vote());
          }
          os << ((++it == _players.end()) ? "." : ",\n");
       }
 
       os << "\n\nAs it stands, "
-      << (_next_lynch_victim ? _next_lynch_victim->name() : "nobody")
+      << (_next_lynch_victim ? game_log().get_name(*_next_lynch_victim) : "nobody")
       << " will be lynched.^h\n\nEnter ^clynch^h to submit the current lynch votes. Daytime abilities may also be used at this point.";
    } else {
       os << "^GDay "
@@ -222,7 +224,7 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       for (auto it = _players.begin(); it != _players.end(); ) {
          const Player &p = *it;
          os << "   "
-         << p.name()
+         << game_log().get_name(p)
          << ((++it == _players.end()) ? "." : ",\n");
       }
 
@@ -233,9 +235,9 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
 void maf::Town_meeting::write_summary(std::ostream &os) const {
    if (_recent_vote_caster) {
       if (_recent_vote_target) {
-         os << _recent_vote_caster->name() << " voted to lynch " << _recent_vote_target->name() << ".";
+         os << game_log().get_name(*_recent_vote_caster) << " voted to lynch " << game_log().get_name(*_recent_vote_target) << ".";
       } else {
-         os << _recent_vote_caster->name() << " chose not to vote.";
+         os << game_log().get_name(*_recent_vote_caster) << " chose not to vote.";
       }
    }
 }
@@ -251,16 +253,16 @@ void maf::Player_kicked::do_commands(const std::vector<std::string> &commands, G
 
 void maf::Player_kicked::write_full(std::ostream &os) const {
    os << "^G"
-   << player.get().name()
+   << game_log().get_name(player)
    << " kicked^g"
-   << player.get().name()
+   << game_log().get_name(player)
    << " was kicked from the game!\nThey were the "
    << full_name(player.get().role())
    << ".";
 }
 
 void maf::Player_kicked::write_summary(std::ostream &os) const {
-   os << player.get().name() << " was kicked.";
+   os << game_log().get_name(player) << " was kicked.";
 }
 
 void maf::Lynch_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
@@ -276,13 +278,15 @@ void maf::Lynch_result::write_full(std::ostream &os) const {
    os << "^GLynch Result^g";
 
    if (victim) {
-      os << victim->name() << " was lynched!\n";
+      auto & victim_name = game_log().get_name(*victim);
+
+      os << victim_name << " was lynched!\n";
 
       if (victim_role) {
          os << "They were a " << full_name(victim_role->id()) << ".";
          if (victim_role->is_troll()) {
             os << "^i\n\nA chill blows through the air. The townsfolk who voted to lynch "
-            << victim->name()
+            << victim_name
             << " look nervous...";
          }
       } else {
@@ -294,7 +298,7 @@ void maf::Lynch_result::write_full(std::ostream &os) const {
 }
 
 void maf::Lynch_result::write_summary(std::ostream &os) const {
-   os << (victim ? victim->name() : "Nobody") << " was lynched.";
+   os << (victim ? game_log().get_name(*victim) : "Nobody") << " was lynched.";
 }
 
 void maf::Duel_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
@@ -310,19 +314,25 @@ void maf::Duel_result::write_full(std::ostream &os) const {
    const Player &winner = (caster.get().is_alive() ? caster : target);
    const Player &loser = (caster.get().is_alive() ? target : caster);
 
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(caster);
+   auto & target_name = glog.get_name(target);
+   auto & winner_name = glog.get_name(winner);
+   auto & loser_name = glog.get_name(loser);
+
    os << "^GDuel^g"
-   << caster.get().name()
+   << caster_name
    << " has challenged "
-   << target.get().name()
+   << target_name
    << " to a duel!^i\n\nThe pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!^g\n\nThe lifeless body of "
-   << loser.name()
+   << loser_name
    << " falls to the ground. "
-   << winner.name()
+   << winner_name
    << " lets out a sigh of relief.";
 
    if (!winner.is_present()) {
       os << "\n\nWith that, "
-      << winner.name()
+      << winner_name
       << " throws their gun to the ground and flees from the village.";
    }
 
@@ -330,10 +340,14 @@ void maf::Duel_result::write_full(std::ostream &os) const {
 }
 
 void maf::Duel_result::write_summary(std::ostream &os) const {
-   if (caster.get().is_alive()) {
-      os << caster.get().name() << " won a duel against " << target.get().name() << ".";
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(caster);
+   auto & target_name = glog.get_name(target);
+
+   if (caster.get().is_alive()) { // fix-me: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
+      os << caster_name << " won a duel against " << target_name << ".";
    } else {
-      os << caster.get().name() << " lost a duel against " << target.get().name() << ".";
+      os << caster_name << " lost a duel against " << target_name << ".";
    }
 }
 
@@ -365,11 +379,11 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string> &commands
 void maf::Choose_fake_role::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os << "^GChoose Fake Role^g"
-      << _player->name()
+      << game_log().get_name(*_player)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else if (_fake_role) {
       os << "^GChoose Fake Role^g"
-      << _player->name()
+      << game_log().get_name(*_player)
       << ", you have been given the "
       << full_name(*_fake_role)
       << " as your fake role.\n\nYou must pretend that this is your real role for the remainder of the game. Breaking this rule will result in you being kicked from the game!\n\nNow would be a good time to study your fake role.^h\n\nEnter ^chelp r "
@@ -377,16 +391,16 @@ void maf::Choose_fake_role::write_full(std::ostream &os) const {
       << "^h to see more information about your fake role.\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GChoose Fake Role^g"
-      << _player->name()
+      << game_log().get_name(*_player)
       << " needs to be given a fake role, which they must pretend is their true role for the rest of the game.^h\n\nIf they break the rules by contradicting their fake role, then they should be kicked from the game by entering ^ckick "
-      << _player->name()
+      << game_log().get_name(*_player)
       << "^h during the day.\n\nTo choose the role with alias ^cA^h, enter ^cchoose A^h.";
    }
 }
 
 void maf::Choose_fake_role::write_summary(std::ostream &os) const {
    if (_fake_role) {
-      os << _player->name() << " was given the " << full_name(*_fake_role) << " as a fake role.";
+      os << game_log().get_name(*_player) << " was given the " << full_name(*_fake_role) << " as a fake role.";
    }
 }
 
@@ -429,7 +443,7 @@ void maf::Mafia_meeting::write_full(std::ostream &os) const {
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
          const Player &p = *it;
-         os << "   " << p.name() << ", the " << full_name(p.role());
+         os << "   " << game_log().get_name(p) << ", the " << full_name(p.role());
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 
@@ -439,7 +453,7 @@ void maf::Mafia_meeting::write_full(std::ostream &os) const {
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
          const Player &p = *it;
-         os << "   " << p.name() << ", the " << full_name(p.role());
+         os << "   " << game_log().get_name(p) << ", the " << full_name(p.role());
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 
@@ -472,11 +486,11 @@ void maf::Kill_use::do_commands(const std::vector<std::string> &commands, Game_l
 void maf::Kill_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os <<"^GKill Use^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GKill Use^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << ", you can choose to kill somebody this night.^h\n\nEnter ^ckill A^h to kill player A, or enter ^cskip^h if you don't wish to kill anybody.";
    }
 }
@@ -506,11 +520,11 @@ void maf::Heal_use::do_commands(const std::vector<std::string> &commands, Game_l
 void maf::Heal_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os <<"^GHeal Use^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GHeal Use^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << ", you can choose to heal somebody this night.^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
    }
 }
@@ -540,11 +554,11 @@ void maf::Investigate_use::do_commands(const std::vector<std::string> &commands,
 void maf::Investigate_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os <<"^GInvestigation^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GInvestigation^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << ", you can choose to investigate somebody this night.^h\n\nEnter ^ccheck A^h to investigate player A, or enter ^cskip^h if you don't wish to investigate anybody.";
    }
 }
@@ -574,11 +588,11 @@ void maf::Peddle_use::do_commands(const std::vector<std::string> &commands, Game
 void maf::Peddle_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os <<"^GPeddle^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GPeddle^g"
-      << _caster->name()
+      << game_log().get_name(*_caster)
       << ", you can choose to peddle drugs to somebody this night.^h\n\nEnter ^ctarget A^h to peddle drugs to player A, or enter ^cskip^h if you don't wish to peddle drugs to anybody.";
    }
 }
@@ -619,21 +633,21 @@ void maf::Investigation_result::do_commands(const std::vector<std::string> &comm
 void maf::Investigation_result::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
       os << "^GInvestigation Result^g"
-      << investigation.caster.get().name()
+      << game_log().get_name(investigation.caster)
       << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
       os << "^GInvestigation Result^g"
-      << investigation.caster.get().name()
+      << game_log().get_name(investigation.caster)
       << ", you have completed your investigation of "
-      << investigation.target.get().name()
+      << game_log().get_name(investigation.target)
       << ".\n\n";
 
       if (investigation.target_is_suspicious) {
-         os << investigation.target.get().name()
+         os << game_log().get_name(investigation.target)
          << " was behaving very suspiciously this night!";
       } else {
          os << "The investigation was fruitless. "
-         << investigation.target.get().name()
+         << game_log().get_name(investigation.target)
          << " appears to be innocent.";
       }
 
@@ -642,9 +656,9 @@ void maf::Investigation_result::write_full(std::ostream &os) const {
 }
 
 void maf::Investigation_result::write_summary(std::ostream &os) const {
-   os << investigation.caster.get().name()
+   os << game_log().get_name(investigation.caster)
    << " decided that "
-   << investigation.target.get().name()
+   << game_log().get_name(investigation.target)
    << " was "
    << (investigation.target_is_suspicious ? "suspicious" : "innocent")
    << ".";
@@ -657,7 +671,7 @@ void maf::Game_ended::do_commands(const std::vector<std::string> &commands, Game
 void maf::Game_ended::write_full(std::ostream &os) const {
    std::vector<const Player *> winners{};
    std::vector<const Player *> losers{};
-   for (const Player &player: _game_ptr->players()) {
+   for (const Player &player: game_log().game().players()) {
       if (player.has_won()) {
          winners.push_back(&player);
       } else {
@@ -672,7 +686,7 @@ void maf::Game_ended::write_full(std::ostream &os) const {
 
       for (auto it = winners.begin(); it != winners.end(); ) {
          const Player &player = **it;
-         os << "   " << player.name() << ", the " << full_name(player.role());
+         os << "   " << game_log().get_name(player) << ", the " << full_name(player.role());
          os << ((++it == winners.end()) ? "." : ",\n");
       }
    } else {
@@ -684,7 +698,7 @@ void maf::Game_ended::write_full(std::ostream &os) const {
 
       for (auto it = losers.begin(); it != losers.end(); ) {
          const Player &player = **it;
-         os << "   " << player.name() << ", the " << full_name(player.role());
+         os << "   " << game_log().get_name(player) << ", the " << full_name(player.role());
          os << ((++it == losers.end()) ? "." : ",\n");
       }
    } else {
@@ -695,10 +709,10 @@ void maf::Game_ended::write_full(std::ostream &os) const {
 }
 
 void maf::Game_ended::write_summary(std::ostream &os) const {
-   for (auto it = _game_ptr->players().begin(); it != _game_ptr->players().end(); ) {
+   for (auto it = game_log().game().players().begin(); it != game_log().game().players().end(); ) {
       const Player &player = *it;
-      os << player.name() << (player.has_won() ? " won." : " lost.");
-      if (++it != _game_ptr->players().end()) {
+      os << game_log().get_name(player) << (player.has_won() ? " won." : " lost.");
+      if (++it != game_log().game().players().end()) {
          os << "\n";
       }
    }

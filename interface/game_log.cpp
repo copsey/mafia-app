@@ -16,27 +16,27 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
 
    for (const Player &player: _game.players()) {
       store_event(new Player_given_initial_role{
-         player, player.role(), player.wildcard()
+         *this, player, player.role(), player.wildcard()
       });
    }
 
    if (_game.has_ended()) {
-      store_event(new Game_ended(_game));
+      store_event(new Game_ended(*this));
       return;
    }
 
    _game.begin_night();
-   store_event(new Time_changed{0, Time::night});
+   store_event(new Time_changed{*this, 0, Time::night});
 
    std::vector<Event *> new_events{};
 
    if (_game.num_players_left(Alignment::mafia) > 0) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Alignment::mafia), true});
+      new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), true});
    }
 
    for (const Player &player: _game.remaining_players()) {
       if (player.role().is_role_faker() && !player.has_fake_role()) {
-         new_events.push_back(new Choose_fake_role{player});
+         new_events.push_back(new Choose_fake_role{*this, player});
       }
    }
 
@@ -106,7 +106,7 @@ const std::string & maf::Game_log::get_name(Player::ID id) const {
 void maf::Game_log::kick_player(Player::ID id) {
    _game.kick_player(id);
    const Player &player = find_player(id);
-   store_event(new Player_kicked{player, player.role()});
+   store_event(new Player_kicked{*this, player, player.role()});
 
    if (_game.has_ended()) {
       log_game_ended();
@@ -162,7 +162,7 @@ void maf::Game_log::begin_night() {
    std::vector<Event *> new_events{};
 
    if (_game.mafia_can_use_kill()) {
-      new_events.push_back(new Mafia_meeting{_game.remaining_players(Alignment::mafia), false});
+      new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), false});
    }
 
    /* fix-me: minimise number of events when a player has multiple things to do this night. */
@@ -170,19 +170,19 @@ void maf::Game_log::begin_night() {
       for (Ability ability: player.compulsory_abilities()) {
          switch (ability.id) {
             case Ability::ID::kill:
-               new_events.push_back(new Kill_use{player});
+               new_events.push_back(new Kill_use{*this, player});
                break;
 
             case Ability::ID::heal:
-               new_events.push_back(new Heal_use{player});
+               new_events.push_back(new Heal_use{*this, player});
                break;
 
             case Ability::ID::investigate:
-               new_events.push_back(new Investigate_use{player});
+               new_events.push_back(new Investigate_use{*this, player});
                break;
 
             case Ability::ID::peddle:
-               new_events.push_back(new Peddle_use{player});
+               new_events.push_back(new Peddle_use{*this, player});
                break;
 
             default:
@@ -262,7 +262,7 @@ void maf::Game_log::store_event(Event *event) {
 }
 
 void maf::Game_log::log_time_changed() {
-   store_event(new Time_changed{_game.date(), _game.time()});
+   store_event(new Time_changed{*this, _game.date(), _game.time()});
 }
 
 void maf::Game_log::log_obituary(Date date) {
@@ -272,31 +272,31 @@ void maf::Game_log::log_obituary(Date date) {
          deaths.emplace_back(p);
       }
    }
-   store_event(new Obituary{deaths});
+   store_event(new Obituary{*this, deaths});
 }
 
 void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Player *recent_vote_target) {
-   store_event(new Town_meeting{_game.remaining_players(), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target});
+   store_event(new Town_meeting{*this, _game.remaining_players(), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target});
 }
 
 void maf::Game_log::log_lynch_result(const Player *victim) {
-   store_event(new Lynch_result{victim, victim ? &victim->role() : nullptr});
+   store_event(new Lynch_result{*this, victim, victim ? &victim->role() : nullptr});
 }
 
 void maf::Game_log::log_duel_result(const Player &caster, const Player &target) {
-   store_event(new Duel_result{caster, target});
+   store_event(new Duel_result{*this, caster, target});
 }
 
 void maf::Game_log::log_boring_night() {
-   store_event(new Boring_night{});
+   store_event(new Boring_night{*this});
 }
 
 void maf::Game_log::log_investigation_result(Game::Investigation investigation) {
-   store_event(new Investigation_result{investigation});
+   store_event(new Investigation_result{*this, investigation});
 }
 
 void maf::Game_log::log_game_ended() {
-   store_event(new Game_ended{_game});
+   store_event(new Game_ended{*this});
 }
 
 void maf::Game_log::try_to_log_night_ended() {
