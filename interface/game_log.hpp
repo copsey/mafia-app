@@ -57,9 +57,16 @@ namespace maf {
       // Finds the player with the given ID.
       // Throws an exception if no such player could be found.
       const Player & find_player(Player::ID id) const;
+
       // Finds the player whose name matches the given string, up to case.
       // Throws an exception if no such player could be found.
       const Player & find_player(const std::string &name) const;
+
+      /// Get the name of the given player.
+      const std::string & get_name(const Player & player) const;
+
+      /// Get the name of the player with the given ID.
+      const std::string & get_name(Player::ID id) const;
 
 
 
@@ -96,6 +103,8 @@ namespace maf {
 
    private:
       Game _game;
+
+      std::vector<std::string> _player_names;
 
       std::vector<std::unique_ptr<Event>> _log{};
       decltype(_log)::size_type _log_index{0};

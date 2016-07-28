@@ -222,8 +222,7 @@ namespace maf {
       // Start a new game with the given parameters, creating a set of players
       // and assigning each player an initial role.
       // Note that this could lead to the game immediately ending.
-      Game(const std::vector<std::string> &player_names,
-           const std::vector<Role::ID> &role_ids,
+      Game(const std::vector<Role::ID> &role_ids,
            const std::vector<Wildcard::ID> &wildcard_ids,
            const Rulebook &rulebook = Rulebook{});
       

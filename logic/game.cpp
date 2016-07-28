@@ -3,10 +3,9 @@
 
 #include "game.hpp"
 
-maf::Game::Game(const std::vector<std::string> &player_names,
-                  const std::vector<Role::ID> &role_ids,
-                  const std::vector<Wildcard::ID> &wildcard_ids,
-                  const Rulebook &rulebook)
+maf::Game::Game(const std::vector<Role::ID> &role_ids,
+                const std::vector<Wildcard::ID> &wildcard_ids,
+                const Rulebook &rulebook)
 : _rulebook{rulebook} {
    std::vector<std::pair<const Role *, const Wildcard *>> cards{};
 
@@ -19,13 +18,9 @@ maf::Game::Game(const std::vector<std::string> &player_names,
       cards.emplace_back(&wildcard.pick_role(_rulebook), &wildcard);
    }
 
-   if (player_names.size() != cards.size()) {
-      throw Players_to_cards_mismatch{player_names.size(), cards.size()};
-   }
-
    rkt::shuffle(cards);
    for (std::size_t i{0}; i != cards.size(); ++i) {
-      _players.emplace_back(player_names[i], i);
+      _players.emplace_back(i);
 
       Player &player = _players.back();
       auto &card = cards[i];

@@ -8,16 +8,11 @@ namespace maf {
    struct Player {
       using ID = std::size_t;
 
-      /// Create a player with the given name and ID.
+      /// Create a player with the given ID.
       ///
       /// Each status is set to its default value.
-      Player(std::string name, ID id)
-       : _name{name}, _id{id} { }
-
-      /// The player's name.
-      const std::string & name() const {
-         return _name;
-      }
+      Player(ID id)
+       : _id{id} { }
 
       /// The unique ID given to the player for the game that they are in.
       ID id() const {
@@ -202,7 +197,6 @@ namespace maf {
       }
 
    private:
-      std::string _name;
       ID _id;
 
       const Role * _role_ptr{nullptr};

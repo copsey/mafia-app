@@ -9,7 +9,11 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
                           const std::vector<Role::ID> &role_ids,
                           const std::vector<Wildcard::ID> &wildcard_ids,
                           const Rulebook &rulebook)
-: _game{player_names, role_ids, wildcard_ids, rulebook} {
+: _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names} {
+   if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
+      throw Game::Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
+   }
+
    for (const Player &player: _game.players()) {
       store_event(new Player_given_initial_role{
          player, player.role(), player.wildcard()
@@ -82,11 +86,21 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
 }
 
 const maf::Player & maf::Game_log::find_player(const std::string &name) const {
-   for (const Player &player: _game.players()) {
-      if (rkt::equal_up_to_case(name, player.name())) return player;
+   for (Player::ID i = 0; i < _player_names.size(); ++i) {
+      if (rkt::equal_up_to_case(name, _player_names[i])) {
+         return _game.players()[i];
+      }
    }
 
    throw Player_not_found{name};
+}
+
+const std::string & maf::Game_log::get_name(const maf::Player & player) const {
+   return get_name(player.id());
+}
+
+const std::string & maf::Game_log::get_name(Player::ID id) const {
+   return _player_names[id];
 }
 
 void maf::Game_log::kick_player(Player::ID id) {

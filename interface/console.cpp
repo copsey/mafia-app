@@ -154,8 +154,8 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 
       switch (e.reason) {
          case Game::Kick_failed::Reason::game_ended:
-            err << e.player.get().name()
-            << " could not be kicked from the game, because the game has already ended.";
+            err << _game_log->get_name(e.player)
+                << " could not be kicked from the game, because the game has already ended.";
             break;
 
          case Game::Kick_failed::Reason::bad_timing:
@@ -163,8 +163,8 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Kick_failed::Reason::already_kicked:
-            err << e.player.get().name()
-            << " has already been kicked from the game";
+            err << _game_log->get_name(e.player)
+                << " has already been kicked from the game";
             break;
       }
    }
@@ -194,16 +194,16 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Lynch_vote_failed::Reason::voter_is_not_present:
-            err << e.voter.get().name()
+            err << _game_log->get_name(e.voter)
             << " is unable to cast a lynch vote, as they are no longer present in the game.";
             break;
 
          case Game::Lynch_vote_failed::Reason::target_is_not_present:
-            err << e.voter.get().name()
+            err << _game_log->get_name(e.voter)
             << " cannot cast a lynch vote against "
-            << e.target->name()
+            << _game_log->get_name(*e.target)
             << ", because "
-            << e.target->name()
+            << _game_log->get_name(*e.target)
             << " is no longer present in the game.";
             break;
 
@@ -225,16 +225,16 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " is unable to initiate a duel, as they are no longer present in the game.";
             break;
 
          case Game::Duel_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot initiate a duel against "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << ", because "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << " is no longer present in the game.";
             break;
 
@@ -243,7 +243,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_has_no_duel:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " has no duel ability to use.";
             break;
       }
@@ -277,12 +277,12 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Choose_fake_role_failed::Reason::player_is_not_faker:
-            err << e.player.get().name()
+            err << _game_log->get_name(e.player)
             << " doesn't need to be given a fake role.";
             break;
 
          case Game::Choose_fake_role_failed::Reason::already_chosen:
-            err << e.player.get().name()
+            err << _game_log->get_name(e.player)
             << " has already been given a fake role.";
             break;
       }
@@ -301,19 +301,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot perform the mafia's kill, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot perform the mafia's kill, as they are not part of the mafia.";
             break;
          case Game::Mafia_kill_failed::Reason::target_is_not_present:
-            err << e.target.get().name()
+            err << _game_log->get_name(e.target)
             << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_target:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot use the mafia's kill on themself.";
             break;
       }
@@ -326,19 +326,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Kill_failed::Reason::caster_cannot_kill:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot use a kill ability right now.";
             break;
          case Game::Kill_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot kill "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << ", because "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << " is no longer present in the game.";
             break;
          case Game::Kill_failed::Reason::caster_is_target:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " is not allowed to kill themself.\n(nice try.)";
             break;
       }
@@ -351,19 +351,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Heal_failed::Reason::caster_cannot_heal:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot use a heal ability right now.";
             break;
          case Game::Heal_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot heal "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << ", because "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << " is no longer present in the game.";
             break;
          case Game::Heal_failed::Reason::caster_is_target:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot heal themself.";
             break;
       }
@@ -376,19 +376,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Investigate_failed::Reason::caster_cannot_investigate:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot investigate anybody right now.";
             break;
          case Game::Investigate_failed::Reason::target_is_not_present:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot investigate "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << ", because "
-            << e.target.get().name()
+            << _game_log->get_name(e.target)
             << " is no longer present in the game.";
             break;
          case Game::Investigate_failed::Reason::caster_is_target:
-            err << e.caster.get().name()
+            err << _game_log->get_name(e.caster)
             << " cannot investigate themself.";
             break;
       }
