@@ -1,31 +1,35 @@
 #include "../riketi/algorithm.hpp"
 #include "../riketi/random.hpp"
+#include "../riketi/ref.hpp"
 
 #include "game.hpp"
 
-maf::Game::Game(const std::vector<Role::ID> &role_ids,
-                const std::vector<Wildcard::ID> &wildcard_ids,
-                const Rulebook &rulebook)
-: _rulebook{rulebook} {
-   std::vector<std::pair<const Role *, const Wildcard *>> cards{};
+maf::Game::Game(const std::vector<Role::ID> & role_ids,
+                const std::vector<Wildcard::ID> & wildcard_ids,
+                const Rulebook & rulebook)
+ : _rulebook{rulebook} {
+   using Card = std::pair<rkt::ref<const Role>, const Wildcard *>;
+
+   std::vector<Card> cards{};
 
    for (Role::ID id: role_ids) {
-      cards.emplace_back(&_rulebook.get_role(id), nullptr);
+      cards.emplace_back(_rulebook.get_role(id), nullptr);
    }
 
    for (Wildcard::ID id: wildcard_ids) {
-      Wildcard &wildcard = _rulebook.get_wildcard(id);
-      cards.emplace_back(&wildcard.pick_role(_rulebook), &wildcard);
+      Wildcard & wildcard = _rulebook.get_wildcard(id);
+      cards.emplace_back(wildcard.pick_role(_rulebook), &wildcard);
    }
 
    rkt::shuffle(cards);
-   for (std::size_t i{0}; i != cards.size(); ++i) {
+
+    for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
       _players.emplace_back(i);
 
-      Player &player = _players.back();
-      auto &card = cards[i];
+      Player & player = _players.back();
+      Card & card = cards[i];
 
-      player.assign_role(*card.first);
+      player.assign_role(card.first);
       if (card.second) player.set_wildcard(*card.second);
    }
 
