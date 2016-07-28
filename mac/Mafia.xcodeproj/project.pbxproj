@@ -143,22 +143,22 @@
 		F84FE07F1AF3BB1A00BF4992 /* interface */ = {
 			isa = PBXGroup;
 			children = (
-				F858FAD31AFF5A16004D7058 /* names.hpp */,
-				F858FAD21AFF5A16004D7058 /* names.cpp */,
-				F8D3F4AE1B859D39007D134B /* styled_string.hpp */,
-				F8D3F4B01B859F91007D134B /* styled_string.cpp */,
-				F8D646E61B85F36200E72222 /* game_log.hpp */,
-				F8D646E51B85F36200E72222 /* game_log.cpp */,
-				F8D5DB341B84E43B00D032D6 /* events.hpp */,
-				F8D5DB331B84E43B00D032D6 /* events.cpp */,
-				F88A4DF01B8C9D1D0033A040 /* setup_screen.hpp */,
-				F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */,
-				F880CA041B89BEC600144257 /* help_screens.hpp */,
-				F880CA031B89BEC600144257 /* help_screens.cpp */,
-				F880CA0A1B8A606300144257 /* questions.hpp */,
-				F880CA091B8A606300144257 /* questions.cpp */,
 				F8D772D61AF4B42100E16BB6 /* console.hpp */,
 				F8D772D51AF4B42100E16BB6 /* console.cpp */,
+				F8D5DB341B84E43B00D032D6 /* events.hpp */,
+				F8D5DB331B84E43B00D032D6 /* events.cpp */,
+				F8D646E61B85F36200E72222 /* game_log.hpp */,
+				F8D646E51B85F36200E72222 /* game_log.cpp */,
+				F880CA041B89BEC600144257 /* help_screens.hpp */,
+				F880CA031B89BEC600144257 /* help_screens.cpp */,
+				F858FAD31AFF5A16004D7058 /* names.hpp */,
+				F858FAD21AFF5A16004D7058 /* names.cpp */,
+				F880CA0A1B8A606300144257 /* questions.hpp */,
+				F880CA091B8A606300144257 /* questions.cpp */,
+				F88A4DF01B8C9D1D0033A040 /* setup_screen.hpp */,
+				F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */,
+				F8D3F4AE1B859D39007D134B /* styled_string.hpp */,
+				F8D3F4B01B859F91007D134B /* styled_string.cpp */,
 			);
 			name = interface;
 			path = ../interface;
