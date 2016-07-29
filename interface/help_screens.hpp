@@ -9,6 +9,7 @@
 #include "../logic/logic.hpp"
 
 #include "events.hpp"
+#include "game_log.hpp"
 
 namespace maf {
    struct Help_screen {
@@ -48,6 +49,21 @@ namespace maf {
 
    struct Setup_help_screen: Help_screen {
       void write(std::ostream &os) const override;
+   };
+
+
+   /// A screen presenting information on a given player.
+   struct Player_Info_Screen: Help_screen {
+      /// Create an info screen for `player`, who should be a participant in the
+      /// game managed by `game_log`.
+      Player_Info_Screen(const Player & player, const Game_log & game_log)
+       : _player_ref{player}, _game_log_ref{game_log} { }
+
+      void write(std::ostream & os) const override;
+
+   private:
+      rkt::ref<const Player> _player_ref;
+      rkt::ref<const Game_log> _game_log_ref;
    };
 }
 
