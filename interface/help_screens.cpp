@@ -141,7 +141,7 @@ void maf::Player_Info_Screen::write(std::ostream & os) const {
 
    for (const Investigation & inv: game.investigations()) {
       if (inv.caster() == player) {
-         os << "You checked "
+         os << "\n\nYou checked "
          << game_log.get_name(inv.target())
          << " on night "
          << inv.date()
