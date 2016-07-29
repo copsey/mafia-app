@@ -222,6 +222,11 @@ namespace maf {
       bool _healed{false};
       bool _high{false};
    };
+
+   /// Check if two players are the same.
+   ///
+   /// This is fully determined by checking if they have the same ID.
+   bool operator==(const Player & p1, const Player & p2);
 }
 
 #endif

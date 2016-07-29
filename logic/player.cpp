@@ -80,3 +80,7 @@ void maf::Player::give_drugs() {
 void maf::Player::haunt(const Player &haunter) {
    _haunter = &haunter;
 }
+
+bool maf::operator==(const Player & p1, const Player & p2) {
+   return p1.id() == p2.id();
+}
