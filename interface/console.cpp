@@ -69,6 +69,16 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
       else if (commands_match(commands, {"list", "r", "f"})) {
          store_help_screen(new List_roles_screen(active_rulebook(), Alignment::freelance));
       }
+      else if (commands_match(commands, {"info", ""})) {
+         if (!has_game()) {
+            err << "^HNo game in progress!^hThere is no game in progress to display information about.";
+         } else {
+            const std::string & approx_name = commands[1];
+            const Player & player = _game_log->find_player(approx_name);
+
+            store_help_screen(new Player_Info_Screen{player, *_game_log});
+         }
+      }
       else if (has_help_screen()) {
          if (commands_match(commands, {"ok"})) {
             clear_help_screen();
