@@ -140,9 +140,6 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
        list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
 
       /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
-
-      /* fix-me: enter "info name" to get a help screen containing information that the player with the given name should know, as a reminder.
-       (i.e. this should include things like their role, but not things like whether or not they are infected.) */
    }
    catch (const Rulebook::Missing_role_alias &e) {
       err << "^HInvalid alias!^hNo role could be found whose alias is ^c"
