@@ -81,8 +81,7 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
       if (id == player.id()) return player;
    }
 
-   /* fix-me: throw exception in Game_log namespace, or remove this function. */
-   throw Game::Player_not_found{id};
+   throw error::missing_player();
 }
 
 const maf::Player & maf::Game_log::find_player(const std::string &name) const {
