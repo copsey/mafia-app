@@ -82,6 +82,7 @@
 		F8D646E81B85F4F800E72222 /* iTunes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
 		F8D772D51AF4B42100E16BB6 /* console.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console.cpp; sourceTree = "<group>"; };
 		F8D772D61AF4B42100E16BB6 /* console.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = console.hpp; sourceTree = "<group>"; };
+		F8FC24831F8023A900384847 /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +168,7 @@
 		F84FE0801AF3BB1A00BF4992 /* logic */ = {
 			isa = PBXGroup;
 			children = (
+				F8FC24831F8023A900384847 /* error.hpp */,
 				F84FE0821AF3BB1A00BF4992 /* game.hpp */,
 				F84FE0811AF3BB1A00BF4992 /* game.cpp */,
 				F84FE0851AF3BB1A00BF4992 /* logic.hpp */,
