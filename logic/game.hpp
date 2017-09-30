@@ -17,13 +17,13 @@ namespace maf {
        : _caster_ref{caster}, _target_ref{target}, _date{date}, _result{result} { }
 
       /// The player that performed the investigation.
-      const Player & caster() const {
-         return _caster_ref;
+      const Player& caster() const {
+         return *_caster_ref;
       }
 
       /// The target of the investigation.
-      const Player & target() const {
-         return _target_ref;
+      const Player& target() const {
+         return *_target_ref;
       }
 
       /// The date on which the investigation occurred.

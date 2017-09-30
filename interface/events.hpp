@@ -19,14 +19,14 @@ namespace maf {
       ///
       /// A reference to the game log passed in is stored in the event, for
       /// convenience of implementing subclasses.
-      Event(const Game_log & game_log)
+      Event(const Game_log& game_log)
        : _game_log_ref{game_log} { }
 
       virtual ~Event() = default;
 
       /// Get the game log from which this event was spawned.
-      const Game_log & game_log() const {
-         return _game_log_ref;
+      const Game_log& game_log() const {
+         return *_game_log_ref;
       }
 
       // Handles the given commands, acting on the given game log as required.
@@ -44,7 +44,7 @@ namespace maf {
       virtual void write_help(std::ostream &os) const;
 
    private:
-      rkt::fixed_ref<const Game_log> _game_log_ref;
+      rkt::ref<const Game_log> _game_log_ref;
    };
 
 
@@ -80,13 +80,13 @@ namespace maf {
 
 
    struct Obituary: Event {
-      Obituary(const Game_log & game_log, std::vector<rkt::ref<const Player>> deaths)
+      Obituary(const Game_log& game_log, std::vector<rkt::ref<const Player>> deaths)
        : Event{game_log}, _deaths{deaths} { }
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
 
-      void write_full(std::ostream &os) const override;
-      void write_summary(std::ostream &os) const override;
+      void write_full(std::ostream& os) const override;
+      void write_summary(std::ostream& os) const override;
 
    private:
       std::vector<rkt::ref<const Player>> _deaths;
@@ -123,7 +123,7 @@ namespace maf {
 
 
    struct Player_kicked: Event {
-      Player_kicked(const Game_log & game_log, const Player & player, const Role & player_role)
+      Player_kicked(const Game_log& game_log, const Player & player, const Role & player_role)
       : Event{game_log}, player{player}, player_role{player_role} { }
 
       void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;

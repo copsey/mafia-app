@@ -3,16 +3,16 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-void maf::Event_help_screen::write(std::ostream &os) const {
-   event.get().write_help(os);
+void maf::Event_help_screen::write(std::ostream& os) const {
+   event->write_help(os);
 }
 
-void maf::Role_info_screen::write(std::ostream &os) const {
+void maf::Role_info_screen::write(std::ostream& os) const {
    /* fix-me */
 
-   os << "^HMissing Role Info^hNo extra help could be found for the "
-   << full_name(role)
-   << ".\n(this counts as a bug!)";
+   os << "^HMissing Role Info^hNo extra help could be found for the ";
+   os << full_name(*role);
+   os << ".\n(this counts as a bug!)";
 
 //   os << "^HHelp: " << full_name(_r->id()) << "^h";
 //
@@ -24,7 +24,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       os << "^HRoles^hThe following is an alphabetical listing of every role in the rulebook:\n\n";
 
       std::vector<const Role *> sorted_roles{};
-      for (const Role &r: rulebook.get().roles()) {
+      for (const Role& r: rulebook->roles()) {
          sorted_roles.push_back(&r);
       }
       rkt::sort(sorted_roles, [](const Role *r1, const Role *r2) {
@@ -56,15 +56,15 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       std::vector<rkt::ref<const Role>> v;
       switch (alignment.get()) {
          case Alignment::village:
-            v = rulebook.get().village_roles();
+            v = rulebook->village_roles();
             os << "^HVillage Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
             break;
          case Alignment::mafia:
-            v = rulebook.get().mafia_roles();
+            v = rulebook->mafia_roles();
             os << "^HMafia Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
             break;
          case Alignment::freelance:
-            v = rulebook.get().freelance_roles();
+            v = rulebook->freelance_roles();
             os << "^HFreelance Roles^hThe following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
             break;
       }
@@ -74,7 +74,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
 
       std::vector<const Role *> w;
       for (rkt::ref<const Role> r: v) {
-         w.push_back(&r.get());
+         w.push_back(&(*r));
       }
 
       rkt::sort(w, [](const Role *r1, const Role *r2) {
@@ -82,7 +82,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       });
 
       for (std::size_t i{0}; i < v.size(); ++i) {
-         const Role &r = v[i];
+         const Role& r = *v[i];
 
          os << "   the "
          << full_name(r)
@@ -115,9 +115,9 @@ void maf::Setup_help_screen::write(std::ostream &os) const {
 }
 
 void maf::Player_Info_Screen::write(std::ostream & os) const {
-   const Player & player = _player_ref;
-   const Game & game = _game_log_ref->game();
-   const Game_log & game_log = _game_log_ref;
+   const Player& player = *_player_ref;
+   const Game& game = _game_log_ref->game();
+   const Game_log& game_log = *_game_log_ref;
 
    os << "^HInfo: " << game_log.get_name(player);
 

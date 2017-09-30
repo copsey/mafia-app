@@ -26,10 +26,10 @@ maf::Game::Game(const std::vector<Role::ID> & role_ids,
     for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
       _players.emplace_back(i);
 
-      Player & player = _players.back();
-      Card & card = cards[i];
+      Player& player = _players.back();
+      Card& card = cards[i];
 
-      player.assign_role(card.first);
+      player.assign_role(*card.first);
       if (card.second) player.set_wildcard(*card.second);
    }
 

@@ -156,7 +156,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 
       switch (e.reason) {
          case Game::Kick_failed::Reason::game_ended:
-            err << _game_log->get_name(e.player)
+            err << _game_log->get_name(*e.player)
                 << " could not be kicked from the game, because the game has already ended.";
             break;
 
@@ -165,7 +165,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Kick_failed::Reason::already_kicked:
-            err << _game_log->get_name(e.player)
+            err << _game_log->get_name(*e.player)
                 << " has already been kicked from the game";
             break;
       }
@@ -196,12 +196,12 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Lynch_vote_failed::Reason::voter_is_not_present:
-            err << _game_log->get_name(e.voter)
+            err << _game_log->get_name(*e.voter)
             << " is unable to cast a lynch vote, as they are no longer present in the game.";
             break;
 
          case Game::Lynch_vote_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.voter)
+            err << _game_log->get_name(*e.voter)
             << " cannot cast a lynch vote against "
             << _game_log->get_name(*e.target)
             << ", because "
@@ -227,16 +227,16 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " is unable to initiate a duel, as they are no longer present in the game.";
             break;
 
          case Game::Duel_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot initiate a duel against "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << ", because "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << " is no longer present in the game.";
             break;
 
@@ -245,7 +245,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_has_no_duel:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " has no duel ability to use.";
             break;
       }
@@ -279,12 +279,12 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             break;
 
          case Game::Choose_fake_role_failed::Reason::player_is_not_faker:
-            err << _game_log->get_name(e.player)
+            err << _game_log->get_name(*e.player)
             << " doesn't need to be given a fake role.";
             break;
 
          case Game::Choose_fake_role_failed::Reason::already_chosen:
-            err << _game_log->get_name(e.player)
+            err << _game_log->get_name(*e.player)
             << " has already been given a fake role.";
             break;
       }
@@ -303,19 +303,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot perform the mafia's kill, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot perform the mafia's kill, as they are not part of the mafia.";
             break;
          case Game::Mafia_kill_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.target)
+            err << _game_log->get_name(*e.target)
             << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_target:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot use the mafia's kill on themself.";
             break;
       }
@@ -328,19 +328,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Kill_failed::Reason::caster_cannot_kill:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot use a kill ability right now.";
             break;
          case Game::Kill_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot kill "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << ", because "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << " is no longer present in the game.";
             break;
          case Game::Kill_failed::Reason::caster_is_target:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " is not allowed to kill themself.\n(nice try.)";
             break;
       }
@@ -353,19 +353,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Heal_failed::Reason::caster_cannot_heal:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot use a heal ability right now.";
             break;
          case Game::Heal_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot heal "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << ", because "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << " is no longer present in the game.";
             break;
          case Game::Heal_failed::Reason::caster_is_target:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot heal themself.";
             break;
       }
@@ -378,19 +378,19 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
             err << "The game has already ended.";
             break;
          case Game::Investigate_failed::Reason::caster_cannot_investigate:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot investigate anybody right now.";
             break;
          case Game::Investigate_failed::Reason::target_is_not_present:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot investigate "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << ", because "
-            << _game_log->get_name(e.target)
+            << _game_log->get_name(*e.target)
             << " is no longer present in the game.";
             break;
          case Game::Investigate_failed::Reason::caster_is_target:
-            err << _game_log->get_name(e.caster)
+            err << _game_log->get_name(*e.caster)
             << " cannot investigate themself.";
             break;
       }
@@ -424,12 +424,12 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
    }
    catch (const Setup_screen::Rolecard_unselected &e) {
       err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c"
-          << e.role.get().alias()
+          << e.role->alias()
           << "^h have been selected.";
    }
    catch (const Setup_screen::Wildcard_unselected &e) {
       err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c"
-      << e.wildcard.get().alias()
+      << e.wildcard->alias()
       << "^h have been selected.";
    }
    catch (const Setup_screen::Bad_commands &e) {

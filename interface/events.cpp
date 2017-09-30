@@ -114,7 +114,7 @@ void maf::Obituary::write_full(std::ostream &os) const {
          os << "^GObituary^gIt appears that " << _deaths.size() << " of us did not survive the night...";
       }
    } else {
-      const Player &death = _deaths[_deaths_index].get();
+      const Player& death = *_deaths[_deaths_index];
 
       os << "^GObituary^g" << game_log().get_name(death) << " died during the night!";
       if (death.is_haunted()) {
@@ -128,9 +128,9 @@ void maf::Obituary::write_full(std::ostream &os) const {
 void maf::Obituary::write_summary(std::ostream &os) const {
    bool write_nl = false;
 
-   for (const Player &p: _deaths) {
+   for (auto& p_ref: _deaths) {
       if (write_nl) os << '\n';
-      os << game_log().get_name(p) << " died during the night.";
+      os << game_log().get_name(*p_ref) << " died during the night.";
       write_nl = true;
    }
 }
@@ -203,12 +203,12 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       << "^gGathered outside the town hall are:\n";
 
       for (auto it = _players.begin(); it != _players.end(); ) {
-         const Player &p = *it;
+         auto& p_ref = *it;
          os << "   "
-         << game_log().get_name(p);
-         if (p.lynch_vote() != nullptr) {
+         << game_log().get_name(*p_ref);
+         if (p_ref->lynch_vote() != nullptr) {
             os << ", voting to lynch "
-            << game_log().get_name(*p.lynch_vote());
+            << game_log().get_name(*(p_ref->lynch_vote()));
          }
          os << ((++it == _players.end()) ? "." : ",\n");
       }
@@ -222,10 +222,10 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       << "^iWith little time left in the day, the townsfolk prepare themselves for another night of uncertainty...\n\n^gGathered outside the town hall are:\n";
 
       for (auto it = _players.begin(); it != _players.end(); ) {
-         const Player &p = *it;
-         os << "   "
-         << game_log().get_name(p)
-         << ((++it == _players.end()) ? "." : ",\n");
+         auto& p_ref = *it;
+         os << "   ";
+         os << game_log().get_name(*p_ref);
+         os << ((++it == _players.end()) ? "." : ",\n");
       }
 
       os << "^h\n\nAnybody who wishes to use a daytime ability may do so now. Otherwise, enter ^cnight^h to continue.";
@@ -253,16 +253,16 @@ void maf::Player_kicked::do_commands(const std::vector<std::string> &commands, G
 
 void maf::Player_kicked::write_full(std::ostream &os) const {
    os << "^G"
-   << game_log().get_name(player)
+   << game_log().get_name(*player)
    << " kicked^g"
-   << game_log().get_name(player)
+   << game_log().get_name(*player)
    << " was kicked from the game!\nThey were the "
-   << full_name(player.get().role())
+   << full_name(player->role())
    << ".";
 }
 
 void maf::Player_kicked::write_summary(std::ostream &os) const {
-   os << game_log().get_name(player) << " was kicked.";
+   os << game_log().get_name(*player) << " was kicked.";
 }
 
 void maf::Lynch_result::do_commands(const std::vector<std::string> &commands, Game_log &game_log) {
@@ -311,14 +311,14 @@ void maf::Duel_result::do_commands(const std::vector<std::string> &commands, Gam
 }
 
 void maf::Duel_result::write_full(std::ostream &os) const {
-   const Player &winner = (caster.get().is_alive() ? caster : target);
-   const Player &loser = (caster.get().is_alive() ? target : caster);
+   auto& winner = (caster->is_alive() ? caster : target);
+   auto& loser = (caster->is_alive() ? target : caster);
 
-   auto & glog = game_log();
-   auto & caster_name = glog.get_name(caster);
-   auto & target_name = glog.get_name(target);
-   auto & winner_name = glog.get_name(winner);
-   auto & loser_name = glog.get_name(loser);
+   auto& glog = game_log();
+   auto& caster_name = glog.get_name(*caster);
+   auto& target_name = glog.get_name(*target);
+   auto& winner_name = glog.get_name(*winner);
+   auto& loser_name = glog.get_name(*loser);
 
    os << "^GDuel^g"
    << caster_name
@@ -330,7 +330,7 @@ void maf::Duel_result::write_full(std::ostream &os) const {
    << winner_name
    << " lets out a sigh of relief.";
 
-   if (!winner.is_present()) {
+   if (!winner->is_present()) {
       os << "\n\nWith that, "
       << winner_name
       << " throws their gun to the ground and flees from the village.";
@@ -341,10 +341,10 @@ void maf::Duel_result::write_full(std::ostream &os) const {
 
 void maf::Duel_result::write_summary(std::ostream &os) const {
    auto & glog = game_log();
-   auto & caster_name = glog.get_name(caster);
-   auto & target_name = glog.get_name(target);
+   auto & caster_name = glog.get_name(*caster);
+   auto & target_name = glog.get_name(*target);
 
-   if (caster.get().is_alive()) { // fix-me: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
+   if (caster->is_alive()) { // fix-me: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
       os << caster_name << " won a duel against " << target_name << ".";
    } else {
       os << caster_name << " lost a duel against " << target_name << ".";
@@ -442,8 +442,8 @@ void maf::Mafia_meeting::write_full(std::ostream &os) const {
       os << "^GMafia Meeting^gThe mafia consists of:\n";
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
-         const Player &p = *it;
-         os << "   " << game_log().get_name(p) << ", the " << full_name(p.role());
+         auto& p_ref = *it;
+         os << "   " << game_log().get_name(*p_ref) << ", the " << full_name(p_ref->role());
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 
@@ -452,8 +452,8 @@ void maf::Mafia_meeting::write_full(std::ostream &os) const {
       os << "^GMafia Meeting^gSeated around a polished walnut table are:\n";
 
       for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
-         const Player &p = *it;
-         os << "   " << game_log().get_name(p) << ", the " << full_name(p.role());
+         auto& p_ref = *it;
+         os << "   " << game_log().get_name(*p_ref) << ", the " << full_name(p_ref->role());
          os << ((++it == _mafiosi.end()) ? "." : ",\n");
       }
 

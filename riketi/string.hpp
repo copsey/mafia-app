@@ -4,43 +4,48 @@
 #include <string>
 
 namespace rkt {
-   /// Check if s1 and s2 are equal, ignoring differences in case.
-   bool equal_up_to_case (const std::string & s1, const std::string & s2);
-
-   /// Convert str into an int, using the given numeric base.
-   ///
-   /// In addition to throwing the same exceptions as std::stoi(str, 0, base),
-   /// a std::invalid_argument is thrown if some unexpected superfluous chars
-   /// were encountered at the end of str.
-   int to_i (const std::string & str, int base = 10);
-
-   /// Convert str into a long, using the given numeric base.
-   ///
-   /// In addition to throwing the same exceptions as std::stol(str, 0, base),
-   /// a std::invalid_argument is thrown if some unexpected superfluous chars
-   /// were encountered at the end of str.
-   long to_l (const std::string & str, int base = 10);
-
-   /// Convert str into a long long, using the given numeric base.
-   ///
-   /// In addition to throwing the same exceptions as std::stoll(str, 0, base),
-   /// a std::invalid_argument is thrown if some unexpected superfluous chars
-   /// were encountered at the end of str.
-   long long to_ll (const std::string & str, int base = 10);
-
-   /// Convert str into an unsigned long, using the given numeric base.
-   ///
-   /// In addition to throwing the same exceptions as std::stoul(str, 0, base),
-   /// a std::invalid_argument is thrown if some unexpected superfluous chars
-   /// were encountered at the end of str.
-   unsigned long to_ul (const std::string & str, int base = 10);
-
-   /// Convert str into an unsigned long long, using the given numeric base.
-   ///
-   /// In addition to throwing the same exceptions as std::stoull(str, 0, base),
-   /// a std::invalid_argument is thrown if some unexpected superfluous chars
-   /// were encountered at the end of str.
-   unsigned long long to_ull (const std::string & str, int base = 10);
+	// Check if `s1` and `s2` are equal, ignoring differences in case.
+	bool equal_up_to_case(const std::string & s1, const std::string & s2);
+	
+	// Read the contents of `str` as an `int`,
+	// using `base` as the numeric base.
+	//
+	// This is the same as `std::stoi(str, 0, base)`, except that
+	// `std::invalid_argument` is thrown if there are excess `char`s at
+	// the end of `str` which were not used in the conversion.
+	int s_to_i(const std::string & str, int base = 10);
+	
+	// Read the contents of `str` as a `long`,
+	// using `base` as the numeric base.
+	//
+	// This is the same as `std::stol(str, 0, base)`, except that
+	// `std::invalid_argument` is thrown if there are excess `char`s at
+	// the end of `str` which were not used in the conversion.
+	long s_to_l(const std::string & str, int base = 10);
+	
+	// Read the contents of `str` as a `long long`,
+	// using `base` as the numeric base.
+	//
+	// This is the same as `std::stoll(str, 0, base)`, except that
+	// `std::invalid_argument` is thrown if there are excess `char`s at
+	// the end of `str` which were not used in the conversion.
+	long long s_to_ll(const std::string & str, int base = 10);
+	
+	// Read the contents of `str` as an `unsigned long`,
+	// using `base` as the numeric base.
+	//
+	// This is the same as `std::stoul(str, 0, base)`, except that
+	// `std::invalid_argument` is thrown if there are excess `char`s at
+	// the end of `str` which were not used in the conversion.
+	unsigned long s_to_ul(const std::string & str, int base = 10);
+	
+	// Read the contents of `str` as an `unsigned long long`,
+	// using `base` as the numeric base.
+	//
+	// This is the same as `std::stoull(str, 0, base)`, except that
+	// `std::invalid_argument` is thrown if there are excess `char`s at
+	// the end of `str` which were not used in the conversion.
+	unsigned long long s_to_ull(const std::string & str, int base = 10);
 }
 
 #endif

@@ -34,9 +34,9 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
       new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), true});
    }
 
-   for (const Player &player: _game.remaining_players()) {
-      if (player.role().is_role_faker() && !player.has_fake_role()) {
-         new_events.push_back(new Choose_fake_role{*this, player});
+   for (auto& p_ref: _game.remaining_players()) {
+      if (p_ref->role().is_role_faker() && !p_ref->has_fake_role()) {
+         new_events.push_back(new Choose_fake_role{*this, *p_ref});
       }
    }
 
