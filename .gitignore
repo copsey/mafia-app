@@ -1,0 +1,8 @@
+# Build
+./mafia
+mac/build
+
+# Xcode
+mac/Mafia.xcodeproj/xcuserdata
+mac/Mafia.xcodeproj/project.xcworkspace/xcuserdata
+
