@@ -30,6 +30,59 @@ namespace maf {
       /// Assign the given role to the player.
       void assign_role(const Role & role);
 
+      // The player's alignment.
+      // This is fully determined by their role.
+      //
+      // @warning Undefined behaviour if the player hasn't been assigned
+      // a role.
+      Alignment alignment() const {
+         return _role_ptr->alignment();
+      }
+
+      // Get the player's win condition.
+	  // This is fully determined by their role.
+	  //
+	  // Note that the behaviour of this function is undefined if the player
+	  // has not been assigned a role yet.
+	  Win_condition win_condition() const {
+	     return _role_ptr->win_condition();
+	  }
+
+      // Get the player's peace condition.
+      // This is fully determined by their role.
+      //
+      // Note that the behaviour of this function is undefined if the player
+      // has not been assigned a role yet.
+      Peace_condition peace_condition() const {
+         return _role_ptr->peace_condition();
+      }
+
+      // Get the player's duel strength.
+      // This is fully determined by their role.
+      //
+      // Note that the behaviour of this function is undefined if the player
+      // has not been assigned a role yet.
+      double duel_strength() const {
+         return _role_ptr->duel_strength();
+      }
+
+      // Whether the player must pretend to have a role that possibly differs from their own.
+      //
+      // Note that the behaviour of this function is undefined if the player
+      // has not been assigned a role yet.
+      bool is_role_faker() const {
+         return _role_ptr->is_role_faker();
+      }
+
+      // Check whether the player is a troll.
+      // This is fully determined by their role.
+      //
+      // Note that the behaviour of this function is undefined if the player
+      // has not been assigned a role yet.
+      bool is_troll() const {
+         return _role_ptr->is_troll();
+      }
+
       /// The wildcard from which the player obtained their current role, or
       /// `nullptr` if none exists.
       const Wildcard * wildcard() const {
@@ -201,7 +254,7 @@ namespace maf {
 
       const Role * _role_ptr{nullptr};
       const Wildcard * _wildcard_ptr{nullptr};
-      
+
       const Role * _fake_role_ptr{nullptr};
 
       bool _alive{true};

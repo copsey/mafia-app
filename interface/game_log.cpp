@@ -35,7 +35,7 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
    }
 
    for (auto& p_ref: _game.remaining_players()) {
-      if (p_ref->role().is_role_faker() && !p_ref->has_fake_role()) {
+      if (p_ref->is_role_faker() && !p_ref->has_fake_role()) {
          new_events.push_back(new Choose_fake_role{*this, *p_ref});
       }
    }
