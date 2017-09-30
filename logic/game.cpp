@@ -1,7 +1,9 @@
 #include "../riketi/algorithm.hpp"
+#include "../riketi/memory.hpp"
 #include "../riketi/random.hpp"
 #include "../riketi/ref.hpp"
 
+#include "error.hpp"
 #include "game.hpp"
 
 maf::Game::Game(const std::vector<Role::ID> & role_ids,
@@ -87,14 +89,17 @@ bool maf::Game::is_day() const {
 }
 
 void maf::Game::kick_player(Player::ID id) {
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!is_day())
+      throw error::bad_timing();
+
    Player &player = find_player(id);
 
-   if (_has_ended) throw Kick_failed{player, Kick_failed::Reason::game_ended};
-   if (!is_day()) throw Kick_failed{player, Kick_failed::Reason::bad_timing};
-   if (player.has_been_kicked()) throw Kick_failed{player, Kick_failed::Reason::already_kicked};
+   if (player.has_been_kicked())
+      throw error::repeat_action();
 
    player.kick();
-
    try_to_end();
 }
 
@@ -126,31 +131,43 @@ bool maf::Game::lynch_can_occur() const {
 }
 
 void maf::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id) {
-   Player &voter = find_player(voter_id);
-   Player &target = find_player(target_id);
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!lynch_can_occur())
+      throw error::bad_timing();
 
-   if (has_ended()) throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::game_ended};
-   if (!lynch_can_occur()) throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::bad_timing};
-   if (!voter.is_present()) throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_not_present};
-   if (!target.is_present()) throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::target_is_not_present};
-   if (&voter == &target) throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_target};
+   Player& voter = find_player(voter_id);
+   Player& target = find_player(target_id);
+
+   if (!voter.is_present())
+      throw error::inactive_voter();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(voter, target))
+      throw error::identical_players();
 
    voter.cast_lynch_vote(target);
 }
 
 void maf::Game::clear_lynch_vote(Player::ID voter_id) {
-   Player &voter = find_player(voter_id);
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!lynch_can_occur())
+      throw error::bad_timing();
 
-   if (has_ended()) throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::game_ended};
-   if (!lynch_can_occur()) throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::bad_timing};
-   if (!voter.is_present()) throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::voter_is_not_present};
+   Player& voter = find_player(voter_id);
+
+   if (!voter.is_present())
+      throw error::inactive_voter();
 
    voter.clear_lynch_vote();
 }
 
 const maf::Player * maf::Game::process_lynch_votes() {
-   if (has_ended()) throw Lynch_failed{Lynch_failed::Reason::game_ended};
-   if (!lynch_can_occur()) throw Lynch_failed{Lynch_failed::Reason::bad_timing};
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!lynch_can_occur())
+      throw error::bad_timing();
 
    auto victim = const_cast<Player *>(next_lynch_victim());
    if (victim) {
@@ -169,12 +186,18 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Duel_failed{caster, target, Duel_failed::Reason::game_ended};
-   if (!is_day()) throw Duel_failed{caster, target, Duel_failed::Reason::bad_timing};
-   if (!caster.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_not_present};
-   if (!target.is_present()) throw Duel_failed{caster, target, Duel_failed::Reason::target_is_not_present};
-   if (&caster == &target) throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_target};
-   if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel) throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!is_day())
+      throw error::bad_timing();
+   if (!caster.is_present())
+      throw error::inactive_caster();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(caster, target))
+      throw error::identical_players();
+   if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel)
+      throw error::unavailable_ability();
 
    double s = caster.role().duel_strength() + target.role().duel_strength();
    /* fix-me: throw exception if s <= 0 */
@@ -205,9 +228,12 @@ bool maf::Game::is_night() const {
 }
 
 void maf::Game::begin_night() {
-   if (has_ended()) throw Begin_night_failed{Begin_night_failed::Reason::game_ended};
-   if (is_night()) throw Begin_night_failed{Begin_night_failed::Reason::already_night};
-   if (lynch_can_occur()) throw Begin_night_failed{Begin_night_failed::Reason::lynch_can_occur};
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (is_night())
+      throw error::bad_timing();
+   if (lynch_can_occur())
+      throw error::pending_lynch();
 
    _time = Time::night;
 
@@ -240,10 +266,14 @@ void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
    Player &player = find_player(player_id);
    const Role &fake_role = _rulebook.get_role(fake_role_id);
 
-   if (_has_ended) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};
-   if (!is_night()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::bad_timing};
-   if (!player.role().is_role_faker()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::player_is_not_faker};
-   if (player.has_fake_role()) throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::already_chosen};
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!is_night())
+      throw error::bad_timing();
+   if (!player.role().is_role_faker())
+      throw error::action_invalid_for_player();
+   if (player.has_fake_role())
+      throw error::repeat_action();
 
    player.give_fake_role(fake_role);
 
@@ -255,16 +285,24 @@ bool maf::Game::mafia_can_use_kill() const {
 }
 
 void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!is_night())
+      throw error::bad_timing();
+   if (!mafia_can_use_kill())
+      throw error::unavailable_ability();
+
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::game_ended};
-   if (!is_night()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::bad_timing};
-   if (!mafia_can_use_kill()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::already_used};
-   if (!caster.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_present};
-   if (caster.role().alignment() != Alignment::mafia) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
-   if (!target.is_present()) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::target_is_not_present};
-   if (&caster == &target) throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_target};
+   if (!caster.is_present())
+      throw error::inactive_caster();
+   if (caster.role().alignment() != Alignment::mafia)
+      throw error::wrong_alignment();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(caster, target))
+      throw error::identical_players();
 
    _mafia_can_use_kill = false;
    _mafia_kill_caster = &const_cast<Player &>(caster);
@@ -274,9 +312,12 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
 }
 
 void maf::Game::skip_mafia_kill() {
-   if (has_ended()) throw Skip_failed{};
-   if (!is_night()) throw Skip_failed{};
-   if (!mafia_can_use_kill()) throw Skip_failed{};
+   if (this->has_ended())
+      throw error::game_has_ended();
+   if (!is_night())
+      throw error::bad_timing();
+   if (!mafia_can_use_kill())
+      throw error::unavailable_ability();
 
    _mafia_can_use_kill = false;
 
@@ -284,17 +325,22 @@ void maf::Game::skip_mafia_kill() {
 }
 
 void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
+   auto is_kill = [](const Ability& abl) {
+      return abl.id == Ability::ID::kill;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Kill_failed{caster, target, Kill_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::kill;
-   })) {
-      throw Kill_failed{caster, target, Kill_failed::Reason::caster_cannot_kill};
-   }
-   if (!target.is_present()) throw Kill_failed{caster, target, Kill_failed::Reason::target_is_not_present};
-   if (&caster == &target) throw Kill_failed{caster, target, Kill_failed::Reason::caster_is_target};
+   if (rkt::none_of(caster.compulsory_abilities(), is_kill))
+      throw error::unavailable_ability();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(caster, target))
+      throw error::identical_players();
 
    _pending_kills.emplace_back(&caster, &target);
    caster.remove_compulsory_ability(Ability{Ability::ID::kill});
@@ -303,14 +349,17 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
 }
 
 void maf::Game::skip_kill(Player::ID caster_id) {
+   auto is_kill = [](const Ability & abl) {
+      return abl.id == Ability::ID::kill;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
 
-   if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::kill;
-   })) {
-      throw Skip_failed{};
-   }
+   if (rkt::none_of(caster.compulsory_abilities(), is_kill))
+      throw error::unavailable_ability();
 
    caster.remove_compulsory_ability(Ability{Ability::ID::kill});
 
@@ -318,17 +367,22 @@ void maf::Game::skip_kill(Player::ID caster_id) {
 }
 
 void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
+   auto is_heal = [](const Ability & abl) {
+      return abl.id == Ability::ID::heal;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Heal_failed{caster, target, Heal_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::heal;
-   })) {
-      throw Heal_failed{caster, target, Heal_failed::Reason::caster_cannot_heal};
-   }
-   if (!target.is_present()) throw Heal_failed{caster, target, Heal_failed::Reason::target_is_not_present};
-   if (&caster == &target) throw Heal_failed{caster, target, Heal_failed::Reason::caster_is_target};
+   if (rkt::none_of(caster.compulsory_abilities(), is_heal))
+      throw error::unavailable_ability();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(caster, target))
+      throw error::identical_players();
 
    _pending_heals.emplace_back(&caster, &target);
    caster.remove_compulsory_ability(Ability{Ability::ID::heal});
@@ -337,14 +391,17 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
 }
 
 void maf::Game::skip_heal(Player::ID caster_id) {
+   auto is_heal = [](const Ability & abl) {
+      return abl.id == Ability::ID::heal;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
 
-   if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::heal;
-   })) {
-      throw Skip_failed{};
-   }
+   if (rkt::none_of(caster.compulsory_abilities(), is_heal))
+      throw error::unavailable_ability();
 
    caster.remove_compulsory_ability(Ability{Ability::ID::heal});
 
@@ -352,17 +409,22 @@ void maf::Game::skip_heal(Player::ID caster_id) {
 }
 
 void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
+   auto is_investigate = [](const Ability & abl) {
+      return abl.id == Ability::ID::investigate;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Investigate_failed{caster, target, Investigate_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::investigate;
-   })) {
-      throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_cannot_investigate};
-   }
-   if (!target.is_present()) throw Investigate_failed{caster, target, Investigate_failed::Reason::target_is_not_present};
-   if (&caster == &target) throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_is_target};
+   if (rkt::none_of(caster.compulsory_abilities(), is_investigate))
+      throw error::unavailable_ability();
+   if (!target.is_present())
+      throw error::inactive_target();
+   if (rkt::identical(caster, target))
+      throw error::identical_players();
 
    _pending_investigations.emplace_back(&caster, &target);
    caster.remove_compulsory_ability(Ability{Ability::ID::investigate});
@@ -371,14 +433,17 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
 }
 
 void maf::Game::skip_investigate(Player::ID caster_id) {
+   auto is_investigate = [](const Ability & abl) {
+      return abl.id == Ability::ID::investigate;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
 
-   if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::investigate;
-   })) {
-      throw Skip_failed{};
-   }
+   if (rkt::none_of(caster.compulsory_abilities(), is_investigate))
+      throw error::unavailable_ability();
 
    caster.remove_compulsory_ability(Ability{Ability::ID::investigate});
 
@@ -386,16 +451,20 @@ void maf::Game::skip_investigate(Player::ID caster_id) {
 }
 
 void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
+   auto is_peddle = [](const Ability & abl) {
+      return abl.id == Ability::ID::peddle;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
    Player &target = find_player(target_id);
 
-   if (has_ended()) throw Peddle_failed{caster, target, Peddle_failed::Reason::game_ended};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::peddle;
-   })) {
-      throw Peddle_failed{caster, target, Peddle_failed::Reason::caster_cannot_peddle};
-   }
-   if (!target.is_present()) throw Peddle_failed{caster, target, Peddle_failed::Reason::target_is_not_present};
+   if (rkt::none_of(caster.compulsory_abilities(), is_peddle))
+      throw error::unavailable_ability();
+   if (!target.is_present())
+      throw error::inactive_target();
 
    _pending_peddles.emplace_back(&caster, &target);
    caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
@@ -404,14 +473,17 @@ void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
 }
 
 void maf::Game::skip_peddle(Player::ID caster_id) {
+   auto is_peddle = [](const Ability & abl) {
+      return abl.id == Ability::ID::peddle;
+   };
+
+   if (this->has_ended())
+      throw error::game_has_ended();
+
    Player &caster = find_player(caster_id);
 
-   if (has_ended()) throw Skip_failed{};
-   if (rkt::none_of(caster.compulsory_abilities(), [](const Ability &ability) {
-      return ability.id == Ability::ID::peddle;
-   })) {
-      throw Skip_failed{};
-   }
+   if (rkt::none_of(caster.compulsory_abilities(), is_peddle))
+      throw error::unavailable_ability();
 
    caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
 
@@ -426,7 +498,7 @@ maf::Player & maf::Game::find_player(Player::ID id) {
    if (id < _players.size()) {
       return _players[id];
    } else {
-      throw Player_not_found{id};
+      throw error::missing_player();
    }
 }
 
