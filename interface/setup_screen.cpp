@@ -79,8 +79,8 @@ void maf::Setup_screen::add_player(const std::string &name) {
 }
 
 void maf::Setup_screen::add_rolecard(const std::string &alias) {
-   const Role &r = _rulebook.get_role(alias);
-   ++_role_ids[r.id()];
+   const Role& rl = _rulebook.get_role(alias);
+   ++_role_ids[rl.id()];
 }
 
 void maf::Setup_screen::add_wildcard(const std::string &alias) {
@@ -154,7 +154,7 @@ std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
    return std::unique_ptr<Game_log>{new Game_log{player_names(), rolecard_ids(), wildcard_ids(), _rulebook}};
 }
 
-void maf::Setup_screen::do_commands(const std::vector<std::string> &commands) {
+void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, std::ostream& err) {
    if (commands_match(commands, {"add", "p", ""})) {
       add_player(commands[2]);
    }
@@ -165,25 +165,73 @@ void maf::Setup_screen::do_commands(const std::vector<std::string> &commands) {
       clear_all_players();
    }
    else if (commands_match(commands, {"add", "r", ""})) {
-      add_rolecard(commands[2]);
+      auto& r_alias = commands[2];
+
+      try {
+         add_rolecard(r_alias);
+      } catch (error::missing_role) {
+         err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
+         err << r_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+      }
    }
    else if (commands_match(commands, {"take", "r", ""})) {
-      remove_rolecard(commands[2]);
+      auto& r_alias = commands[2];
+
+      try {
+         remove_rolecard(r_alias);
+      } catch (error::missing_role) {
+         err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
+         err << r_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+      }
    }
    else if (commands_match(commands, {"clear", "r", ""})) {
-      clear_rolecards(commands[2]);
+      auto& r_alias = commands[2];
+
+      try {
+         clear_rolecards(r_alias);
+      } catch (error::missing_role) {
+         err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
+         err << r_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+      }
    }
    else if (commands_match(commands, {"clear", "r"})) {
       clear_all_rolecards();
    }
    else if (commands_match(commands, {"add", "w", ""})) {
-      add_wildcard(commands[2]);
+      auto& w_alias = commands[2];
+
+      try {
+         add_wildcard(w_alias);
+      } catch (error::missing_wildcard) {
+         err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
+         err << w_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+      }
    }
    else if (commands_match(commands, {"take", "w", ""})) {
-      remove_wildcard(commands[2]);
+      auto& w_alias = commands[2];
+
+      try {
+         remove_wildcard(w_alias);
+      } catch (error::missing_wildcard) {
+         err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
+         err << w_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+      }
    }
    else if (commands_match(commands, {"clear", "w", ""})) {
-      clear_wildcards(commands[2]);
+      auto& w_alias = commands[2];
+
+      try {
+         clear_wildcards(w_alias);
+      } catch (error::missing_wildcard) {
+         err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
+         err << w_alias;
+         err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+      }
    }
    else if (commands_match(commands, {"clear", "w"})) {
       clear_all_wildcards();

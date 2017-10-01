@@ -127,7 +127,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          if (i_is_valid) begin_preset(i);
       }
       else {
-         _setup_screen.do_commands(commands);
+         _setup_screen.do_commands(commands, err);
       }
 
       /* fix-me: add  "list w", "list w v", "list w m", "list w f". */
@@ -141,16 +141,6 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
        list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
 
       /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
-   }
-   catch (const Rulebook::Missing_role_alias &e) {
-      err << "^HInvalid alias!^hNo role could be found whose alias is ^c"
-      << e.alias
-      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
-   }
-   catch (const Rulebook::Missing_wildcard_alias &e) {
-      err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c"
-      << e.alias
-      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
 //   catch (const Game::Lynch_failed &e) {
 //      err << "^HLynch failed!^h";
@@ -397,7 +387,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
    catch (const Setup_screen::Player_already_exists &e) {
       err << "^HPlayer already exists!^hA player named ^c"
           << e.name
-          << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
+          << "^h has already been selected to play in the next game.\n(Note that names are case-insensitive.)";
    }
    catch (const Setup_screen::Player_missing &e) {
       err << "^HMissing player!^hA player named ^c"

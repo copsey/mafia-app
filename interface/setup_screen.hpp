@@ -104,7 +104,7 @@ namespace maf {
       // Handles the given commands, making alterations to the setup screen as
       // appropriate.
       // Throws an exception if the commands couldn't be interpreted.
-      void do_commands(const std::vector<std::string> &commands);
+      void do_commands(const std::vector<std::string>& commands, std::ostream& err);
 
       // Writes the setup screen to os.
       void write(std::ostream &os) const;

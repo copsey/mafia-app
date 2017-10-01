@@ -22,47 +22,6 @@ namespace maf {
       /// The most recent edition of the rules.
       static constexpr Edition latest_edition{1};
 
-      /// Exception signifying that no rulebook with the given edition exists.
-      struct Bad_edition {
-         Edition edition;
-      };
-
-      /// Exception signifying that no role could be found with the given ID.
-      struct Missing_role_ID {
-         Role::ID id;
-      };
-
-      /// Exception signifying that no role could be found with the given alias.
-      ///
-      /// This could be because the alias doesn't correspond to a role ID.
-      struct Missing_role_alias {
-         std::string alias;
-      };
-
-      /// Exception signifying that a role with the given ID already exists.
-      struct Preexisting_role_ID {
-         Role::ID id;
-      };
-
-      /// Exception signifying that no wildcard could be found with
-      /// the given ID.
-      struct Missing_wildcard_ID {
-         Wildcard::ID id;
-      };
-
-      /// Exception signifying that no wildcard could be found with the
-      /// given alias.
-      ///
-      /// This could be because the alias doesn't correspond to a wildcard ID.
-      struct Missing_wildcard_alias {
-         std::string alias;
-      };
-
-      /// Exception signifying that a wildcard with the given ID already exists.
-      struct Preexisting_wildcard_ID {
-         Wildcard::ID id;
-      };
-
       /// Make a rulebook with the latest edition.
       Rulebook()
        : Rulebook{latest_edition} { }
@@ -119,22 +78,14 @@ namespace maf {
 
       /// Get the role with the given ID.
       ///
-      /// @throws `Missing_role_ID` if none could be found.
+      /// @throws `error::missing_role` if none could be found.
       Role & get_role(Role::ID id);
-
-      /// Get the role with the given ID.
-      ///
-      /// @throws `Missing_role_ID` if none could be found.
       const Role & get_role(Role::ID id) const;
 
       /// Get the role with the given alias.
       ///
-      // @throws `Missing_role_alias` if none could be found.
+      // @throws `error::missing_role` if none could be found.
       Role & get_role(const std::string & alias);
-
-      /// Get the role with the given alias.
-      ///
-      // @throws `Missing_role_alias` if none could be found.
       const Role & get_role(const std::string & alias) const;
 
       /// Get the wildcard with the given ID.

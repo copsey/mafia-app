@@ -1,8 +1,9 @@
+#include "error.hpp"
 #include "rulebook.hpp"
 
 maf::Rulebook::Rulebook(Edition edition)
  : _edition{edition} {
-   if (edition != 1) throw Bad_edition{edition};
+   if (edition != 1) throw error::invalid_edition();
 
    Role & peasant = new_village_role(Role::ID::peasant);
    peasant._duel_strength = 0.333333333;
@@ -156,7 +157,7 @@ maf::Role & maf::Rulebook::get_role(Role::ID id) {
       if (r.id() == id) return r;
    }
 
-   throw Missing_role_ID{id};
+   throw error::missing_role();
 }
 
 const maf::Role & maf::Rulebook::get_role(Role::ID id) const {
@@ -164,7 +165,7 @@ const maf::Role & maf::Rulebook::get_role(Role::ID id) const {
       if (r.id() == id) return r;
    }
 
-   throw Missing_role_ID{id};
+   throw error::missing_role();
 }
 
 maf::Role & maf::Rulebook::get_role(const std::string & alias) {
@@ -172,7 +173,7 @@ maf::Role & maf::Rulebook::get_role(const std::string & alias) {
       if (r.alias() == alias) return r;
    }
 
-   throw Missing_role_alias{alias};
+   throw error::missing_role();
 }
 
 const maf::Role & maf::Rulebook::get_role(const std::string & alias) const {
@@ -180,7 +181,7 @@ const maf::Role & maf::Rulebook::get_role(const std::string & alias) const {
       if (r.alias() == alias) return r;
    }
 
-   throw Missing_role_alias{alias};
+   throw error::missing_role();
 }
 
 maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) {
@@ -188,7 +189,7 @@ maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) {
       if (w.id() == id) return w;
    }
 
-   throw Missing_wildcard_ID{id};
+   throw error::missing_wildcard();
 }
 
 const maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) const {
@@ -196,7 +197,7 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) const {
       if (w.id() == id) return w;
    }
 
-   throw Missing_wildcard_ID{id};
+   throw error::missing_wildcard();
 }
 
 maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) {
@@ -204,7 +205,7 @@ maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) {
       if (w.alias() == alias) return w;
    }
 
-   throw Missing_wildcard_alias{alias};
+   throw error::missing_wildcard();
 }
 
 const maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) const {
@@ -212,12 +213,12 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) con
       if (w.alias() == alias) return w;
    }
 
-   throw Missing_wildcard_alias{alias};
+   throw error::missing_wildcard();
 }
 
 maf::Role & maf::Rulebook::new_role(Role::ID id) {
    if (contains_role(id)) {
-      throw Preexisting_role_ID{id};
+      throw error::duplicate_role();
    }
 
    _roles.emplace_back(id);
@@ -246,7 +247,7 @@ maf::Role & maf::Rulebook::new_freelance_role(Role::ID id) {
 
 maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator) {
    if (contains_wildcard(id)) {
-      throw Preexisting_wildcard_ID{id};
+      throw error::duplicate_wildcard();
    }
 
    _wildcards.emplace_back(id, evaluator);
@@ -255,7 +256,7 @@ maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_eval
 
 maf::Wildcard & maf::Rulebook::new_wildcard(Wildcard::ID id, const std::map<Role::ID, double> & weights) {
    if (contains_wildcard(id)) {
-      throw Preexisting_wildcard_ID{id};
+      throw error::duplicate_wildcard();
    }
 
    _wildcards.emplace_back(id, weights);
