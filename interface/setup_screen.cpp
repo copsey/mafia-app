@@ -2,6 +2,7 @@
 #include "../riketi/string.hpp"
 
 #include "console.hpp"
+#include "error.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"
 
@@ -70,9 +71,9 @@ std::size_t maf::Setup_screen::num_cards() const {
 
 void maf::Setup_screen::add_player(const std::string &name) {
    if (rkt::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
-      throw Bad_player_name{name};
+      throw error::invalid_name();
    } else if (has_player(name)) {
-      throw Player_already_exists{name};
+      throw error::duplicate_player();
    } else {
       _player_names.insert(name);
    }
@@ -94,7 +95,7 @@ void maf::Setup_screen::remove_player(const std::string &name) {
    });
 
    if (it == _player_names.end()) {
-      throw Player_missing{name};
+      throw error::missing_player();
    } else {
       _player_names.erase(it);
    }
@@ -103,7 +104,7 @@ void maf::Setup_screen::remove_player(const std::string &name) {
 void maf::Setup_screen::remove_rolecard(const std::string &alias) {
    const Role &r = _rulebook.get_role(alias);
    if (_role_ids[r.id()] == 0) {
-      throw Rolecard_unselected{r};
+      throw error::unselected_card();
    } else {
       --_role_ids[r.id()];
    }
@@ -112,7 +113,7 @@ void maf::Setup_screen::remove_rolecard(const std::string &alias) {
 void maf::Setup_screen::remove_wildcard(const std::string &alias) {
    const Wildcard &w = _rulebook.get_wildcard(alias);
    if (_wildcard_ids[w.id()] == 0) {
-      throw Wildcard_unselected{w};
+      throw error::unselected_card();
    } else {
       --_wildcard_ids[w.id()];
    }
@@ -156,10 +157,36 @@ std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
 
 void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, std::ostream& err) {
    if (commands_match(commands, {"add", "p", ""})) {
-      add_player(commands[2]);
+      auto& p_name = commands[2];
+
+      try {
+         add_player(p_name);
+      } catch (error::invalid_name) {
+         std::string esc_p_name = copy_with_escaped_style_codes(p_name);
+
+         err << "^HInvalid name!^hThe text ^c";
+         err << esc_p_name;
+         err << "^h is not a valid name for a player.\n\nThe names of players must be at least 1 character long, and can only contain alphanumeric characters (a-z, A-Z, 0-9).";
+      } catch (error::duplicate_player) {
+         std::string esc_p_name = copy_with_escaped_style_codes(p_name);
+
+         err << "^HPlayer already exists!^hA player named ^c";
+         err << esc_p_name;
+         err << "^h has already been selected to play in the next game.\n(Note that names are case-insensitive.)";
+      }
    }
    else if (commands_match(commands, {"take", "p", ""})) {
-      remove_player(commands[2]);
+      auto& p_name = commands[2];
+
+      try {
+         remove_player(commands[2]);
+      } catch (error::missing_player) {
+         std::string esc_p_name = copy_with_escaped_style_codes(p_name);
+
+         err << "^HMissing player!^hA player named ^c";
+         err << esc_p_name;
+         err << "^h could not be found.";
+      }
    }
    else if (commands_match(commands, {"clear", "p"})) {
       clear_all_players();
@@ -170,8 +197,10 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          add_rolecard(r_alias);
       } catch (error::missing_role) {
+         std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
+
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
-         err << r_alias;
+         err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
       }
    }
@@ -181,9 +210,17 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          remove_rolecard(r_alias);
       } catch (error::missing_role) {
+         std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
+
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
-         err << r_alias;
+         err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+      } catch (error::unselected_card) {
+         std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
+
+         err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c";
+         err << esc_r_alias;
+         err << "^h have been selected.";
       }
    }
    else if (commands_match(commands, {"clear", "r", ""})) {
@@ -192,8 +229,10 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          clear_rolecards(r_alias);
       } catch (error::missing_role) {
+         std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
+
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
-         err << r_alias;
+         err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
       }
    }
@@ -206,8 +245,10 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          add_wildcard(w_alias);
       } catch (error::missing_wildcard) {
+         std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
+
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
-         err << w_alias;
+         err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
       }
    }
@@ -217,9 +258,17 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          remove_wildcard(w_alias);
       } catch (error::missing_wildcard) {
+         std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
+
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
-         err << w_alias;
+         err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+      } catch (error::unselected_card) {
+         std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
+
+         err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c";
+         err << esc_w_alias;
+         err << "^h have been selected.";
       }
    }
    else if (commands_match(commands, {"clear", "w", ""})) {
@@ -228,8 +277,10 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       try {
          clear_wildcards(w_alias);
       } catch (error::missing_wildcard) {
+         std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
+
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
-         err << w_alias;
+         err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
       }
    }
@@ -243,7 +294,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       clear_all();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 

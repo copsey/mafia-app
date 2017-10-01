@@ -3,6 +3,21 @@
 
 #include "styled_string.hpp"
 
+void maf::escape_style_codes(std::string& str) {
+   for (std::string::size_type i = 0; i < str.size(); ++i) {
+      if (str[i] == '^') {
+         str.insert(i, 1, '^');
+         ++i;
+      }
+   }
+}
+
+std::string maf::copy_with_escaped_style_codes(const std::string& str) {
+   std::string str2 = str;
+   escape_style_codes(str2);
+   return str2;
+}
+
 maf::Styled_text maf::styled_text_from(const std::string &tagged_s) {
    std::istringstream iss{tagged_s};
    return styled_text_from(iss);

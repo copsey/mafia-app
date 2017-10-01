@@ -6,6 +6,17 @@
 #include <vector>
 
 namespace maf {
+   // Escape all of the style control characters '^' in `str`.
+   //
+   // Useful when converting a string entered by the user into styled text.
+   void escape_style_codes(std::string& str);
+
+   // Create a copy of `str` with all of the style control characters '^'
+   // escaped.
+   //
+   // Useful when converting a string entered by the user into styled text.
+   std::string copy_with_escaped_style_codes(const std::string& str);
+
    // A string coupled with a suggested style.
    // A style is intended to entail such formatting properties as typeface,
    // font size, colour, etc.
@@ -50,7 +61,7 @@ namespace maf {
    // Convert a tagged string into some styled text.
    Styled_text styled_text_from(const std::string &tagged_s);
 
-   // Convert the tagged string obtained from is into some styled text.
+   // Convert the tagged string obtained from `is` into some styled text.
    // is.tellg() is assumed to be 0.
    Styled_text styled_text_from(std::istream &is);
 }

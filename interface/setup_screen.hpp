@@ -12,38 +12,6 @@
 
 namespace maf {
    struct Setup_screen {
-      // Signifies that the given name is invalid for a player.
-      struct Bad_player_name {
-         std::string name;
-      };
-
-      // Signifies that a player with the given name already exists.
-      struct Player_already_exists {
-         std::string name;
-      };
-
-      // Signifies that no player with the given name exists.
-      struct Player_missing {
-         std::string name;
-      };
-
-      // Signifies that no copies of the given rolecard have been chosen.
-      struct Rolecard_unselected {
-         Rolecard_unselected(const Role &r): role{r} { }
-
-         rkt::ref<const Role> role;
-      };
-
-      // Signifies that no copies of the given wildcard have been chosen.
-      struct Wildcard_unselected {
-         Wildcard_unselected(const Wildcard &w): wildcard{w} { }
-
-         rkt::ref<const Wildcard> wildcard;
-      };
-
-      // Signifies that a set of commands couldn't be interpreted.
-      struct Bad_commands { };
-
       // The rulebook to be used in the pending game.
       const Rulebook & rulebook() const;
       // The names of the currently selected players.

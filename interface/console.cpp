@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 #include "../riketi/algorithm.hpp"
 #include "../riketi/char.hpp"
@@ -55,8 +56,16 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          }
       }
       else if (commands_match(commands, {"help", "r", ""})) {
-         const Role &r = active_rulebook().get_role(commands[2]);
-         store_help_screen(new Role_info_screen(r));
+         auto& r_name = commands[2];
+
+         try {
+            const Role &r = active_rulebook().get_role(r_name);
+            store_help_screen(new Role_info_screen(r));
+         } catch (error::missing_role()) {
+            auto esc_r_name = copy_with_escaped_style_codes(r_name);
+
+            
+         }
       }
       else if (commands_match(commands, {"list", "r"})) {
          store_help_screen(new List_roles_screen(active_rulebook()));
@@ -105,29 +114,42 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          _game_log->do_commands(commands, err);
       }
       else if (commands_match(commands, {"begin"})) {
-         begin_pending_game();
+         try {
+            begin_pending_game();
+         } catch (error::cards_mismatch) {
+            err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+         }
       }
       else if (commands_match(commands, {"preset"})) {
          std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
          begin_preset(uid(rkt::random_engine));
       }
       else if (commands_match(commands, {"preset", ""})) {
-         int i = 0;
-         bool i_is_valid = true;
+         auto& i_str = commands[1];
 
          try {
-            i = std::stoi(commands[1]);
-         } catch (...) {
-            err << "^HInvalid input!^hThe string ^c"
-                << commands[1]
-                << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
-            i_is_valid = false;
-         }
+            auto i = std::stoi(i_str);
+            begin_preset(i);
+         } catch (std::invalid_argument) {
+            auto esc_i_str = copy_with_escaped_style_codes(i_str);
 
-         if (i_is_valid) begin_preset(i);
+            err << "^HInvalid input!^hThe string ^c";
+            err << esc_i_str;
+            err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+         } catch (std::out_of_range) {
+            auto esc_i_str = copy_with_escaped_style_codes(i_str);
+
+            err << "^HInvalid input!^hThe string ^c";
+            err << esc_i_str;
+            err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+         }
       }
       else {
-         _setup_screen.do_commands(commands, err);
+         try {
+            _setup_screen.do_commands(commands, err);
+         } catch (error::bad_commands) {
+            err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+         }
       }
 
       /* fix-me: add  "list w", "list w v", "list w m", "list w f". */
@@ -370,41 +392,12 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 //   catch (const Game::Skip_failed &e) {
 //      err << "^HSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
 //   }
-   catch (error::cards_mismatch) {
-      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
-   }
 //   catch (const Game_log::Player_not_found &e) {
 //      err << "^HPlayer not found!^hA player named ^c"
 //      << e.name
 //      << "^h could not be found.";
 //   }
    catch (const Event::Bad_commands &e) {
-      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
-   }
-   catch (const Setup_screen::Bad_player_name &e) {
-      err << "^HInvalid name!^hThe name of a player can only contain letters and numbers.";
-   }
-   catch (const Setup_screen::Player_already_exists &e) {
-      err << "^HPlayer already exists!^hA player named ^c"
-          << e.name
-          << "^h has already been selected to play in the next game.\n(Note that names are case-insensitive.)";
-   }
-   catch (const Setup_screen::Player_missing &e) {
-      err << "^HMissing player!^hA player named ^c"
-          << e.name
-          << "^h could not be found.";
-   }
-   catch (const Setup_screen::Rolecard_unselected &e) {
-      err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c"
-          << e.role->alias()
-          << "^h have been selected.";
-   }
-   catch (const Setup_screen::Wildcard_unselected &e) {
-      err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c"
-      << e.wildcard->alias()
-      << "^h have been selected.";
-   }
-   catch (const Setup_screen::Bad_commands &e) {
       err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
    catch (const Question::Bad_commands &e) {
