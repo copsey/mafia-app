@@ -1,5 +1,5 @@
-#ifndef MAFIA_ERROR
-#define MAFIA_ERROR
+#ifndef MAFIA_LOGIC_ERROR
+#define MAFIA_LOGIC_ERROR
 
 namespace maf {
 	namespace error {

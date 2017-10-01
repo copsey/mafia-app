@@ -84,6 +84,7 @@
 		F8D772D61AF4B42100E16BB6 /* console.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = console.hpp; sourceTree = "<group>"; };
 		F8FC24831F8023A900384847 /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 		F8FC24841F80262C00384847 /* memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = memory.hpp; sourceTree = "<group>"; };
+		F8FC24851F80D52800384847 /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +148,7 @@
 			children = (
 				F8D772D61AF4B42100E16BB6 /* console.hpp */,
 				F8D772D51AF4B42100E16BB6 /* console.cpp */,
+				F8FC24851F80D52800384847 /* error.hpp */,
 				F8D5DB341B84E43B00D032D6 /* events.hpp */,
 				F8D5DB331B84E43B00D032D6 /* events.cpp */,
 				F8D646E61B85F36200E72222 /* game_log.hpp */,

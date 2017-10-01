@@ -29,7 +29,7 @@ void maf::Event::kick_player(const std::string& pl_name, Game_log& glog, std::os
          err << glog.get_name(pl);
          err << " has already been kicked from the game";
       }
-   } catch (Game_log::Player_not_found) {
+   } catch (error::missing_player) {
       err << "^HKick failed!^h";
       err << "A player named ^c";
       err << pl_name;

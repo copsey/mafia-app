@@ -8,27 +8,6 @@
 
 namespace maf {
    struct Game_log {
-      /// Exception signifying that an attempt was made to create a game with
-      /// an unequal number of players and cards.
-      struct Players_to_cards_mismatch {
-         std::size_t num_players;
-         std::size_t num_cards;
-      };
-
-      // Signifies that no player could be found with the given name.
-      struct Player_not_found {
-         std::string name;
-      };
-
-      // An exception signifying that an ability use has not been programmed in
-      // yet.
-      struct Unexpected_ability {
-         Ability ability;
-      };
-
-      // Signifies that there are no more events to advance to.
-      struct Cannot_advance { };
-
       // Creates a new game log, managing a game with the given parameters.
       Game_log(const std::vector<std::string> &player_names,
                const std::vector<Role::ID> &role_ids,

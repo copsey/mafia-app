@@ -1,8 +1,10 @@
 #include <sstream>
+#include <stdexcept>
 
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "error.hpp"
 #include "game_log.hpp"
 
 maf::Game_log::Game_log(const std::vector<std::string> &player_names,
@@ -10,9 +12,10 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
                           const std::vector<Wildcard::ID> &wildcard_ids,
                           const Rulebook &rulebook)
 : _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names} {
-   if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
-      throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
-   }
+   auto num_players = player_names.size();
+   auto num_cards = role_ids.size() + wildcard_ids.size();
+
+   if (num_players != num_cards) throw error::cards_mismatch();
 
    for (const Player &player: _game.players()) {
       store_event(new Player_given_initial_role{
@@ -58,7 +61,7 @@ void maf::Game_log::advance() {
    if (_log_index + 1 < _log.size()) {
       ++_log_index;
    } else {
-      throw Cannot_advance{};
+      throw std::logic_error("maf: no further events to advance to");
    }
 }
 
@@ -91,7 +94,7 @@ const maf::Player & maf::Game_log::find_player(const std::string &name) const {
       }
    }
 
-   throw Player_not_found{name};
+   throw error::missing_player();
 }
 
 const std::string & maf::Game_log::get_name(const maf::Player & player) const {
@@ -185,7 +188,7 @@ void maf::Game_log::begin_night() {
                break;
 
             default:
-               throw Unexpected_ability{ability};
+               throw std::logic_error("maf: ability not yet supported");
          }
       }
    }

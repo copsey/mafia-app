@@ -10,6 +10,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "error.hpp"
 #include "names.hpp"
 #include "console.hpp"
 
@@ -379,14 +380,14 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 //   catch (const Game::Skip_failed &e) {
 //      err << "^HSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
 //   }
-   catch (const Game_log::Players_to_cards_mismatch &e) {
+   catch (error::cards_mismatch) {
       err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
    }
-   catch (const Game_log::Player_not_found &e) {
-      err << "^HPlayer not found!^hA player named ^c"
-      << e.name
-      << "^h could not be found.";
-   }
+//   catch (const Game_log::Player_not_found &e) {
+//      err << "^HPlayer not found!^hA player named ^c"
+//      << e.name
+//      << "^h could not be found.";
+//   }
    catch (const Event::Bad_commands &e) {
       err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }

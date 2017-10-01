@@ -29,9 +29,8 @@ namespace maf {
          return *_game_log_ref;
       }
 
-      // Handles the given commands, acting on the given game log as required.
-      // Any resulting exceptions thrown by the game log are caught, and a summary
-      // written to err.
+      // Handles the given commands, acting on `game_log` as required.
+      // Any resulting exceptions thrown by the game log are caught, with a summary written to `err`.
       virtual void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) = 0;
 
       // Writes a tagged string detailing the event to os.
