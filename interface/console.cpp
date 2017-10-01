@@ -101,7 +101,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          }
       }
       else if (has_game()) {
-         _game_log->do_commands(commands);
+         _game_log->do_commands(commands, err);
       }
       else if (commands_match(commands, {"begin"})) {
          begin_pending_game();

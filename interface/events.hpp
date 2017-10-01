@@ -30,8 +30,10 @@ namespace maf {
       }
 
       // Handles the given commands, acting on the given game log as required.
+      // Any resulting exceptions thrown by the game log are caught, and a summary
+      // written to err.
       // Throws an exception if the commands couldn't be handled.
-      virtual void do_commands(const std::vector<std::string> &commands, Game_log &game_log) = 0;
+      virtual void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) = 0;
 
       // Writes a tagged string detailing the event to os.
       virtual void write_full(std::ostream &os) const = 0;
@@ -52,7 +54,7 @@ namespace maf {
       Player_given_initial_role(const Game_log & game_log, const Player & player, const Role & role, const Wildcard * wildcard)
        : Event{game_log}, _p{&player}, _r{&role}, _w{wildcard} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -72,7 +74,7 @@ namespace maf {
       Date date;
       Time time;
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -83,7 +85,7 @@ namespace maf {
       Obituary(const Game_log& game_log, std::vector<rkt::ref<const Player>> deaths)
        : Event{game_log}, _deaths{deaths} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream& os) const override;
       void write_summary(std::ostream& os) const override;
@@ -107,7 +109,7 @@ namespace maf {
       _recent_vote_caster{recent_lynch_vote_caster},
       _recent_vote_target{recent_lynch_vote_target} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -126,7 +128,7 @@ namespace maf {
       Player_kicked(const Game_log& game_log, const Player & player, const Role & player_role)
       : Event{game_log}, player{player}, player_role{player_role} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -146,7 +148,7 @@ namespace maf {
       // lynched / the role could not be determined.
       const Role *victim_role;
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -157,7 +159,7 @@ namespace maf {
       Duel_result(const Game_log & game_log, const Player & caster, const Player & target)
       : Event{game_log}, caster{caster}, target{target} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -171,7 +173,7 @@ namespace maf {
       Choose_fake_role(const Game_log & game_log, const Player & player)
       : Event{game_log}, _player{&player} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -189,7 +191,7 @@ namespace maf {
                     bool is_initial_meeting)
       : Event{game_log}, _mafiosi{mafiosi}, _initial{is_initial_meeting} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -204,7 +206,7 @@ namespace maf {
       Kill_use(const Game_log & game_log, const Player & caster)
       : Event{game_log}, _caster{&caster} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -218,7 +220,7 @@ namespace maf {
       Heal_use(const Game_log & game_log, const Player & caster)
       : Event{game_log}, _caster{&caster} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -232,7 +234,7 @@ namespace maf {
       Investigate_use(const Game_log & game_log, const Player & caster)
       : Event{game_log}, _caster{&caster} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -246,7 +248,7 @@ namespace maf {
       Peddle_use(const Game_log & game_log, const Player & caster)
       : Event{game_log}, _caster{&caster} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -260,7 +262,7 @@ namespace maf {
       Boring_night(const Game_log & game_log)
       : Event{game_log} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
    };
@@ -272,7 +274,7 @@ namespace maf {
 
       Investigation investigation;
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -286,7 +288,7 @@ namespace maf {
       Game_ended(const Game_log & game_log)
       : Event{game_log} { }
 
-      void do_commands(const std::vector<std::string> &commands, Game_log &game_log) override;
+      void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;

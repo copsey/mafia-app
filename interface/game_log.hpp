@@ -2,6 +2,7 @@
 #define MAFIA_GAME_LOG_H
 
 #include <memory>
+#include <ostream>
 
 #include "events.hpp"
 
@@ -54,8 +55,8 @@ namespace maf {
       void advance();
 
       // Handles the given commands, by passing them to the current event.
-      // Throws an exception if the commands couldn't be handled.
-      void do_commands(const std::vector<std::string> &commands);
+      // Most (but not all) resulting exceptions are caught, and a summary written to err.
+      void do_commands(const std::vector<std::string>& commands, std::ostream& err);
 
       // Writes a transcript to os, containing a summary of every event which
       // has occurred so far, in chronological order.
