@@ -82,7 +82,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       });
 
       for (std::size_t i{0}; i < v.size(); ++i) {
-         const Role& r = *v[i];
+         const Role& r = *(v[i]);
 
          os << "   the "
          << full_name(r)
@@ -115,9 +115,9 @@ void maf::Setup_help_screen::write(std::ostream &os) const {
 }
 
 void maf::Player_Info_Screen::write(std::ostream & os) const {
-   const Player& player = *_player_ref;
-   const Game& game = _game_log_ref->game();
-   const Game_log& game_log = *_game_log_ref;
+   const Player & player = *_player_ref;
+   const Game & game = _game_log_ref->game();
+   const Game_log & game_log = *_game_log_ref;
 
    os << "^HInfo: " << game_log.get_name(player);
 
@@ -139,15 +139,15 @@ void maf::Player_Info_Screen::write(std::ostream & os) const {
       }
    }
 
-   for (const Investigation & inv: game.investigations()) {
+   for (const Investigation& inv: game.investigations()) {
       if (inv.caster() == player) {
-         os << "\n\nYou checked "
-         << game_log.get_name(inv.target())
-         << " on night "
-         << inv.date()
-         << ", who appeared to be "
-         << ((inv.result()) ? "suspicious" : "innocent")
-         << ".";
+         os << "\n\nYou checked ";
+         os << game_log.get_name(inv.target());
+         os << " on night ";
+         os << inv.date();
+         os << ", who appeared to be ";
+         os << ((inv.result()) ? "suspicious" : "innocent");
+         os << ".";
       }
    }
 }

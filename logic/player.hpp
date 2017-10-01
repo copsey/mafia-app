@@ -184,6 +184,11 @@ namespace maf {
          return _lynch_vote;
       }
 
+      /// Whether the player has a lynch vote.
+      bool has_lynch_vote() const {
+         return _lynch_vote != nullptr;
+      }
+
       /// Choose a target for the player to vote against in the upcoming lynch.
       void cast_lynch_vote(const Player & target);
 

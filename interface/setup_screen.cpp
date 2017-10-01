@@ -209,9 +209,9 @@ void maf::Setup_screen::write(std::ostream &os) const {
          os << "You haven't added any players yet.\n\nThe following cards will be used:\n";
          write_cards_list(os);
          if (num_cards() >= 3) {
-            os << "\n\nSo far, you have selected "
-            << num_cards()
-            << " cards.";
+            os << "\n\nSo far, you have selected ";
+            os << num_cards();
+            os << " cards.";
          }
       }
    } else {
@@ -220,24 +220,24 @@ void maf::Setup_screen::write(std::ostream &os) const {
          write_players_list(os);
          os << "\n\n";
          if (num_players() >= 3) {
-            os << "So far, you have selected "
-            << num_players()
-            << " players. ";
+            os << "So far, you have selected ";
+            os << num_players();
+            os << " players. ";
          }
          os << "You haven't chosen any cards yet.";
       } else {
          os << "The following players will participate:\n";
          write_players_list(os);
+
          os << "\n\nThey will be assigned the following cards:\n";
          write_cards_list(os);
-         os << "\n\nSo far, you have selected "
-         << num_players()
-         << " player";
-         if (num_players() > 1) os << "s";
-         os << " and "
-         << num_cards()
-         << " card";
-         if (num_cards() > 1) os << "s";
+
+         os << "\n\nSo far, you have selected ";
+         os << num_players();
+         os << " player" << ((num_players() != 1) ? "s" : "");
+         os << " and ";
+         os << num_cards();
+         os << " card" << ((num_cards() != 1) ? "s" : "");
          os << ".";
       }
    }

@@ -204,11 +204,11 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
 
       for (auto it = _players.begin(); it != _players.end(); ) {
          auto& p_ref = *it;
-         os << "   "
-         << game_log().get_name(*p_ref);
+         os << "   ";
+         os << game_log().get_name(*p_ref);
          if (p_ref->lynch_vote() != nullptr) {
-            os << ", voting to lynch "
-            << game_log().get_name(*(p_ref->lynch_vote()));
+            os << ", voting to lynch ";
+	    os  << game_log().get_name(*(p_ref->lynch_vote()));
          }
          os << ((++it == _players.end()) ? "." : ",\n");
       }
@@ -217,9 +217,9 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       << (_next_lynch_victim ? game_log().get_name(*_next_lynch_victim) : "nobody")
       << " will be lynched.^h\n\nEnter ^clynch^h to submit the current lynch votes. Daytime abilities may also be used at this point.";
    } else {
-      os << "^GDay "
-      << _date
-      << "^iWith little time left in the day, the townsfolk prepare themselves for another night of uncertainty...\n\n^gGathered outside the town hall are:\n";
+      os << "^G" << "Day " << _date;
+      os << "^i" << "With little time left in the day, the townsfolk prepare themselves for another night of uncertainty...\n\n";
+      os << "^g" << "Gathered outside the town hall are:\n";
 
       for (auto it = _players.begin(); it != _players.end(); ) {
          auto& p_ref = *it;
@@ -252,13 +252,9 @@ void maf::Player_kicked::do_commands(const std::vector<std::string> &commands, G
 }
 
 void maf::Player_kicked::write_full(std::ostream &os) const {
-   os << "^G"
-   << game_log().get_name(*player)
-   << " kicked^g"
-   << game_log().get_name(*player)
-   << " was kicked from the game!\nThey were the "
-   << full_name(player->role())
-   << ".";
+   os << "^G" << game_log().get_name(*player) << " kicked";
+   os << "^g" << game_log().get_name(*player) << " was kicked from the game!\n";
+   os << "They were the " << full_name(player->role()) << ".";
 }
 
 void maf::Player_kicked::write_summary(std::ostream &os) const {
@@ -519,13 +515,14 @@ void maf::Heal_use::do_commands(const std::vector<std::string> &commands, Game_l
 
 void maf::Heal_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
-      os <<"^GHeal Use^g"
-      << game_log().get_name(*_caster)
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os << "^G" << "Heal Use";
+      os << "^g" << game_log().get_name(*_caster) << " should now go back to sleep.";
+      os << "^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GHeal Use^g"
-      << game_log().get_name(*_caster)
-      << ", you can choose to heal somebody this night.^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
+      os << "^G" << "Heal Use";
+      os << "^g" << game_log().get_name(*_caster);
+      os << ", you can choose to heal somebody this night.";
+      os << "^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
    }
 }
 

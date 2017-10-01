@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "../riketi/algorithm.hpp"
-#include "../riketi/char.hpp"
 #include "../riketi/enum.hpp"
 #include "../riketi/experimental/algorithm.hpp"
 #include "../riketi/random.hpp"
@@ -28,18 +27,20 @@ const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::
    }
 };
 
-bool maf::commands_match(const std::vector<std::string> &v1,
-                           const std::vector<std::string> &v2) {
-   return rkt::matches(v1, v2, [](const std::string &s1, const std::string &s2) {
+bool maf::commands_match(const std::vector<std::string>& v1,
+                         const std::vector<std::string>& v2) {
+   auto pred = [](const std::string& s1, const std::string& s2) {
       return s1.empty() || s2.empty() || s1 == s2;
-   });
+   };
+
+   return rkt::matches(v1, v2, pred);
 }
 
 maf::Console::Console() {
    refresh_output();
 }
 
-bool maf::Console::do_commands(const std::vector<std::string> &commands) {
+bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    std::stringstream err{}; // Write an error here if something goes wrong.
 
    try {
@@ -499,7 +500,7 @@ const maf::Styled_text & maf::Console::error_message() const {
    return _error_message;
 }
 
-void maf::Console::read_error_message(std::istream &is) {
+void maf::Console::read_error_message(std::istream& is) {
    _error_message = styled_text_from(is);
 }
 
