@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "../riketi/algorithm.hpp"
 #include "../riketi/string.hpp"
 
@@ -155,7 +157,7 @@ std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
    return std::unique_ptr<Game_log>{new Game_log{player_names(), rolecard_ids(), wildcard_ids(), _rulebook}};
 }
 
-void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, std::ostream& err) {
+void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
    if (commands_match(commands, {"add", "p", ""})) {
       auto& p_name = commands[2];
 
@@ -164,15 +166,19 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::invalid_name) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
+         std::stringstream err{};
          err << "^HInvalid name!^hThe text ^c";
          err << esc_p_name;
          err << "^h is not a valid name for a player.\n\nThe names of players must be at least 1 character long, and can only contain alphanumeric characters (a-z, A-Z, 0-9).";
+         throw error::unresolved_input(err);
       } catch (error::duplicate_player) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
+         std::stringstream err{};
          err << "^HPlayer already exists!^hA player named ^c";
          err << esc_p_name;
          err << "^h has already been selected to play in the next game.\n(Note that names are case-insensitive.)";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"take", "p", ""})) {
@@ -183,9 +189,11 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_player) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
+         std::stringstream err{};
          err << "^HMissing player!^hA player named ^c";
          err << esc_p_name;
          err << "^h could not be found.";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"clear", "p"})) {
@@ -199,9 +207,11 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_role) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"take", "r", ""})) {
@@ -212,15 +222,19 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_role) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+         throw error::unresolved_input(err);
       } catch (error::unselected_card) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
+         std::stringstream err{};
          err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c";
          err << esc_r_alias;
          err << "^h have been selected.";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"clear", "r", ""})) {
@@ -231,9 +245,11 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_role) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"clear", "r"})) {
@@ -247,9 +263,11 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_wildcard) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"take", "w", ""})) {
@@ -260,15 +278,19 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_wildcard) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+         throw error::unresolved_input(err);
       } catch (error::unselected_card) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
+         std::stringstream err{};
          err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c";
          err << esc_w_alias;
          err << "^h have been selected.";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"clear", "w", ""})) {
@@ -279,9 +301,11 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands, st
       } catch (error::missing_wildcard) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
+         std::stringstream err{};
          err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+         throw error::unresolved_input(err);
       }
    }
    else if (commands_match(commands, {"clear", "w"})) {

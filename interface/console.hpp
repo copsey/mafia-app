@@ -18,11 +18,6 @@ namespace maf {
    bool commands_match(const std::vector<std::string> &v1,
                        const std::vector<std::string> &v2);
 
-   // Signifies that no preset is defined with index i.
-   struct Missing_preset {
-      int index;
-   };
-
    // Signifies that there is no game in progress at the moment.
    struct No_game_in_progress { };
 
@@ -69,7 +64,7 @@ namespace maf {
       const Styled_text & error_message() const;
       // Reads the tagged string contained in is, updating the error message to
       // display the styled text obtained.
-      void read_error_message(std::istream &is);
+      void read_error_message(std::istream& is);
       // Removes the current error message.
       void clear_error_message();
 

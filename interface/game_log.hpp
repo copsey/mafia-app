@@ -34,8 +34,10 @@ namespace maf {
       void advance();
 
       // Handles the given commands, by passing them to the current event.
-      // Most (but not all) resulting exceptions are caught, and a summary written to err.
-      void do_commands(const std::vector<std::string>& commands, std::ostream& err);
+      //
+      // @throws `error::unresolved_input` if the commands could not be
+      // handled completely.
+      void do_commands(const std::vector<std::string>& commands);
 
       // Writes a transcript to os, containing a summary of every event which
       // has occurred so far, in chronological order.

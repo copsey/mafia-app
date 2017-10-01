@@ -41,30 +41,32 @@ maf::Console::Console() {
    refresh_output();
 }
 
-bool maf::Console::do_commands(const std::vector<std::string> &commands) {
-   std::stringstream err{}; // Write an error here if something goes wrong.
-
+bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    try {
       if (commands.size() == 0) {
-         err << "^HMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
+         throw error::unresolved_input("^HMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)");
       }
       else if (commands_match(commands, {"help"})) {
          if (has_game()) {
-            store_help_screen(new Event_help_screen{_game_log->current_event()});
+            store_help_screen(new Event_help_screen(_game_log->current_event()));
          } else {
             store_help_screen(new Setup_help_screen());
          }
       }
       else if (commands_match(commands, {"help", "r", ""})) {
-         auto& r_name = commands[2];
+         auto& r_alias = commands[2];
 
          try {
-            const Role &r = active_rulebook().get_role(r_name);
+            const Role& r = active_rulebook().get_role(r_alias);
             store_help_screen(new Role_info_screen(r));
          } catch (error::missing_role()) {
-            auto esc_r_name = copy_with_escaped_style_codes(r_name);
+            auto esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
-            
+            std::stringstream err{};
+            err << "^HInvalid alias!^hNo role could be found whose alias is ^c";
+            err << esc_r_alias;
+            err << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+            throw error::unresolved_input(err);
          }
       }
       else if (commands_match(commands, {"list", "r"})) {
@@ -81,19 +83,30 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
       }
       else if (commands_match(commands, {"info", ""})) {
          if (!has_game()) {
-            err << "^HNo game in progress!^hThere is no game in progress to display information about.";
+            throw error::unresolved_input("^HNo game in progress!^hThere is no game in progress to display information about.");
          } else {
-            const std::string & approx_name = commands[1];
-            const Player & player = _game_log->find_player(approx_name);
+            auto& pl_name = commands[1];
 
-            store_help_screen(new Player_Info_Screen{player, *_game_log});
+            try {
+               auto& player = _game_log->find_player(pl_name);
+               store_help_screen(new Player_Info_Screen{player, *_game_log});
+            } catch (error::missing_player) {
+               auto pl_name_esc = copy_with_escaped_style_codes(pl_name);
+
+               std::stringstream err{};
+               err << "^HMissing player!^h";
+               err << "A player named ^c";
+               err << pl_name_esc;
+               err << "^h could not be found.";
+               throw error::unresolved_input(err);
+            }
          }
       }
       else if (has_help_screen()) {
          if (commands_match(commands, {"ok"})) {
             clear_help_screen();
          } else {
-            err << "^HInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+            throw error::unresolved_input("^HInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)");
          }
       }
       else if (has_question()) {
@@ -103,7 +116,7 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
       }
       else if (commands_match(commands, {"end"})) {
          if (!has_game()) {
-            err << "^HNo game in progress!^hThere is no game in progress to end.";
+            throw error::unresolved_input("^HNo game in progress!^hThere is no game in progress to end.");
          } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
             end_game();
          } else {
@@ -111,13 +124,13 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
          }
       }
       else if (has_game()) {
-         _game_log->do_commands(commands, err);
+         _game_log->do_commands(commands);
       }
       else if (commands_match(commands, {"begin"})) {
          try {
             begin_pending_game();
          } catch (error::cards_mismatch) {
-            err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+            throw error::unresolved_input("^HMismatch!^hA new game cannot begin with an unequal number of players and cards.");
          }
       }
       else if (commands_match(commands, {"preset"})) {
@@ -129,26 +142,39 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 
          try {
             auto i = std::stoi(i_str);
-            begin_preset(i);
+
+            try {
+               begin_preset(i);
+            } catch (error::invalid_preset) {
+               std::stringstream err{};
+               err << "^HMissing preset!^hThere is no preset defined with index ";
+               err << i;
+               err << ".";
+               throw error::unresolved_input(err);
+            }
          } catch (std::invalid_argument) {
             auto esc_i_str = copy_with_escaped_style_codes(i_str);
 
+            std::stringstream err{};
             err << "^HInvalid input!^hThe string ^c";
             err << esc_i_str;
             err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+            throw error::unresolved_input(err);
          } catch (std::out_of_range) {
             auto esc_i_str = copy_with_escaped_style_codes(i_str);
 
+            std::stringstream err{};
             err << "^HInvalid input!^hThe string ^c";
             err << esc_i_str;
             err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+            throw error::unresolved_input(err);
          }
       }
       else {
          try {
-            _setup_screen.do_commands(commands, err);
+            _setup_screen.do_commands(commands);
          } catch (error::bad_commands) {
-            err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+            throw error::unresolved_input("^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)");
          }
       }
 
@@ -163,6 +189,10 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
        list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
 
       /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
+
+      refresh_output();
+      clear_error_message();
+      return true;
    }
 //   catch (const Game::Lynch_failed &e) {
 //      err << "^HLynch failed!^h";
@@ -398,33 +428,23 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
 //      << "^h could not be found.";
 //   }
    catch (const Event::Bad_commands &e) {
-      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+      throw error::unresolved_input("^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)");
    }
    catch (const Question::Bad_commands &e) {
-      err << "^HInvalid input!^hPlease answer the question being shown before trying to do anything else.";
+      throw error::unresolved_input("^HInvalid input!^hPlease answer the question being shown before trying to do anything else.");
    }
    catch (const No_game_in_progress &e) {
-      err << "^HNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
+      throw error::unresolved_input("^HNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)");
    }
    catch (const Begin_game_failed &e) {
       switch (e.reason) {
          case Begin_game_failed::Reason::game_already_in_progress:
-             err << "^HGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
+            throw error::unresolved_input("^HGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)");
             break;
       }
    }
-   catch (const Missing_preset &e) {
-      err << "^HMissing preset!^hThere is no preset defined for the index "
-      << e.index
-      << ".";
-   }
-
-   if (err.tellp() == 0) {
-      refresh_output();
-      clear_error_message();
-      return true;
-   } else {
-      read_error_message(err);
+   catch (const error::unresolved_input& ex) {
+      _error_message = ex.styled_message();
       return false;
    }
 }
@@ -464,7 +484,7 @@ const maf::Styled_text & maf::Console::error_message() const {
    return _error_message;
 }
 
-void maf::Console::read_error_message(std::istream &is) {
+void maf::Console::read_error_message(std::istream& is) {
    _error_message = styled_text_from(is);
 }
 
@@ -560,6 +580,6 @@ void maf::Console::begin_preset(int i) {
       Game_parameters params = _presets[i];
       begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
    } else {
-      throw Missing_preset{i};
+      throw error::invalid_preset();
    }
 }
