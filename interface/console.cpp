@@ -151,25 +151,6 @@ bool maf::Console::do_commands(const std::vector<std::string> &commands) {
       << e.alias
       << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
-//   catch (const Game::Kick_failed &e) {
-//      err << "^HKick failed!^h";
-//
-//      switch (e.reason) {
-//         case Game::Kick_failed::Reason::game_ended:
-//            err << _game_log->get_name(*e.player)
-//                << " could not be kicked from the game, because the game has already ended.";
-//            break;
-//
-//         case Game::Kick_failed::Reason::bad_timing:
-//            err << "Players can only be kicked from the game during the day.";
-//            break;
-//
-//         case Game::Kick_failed::Reason::already_kicked:
-//            err << _game_log->get_name(*e.player)
-//                << " has already been kicked from the game";
-//            break;
-//      }
-//   }
 //   catch (const Game::Lynch_failed &e) {
 //      err << "^HLynch failed!^h";
 //

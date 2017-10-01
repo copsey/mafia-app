@@ -10,6 +10,33 @@ void maf::Event::write_help(std::ostream &os) const {
    os << "^HMissing Help Screen^hNo help has been written for the current game event.\n(this counts as a bug!)\n\nEnter ^cok^h to leave this screen.";
 }
 
+void maf::Event::kick_player(const std::string& pl_name, Game_log& glog, std::ostream& err) {
+   try {
+      const Player& pl = glog.find_player(pl_name);
+
+      try {
+         glog.kick_player(pl.id());
+         glog.advance();
+      } catch (error::game_has_ended) {
+         err << "^HKick failed!^h";
+         err << glog.get_name(pl);
+         err << " could not be kicked from the game, because the game has already ended.";
+      } catch (error::bad_timing) {
+         err << "^HKick failed!^h";
+         err << "Players can only be kicked from the game during the day.";
+      } catch (error::repeat_action) {
+         err << "^HKick failed!^h";
+         err << glog.get_name(pl);
+         err << " has already been kicked from the game";
+      }
+   } catch (Game_log::Player_not_found) {
+      err << "^HKick failed!^h";
+      err << "A player named ^c";
+      err << pl_name;
+      err << "^h could not be found.";
+   }
+}
+
 void maf::Player_given_initial_role::do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) {
    if (commands_match(commands, {"ok"})) {
       if (_is_private) {
@@ -135,14 +162,19 @@ void maf::Obituary::write_summary(std::ostream &os) const {
 }
 
 void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) {
-   if (_lynch_can_occur) {
-      if (commands_match(commands, {"kick", ""})) {
-         const Player &player = game_log.find_player(commands[1]);
+   if (commands_match(commands, {"kick", ""})) {
+      const std::string& pl_name = commands[1];
+      kick_player(pl_name, game_log, err);
+   }
+   else if (commands_match(commands, {"duel", "", ""})) {
+      const Player &caster = game_log.find_player(commands[1]);
+      const Player &target = game_log.find_player(commands[2]);
 
-         game_log.kick_player(player.id());
-         game_log.advance();
-      }
-      else if (commands_match(commands, {"vote", "", ""})) {
+      game_log.stage_duel(caster.id(), target.id());
+      game_log.advance();
+   }
+   else if (_lynch_can_occur) {
+      if (commands_match(commands, {"vote", "", ""})) {
          const Player &voter = game_log.find_player(commands[1]);
          const Player &target = game_log.find_player(commands[2]);
 
@@ -169,22 +201,10 @@ void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Ga
       else {
          throw Bad_commands{};
       }
-   } else {
+   }
+   else {
       if (commands_match(commands, {"night"})) {
          game_log.begin_night();
-         game_log.advance();
-      }
-      else if (commands_match(commands, {"kick", ""})) {
-         const Player &player = game_log.find_player(commands[1]);
-
-         game_log.kick_player(player.id());
-         game_log.advance();
-      }
-      else if (commands_match(commands, {"duel", "", ""})) {
-         const Player &caster = game_log.find_player(commands[1]);
-         const Player &target = game_log.find_player(commands[2]);
-
-         game_log.stage_duel(caster.id(), target.id());
          game_log.advance();
       }
       else {

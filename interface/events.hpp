@@ -32,7 +32,6 @@ namespace maf {
       // Handles the given commands, acting on the given game log as required.
       // Any resulting exceptions thrown by the game log are caught, and a summary
       // written to err.
-      // Throws an exception if the commands couldn't be handled.
       virtual void do_commands(const std::vector<std::string>& commands, Game_log& game_log, std::ostream& err) = 0;
 
       // Writes a tagged string detailing the event to os.
@@ -44,6 +43,11 @@ namespace maf {
       // Writes a tagged string to os containing help with the event.
       // By default, complains that no help has been written for the event.
       virtual void write_help(std::ostream &os) const;
+
+   protected:
+      // Kick the player named `pl_name` from the game.
+      // Any resulting exceptions thrown by the game log are caught, with a summary written to `err`.
+      void kick_player(const std::string& pl_name, Game_log& glog, std::ostream& err);
 
    private:
       rkt::ref<const Game_log> _game_log_ref;
