@@ -18,7 +18,7 @@
    std::string str{[self.input.stringValue cStringUsingEncoding:NSUTF8StringEncoding]};
 
    if (_console.input(str)) {
-      /* fix-me: make more reliable, i.e. "preset i" doesn't work with this method. */
+      /* FIXME: make more reliable, i.e. "preset i" doesn't work with this method. */
       if (str == "begin" || str == "preset") {
          [_delegate playMusic:MafiaPlaylistItem_Beginning];
       } else if (str == "end") {

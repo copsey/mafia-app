@@ -32,7 +32,7 @@ void maf::Player_given_initial_role::write_full(std::ostream &os) const {
       << full_name(*_r) << ".";
 
       if (_w != nullptr) {
-         /* fix-me */
+         /* FIXME */
          os << "\nYou were randomly given this role from the ^c"
          << _w->alias()
          << "^g wildcard.";
@@ -110,7 +110,7 @@ void maf::Obituary::write_full(std::ostream &os) const {
       if (_deaths.size() == 0) {
          os << "^GObituary^gNobody died during the night.";
       } else {
-         /* fix-me: reword to remove use of "us". */
+         /* FIXME: reword to remove use of "us". */
          os << "^GObituary^gIt appears that " << _deaths.size() << " of us did not survive the night...";
       }
    } else {
@@ -195,7 +195,7 @@ void maf::Town_meeting::do_commands(const std::vector<std::string> &commands, Ga
 }
 
 void maf::Town_meeting::write_full(std::ostream &os) const {
-   /* fix-me: add in proper content. */
+   /* FIXME: add in proper content. */
 
    if (_lynch_can_occur) {
       os << "^GDay "
@@ -340,7 +340,7 @@ void maf::Duel_result::write_summary(std::ostream &os) const {
    auto & caster_name = glog.get_name(*caster);
    auto & target_name = glog.get_name(*target);
 
-   if (caster->is_alive()) { // fix-me: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
+   if (caster->is_alive()) { // FIXME: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
       os << caster_name << " won a duel against " << target_name << ".";
    } else {
       os << caster_name << " lost a duel against " << target_name << ".";
@@ -421,7 +421,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string> &commands, G
          game_log.cast_mafia_kill(caster.id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         /* fix-me: show "confirm skip?" screen. */
+         /* FIXME: show "confirm skip?" screen. */
          game_log.skip_mafia_kill();
          _go_to_sleep = true;
       } else {
@@ -431,7 +431,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string> &commands, G
 }
 
 void maf::Mafia_meeting::write_full(std::ostream &os) const {
-   /* fix-me */
+   /* FIXME */
    if (_go_to_sleep) {
       os << "^GMafia Meeting^gThe mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^h when you are ready to continue.";
    } else if (_initial) {
@@ -604,7 +604,7 @@ void maf::Boring_night::do_commands(const std::vector<std::string> &commands, Ga
 }
 
 void maf::Boring_night::write_full(std::ostream &os) const {
-   /* fix-me: show current date in title. (e.g. "Night 1") */
+   /* FIXME: show current date in title. (e.g. "Night 1") */
 
    os << "^GCalm Night^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
 }

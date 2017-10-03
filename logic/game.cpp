@@ -197,7 +197,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
       throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
 
    double s = caster.duel_strength() + target.duel_strength();
-   /* fix-me: throw exception if s <= 0 */
+   /* FIXME: throw exception if s <= 0 */
    double p = caster.duel_strength() / s;
 
    std::bernoulli_distribution bd{p};

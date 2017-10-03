@@ -8,7 +8,7 @@ void maf::Event_help_screen::write(std::ostream& os) const {
 }
 
 void maf::Role_info_screen::write(std::ostream& os) const {
-   /* fix-me */
+   /* FIXME */
 
    os << "^HMissing Role Info^hNo extra help could be found for the ";
    os << full_name(*role);
@@ -69,8 +69,8 @@ void maf::List_roles_screen::write(std::ostream &os) const {
             break;
       }
 
-      /* fix-me: make rkt::refs work directly. */
-      /* fix-me: still not sorted alphabetically! */
+      /* FIXME: make rkt::refs work directly. */
+      /* FIXME: still not sorted alphabetically! */
 
       std::vector<const Role *> w;
       for (rkt::ref<const Role> r: v) {
@@ -123,7 +123,7 @@ void maf::Player_Info_Screen::write(std::ostream & os) const {
 
    os << "^hYour role is the " << full_name(player.role()) << ".";
    if (player.has_fake_role()) {
-      // fix-me
+      // FIXME
       os << " You were randomly given this role from the ^c"
       << player.wildcard()->alias()
       << "^g wildcard.";

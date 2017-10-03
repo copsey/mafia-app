@@ -237,7 +237,7 @@ namespace maf {
          Reason reason;
       };
 
-      /* fix-me: make specific iterations of this exception for each ability. */
+      /* FIXME: make specific iterations of this exception for each ability. */
       // An exception signifying that an ability cannot be skipped.
       struct Skip_failed { };
 

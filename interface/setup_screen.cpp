@@ -271,7 +271,7 @@ void maf::Setup_screen::write_cards_list(std::ostream &os) const {
       }
    }
 
-   /* fix-me: sort wildcards in some definite order (maybe natural Wildcard::ID order is fine?) */
+   /* FIXME: sort wildcards in some definite order (maybe natural Wildcard::ID order is fine?) */
    for (const auto &p: _wildcard_ids) {
       Wildcard::ID id{p.first};
       std::size_t n{p.second};

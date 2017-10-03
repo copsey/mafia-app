@@ -130,17 +130,17 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          _setup_screen.do_commands(commands);
       }
 
-      /* fix-me: add  "list w", "list w v", "list w m", "list w f". */
+      /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
 
-      /* fix-me: "add p A B C" should result in players A, B, C all being chosen. */
+      /* FIXME: "add p A B C" should result in players A, B, C all being chosen. */
 
-      /* fix-me: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
+      /* FIXME: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
 
-      /* fix-me: list p random, a utility command to generate a list of the players in a game, in a random order.
+      /* FIXME: list p random, a utility command to generate a list of the players in a game, in a random order.
        (for example, when asking people to choose their lynch votes, without the option to change.)
        list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
 
-      /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
+      /* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
    }
    catch (const Rulebook::Missing_role_alias &e) {
       err << "^HInvalid alias!^hNo role could be found whose alias is ^c"
@@ -555,7 +555,7 @@ bool maf::Console::has_game() const {
 }
 
 void maf::Console::end_game() {
-   /* fix-me: set location where history is saved. */
+   /* FIXME: set location where history is saved. */
 
    if (has_game()) {
       std::time_t t = std::time(nullptr);

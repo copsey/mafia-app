@@ -81,7 +81,7 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
       if (id == player.id()) return player;
    }
 
-   /* fix-me: throw exception in Game_log namespace, or remove this function. */
+   /* FIXME: throw exception in Game_log namespace, or remove this function. */
    throw Game::Player_not_found{id};
 }
 
@@ -165,7 +165,7 @@ void maf::Game_log::begin_night() {
       new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), false});
    }
 
-   /* fix-me: minimise number of events when a player has multiple things to do this night. */
+   /* FIXME: minimise number of events when a player has multiple things to do this night. */
    for (const Player &player: _game.players()) {
       for (Ability ability: player.compulsory_abilities()) {
          switch (ability.id) {
