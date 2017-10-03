@@ -49,26 +49,26 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"help"})) {
          if (has_game()) {
-            store_help_screen(new Event_help_screen{_game_log->current_event()});
+            store_help_screen(new Event_Help_Screen{_game_log->current_event()});
          } else {
-            store_help_screen(new Setup_help_screen());
+            store_help_screen(new Setup_Help_Screen());
          }
       }
       else if (commands_match(commands, {"help", "r", ""})) {
          const Role &r = active_rulebook().get_role(commands[2]);
-         store_help_screen(new Role_info_screen(r));
+         store_help_screen(new Role_Info_Screen(r));
       }
       else if (commands_match(commands, {"list", "r"})) {
-         store_help_screen(new List_roles_screen(active_rulebook()));
+         store_help_screen(new List_Roles_Screen(active_rulebook()));
       }
       else if (commands_match(commands, {"list", "r", "v"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::village));
+         store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::village));
       }
       else if (commands_match(commands, {"list", "r", "m"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::mafia));
+         store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::mafia));
       }
       else if (commands_match(commands, {"list", "r", "f"})) {
-         store_help_screen(new List_roles_screen(active_rulebook(), Alignment::freelance));
+         store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::freelance));
       }
       else if (commands_match(commands, {"info", ""})) {
          if (!has_game()) {
@@ -508,7 +508,7 @@ void maf::Console::clear_error_message() {
    _error_message.clear();
 }
 
-const maf::Help_screen * maf::Console::help_screen() const {
+const maf::Help_Screen * maf::Console::help_screen() const {
    return _help_screen.get();
 }
 
@@ -516,7 +516,7 @@ bool maf::Console::has_help_screen() const {
    return static_cast<bool>(_help_screen);
 }
 
-void maf::Console::store_help_screen(Help_screen *hs) {
+void maf::Console::store_help_screen(Help_Screen *hs) {
    _help_screen.reset(hs);
 }
 

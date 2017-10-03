@@ -3,11 +3,11 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-void maf::Event_help_screen::write(std::ostream& os) const {
+void maf::Event_Help_Screen::write(std::ostream& os) const {
    event->write_help(os);
 }
 
-void maf::Role_info_screen::write(std::ostream& os) const {
+void maf::Role_Info_Screen::write(std::ostream& os) const {
    /* FIXME */
 
    os << "^HMissing Role Info^hNo extra help could be found for the ";
@@ -19,7 +19,7 @@ void maf::Role_info_screen::write(std::ostream& os) const {
 //   os << "To leave this screen, enter ^cok^h.";
 }
 
-void maf::List_roles_screen::write(std::ostream &os) const {
+void maf::List_Roles_Screen::write(std::ostream &os) const {
    if (alignment.is_empty()) {
       os << "^HRoles^hThe following is an alphabetical listing of every role in the rulebook:\n\n";
 
@@ -110,7 +110,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
    os << "\n\nTo leave this screen, enter ^cok^h.";
 }
 
-void maf::Setup_help_screen::write(std::ostream &os) const {
+void maf::Setup_Help_Screen::write(std::ostream &os) const {
    os << "^HHelp: Setup^hThe setup screen is where you can choose the players and cards that will feature in the next game of Mafia.\n\nTo add a player called ^cname^h to the next game, enter ^cadd p name^h. The player can be removed again by entering ^ctake p name^h. To remove all of the players that have been selected, enter ^cclear p^h.\n\nA single copy of the rolecard with alias ^cthat^h can be added by entering ^cadd r that^h, and a single copy removed by entering ^ctake r that^h. You can remove all copies of the rolecard by entering ^cclear r that^h, and you can remove every rolecard that has been selected by entering ^cclear r^h.\n\nSimilar effects can be achieved for the wildcard with alias ^cthat^h by using the commands ^cadd w that^h, ^ctake w that^h, ^cclear w that^h, and ^cclear w^h respectively. In addition, every card that has been selected (both rolecards and wildcards) can be removed through the use of the command ^cclear c^h.\n\nTo clear absolutely everything (both players and cards), enter ^cclear^h.\n\nOnce you have finished choosing players and cards, you can enter ^cbegin^h to start a new game. Alternatively, you can enter ^cpreset i^h to start a particular preconfigured game, or just ^cpreset^h to start a random preset. (note: at the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)\n\nYou can get extra information on the role with alias ^cthat^h by entering ^chelp r that^h, and you can see a list of every role in the rulebook by entering ^clist r^h. To see a list of only the village roles, you can enter ^clist r v^h. Similarly, the command ^clist r m^h will list the mafia roles, and the command ^clist r f^h will list the freelance roles.\n\nThe commands ^chelp w that^h, ^clist w^h, ^clist w v^h, ^clist w m^h, and ^clist w f^h have similar effects for wildcards.\n\nTo leave this screen, enter ^cok^h.";
 }
 
