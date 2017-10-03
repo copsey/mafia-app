@@ -101,7 +101,7 @@
 				F84FE08E1AF3BB1A00BF4992 /* riketi */,
 				F84FE0801AF3BB1A00BF4992 /* logic */,
 				F84FE07F1AF3BB1A00BF4992 /* interface */,
-				F84FE05E1AF3B9DF00BF4992 /* osx */,
+				F84FE05E1AF3B9DF00BF4992 /* mac */,
 				F84FE05D1AF3B9DF00BF4992 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -114,7 +114,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F84FE05E1AF3B9DF00BF4992 /* osx */ = {
+		F84FE05E1AF3B9DF00BF4992 /* mac */ = {
 			isa = PBXGroup;
 			children = (
 				F84FE0611AF3B9DF00BF4992 /* AppDelegate.h */,
@@ -127,7 +127,7 @@
 				F84FE0661AF3B9DF00BF4992 /* Images.xcassets */,
 				F84FE05F1AF3B9DF00BF4992 /* Supporting Files */,
 			);
-			name = osx;
+			name = mac;
 			path = Mafia;
 			sourceTree = "<group>";
 		};
