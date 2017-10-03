@@ -58,7 +58,7 @@ void maf::Player_given_initial_role::do_commands(const std::vector<std::string>&
          _is_private = true;
       }
    } else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -95,7 +95,7 @@ void maf::Time_changed::do_commands(const std::vector<std::string>& commands, Ga
       game_log.advance();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -140,7 +140,7 @@ void maf::Obituary::do_commands(const std::vector<std::string>& commands, Game_l
          game_log.advance();
       }
    } else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -212,7 +212,7 @@ void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Ga
          game_log.advance();
       }
       else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
    else {
@@ -221,7 +221,7 @@ void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Ga
          game_log.advance();
       }
       else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -279,7 +279,7 @@ void maf::Player_kicked::do_commands(const std::vector<std::string>& commands, G
       game_log.advance();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -302,7 +302,7 @@ void maf::Lynch_result::do_commands(const std::vector<std::string>& commands, Ga
       game_log.advance();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -338,7 +338,7 @@ void maf::Duel_result::do_commands(const std::vector<std::string>& commands, Gam
       game_log.advance();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -388,13 +388,13 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string>& commands
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else if (_fake_role) {
       if (commands_match(commands, {"ok"})) {
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"choose", ""})) {
@@ -403,7 +403,7 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string>& commands
          _fake_role = &fake_role;
          game_log.choose_fake_role(_player->id(), fake_role.id());
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -441,13 +441,13 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, G
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else if (_initial) {
       if (commands_match(commands, {"ok"})) {
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"kill", "", ""})) {
@@ -461,7 +461,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, G
          game_log.skip_mafia_kill();
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -498,7 +498,7 @@ void maf::Kill_use::do_commands(const std::vector<std::string>& commands, Game_l
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"kill", ""})) {
@@ -510,7 +510,7 @@ void maf::Kill_use::do_commands(const std::vector<std::string>& commands, Game_l
          game_log.skip_kill(_caster->id());
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -532,7 +532,7 @@ void maf::Heal_use::do_commands(const std::vector<std::string>& commands, Game_l
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"heal", ""})) {
@@ -544,7 +544,7 @@ void maf::Heal_use::do_commands(const std::vector<std::string>& commands, Game_l
          game_log.skip_heal(_caster->id());
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -566,7 +566,7 @@ void maf::Investigate_use::do_commands(const std::vector<std::string>& commands,
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"check", ""})) {
@@ -578,7 +578,7 @@ void maf::Investigate_use::do_commands(const std::vector<std::string>& commands,
          game_log.skip_investigate(_caster->id());
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -600,7 +600,7 @@ void maf::Peddle_use::do_commands(const std::vector<std::string>& commands, Game
       if (commands_match(commands, {"ok"})) {
          game_log.advance();
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"target", ""})) {
@@ -612,7 +612,7 @@ void maf::Peddle_use::do_commands(const std::vector<std::string>& commands, Game
          game_log.skip_peddle(_caster->id());
          _go_to_sleep = true;
       } else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -634,7 +634,7 @@ void maf::Boring_night::do_commands(const std::vector<std::string>& commands, Ga
       game_log.advance();
    }
    else {
-      throw Bad_commands{};
+      throw error::bad_commands();
    }
 }
 
@@ -650,14 +650,14 @@ void maf::Investigation_result::do_commands(const std::vector<std::string>& comm
          game_log.advance();
       }
       else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"ok"})) {
          _go_to_sleep = true;
       }
       else {
-         throw Bad_commands{};
+         throw error::bad_commands();
       }
    }
 }
@@ -697,7 +697,7 @@ void maf::Investigation_result::write_summary(std::ostream &os) const {
 }
 
 void maf::Game_ended::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
-   throw Bad_commands{};
+   throw error::bad_commands();
 }
 
 void maf::Game_ended::write_full(std::ostream &os) const {

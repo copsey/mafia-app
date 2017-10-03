@@ -133,13 +133,19 @@ void maf::Game_log::clear_lynch_vote(Player::ID voter_id) {
 }
 
 void maf::Game_log::process_lynch_votes() {
-   const Player *victim = _game.process_lynch_votes();
-   log_lynch_result(victim);
+   try {
+      const Player *victim = _game.process_lynch_votes();
+      log_lynch_result(victim);
 
-   if (_game.has_ended()) {
-      log_game_ended();
-   } else {
-      log_town_meeting();
+      if (_game.has_ended()) {
+         log_game_ended();
+      } else {
+         log_town_meeting();
+      }
+   } catch (error::game_has_ended) {
+      throw error::styled_exception("^HLynch failed!^hThe game has already ended.");
+   } catch (error::bad_timing) {
+      throw error::styled_exception("^HLynch failed!^hA lynch cannot occur at this moment in time.");
    }
 }
 

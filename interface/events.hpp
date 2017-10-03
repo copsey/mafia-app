@@ -12,9 +12,6 @@ namespace maf {
    struct Game_log;
 
    struct Event {
-      // Signifies that an event failed to process a set of commands.
-      struct Bad_commands { };
-
       /// Create an event spawned from the given game log.
       ///
       /// A reference to the game log passed in is stored in the event, for

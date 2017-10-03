@@ -124,7 +124,11 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
       else if (has_game()) {
-         _game_log->do_commands(commands);
+         try {
+            _game_log->do_commands(commands);
+         } catch (error::bad_commands) {
+            throw error::unresolved_input("^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)");
+         }
       }
       else if (commands_match(commands, {"begin"})) {
          try {
@@ -194,19 +198,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       clear_error_message();
       return true;
    }
-//   catch (const Game::Lynch_failed &e) {
-//      err << "^HLynch failed!^h";
-//
-//      switch (e.reason) {
-//         case Game::Lynch_failed::Reason::game_ended:
-//            err << "The game has already ended.";
-//            break;
-//
-//         case Game::Lynch_failed::Reason::bad_timing:
-//            err << "A lynch cannot occur at this moment in time.";
-//            break;
-//      }
-//   }
 //   catch (const Game::Lynch_vote_failed &e) {
 //      err << "^HLynch vote failed!^h";
 //
@@ -427,9 +418,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      << e.name
 //      << "^h could not be found.";
 //   }
-   catch (const Event::Bad_commands &e) {
-      throw error::unresolved_input("^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)");
-   }
    catch (const Question::Bad_commands &e) {
       throw error::unresolved_input("^HInvalid input!^hPlease answer the question being shown before trying to do anything else.");
    }
