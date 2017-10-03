@@ -4,8 +4,6 @@
 #include <functional>
 #include <ostream>
 
-#include "../riketi/box.hpp"
-
 #include "../logic/logic.hpp"
 
 #include "events.hpp"
@@ -41,14 +39,22 @@ namespace maf {
 
 
    struct List_Roles_Screen: Help_Screen {
-      List_Roles_Screen(const Rulebook &rulebook, rkt::box<Alignment> alignment = {})
-         : rulebook{rulebook}, alignment{alignment}
+      // An optional filter, specifying the alignment of roles that should be displayed.
+      enum class Filter_Alignment { all, village, mafia, freelance };
+
+      // Create a help screen listing all of the roles present in `rulebook`.
+      //
+      // It is also possible to specify an optional alignment filter, in which case
+      // only roles of that alignment will be listed.
+      List_Roles_Screen(const Rulebook& rulebook, Filter_Alignment alignment = Filter_Alignment::all)
+         : _rulebook{rulebook}, _filter_alignment{alignment}
       { }
 
       void write(std::ostream &os) const override;
 
-      rkt::ref<const Rulebook> rulebook;
-      rkt::box<Alignment> alignment;
+   private:
+      rkt::ref<const Rulebook> _rulebook;
+      Filter_Alignment _filter_alignment;
    };
 
 

@@ -20,21 +20,64 @@ void maf::Role_Info_Screen::write(std::ostream& os) const {
 }
 
 void maf::List_Roles_Screen::write(std::ostream &os) const {
-   if (alignment.is_empty()) {
-      os << "^HRoles^hThe following is an alphabetical listing of every role in the rulebook:\n\n";
+   std::vector<rkt::ref<const Role>> filtered_roles{};
 
-      std::vector<const Role *> sorted_roles{};
-      for (const Role& r: rulebook->roles()) {
-         sorted_roles.push_back(&r);
+   switch (_filter_alignment) {
+      case Filter_Alignment::all: {
+         for (const Role & role: _rulebook->roles()) {
+            filtered_roles.emplace_back(role);
+         }
+         break;
       }
-      rkt::sort(sorted_roles, [](const Role *r1, const Role *r2) {
-         return full_name(*r1) < full_name(*r2);
-      });
 
-      for (std::size_t i{0}; i < sorted_roles.size(); ++i) {
-         const Role &r = *sorted_roles[i];
+      case Filter_Alignment::village:
+         filtered_roles = _rulebook->village_roles();
+         break;
 
-         os << "   the " << full_name(r) << ", alias ^c" << r.alias() << "^h, ";
+      case Filter_Alignment::mafia:
+         filtered_roles = _rulebook->mafia_roles();
+         break;
+
+      case Filter_Alignment::freelance:
+         filtered_roles = _rulebook->freelance_roles();
+         break;
+   }
+
+   auto order_by_full_name = [](const rkt::ref<const Role> & r1, const rkt::ref<const Role> & r2) {
+      return full_name(*r1) < full_name(*r2);
+   };
+
+   rkt::sort(filtered_roles, order_by_full_name);
+
+   switch (_filter_alignment) {
+      case Filter_Alignment::all:
+         os << "^H" << "Roles";
+         os << "^h" << "The following is an alphabetical listing of every role in the rulebook:\n\n";
+         break;
+
+      case Filter_Alignment::village:
+         os << "^H" << "Village Roles";
+         os << "^h" << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
+         break;
+
+      case Filter_Alignment::mafia:
+         os << "^H" << "Mafia Roles";
+         os << "^h" << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
+         break;
+
+      case Filter_Alignment::freelance:
+         os << "^H" << "Freelance Roles";
+         os << "^h" << "The following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
+         break;
+   }
+
+   for (std::size_t i{0}; i < filtered_roles.size(); ++i) {
+      const Role & r = *filtered_roles[i];
+
+      os << "   the " << full_name(r) << ", alias " << "^c" << r.alias() << "^h";
+
+      if (_filter_alignment == Filter_Alignment::all) {
+         os << ", ";
 
          switch (r.alignment()) {
             case Alignment::village:
@@ -47,64 +90,29 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
                os << "a freelance role";
                break;
          }
-
-         os << ((i == sorted_roles.size() - 1) ? "." : ";\n");
       }
 
-      os << "\n\nTo see more information about the role with alias ^cthat^h, enter ^chelp r that^h.\n\nTo list only the village roles, enter ^clist r v^h. Similarly, ^clist r m^h will list the mafia roles, and ^clist r f^h will list the freelance roles.";
-   } else {
-      std::vector<rkt::ref<const Role>> v;
-      switch (alignment.get()) {
-         case Alignment::village:
-            v = rulebook->village_roles();
-            os << "^HVillage Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
-            break;
-         case Alignment::mafia:
-            v = rulebook->mafia_roles();
-            os << "^HMafia Roles^hThe following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
-            break;
-         case Alignment::freelance:
-            v = rulebook->freelance_roles();
-            os << "^HFreelance Roles^hThe following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
-            break;
-      }
+      os << ((i == filtered_roles.size() - 1) ? "." : ";\n");
+   }
 
-      /* FIXME: make rkt::refs work directly. */
-      /* FIXME: still not sorted alphabetically! */
+   os << "\n\nTo see more information about the role with alias ^cthat^h, enter ^chelp r that^h.\n\n";
 
-      std::vector<const Role *> w;
-      for (rkt::ref<const Role> r: v) {
-         w.push_back(&(*r));
-      }
+   switch (_filter_alignment) {
+      case Filter_Alignment::all:
+         os << "To list only the village roles, enter ^clist r v^h. Similarly, ^clist r m^h will list the mafia roles, and ^clist r f^h will list the freelance roles.";
+         break;
 
-      rkt::sort(w, [](const Role *r1, const Role *r2) {
-         return full_name(r1->id()) < full_name(r2->id());
-      });
+      case Filter_Alignment::village:
+         os << "To list the mafia roles, enter ^clist r m^h, and to list the freelance roles, enter ^clist r f^h.";
+         break;
 
-      for (std::size_t i{0}; i < v.size(); ++i) {
-         const Role& r = *(v[i]);
+      case Filter_Alignment::mafia:
+         os << "To list the village roles, enter ^clist r v^h, and to list the freelance roles, enter ^clist r f^h.";
+         break;
 
-         os << "   the "
-         << full_name(r)
-         << ", alias ^c"
-         << r.alias()
-         << "^h"
-         << ((i == v.size() - 1) ? "." : ";\n");
-      }
-
-      os << "\n\nTo see more information about the role with alias ^cthat^h, enter ^chelp r that^h.\n\n";
-
-      switch (alignment.get()) {
-         case Alignment::village:
-            os << "To list the mafia roles, enter ^clist r m^h, and to list the freelance roles, enter ^clist r f^h.";
-            break;
-         case Alignment::mafia:
-            os << "To list the village roles, enter ^clist r v^h, and to list the freelance roles, enter ^clist r f^h.";
-            break;
-         case Alignment::freelance:
-            os << "To list the village roles, enter ^clist r v^h, and to list the mafia roles, enter ^clist r m^h.";
-            break;
-      }
+      case Filter_Alignment::freelance:
+         os << "To list the village roles, enter ^clist r v^h, and to list the mafia roles, enter ^clist r m^h.";
+         break;
    }
 
    os << "\n\nTo leave this screen, enter ^cok^h.";
