@@ -23,12 +23,9 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
    std::vector<rkt::ref<const Role>> filtered_roles{};
 
    switch (_filter_alignment) {
-      case Filter_Alignment::all: {
-         for (const Role & role: _rulebook->roles()) {
-            filtered_roles.emplace_back(role);
-         }
+      case Filter_Alignment::all:
+         filtered_roles = _rulebook->all_roles();
          break;
-      }
 
       case Filter_Alignment::village:
          filtered_roles = _rulebook->village_roles();
@@ -83,9 +80,11 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
             case Alignment::village:
                os << "aligned to the village";
                break;
+
             case Alignment::mafia:
                os << "aligned to the mafia";
                break;
+
             case Alignment::freelance:
                os << "a freelance role";
                break;

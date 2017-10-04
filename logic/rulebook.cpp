@@ -87,6 +87,12 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
    return v;
 }
 
+std::vector<rkt::ref<const maf::Role>> maf::Rulebook::all_roles() const {
+   std::vector<rkt::ref<const Role>> v{};
+   for (auto & r: _roles) v.emplace_back(r);
+   return v;
+}
+
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (auto & r: _roles) {
