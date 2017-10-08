@@ -63,7 +63,7 @@ void maf::Game_log::advance() {
 }
 
 void maf::Game_log::do_commands(const std::vector<std::string> &commands) {
-   _log[_log_index]->do_commands(commands, *this);
+   _log[_log_index]->do_commands(commands);
 }
 
 void maf::Game_log::write_transcript(std::ostream &os) const {
