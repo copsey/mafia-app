@@ -1,5 +1,7 @@
-#ifndef MAFIA_QUESTIONS_H
-#define MAFIA_QUESTIONS_H
+#ifndef MAFIA_INTERFACE_QUESTIONS
+#define MAFIA_INTERFACE_QUESTIONS
+
+#include "../riketi/ref.hpp"
 
 #include <ostream>
 
@@ -11,11 +13,13 @@ namespace maf {
       // Signifies that a question failed to process a set of commands.
       struct Bad_commands { };
 
-      // Handles some commands, acting upon the console as appropriate.
-      // Returns true if fully answered, and false otherwise. If false, then the
-      // tagged string outputted by write may have changed.
+      // Handles the given commands, taking action as appropriate.
+      //
+      // Returns true if the question has been fully answered, and false otherwise.
+      // If false, then the tagged string outputted by write may have changed.
+      //
       // Throws an exception if the commands couldn't be handled.
-      virtual bool do_commands(const std::vector<std::string> &commands, Console &console) = 0;
+      virtual bool do_commands(const std::vector<std::string> & commands) = 0;
 
       // Writes a tagged string containing the question to os.
       virtual void write(std::ostream &os) const = 0;
@@ -23,23 +27,30 @@ namespace maf {
 
 
 //   struct Confirm_no_lynch_votes: Question {
-//      bool do_commands(const std::vector<std::string> &commands, Console &console) override;
+//      bool do_commands(const std::vector<std::string> &commands) override;
 //
 //      void write(std::ostream &os) const override;
 //   };
 
 
 //   struct Confirm_mafia_kill_skip: Question {
-//      bool do_commands(const std::vector<std::string> &commands, Console &console) override;
+//      bool do_commands(const std::vector<std::string> &commands) override;
 //
 //      void write(std::ostream &os) const override;
 //   };
 
 
    struct Confirm_end_game: Question {
-      bool do_commands(const std::vector<std::string> &commands, Console &console) override;
+      Confirm_end_game(Console & console)
+         : _console_ref(console)
+      { }
+
+      bool do_commands(const std::vector<std::string> & commands) override;
       
       void write(std::ostream &os) const override;
+
+   private:
+      rkt::ref<Console> _console_ref;
    };
 }
 
