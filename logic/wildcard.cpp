@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
 #include "../riketi/map.hpp"
 #include "../riketi/random.hpp"
+#include "../riketi/ref.hpp"
 
 #include "wildcard.hpp"
 #include "rulebook.hpp"
@@ -33,14 +35,11 @@ const char * maf::Wildcard::alias() const {
 
 bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rulebook) const {
    if (uses_evaluator()) {
-      for (const Role & r: rulebook.roles()) {
-         if (r.alignment() != alignment) {
-            double w = _evaluator(r);
-            if (w > 0.0) return false;
-         }
-      }
+      auto wrong_alignment = [&](const Role & role) {
+         return ((role.alignment() == alignment) && (_evaluator(role) > 0.0));
+      };
 
-      return true;
+      return std::none_of(rulebook.roles_begin(), rulebook.roles_end(), wrong_alignment);
    } else {
       std::vector<double> probabilities = _dist.probabilities();
 
@@ -58,11 +57,12 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
    if (uses_evaluator()) {
-      std::vector<const Role *> role_ptrs{};
+      std::vector<rkt::ref<const Role>> role_refs{};
       std::vector<double> weights{};
 
-      for (const Role & role: rulebook.roles()) {
+      auto evaluate_role = [&](const Role & role) {
          double w = _evaluator(role);
+
          if (w < 0.0) {
             std::ostringstream err{};
             err << "A wildcard with alias "
@@ -72,15 +72,17 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
                 << " for the role with alias "
                 << role.alias()
                 << ".";
-            
+
             throw std::logic_error{err.str()};
          } else if (w > 0.0) {
-            role_ptrs.push_back(&role);
+            role_refs.emplace_back(role);
             weights.push_back(w);
          }
-      }
+      };
 
-      if (role_ptrs.size() == 0) {
+      rulebook.for_each_role(evaluate_role);
+
+      if (role_refs.size() == 0) {
          std::ostringstream err{};
          err << "A wildcard with alias "
              << alias()
@@ -90,7 +92,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
       }
 
       std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
-      return *role_ptrs[dist(rkt::random_engine)];
+      return *role_refs[dist(rkt::random_engine)];
    } else {
       return rulebook.get_role(_role_ids[_dist(rkt::random_engine)]);
    }

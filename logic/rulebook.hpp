@@ -63,9 +63,13 @@ namespace maf {
          Wildcard::ID id;
       };
 
+      /// Type for iterators used to define sequences of roles within rulebooks.
+      using Role_Iterator = std::vector<Role>::const_iterator;
+
       /// Make a rulebook with the latest edition.
       Rulebook()
-       : Rulebook{latest_edition} { }
+         : Rulebook{latest_edition}
+      { }
 
       /// Make a rulebook with the specified edition.
       Rulebook(Edition edition);
@@ -75,11 +79,16 @@ namespace maf {
          return _edition;
       }
 
+      /// An iterator defining the beginning of a sequence containing all
+      /// roles present in this rulebook.
+      Role_Iterator roles_begin() const {
+         return _roles.begin();
+      }
 
-      // FIXME: Remove roles() function, in favour of all_roles().
-      /// A vector containing every role defined in the rulebook.
-      const std::vector<Role> & roles() const {
-         return _roles;
+      /// An iterator defining the end of a sequence containing all roles
+      /// present in this rulebook.
+      Role_Iterator roles_end() const {
+         return _roles.end();
       }
 
       /// A vector containing every role defined in the rulebook.
@@ -93,6 +102,12 @@ namespace maf {
 
       /// A vector containing every freelance role defined in the rulebook.
       std::vector<rkt::ref<const Role>> freelance_roles() const;
+
+      /// Evaluate the function `f` on each role present in this rulebook.
+      template <typename F>
+      void for_each_role(F f) const {
+         for (const Role & r: _roles) f(r);
+      }
 
       /// A vector containing every wildcard defined in the rulebook.
       const std::vector<Wildcard> & wildcards() const {
