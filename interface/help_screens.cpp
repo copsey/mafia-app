@@ -10,8 +10,8 @@ void maf::Event_Help_Screen::write(std::ostream& os) const {
 void maf::Role_Info_Screen::write(std::ostream& os) const {
    /* FIXME */
 
-   os << "^HMissing Role Info^/";
-   os << "^hNo extra help could be found for the ";
+   os << "^h^HMissing Role Info^/";
+   os << "No extra help could be found for the ";
    os << full_name(*role);
    os << ".\n(this counts as a bug!)";
 
@@ -49,23 +49,23 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
 
    switch (_filter_alignment) {
       case Filter_Alignment::all:
-         os << "^HRoles^/";
-         os << "^h" << "The following is an alphabetical listing of every role in the rulebook:\n\n";
+         os << "^h^HRoles^/";
+         os << "The following is an alphabetical listing of every role in the rulebook:\n\n";
          break;
 
       case Filter_Alignment::village:
-         os << "^HVillage Roles^/";
-         os << "^h" << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
+         os << "^h^HVillage Roles^/";
+         os << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the village:\n\n";
          break;
 
       case Filter_Alignment::mafia:
-         os << "^HMafia Roles^/";
-         os << "^h" << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
+         os << "^h^HMafia Roles^/";
+         os << "The following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:\n\n";
          break;
 
       case Filter_Alignment::freelance:
-         os << "^HFreelance Roles^/";
-         os << "^h" << "The following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
+         os << "^h^HFreelance Roles^/";
+         os << "The following is an alphabetical listing of all of the freelance roles in the rulebook:\n\n";
          break;
    }
 
@@ -119,7 +119,7 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
 }
 
 void maf::Setup_Help_Screen::write(std::ostream &os) const {
-   os << "^HHelp: Setup^/^hThe setup screen is where you can choose the players and cards that will feature in the next game of Mafia.\n\nTo add a player called ^cname^/ to the next game, enter ^cadd p name^/. The player can be removed again by entering ^ctake p name^/. To remove all of the players that have been selected, enter ^cclear p^/.\n\nA single copy of the rolecard with alias ^cthat^/ can be added by entering ^cadd r that^/, and a single copy removed by entering ^ctake r that^/. You can remove all copies of the rolecard by entering ^cclear r that^/, and you can remove every rolecard that has been selected by entering ^cclear r^/.\n\nSimilar effects can be achieved for the wildcard with alias ^cthat^/ by using the commands ^cadd w that^/, ^ctake w that^/, ^cclear w that^/, and ^cclear w^/ respectively. In addition, every card that has been selected (both rolecards and wildcards) can be removed through the use of the command ^cclear c^/.\n\nTo clear absolutely everything (both players and cards), enter ^cclear^/.\n\nOnce you have finished choosing players and cards, you can enter ^cbegin^/ to start a new game. Alternatively, you can enter ^cpreset i^/ to start a particular preconfigured game, or just ^cpreset^/ to start a random preset. (note: at the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)\n\nYou can get extra information on the role with alias ^cthat^/ by entering ^chelp r that^/, and you can see a list of every role in the rulebook by entering ^clist r^/. To see a list of only the village roles, you can enter ^clist r v^/. Similarly, the command ^clist r m^/ will list the mafia roles, and the command ^clist r f^/ will list the freelance roles.\n\nThe commands ^chelp w that^/, ^clist w^/, ^clist w v^/, ^clist w m^/, and ^clist w f^/ have similar effects for wildcards.\n\nTo leave this screen, enter ^cok^/.";
+   os << "^h^HHelp: Setup^/The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.\n\nTo add a player called ^cname^/ to the next game, enter ^cadd p name^/. The player can be removed again by entering ^ctake p name^/. To remove all of the players that have been selected, enter ^cclear p^/.\n\nA single copy of the rolecard with alias ^cthat^/ can be added by entering ^cadd r that^/, and a single copy removed by entering ^ctake r that^/. You can remove all copies of the rolecard by entering ^cclear r that^/, and you can remove every rolecard that has been selected by entering ^cclear r^/.\n\nSimilar effects can be achieved for the wildcard with alias ^cthat^/ by using the commands ^cadd w that^/, ^ctake w that^/, ^cclear w that^/, and ^cclear w^/ respectively. In addition, every card that has been selected (both rolecards and wildcards) can be removed through the use of the command ^cclear c^/.\n\nTo clear absolutely everything (both players and cards), enter ^cclear^/.\n\nOnce you have finished choosing players and cards, you can enter ^cbegin^/ to start a new game. Alternatively, you can enter ^cpreset i^/ to start a particular preconfigured game, or just ^cpreset^/ to start a random preset. (note: at the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)\n\nYou can get extra information on the role with alias ^cthat^/ by entering ^chelp r that^/, and you can see a list of every role in the rulebook by entering ^clist r^/. To see a list of only the village roles, you can enter ^clist r v^/. Similarly, the command ^clist r m^/ will list the mafia roles, and the command ^clist r f^/ will list the freelance roles.\n\nThe commands ^chelp w that^/, ^clist w^/, ^clist w v^/, ^clist w m^/, and ^clist w f^/ have similar effects for wildcards.\n\nTo leave this screen, enter ^cok^/.";
 }
 
 void maf::Player_Info_Screen::write(std::ostream & os) const {
@@ -127,9 +127,9 @@ void maf::Player_Info_Screen::write(std::ostream & os) const {
    const Game & game = _game_log_ref->game();
    const Game_log & game_log = *_game_log_ref;
 
-   os << "^HInfo: " << game_log.get_name(player) << "^/";
+   os << "^h^HInfo: " << game_log.get_name(player) << "^/";
 
-   os << "^hYour role is the " << full_name(player.role()) << ".";
+   os << "Your role is the " << full_name(player.role()) << ".";
    if (player.has_fake_role()) {
       // FIXME
       os << " You were randomly given this role from the ^c"
