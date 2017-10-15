@@ -45,7 +45,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 
    try {
       if (commands.size() == 0) {
-         err << "^HMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
+         err << "^TMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
       }
       else if (commands_match(commands, {"help"})) {
          if (has_game()) {
@@ -72,7 +72,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"info", ""})) {
          if (!has_game()) {
-            err << "^HNo game in progress!^hThere is no game in progress to display information about.";
+            err << "^TNo game in progress!^hThere is no game in progress to display information about.";
          } else {
             const std::string & approx_name = commands[1];
             const Player & player = _game_log->find_player(approx_name);
@@ -84,7 +84,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          if (commands_match(commands, {"ok"})) {
             clear_help_screen();
          } else {
-            err << "^HInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+            err << "^TInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
          }
       }
       else if (has_question()) {
@@ -94,7 +94,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"end"})) {
          if (!has_game()) {
-            err << "^HNo game in progress!^hThere is no game in progress to end.";
+            err << "^TNo game in progress!^hThere is no game in progress to end.";
          } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
             end_game();
          } else {
@@ -118,7 +118,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          try {
             i = std::stoi(commands[1]);
          } catch (...) {
-            err << "^HInvalid input!^hThe string ^c"
+            err << "^TInvalid input!^hThe string ^c"
                 << commands[1]
                 << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
             i_is_valid = false;
@@ -143,17 +143,17 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       /* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
    }
    catch (const Rulebook::Missing_role_alias &e) {
-      err << "^HInvalid alias!^hNo role could be found whose alias is ^c"
+      err << "^TInvalid alias!^hNo role could be found whose alias is ^c"
       << e.alias
       << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
    }
    catch (const Rulebook::Missing_wildcard_alias &e) {
-      err << "^HInvalid alias!^hNo wildcard could be found whose alias is ^c"
+      err << "^TInvalid alias!^hNo wildcard could be found whose alias is ^c"
       << e.alias
       << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
    catch (const Game::Kick_failed &e) {
-      err << "^HKick failed!^h";
+      err << "^TKick failed!^h";
 
       switch (e.reason) {
          case Game::Kick_failed::Reason::game_ended:
@@ -172,7 +172,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Lynch_failed &e) {
-      err << "^HLynch failed!^h";
+      err << "^TLynch failed!^h";
 
       switch (e.reason) {
          case Game::Lynch_failed::Reason::game_ended:
@@ -185,7 +185,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Lynch_vote_failed &e) {
-      err << "^HLynch vote failed!^h";
+      err << "^TLynch vote failed!^h";
 
       switch (e.reason) {
          case Game::Lynch_vote_failed::Reason::game_ended:
@@ -216,7 +216,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Duel_failed &e) {
-      err << "^HDuel failed!^h";
+      err << "^TDuel failed!^h";
 
       switch (e.reason) {
          case Game::Duel_failed::Reason::game_ended:
@@ -252,7 +252,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Begin_night_failed &e) {
-      err << "^HCannot begin night!^h";
+      err << "^TCannot begin night!^h";
 
       switch (e.reason) {
          case Game::Begin_night_failed::Reason::game_ended:
@@ -268,7 +268,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Choose_fake_role_failed &e) {
-      err << "^HChoose fake role failed!^h";
+      err << "^TChoose fake role failed!^h";
 
       switch (e.reason) {
          case Game::Choose_fake_role_failed::Reason::game_ended:
@@ -291,7 +291,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Mafia_kill_failed &e) {
-      err << "^HMafia kill failed!^h";
+      err << "^TMafia kill failed!^h";
 
       switch (e.reason) {
          case Game::Mafia_kill_failed::Reason::game_ended:
@@ -322,7 +322,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Kill_failed &e) {
-      err << "^HKill failed!^h";
+      err << "^TKill failed!^h";
 
       switch (e.reason) {
          case Game::Kill_failed::Reason::game_ended:
@@ -347,7 +347,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Heal_failed &e) {
-      err << "^HHeal failed!^h";
+      err << "^THeal failed!^h";
 
       switch (e.reason) {
          case Game::Heal_failed::Reason::game_ended:
@@ -372,7 +372,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Investigate_failed &e) {
-      err << "^HInvestigation failed!^h";
+      err << "^TInvestigation failed!^h";
 
       switch (e.reason) {
          case Game::Investigate_failed::Reason::game_ended:
@@ -397,60 +397,60 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
    }
    catch (const Game::Skip_failed &e) {
-      err << "^HSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
+      err << "^TSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
    }
    catch (const Game_log::Players_to_cards_mismatch &e) {
-      err << "^HMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+      err << "^TMismatch!^hA new game cannot begin with an unequal number of players and cards.";
    }
    catch (const Game_log::Player_not_found &e) {
-      err << "^HPlayer not found!^hA player named ^c"
+      err << "^TPlayer not found!^hA player named ^c"
       << e.name
       << "^h could not be found.";
    }
    catch (const Event::Bad_commands &e) {
-      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+      err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
    catch (const Setup_screen::Bad_player_name &e) {
-      err << "^HInvalid name!^hThe name of a player can only contain letters and numbers.";
+      err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
    }
    catch (const Setup_screen::Player_already_exists &e) {
-      err << "^HPlayer already exists!^hA player named ^c"
+      err << "^TPlayer already exists!^hA player named ^c"
           << e.name
           << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
    }
    catch (const Setup_screen::Player_missing &e) {
-      err << "^HMissing player!^hA player named ^c"
+      err << "^TMissing player!^hA player named ^c"
           << e.name
           << "^h could not be found.";
    }
    catch (const Setup_screen::Rolecard_unselected &e) {
-      err << "^HRolecard not selected!^hNo copies of the rolecard with alias ^c"
+      err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c"
           << e.role->alias()
           << "^h have been selected.";
    }
    catch (const Setup_screen::Wildcard_unselected &e) {
-      err << "^HWildcard not selected!^hNo copies of the wildcard with alias ^c"
+      err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c"
       << e.wildcard->alias()
       << "^h have been selected.";
    }
    catch (const Setup_screen::Bad_commands &e) {
-      err << "^HUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+      err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
    catch (const Question::Bad_commands &e) {
-      err << "^HInvalid input!^hPlease answer the question being shown before trying to do anything else.";
+      err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
    }
    catch (const No_game_in_progress &e) {
-      err << "^HNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
+      err << "^TNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
    }
    catch (const Begin_game_failed &e) {
       switch (e.reason) {
          case Begin_game_failed::Reason::game_already_in_progress:
-             err << "^HGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
+             err << "^TGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
             break;
       }
    }
    catch (const Missing_preset &e) {
-      err << "^HMissing preset!^hThere is no preset defined for the index "
+      err << "^TMissing preset!^hThere is no preset defined for the index "
       << e.index
       << ".";
    }

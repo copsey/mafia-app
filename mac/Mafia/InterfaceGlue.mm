@@ -42,34 +42,33 @@
       NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 
       switch (styled_str.style) {
-         case maf::Styled_string::Style::game_title:
-         case maf::Styled_string::Style::help_title:
-            _output.window.title = string;
-            break;
-
          case maf::Styled_string::Style::game: {
-            [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
-                                                                                     attributes:[InterfaceGlue gameStyleAttributes]]];
-            break;
-         }
-
-         case maf::Styled_string::Style::game_italic: {
-            [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
-                                                                                     attributes:[InterfaceGlue gameItalicStyleAttributes]]];
+            NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:[InterfaceGlue gameStyleAttributes]];
+            [attributedString appendAttributedString:newString];
             break;
          }
 
          case maf::Styled_string::Style::help: {
-            [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
-                                                                                     attributes:[InterfaceGlue helpStyleAttributes]]];
+            NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:[InterfaceGlue helpStyleAttributes]];
+            [attributedString appendAttributedString:newString];
+            break;
+         }
+
+         case maf::Styled_string::Style::italic: {
+            NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:[InterfaceGlue gameItalicStyleAttributes]];
+            [attributedString appendAttributedString:newString];
             break;
          }
 
          case maf::Styled_string::Style::command: {
-            [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:string
-                                                                                     attributes:[InterfaceGlue commandStyleAttributes]]];
+            NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:[InterfaceGlue commandStyleAttributes]];
+            [attributedString appendAttributedString:newString];
             break;
          }
+
+         case maf::Styled_string::Style::title:
+            _output.window.title = string;
+            break;
       }
    }
 
@@ -116,7 +115,7 @@
       NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 
       switch (styled_str.style) {
-         case maf::Styled_string::Style::help_title:
+         case maf::Styled_string::Style::title:
             alert.messageText = string;
             break;
 

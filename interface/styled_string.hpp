@@ -11,14 +11,12 @@ namespace maf {
    // font size, colour, etc.
    struct Styled_string {
       enum class Style {
-         game,        // Default style during game.
-         game_title,  // Title during game. A maximum of one title can occur
-                      // per message, as the first item.
-         game_italic, // Italic style during game. Used for descriptive text.
-         help,        // Game set-up and general help.
-         help_title,  // Title for game set-up and general help. A maximum of
-                      // one title can occur per message, as the first item.
-         command      // Commands that can be inputted into the console.
+         game,    // Default style during game.
+         help,    // Game set-up and general help.
+         italic,  // Italic modifier on current style. Used for descriptive text.
+         command, // Commands that can be inputted into the console.
+         title    // Title of section. A maximum of one title can occur
+                  // per message, as the first item.
       };
 
       std::string string{};
@@ -27,7 +25,8 @@ namespace maf {
       Styled_string() = default;
 
       Styled_string(std::string string, Style style)
-         : string{string}, style{style} { }
+         : string{string}, style{style}
+      { }
    };
 
    // A vector of styled strings, used to form a block of text.
@@ -36,12 +35,11 @@ namespace maf {
    // Often, styled text is created from what is called a tagged string: this is
    // simply a std::string containing formatting codes of the form ^x.
    // The following tags are possible:
-   //    ^g = game,
-   //    ^G = game_title,
-   //    ^i = game_italic,
-   //    ^h = help,
-   //    ^H = help_title,
+   //    ^g = game
+   //    ^h = help
+   //    ^i = italic
    //    ^c = command
+   //    ^T = title
    // ^/ closes the current tag, so that what follows uses the previous tag.
    // (Note that the maximum-supported tag depth is 9, including the default.)
    // ^^ prints a single '^' character. The appearance of any other two-
