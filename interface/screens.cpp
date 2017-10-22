@@ -3,7 +3,7 @@
 #include "help_screens.hpp"
 #include "screens.hpp"
 
-bool maf::screen::base_screen::handle_commands(const std::vector<std::string> & commands) {
+bool maf::base_screen::handle_commands(const std::vector<std::string> & commands) {
    auto& con = console();
 
    if (commands.empty()) {
