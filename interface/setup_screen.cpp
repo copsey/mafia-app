@@ -323,7 +323,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
 }
 
 void maf::Setup_screen::write(std::ostream &os) const {
-   os << "^HSetup^iMafia: a game of deduction and deceit...^h\n\nThis is where you can set up the next game to be played.\n\n";
+   os << "^h^HSetup^/^iMafia: a game of deduction and deceit...^/\n\nThis is where you can set up the next game to be played.\n\n";
 
    if (num_players() == 0) {
       if (num_cards() == 0) {
@@ -364,7 +364,7 @@ void maf::Setup_screen::write(std::ostream &os) const {
          os << ".";
       }
    }
-   os << "\n\nTo see the commands which can be used on this screen, enter ^chelp^h.";
+   os << "\n\nTo see the commands which can be used on this screen, enter ^chelp^/.";
 }
 
 void maf::Setup_screen::write_players_list(std::ostream &os) const {
@@ -401,7 +401,7 @@ void maf::Setup_screen::write_cards_list(std::ostream &os) const {
 
       if (n > 0) {
          if (write_nl) os << '\n';
-         os << "   " << n << " x ^c" << alias(id) << "^h" << " wildcard";
+         os << "   " << n << " x ^c" << alias(id) << "^/ wildcard";
 
          write_nl = true;
       }

@@ -52,7 +52,9 @@ namespace maf {
    //    ^i = game_italic,
    //    ^h = help,
    //    ^H = help_title,
-   //    ^c = command.
+   //    ^c = command
+   // ^/ closes the current tag, so that what follows uses the previous tag.
+   // (Note that the maximum-supported tag depth is 9, including the default.)
    // ^^ prints a single '^' character. The appearance of any other two-
    // character substring of the form ^x results in an exception.
    // Note that the default string style is Style::game, and hence game-styled
