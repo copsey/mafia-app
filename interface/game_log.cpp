@@ -4,7 +4,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
-#include "error.hpp"
+#include "errors.hpp"
 #include "game_log.hpp"
 
 maf::Game_log::Game_log(const std::vector<std::string> &player_names,

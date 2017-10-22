@@ -3,7 +3,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/ref.hpp"
 
-#include "error.hpp"
+#include "errors.hpp"
 #include "game.hpp"
 
 maf::Game::Game(const std::vector<Role::ID> & role_ids,

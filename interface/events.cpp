@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "console.hpp"
-#include "error.hpp"
+#include "errors.hpp"
 #include "events.hpp"
 #include "names.hpp"
 

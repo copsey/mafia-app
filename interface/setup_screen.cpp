@@ -4,7 +4,7 @@
 #include "../riketi/string.hpp"
 
 #include "console.hpp"
-#include "error.hpp"
+#include "errors.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"
 

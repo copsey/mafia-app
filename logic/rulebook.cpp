@@ -1,4 +1,4 @@
-#include "error.hpp"
+#include "errors.hpp"
 #include "rulebook.hpp"
 
 maf::Rulebook::Rulebook(Edition edition)

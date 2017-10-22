@@ -10,7 +10,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
-#include "error.hpp"
+#include "errors.hpp"
 #include "names.hpp"
 #include "console.hpp"
 
