@@ -14,7 +14,7 @@ namespace maf {
    // FIXME: Place Setup_screen into separate 'screen' child namespace
    // of 'maf'.
     
-   struct Setup_screen {
+   struct Setup_Screen {
       // Signifies that the given name is invalid for a player.
       struct Bad_player_name {
          std::string name;
