@@ -8,7 +8,7 @@ void maf::Event_help_screen::write(std::ostream& os) const {
 }
 
 void maf::Role_info_screen::write(std::ostream& os) const {
-   /* fix-me */
+   /* FIXME */
 
    os << "^HMissing Role Info^hNo extra help could be found for the ";
    os << full_name(*role);
@@ -69,8 +69,8 @@ void maf::List_roles_screen::write(std::ostream &os) const {
             break;
       }
 
-      /* fix-me: make rkt::refs work directly. */
-      /* fix-me: still not sorted alphabetically! */
+      /* FIXME: make rkt::refs work directly. */
+      /* FIXME: still not sorted alphabetically! */
 
       std::vector<const Role *> w;
       for (rkt::ref<const Role> r: v) {
@@ -82,7 +82,7 @@ void maf::List_roles_screen::write(std::ostream &os) const {
       });
 
       for (std::size_t i{0}; i < v.size(); ++i) {
-         const Role& r = *v[i];
+         const Role& r = *(v[i]);
 
          os << "   the "
          << full_name(r)
@@ -115,15 +115,15 @@ void maf::Setup_help_screen::write(std::ostream &os) const {
 }
 
 void maf::Player_Info_Screen::write(std::ostream & os) const {
-   const Player& player = *_player_ref;
-   const Game& game = _game_log_ref->game();
-   const Game_log& game_log = *_game_log_ref;
+   const Player & player = *_player_ref;
+   const Game & game = _game_log_ref->game();
+   const Game_log & game_log = *_game_log_ref;
 
    os << "^HInfo: " << game_log.get_name(player);
 
    os << "^hYour role is the " << full_name(player.role()) << ".";
    if (player.has_fake_role()) {
-      // fix-me
+      // FIXME
       os << " You were randomly given this role from the ^c"
       << player.wildcard()->alias()
       << "^g wildcard.";
@@ -139,15 +139,15 @@ void maf::Player_Info_Screen::write(std::ostream & os) const {
       }
    }
 
-   for (const Investigation & inv: game.investigations()) {
+   for (const Investigation& inv: game.investigations()) {
       if (inv.caster() == player) {
-         os << "\n\nYou checked "
-         << game_log.get_name(inv.target())
-         << " on night "
-         << inv.date()
-         << ", who appeared to be "
-         << ((inv.result()) ? "suspicious" : "innocent")
-         << ".";
+         os << "\n\nYou checked ";
+         os << game_log.get_name(inv.target());
+         os << " on night ";
+         os << inv.date();
+         os << ", who appeared to be ";
+         os << ((inv.result()) ? "suspicious" : "innocent");
+         os << ".";
       }
    }
 }

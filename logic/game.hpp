@@ -13,8 +13,9 @@ namespace maf {
    /// the lifetime of an investigation result should not exceed the lifetime
    /// of the players concerned.
    struct Investigation {
-      Investigation(const Player & caster, const Player & target, Date date, bool result)
-       : _caster_ref{caster}, _target_ref{target}, _date{date}, _result{result} { }
+      Investigation(const Player& caster, const Player& target, Date date, bool result)
+	     : _caster_ref{caster}, _target_ref{target}, _date{date}, _result{result}
+      { }
 
       /// The player that performed the investigation.
       const Player& caster() const {
@@ -54,7 +55,7 @@ namespace maf {
       Game(const std::vector<Role::ID> &role_ids,
            const std::vector<Wildcard::ID> &wildcard_ids,
            const Rulebook &rulebook = Rulebook{});
-      
+
       // The rulebook being used to run the game.
       const Rulebook & rulebook() const;
 

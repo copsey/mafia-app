@@ -71,7 +71,7 @@ void maf::Player_given_initial_role::write_full(std::ostream &os) const {
       << full_name(*_r) << ".";
 
       if (_w != nullptr) {
-         /* fix-me */
+         /* FIXME */
          os << "\nYou were randomly given this role from the ^c"
          << _w->alias()
          << "^g wildcard.";
@@ -149,7 +149,7 @@ void maf::Obituary::write_full(std::ostream &os) const {
       if (_deaths.size() == 0) {
          os << "^GObituary^gNobody died during the night.";
       } else {
-         /* fix-me: reword to remove use of "us". */
+         /* FIXME: reword to remove use of "us". */
          os << "^GObituary^gIt appears that " << _deaths.size() << " of us did not survive the night...";
       }
    } else {
@@ -227,7 +227,7 @@ void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Ga
 }
 
 void maf::Town_meeting::write_full(std::ostream &os) const {
-   /* fix-me: add in proper content. */
+   /* FIXME: add in proper content. */
 
    if (_lynch_can_occur) {
       os << "^GDay "
@@ -236,11 +236,11 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
 
       for (auto it = _players.begin(); it != _players.end(); ) {
          auto& p_ref = *it;
-         os << "   "
-         << game_log().get_name(*p_ref);
+         os << "   ";
+         os << game_log().get_name(*p_ref);
          if (p_ref->lynch_vote() != nullptr) {
-            os << ", voting to lynch "
-            << game_log().get_name(*(p_ref->lynch_vote()));
+            os << ", voting to lynch ";
+	        os << game_log().get_name(*(p_ref->lynch_vote()));
          }
          os << ((++it == _players.end()) ? "." : ",\n");
       }
@@ -249,9 +249,9 @@ void maf::Town_meeting::write_full(std::ostream &os) const {
       << (_next_lynch_victim ? game_log().get_name(*_next_lynch_victim) : "nobody")
       << " will be lynched.^h\n\nEnter ^clynch^h to submit the current lynch votes. Daytime abilities may also be used at this point.";
    } else {
-      os << "^GDay "
-      << _date
-      << "^iWith little time left in the day, the townsfolk prepare themselves for another night of uncertainty...\n\n^gGathered outside the town hall are:\n";
+      os << "^G" << "Day " << _date;
+      os << "^i" << "With little time left in the day, the townsfolk prepare themselves for another night of uncertainty...\n\n";
+      os << "^g" << "Gathered outside the town hall are:\n";
 
       for (auto it = _players.begin(); it != _players.end(); ) {
          auto& p_ref = *it;
@@ -284,13 +284,9 @@ void maf::Player_kicked::do_commands(const std::vector<std::string>& commands, G
 }
 
 void maf::Player_kicked::write_full(std::ostream &os) const {
-   os << "^G"
-   << game_log().get_name(*player)
-   << " kicked^g"
-   << game_log().get_name(*player)
-   << " was kicked from the game!\nThey were the "
-   << full_name(player->role())
-   << ".";
+   os << "^G" << game_log().get_name(*player) << " kicked";
+   os << "^g" << game_log().get_name(*player) << " was kicked from the game!\n";
+   os << "They were the " << full_name(player->role()) << ".";
 }
 
 void maf::Player_kicked::write_summary(std::ostream &os) const {
@@ -376,7 +372,7 @@ void maf::Duel_result::write_summary(std::ostream &os) const {
    auto & caster_name = glog.get_name(*caster);
    auto & target_name = glog.get_name(*target);
 
-   if (caster->is_alive()) { // fix-me: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
+   if (caster->is_alive()) { // FIXME: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
       os << caster_name << " won a duel against " << target_name << ".";
    } else {
       os << caster_name << " lost a duel against " << target_name << ".";
@@ -457,7 +453,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, G
          game_log.cast_mafia_kill(caster.id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         /* fix-me: show "confirm skip?" screen. */
+         /* FIXME: show "confirm skip?" screen. */
          game_log.skip_mafia_kill();
          _go_to_sleep = true;
       } else {
@@ -467,7 +463,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, G
 }
 
 void maf::Mafia_meeting::write_full(std::ostream &os) const {
-   /* fix-me */
+   /* FIXME */
    if (_go_to_sleep) {
       os << "^GMafia Meeting^gThe mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^h when you are ready to continue.";
    } else if (_initial) {
@@ -551,13 +547,14 @@ void maf::Heal_use::do_commands(const std::vector<std::string>& commands, Game_l
 
 void maf::Heal_use::write_full(std::ostream &os) const {
    if (_go_to_sleep) {
-      os <<"^GHeal Use^g"
-      << game_log().get_name(*_caster)
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os << "^G" << "Heal Use";
+      os << "^g" << game_log().get_name(*_caster) << " should now go back to sleep.";
+      os << "^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GHeal Use^g"
-      << game_log().get_name(*_caster)
-      << ", you can choose to heal somebody this night.^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
+      os << "^G" << "Heal Use";
+      os << "^g" << game_log().get_name(*_caster);
+      os << ", you can choose to heal somebody this night.";
+      os << "^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
    }
 }
 
@@ -639,7 +636,7 @@ void maf::Boring_night::do_commands(const std::vector<std::string>& commands, Ga
 }
 
 void maf::Boring_night::write_full(std::ostream &os) const {
-   /* fix-me: show current date in title. (e.g. "Night 1") */
+   /* FIXME: show current date in title. (e.g. "Night 1") */
 
    os << "^GCalm Night^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
 }

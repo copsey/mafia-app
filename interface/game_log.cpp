@@ -37,9 +37,9 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
       new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), true});
    }
 
-   for (auto& p_ref: _game.remaining_players()) {
-      if (p_ref->role().is_role_faker() && !p_ref->has_fake_role()) {
-         new_events.push_back(new Choose_fake_role{*this, *p_ref});
+   for (auto & player: _game.remaining_players()) {
+      if (player->role().is_role_faker() && !player->has_fake_role()) {
+         new_events.push_back(new Choose_fake_role{*this, *player});
       }
    }
 
@@ -173,7 +173,7 @@ void maf::Game_log::begin_night() {
       new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), false});
    }
 
-   /* fix-me: minimise number of events when a player has multiple things to do this night. */
+   /* FIXME: minimise number of events when a player has multiple things to do this night. */
    for (const Player &player: _game.players()) {
       for (Ability ability: player.compulsory_abilities()) {
          switch (ability.id) {

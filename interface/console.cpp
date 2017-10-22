@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 #include "../riketi/algorithm.hpp"
-#include "../riketi/char.hpp"
 #include "../riketi/enum.hpp"
 #include "../riketi/experimental/algorithm.hpp"
 #include "../riketi/random.hpp"
@@ -30,11 +29,13 @@ const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::
    }
 };
 
-bool maf::commands_match(const std::vector<std::string> &v1,
-                           const std::vector<std::string> &v2) {
-   return rkt::matches(v1, v2, [](const std::string &s1, const std::string &s2) {
+bool maf::commands_match(const std::vector<std::string>& v1,
+                         const std::vector<std::string>& v2) {
+   auto pred = [](const std::string& s1, const std::string& s2) {
       return s1.empty() || s2.empty() || s1 == s2;
-   });
+   };
+
+   return rkt::matches(v1, v2, pred);
 }
 
 maf::Console::Console() {
@@ -182,17 +183,17 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
 
-      /* fix-me: add  "list w", "list w v", "list w m", "list w f". */
+      /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
 
-      /* fix-me: "add p A B C" should result in players A, B, C all being chosen. */
+      /* FIXME: "add p A B C" should result in players A, B, C all being chosen. */
 
-      /* fix-me: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
+      /* FIXME: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
 
-      /* fix-me: list p random, a utility command to generate a list of the players in a game, in a random order.
+      /* FIXME: list p random, a utility command to generate a list of the players in a game, in a random order.
        (for example, when asking people to choose their lynch votes, without the option to change.)
        list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
 
-      /* fix-me: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
+      /* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
 
       refresh_output();
       clear_error_message();
@@ -527,7 +528,7 @@ bool maf::Console::has_game() const {
 }
 
 void maf::Console::end_game() {
-   /* fix-me: set location where history is saved. */
+   /* FIXME: set location where history is saved. */
 
    if (has_game()) {
       std::time_t t = std::time(nullptr);

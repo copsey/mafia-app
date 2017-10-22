@@ -62,7 +62,7 @@ void maf::Player::remove_compulsory_ability(Ability ability) {
          return;
       }
    }
-   /* fix-me: throw exception if compulsory ability is not currently stored. */
+   /* FIXME: throw exception if compulsory ability is not currently stored. */
 }
 
 void maf::Player::cast_lynch_vote(const Player & target) {

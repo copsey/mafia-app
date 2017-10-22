@@ -15,7 +15,7 @@ namespace maf {
       }
    };
 
-   /* fix-me */
+   /* FIXME */
    // The category of the given wildcard.
    std::string category(const Wildcard &wildcard);
    std::string category(Wildcard::ID id);

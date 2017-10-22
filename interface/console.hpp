@@ -15,8 +15,8 @@ namespace maf {
    // Decide whether or not the two given vectors of commands match, which is
    // true exactly when both vectors are of the same length and at each position
    // either one of the strings is empty or both strings are identical.
-   bool commands_match(const std::vector<std::string> &v1,
-                       const std::vector<std::string> &v2);
+   bool commands_match(const std::vector<std::string>& v1,
+                       const std::vector<std::string>& v2);
 
    // Signifies that there is no game in progress at the moment.
    struct No_game_in_progress { };

@@ -9,8 +9,9 @@
 maf::Game::Game(const std::vector<Role::ID> & role_ids,
                 const std::vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
- : _rulebook{rulebook} {
-   using Card = std::pair<rkt::ref<const Role>, const Wildcard *>;
+   : _rulebook{rulebook}
+{
+   using Card = std::pair<rkt::ref<const Role>, const Wildcard*>;
 
    std::vector<Card> cards{};
 
@@ -19,13 +20,13 @@ maf::Game::Game(const std::vector<Role::ID> & role_ids,
    }
 
    for (Wildcard::ID id: wildcard_ids) {
-      Wildcard & wildcard = _rulebook.get_wildcard(id);
+      Wildcard& wildcard = _rulebook.get_wildcard(id);
       cards.emplace_back(wildcard.pick_role(_rulebook), &wildcard);
    }
 
    rkt::shuffle(cards);
 
-    for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
+   for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
       _players.emplace_back(i);
 
       Player& player = _players.back();
@@ -47,33 +48,33 @@ const std::vector<maf::Player> & maf::Game::players() const {
 }
 
 std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players() const {
-   std::vector<rkt::ref<const Player>> v{};
-   for (const Player &p: _players) {
-      if (p.is_present()) v.emplace_back(p);
+   std::vector<rkt::ref<const Player>> vec{};
+   for (const Player& pl: _players) {
+      if (pl.is_present()) vec.emplace_back(pl);
    }
-   return v;
+   return vec;
 }
 
 std::vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const {
-   std::vector<rkt::ref<const Player>> v{};
-   for (const Player &p: _players) {
-      if (p.is_present() && p.role().alignment() == alignment) {
-         v.emplace_back(p);
+   std::vector<rkt::ref<const Player>> vec{};
+   for (const Player& pl: _players) {
+      if (pl.is_present() && pl.alignment() == alignment) {
+         vec.emplace_back(pl);
       }
    }
-   return v;
+   return vec;
 }
 
 std::size_t maf::Game::num_players_left() const {
-   return rkt::count_if(_players, [](const Player &p) {
-      return p.is_present();
-   });
+   return rkt::count_if(_players, std::mem_fn(&Player::is_present));
 }
 
 std::size_t maf::Game::num_players_left(Alignment alignment) const {
-   return rkt::count_if(_players, [alignment](const Player &p) {
-      return p.is_present() && p.role().alignment() == alignment;
-   });
+   auto pred = [alignment](const Player& pl) {
+      return pl.is_present() && pl.alignment() == alignment;
+   };
+
+   return rkt::count_if(_players, pred);
 }
 
 maf::Date maf::Game::date() const {
@@ -94,7 +95,7 @@ void maf::Game::kick_player(Player::ID id) {
    if (!is_day())
       throw error::bad_timing();
 
-   Player &player = find_player(id);
+   Player & player = find_player(id);
 
    if (player.has_been_kicked())
       throw error::repeat_action();
@@ -103,21 +104,22 @@ void maf::Game::kick_player(Player::ID id) {
    try_to_end();
 }
 
-const maf::Player * maf::Game::next_lynch_victim() const {
-   std::map<const Player *, std::size_t> votes_per_player{};
-   std::size_t total_votes{0};
+const maf::Player* maf::Game::next_lynch_victim() const {
+   std::map<const Player*, std::size_t> votes_per_player{};
+   std::size_t total_votes = 0;
 
-   for (const Player &voter: _players) {
-      if (voter.is_present() && voter.lynch_vote() != nullptr) {
-         const Player &target = *voter.lynch_vote();
-         ++votes_per_player[&target];
+   for (const Player& voter: _players) {
+      if (voter.is_present() && voter.has_lynch_vote()) {
+         ++votes_per_player[voter.lynch_vote()];
          ++total_votes;
       }
    }
 
-   auto it = rkt::max_element(votes_per_player, [](const std::pair<const Player *, std::size_t> &p1, const std::pair<const Player *, std::size_t> &p2) {
+   auto less_votes = [](const std::pair<const Player*, std::size_t>& p1, const std::pair<const Player*, std::size_t>& p2) {
       return p1.second < p2.second;
-   });
+   };
+
+   auto it = rkt::max_element(votes_per_player, less_votes);
 
    if (it != votes_per_player.end() && (2 * it->second > total_votes)) {
       return it->first;
@@ -169,10 +171,10 @@ const maf::Player * maf::Game::process_lynch_votes() {
    if (!lynch_can_occur())
       throw error::bad_timing();
 
-   auto victim = const_cast<Player *>(next_lynch_victim());
+   auto victim = const_cast<Player*>(next_lynch_victim());
    if (victim) {
       victim->kill(_date, _time);
-      if (victim->role().is_troll()) _pending_haunters.push_back(victim);
+      if (victim->is_troll()) _pending_haunters.push_back(victim);
    }
 
    _lynch_can_occur = false;
@@ -183,8 +185,8 @@ const maf::Player * maf::Game::process_lynch_votes() {
 }
 
 void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (this->has_ended())
       throw error::game_has_ended();
@@ -199,9 +201,9 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel)
       throw error::unavailable_ability();
 
-   double s = caster.role().duel_strength() + target.role().duel_strength();
-   /* fix-me: throw exception if s <= 0 */
-   double p = caster.role().duel_strength() / s;
+   double s = caster.duel_strength() + target.duel_strength();
+   /* FIXME: throw exception if s <= 0 */
+   double p = caster.duel_strength() / s;
 
    std::bernoulli_distribution bd{p};
 
@@ -215,7 +217,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
    }
 
    winner->win_duel();
-   if (winner->role().win_condition() == Win_condition::win_duel) {
+   if (winner->win_condition() == Win_condition::win_duel) {
       winner->leave();
    }
    loser->kill(_date, _time);
@@ -240,7 +242,7 @@ void maf::Game::begin_night() {
    if (_date > 0) {
       _mafia_can_use_kill = (num_players_left(Alignment::mafia) > 0);
 
-      for (Player &player: _players) {
+      for (Player& player: _players) {
          if (player.is_present() && player.role().has_ability()) {
             Ability ability = player.role().ability();
 
@@ -263,14 +265,14 @@ void maf::Game::begin_night() {
 }
 
 void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
-   Player &player = find_player(player_id);
-   const Role &fake_role = _rulebook.get_role(fake_role_id);
+   Player& player = find_player(player_id);
+   const Role& fake_role = _rulebook.get_role(fake_role_id);
 
    if (this->has_ended())
       throw error::game_has_ended();
    if (!is_night())
       throw error::bad_timing();
-   if (!player.role().is_role_faker())
+   if (!player.is_role_faker())
       throw error::action_invalid_for_player();
    if (player.has_fake_role())
       throw error::repeat_action();
@@ -292,12 +294,12 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
    if (!mafia_can_use_kill())
       throw error::unavailable_ability();
 
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (!caster.is_present())
       throw error::inactive_caster();
-   if (caster.role().alignment() != Alignment::mafia)
+   if (caster.alignment() != Alignment::mafia)
       throw error::wrong_alignment();
    if (!target.is_present())
       throw error::inactive_target();
@@ -305,8 +307,8 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
       throw error::identical_players();
 
    _mafia_can_use_kill = false;
-   _mafia_kill_caster = &const_cast<Player &>(caster);
-   _mafia_kill_target = &const_cast<Player &>(target);
+   _mafia_kill_caster = &caster;
+   _mafia_kill_target = &target;
 
    try_to_end_night();
 }
@@ -332,8 +334,8 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_kill))
       throw error::unavailable_ability();
@@ -356,7 +358,7 @@ void maf::Game::skip_kill(Player::ID caster_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
+   Player& caster = find_player(caster_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_kill))
       throw error::unavailable_ability();
@@ -374,8 +376,8 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_heal))
       throw error::unavailable_ability();
@@ -398,7 +400,7 @@ void maf::Game::skip_heal(Player::ID caster_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
+   Player& caster = find_player(caster_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_heal))
       throw error::unavailable_ability();
@@ -416,8 +418,8 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_investigate))
       throw error::unavailable_ability();
@@ -440,7 +442,7 @@ void maf::Game::skip_investigate(Player::ID caster_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
+   Player& caster = find_player(caster_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_investigate))
       throw error::unavailable_ability();
@@ -458,8 +460,8 @@ void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
-   Player &target = find_player(target_id);
+   Player& caster = find_player(caster_id);
+   Player& target = find_player(target_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_peddle))
       throw error::unavailable_ability();
@@ -480,7 +482,7 @@ void maf::Game::skip_peddle(Player::ID caster_id) {
    if (this->has_ended())
       throw error::game_has_ended();
 
-   Player &caster = find_player(caster_id);
+   Player& caster = find_player(caster_id);
 
    if (rkt::none_of(caster.compulsory_abilities(), is_peddle))
       throw error::unavailable_ability();
@@ -494,7 +496,7 @@ bool maf::Game::has_ended() const {
    return _has_ended;
 }
 
-maf::Player & maf::Game::find_player(Player::ID id) {
+maf::Player& maf::Game::find_player(Player::ID id) {
    if (id < _players.size()) {
       return _players[id];
    } else {
@@ -503,14 +505,26 @@ maf::Player & maf::Game::find_player(Player::ID id) {
 }
 
 bool maf::Game::try_to_end_night() {
-   if (!is_night()) return false;
-   if (rkt::any_of(_players, [](const Player &player) {
-      return player.is_present() && player.role().is_role_faker() && !player.has_fake_role();
-   })) return false;
+   if (!is_night()) {
+      return false;
+   }
+
+   auto faker_needs_role = [](const Player & pl) {
+      return pl.is_present()
+         && pl.role().is_role_faker()
+         && !pl.has_fake_role();
+   };
+
+   if (rkt::any_of(_players, faker_needs_role)) {
+      return false;
+   }
+
+   auto has_compulsory_ability = [](const Player& pl) {
+      return pl.compulsory_abilities().size() > 0;
+   };
+
    if (mafia_can_use_kill()) return false;
-   if (rkt::any_of(players(), [](const Player &player) {
-      return player.compulsory_abilities().size() > 0;
-   })) return false;
+   if (rkt::any_of(players(), has_compulsory_ability)) return false;
 
    for (const auto &pair: _pending_heals) {
       Player &target = *pair.second;
@@ -518,7 +532,7 @@ bool maf::Game::try_to_end_night() {
    }
 
    for (const auto &pair: _pending_peddles) {
-      Player &target = *pair.second;
+      Player& target = *pair.second;
       target.give_drugs();
    }
 
@@ -528,7 +542,7 @@ bool maf::Game::try_to_end_night() {
       }
    }
 
-   /* fix-me: make kill strengths work correctly. */
+   // FIXME: make kill strengths work correctly.
    for (const auto &pair: _pending_kills) {
       Player &target = *pair.second;
       if (!target.is_healed()) {
@@ -536,29 +550,27 @@ bool maf::Game::try_to_end_night() {
       }
    }
 
-   for (auto & pair: _pending_investigations) {
-      Player & caster = *pair.first;
-      Player & target = *pair.second;
+   for (auto& pair: _pending_investigations) {
+      Player& caster = *pair.first;
+      Player& target = *pair.second;
 
       if (caster.is_present()) {
          _investigations.emplace_back(caster, target, _date, target.is_suspicious());
       }
    }
 
-   for (Player *haunter: _pending_haunters) {
-      std::vector<Player *> possible_victims{};
-      for (Player &player: _players) {
-         if (player.is_present() && player.lynch_vote() == haunter)  {
+   for (Player* haunter: _pending_haunters) {
+      std::vector<Player*> possible_victims{};
+      for (Player& player: _players) {
+         if (player.is_present() && player.lynch_vote() == haunter)   {
             possible_victims.push_back(&player);
          }
       }
 
       if (possible_victims.size() > 0) {
-         Player &victim = **rkt::pick(possible_victims);
+         Player& victim = **rkt::pick(possible_victims);
          victim.kill(_date, _time);
          victim.haunt(*haunter);
-      } else {
-         break;
       }
    }
 
@@ -578,7 +590,7 @@ bool maf::Game::try_to_end_night() {
 
       _pending_haunters.clear();
 
-      for (Player &player: _players) player.refresh();
+      for (Player& player: _players) player.refresh();
    }
 
    return true;
@@ -595,23 +607,23 @@ bool maf::Game::try_to_end() {
    bool check_for_mafia_eliminated = false;
    bool check_for_last_survivor = false;
 
-   for (const Player &player : _players) {
+   for (const Player& player : _players) {
       if (player.is_present()) {
          ++num_players_left;
-         switch (player.role().alignment()) {
-         case Alignment::village:
-            ++num_village_left;
-            break;
+         switch (player.alignment()) {
+            case Alignment::village:
+               ++num_village_left;
+               break;
 
-         case Alignment::mafia:
-            ++num_mafia_left;
-            break;
+            case Alignment::mafia:
+               ++num_mafia_left;
+               break;
 
-         default:
-            break;
+            default:
+               break;
          }
 
-         switch (player.role().peace_condition()) {
+         switch (player.peace_condition()) {
          case Peace_condition::always_peaceful:
             break;
 
@@ -636,11 +648,11 @@ bool maf::Game::try_to_end() {
       return false;
    }
 
-   for (Player &player: _players) {
+   for (Player& player: _players) {
       bool has_won = false;
 
       if (!player.has_been_kicked()) {
-         switch (player.role().win_condition()) {
+         switch (player.win_condition()) {
             case Win_condition::survive:
                has_won = player.is_alive();
                break;
