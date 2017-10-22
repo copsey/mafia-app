@@ -1,17 +1,28 @@
 #include "console.hpp"
+#include "errors.hpp"
 #include "questions.hpp"
 
-bool maf::Confirm_end_game::do_commands(const std::vector<std::string> &commands) {
+maf::Help_Screen * maf::Question::get_help_screen() const {
+   return nullptr;
+}
+
+bool maf::Confirm_end_game::handle_commands(const std::vector<std::string> & commands) {
+   if (Question::handle_commands(commands)) return true;
+
+   auto& con = this->console();
+
    if (commands_match(commands, {"yes"})) {
-      _console_ref->end_game();
-      return true;
+      con.end_game();
+      con.clear_question();
    }
    else if (commands_match(commands, {"no"})) {
-      return true;
+      con.clear_question();
    }
    else {
       throw Bad_commands();
    }
+
+   return true;
 }
 
 void maf::Confirm_end_game::write(std::ostream &os) const {

@@ -5,6 +5,8 @@
 
 #include <ostream>
 
+#include "screens.hpp"
+
 namespace maf {
    struct Console;
 
@@ -12,20 +14,12 @@ namespace maf {
    // FIXME: Place all Questions into separate 'question' child namespace
    // of 'maf'.
     
-   struct Question {
-      // Signifies that a question failed to process a set of commands.
-      struct Bad_commands { };
+   struct Question: Base_Screen {
+      struct Bad_commands {};
 
-      // Handles the given commands, taking action as appropriate.
-      //
-      // Returns true if the question has been fully answered, and false otherwise.
-      // If false, then the tagged string outputted by write may have changed.
-      //
-      // Throws an exception if the commands couldn't be handled.
-      virtual bool do_commands(const std::vector<std::string> & commands) = 0;
+      using Base_Screen::Base_Screen;
 
-      // Writes a tagged string containing the question to os.
-      virtual void write(std::ostream &os) const = 0;
+      Help_Screen * get_help_screen() const override;
    };
 
 
@@ -45,15 +39,11 @@ namespace maf {
 
    struct Confirm_end_game: Question {
       Confirm_end_game(Console & console)
-         : _console_ref(console)
+         : Question(console)
       { }
 
-      bool do_commands(const std::vector<std::string> & commands) override;
-      
+      bool handle_commands(const std::vector<std::string> & commands) override;
       void write(std::ostream &os) const override;
-
-   private:
-      rkt::ref<Console> _console_ref;
    };
 }
 

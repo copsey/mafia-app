@@ -75,7 +75,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
       else if (has_question()) {
-         if (_question->do_commands(commands)) {
+         if (_question->handle_commands(commands)) {
             clear_question();
          }
       }
