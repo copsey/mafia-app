@@ -12,21 +12,6 @@
 #include "names.hpp"
 #include "console.hpp"
 
-const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
-   maf::Console::Game_parameters{
-      {"Augustus", "Brutus", "Claudius", "Drusilla"},
-      {maf::Role::ID::peasant, maf::Role::ID::racketeer, maf::Role::ID::coward},
-      {maf::Wildcard::ID::village_basic},
-      maf::Rulebook{}
-   },
-   maf::Console::Game_parameters{
-      {"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
-      {maf::Role::ID::peasant, maf::Role::ID::peasant,maf::Role::ID::doctor, maf::Role::ID::detective, maf::Role::ID::dealer, maf::Role::ID::musketeer},
-      {},
-      maf::Rulebook{}
-   }
-};
-
 bool maf::commands_match(const std::vector<std::string>& v1,
                          const std::vector<std::string>& v2) {
    auto pred = [](const std::string& s1, const std::string& s2) {
@@ -36,7 +21,9 @@ bool maf::commands_match(const std::vector<std::string>& v1,
    return rkt::matches(v1, v2, pred);
 }
 
-maf::Console::Console() {
+maf::Console::Console()
+   : _setup_screen{*this}
+{
    refresh_output();
 }
 
@@ -104,30 +91,8 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       else if (has_game()) {
          _game_log->do_commands(commands);
       }
-      else if (commands_match(commands, {"begin"})) {
-         begin_pending_game();
-      }
-      else if (commands_match(commands, {"preset"})) {
-         std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
-         begin_preset(uid(rkt::random_engine));
-      }
-      else if (commands_match(commands, {"preset", ""})) {
-         int i = 0;
-         bool i_is_valid = true;
-
-         try {
-            i = std::stoi(commands[1]);
-         } catch (...) {
-            err << "^TInvalid input!^hThe string ^c"
-                << commands[1]
-                << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
-            i_is_valid = false;
-         }
-
-         if (i_is_valid) begin_preset(i);
-      }
       else {
-         _setup_screen.do_commands(commands);
+         _setup_screen.handle_commands(commands);
       }
 
       /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
@@ -433,6 +398,16 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       << e.wildcard->alias()
       << "^h have been selected.";
    }
+   catch (const Setup_Screen::Missing_preset &e) {
+      err << "^h^TMissing preset!^/There is no preset defined for the index ";
+      err << e.index;
+      err << ".";
+   }
+   catch (const Setup_Screen::Bad_preset_string &e) {
+       err << "^h^TInvalid input!^/The string ^c";
+       err << e.str;
+       err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
+   }
    catch (const Setup_Screen::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
@@ -449,12 +424,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             break;
       }
    }
-   catch (const Missing_preset &e) {
-      err << "^TMissing preset!^hThere is no preset defined for the index "
-      << e.index
-      << ".";
-   }
-
    if (err.tellp() == 0) {
       refresh_output();
       clear_error_message();
@@ -579,23 +548,9 @@ const maf::Rulebook & maf::Console::active_rulebook() const {
 }
 
 void maf::Console::begin_game(const std::vector<std::string> &pl_names,
-                                const std::vector<Role::ID> &r_ids,
-                                const std::vector<Wildcard::ID> &w_ids,
-                                const Rulebook &rulebook) {
+                              const std::vector<Role::ID> &r_ids,
+                              const std::vector<Wildcard::ID> &w_ids,
+                              const Rulebook &rulebook) {
    if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
    _game_log.reset(new Game_log{pl_names, r_ids, w_ids, rulebook});
-}
-
-void maf::Console::begin_pending_game() {
-   if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
-   _game_log = _setup_screen.new_game_log();
-}
-
-void maf::Console::begin_preset(int i) {
-   if (i >= 0 && i < num_presets) {
-      Game_parameters params = _presets[i];
-      begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
-   } else {
-      throw Missing_preset{i};
-   }
 }

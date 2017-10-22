@@ -1,7 +1,6 @@
-#ifndef MAFIA_SETUP_SCREEN_H
-#define MAFIA_SETUP_SCREEN_H
+#ifndef MAFIA_INTERFACE_SETUP_SCREEN
+#define MAFIA_INTERFACE_SETUP_SCREEN
 
-#include <memory>
 #include <ostream>
 #include <set>
 
@@ -9,12 +8,13 @@
 
 #include "game_log.hpp"
 #include "names.hpp"
+#include "screens.hpp"
 
 namespace maf {
    // FIXME: Place Setup_screen into separate 'screen' child namespace
    // of 'maf'.
     
-   struct Setup_Screen {
+   struct Setup_Screen: Base_Screen {
       // Signifies that the given name is invalid for a player.
       struct Bad_player_name {
          std::string name;
@@ -44,8 +44,24 @@ namespace maf {
          rkt::ref<const Wildcard> wildcard;
       };
 
+      // Signifies that no preset is defined with index i.
+      struct Missing_preset {
+         int index;
+      };
+
+      // Signifies that the string `str` could not be converted into a preset
+      // index.
+      struct Bad_preset_string {
+         std::string str;
+      };
+
       // Signifies that a set of commands couldn't be interpreted.
       struct Bad_commands { };
+
+      // Make a blank setup screen.
+      Setup_Screen(Console & con)
+         : Base_Screen{con}
+      { }
 
       // The rulebook to be used in the pending game.
       const Rulebook & rulebook() const;
@@ -101,22 +117,40 @@ namespace maf {
       // Removes all of the players and cards that have been chosen.
       void clear_all();
 
-      // Begins a new game using the current parameters, stored in a game log.
-      std::unique_ptr<Game_log> new_game_log() const;
+      // Begin the pending game.
+      void begin_pending_game();
+      // Begin the preset with index `i`.
+      void begin_preset(int i);
+      // Begin a random preset.
+      void begin_random_preset();
 
       // Handles the given commands, making alterations to the setup screen as
       // appropriate.
-      // Throws an exception if the commands couldn't be interpreted.
-      void do_commands(const std::vector<std::string> &commands);
+      //
+      // @throws `error::bad_commands` if the commands couldn't be interpreted.
+      bool handle_commands(const std::vector<std::string> & commands) override;
 
-      // Writes the setup screen to os.
-      void write(std::ostream &os) const;
-      // Writes a list of the selected players to os.
+      // Write the setup screen to `os`.
+      void write(std::ostream & os) const override;
+      // Write a list of the selected players to `os`.
       void write_players_list(std::ostream &os) const;
-      // Writes a list of the selected cards to os.
+      // Write a list of the selected cards to `os`.
       void write_cards_list(std::ostream &os) const;
 
+      // Generate a help screen for setting up a new game.
+      Help_Screen * get_help_screen() const override;
+
    private:
+      struct Game_parameters {
+         std::vector<std::string> player_names;
+         std::vector<Role::ID> role_ids;
+         std::vector<Wildcard::ID> wildcard_ids;
+         Rulebook rulebook;
+      };
+
+      static constexpr std::size_t num_presets{2};
+      static const std::array<Game_parameters, num_presets> _presets;
+
       Rulebook _rulebook{};
       std::set<std::string> _player_names{};
       std::map<Role::ID, std::size_t, Role_ID_full_name_compare> _role_ids{};

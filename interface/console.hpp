@@ -18,11 +18,6 @@ namespace maf {
    bool commands_match(const std::vector<std::string>& v1,
                        const std::vector<std::string>& v2);
 
-   // Signifies that no preset is defined with index i.
-   struct Missing_preset {
-      int index;
-   };
-
    // Signifies that there is no game in progress at the moment.
    struct No_game_in_progress { };
 
@@ -45,7 +40,7 @@ namespace maf {
       // error_message() is empty.
       // Returns false if the commands are invalid for some reason. In this
       // case, output() remains unchanged and error_message() is non-empty.
-      bool do_commands(const std::vector<std::string> &commands);
+      bool do_commands(const std::vector<std::string> & commands);
       // Process the given input string, by seperating it into commands
       // delimited by whitespace. For example, the input "add p Brutus" becomes
       // {"add", "p", "Brutus"}.
@@ -102,6 +97,11 @@ namespace maf {
       // Checks if a game is currently in progress.
       bool has_game() const;
 
+      // Begin a new game using the given parameters.
+      void begin_game(const std::vector<std::string> &player_names,
+                      const std::vector<Role::ID> &role_ids,
+                      const std::vector<Wildcard::ID> &wildcard_ids,
+                      const Rulebook &rulebook);
       // Instantly ends any game in progress, and saves a transcript of it.
       // (the game may not have actually reached an end state.)
       void end_game();
@@ -111,30 +111,13 @@ namespace maf {
       const Rulebook & active_rulebook() const;
 
    private:
-      struct Game_parameters {
-         std::vector<std::string> player_names;
-         std::vector<Role::ID> role_ids;
-         std::vector<Wildcard::ID> wildcard_ids;
-         Rulebook rulebook;
-      };
-
-      static constexpr std::size_t num_presets{2};
-      static const std::array<Game_parameters, num_presets> _presets;
-
       Styled_text _output{};
       Styled_text _error_message{};
 
       std::unique_ptr<Game_log> _game_log{};
-      Setup_Screen _setup_screen{};
+      Setup_Screen _setup_screen;
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
-
-      void begin_game(const std::vector<std::string> &player_names,
-                      const std::vector<Role::ID> &role_ids,
-                      const std::vector<Wildcard::ID> &wildcard_ids,
-                      const Rulebook &rulebook);
-      void begin_pending_game();
-      void begin_preset(int i);
    };
 }
 
