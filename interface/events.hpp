@@ -11,6 +11,11 @@
 namespace maf {
    struct Game_log;
 
+   // FIXME: Implement Game_Screen class.
+   // These will usually correspond 1-to-1 with Events.
+
+   // FIXME: Split Events from Game_Screens.
+
    struct Event {
       // Signifies that an event failed to process a set of commands.
       struct Bad_commands { };
