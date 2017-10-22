@@ -49,26 +49,26 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"help"})) {
          if (has_game()) {
-            store_help_screen(new Event_Help_Screen{_game_log->current_event()});
+            store_help_screen(new Event_Help_Screen{*this, _game_log->current_event()});
          } else {
-            store_help_screen(new Setup_Help_Screen());
+            store_help_screen(new Setup_Help_Screen{*this});
          }
       }
       else if (commands_match(commands, {"help", "r", ""})) {
-         const Role &r = active_rulebook().get_role(commands[2]);
-         store_help_screen(new Role_Info_Screen(r));
+         const Role & r = active_rulebook().get_role(commands[2]);
+         store_help_screen(new Role_Info_Screen{*this, r});
       }
       else if (commands_match(commands, {"list", "r"})) {
-         store_help_screen(new List_Roles_Screen(active_rulebook()));
+         store_help_screen(new List_Roles_Screen{*this});
       }
       else if (commands_match(commands, {"list", "r", "v"})) {
-         store_help_screen(new List_Roles_Screen(active_rulebook(), List_Roles_Screen::Filter_Alignment::village));
+         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::village});
       }
       else if (commands_match(commands, {"list", "r", "m"})) {
-         store_help_screen(new List_Roles_Screen(active_rulebook(), List_Roles_Screen::Filter_Alignment::mafia));
+         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::mafia});
       }
       else if (commands_match(commands, {"list", "r", "f"})) {
-         store_help_screen(new List_Roles_Screen(active_rulebook(), List_Roles_Screen::Filter_Alignment::freelance));
+         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::freelance});
       }
       else if (commands_match(commands, {"info", ""})) {
          if (!has_game()) {
@@ -77,7 +77,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             const std::string & approx_name = commands[1];
             const Player & player = _game_log->find_player(approx_name);
 
-            store_help_screen(new Player_Info_Screen{player, *_game_log});
+            store_help_screen(new Player_Info_Screen{*this, player});
          }
       }
       else if (has_help_screen()) {

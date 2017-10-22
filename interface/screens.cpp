@@ -1,3 +1,4 @@
+#include "console.hpp"
 #include "errors.hpp"
 #include "events.hpp"
 #include "help_screens.hpp"
@@ -19,15 +20,15 @@ bool maf::Base_Screen::handle_commands(const std::vector<std::string> & commands
       auto& alias = commands[2];
       auto& role = con.active_rulebook().get_role(alias);
 
-      con.store_help_screen(new Role_Info_Screen(role));
+      con.store_help_screen(new Role_Info_Screen(con, role));
    } else if (commands_match(commands, {"list", "r"})) {
-      con.store_help_screen(new List_Roles_Screen(con.active_rulebook()));
+      con.store_help_screen(new List_Roles_Screen(con));
    } else if (commands_match(commands, {"list", "r", "v"})) {
-      con.store_help_screen(new List_Roles_Screen(con.active_rulebook(), List_Roles_Screen::Filter_Alignment::village));
+      con.store_help_screen(new List_Roles_Screen(con, List_Roles_Screen::Filter_Alignment::village));
    } else if (commands_match(commands, {"list", "r", "m"})) {
-      con.store_help_screen(new List_Roles_Screen(con.active_rulebook(), List_Roles_Screen::Filter_Alignment::mafia));
+      con.store_help_screen(new List_Roles_Screen(con, List_Roles_Screen::Filter_Alignment::mafia));
    } else if (commands_match(commands, {"list", "r", "f"})) {
-      con.store_help_screen(new List_Roles_Screen(con.active_rulebook(), List_Roles_Screen::Filter_Alignment::freelance));
+      con.store_help_screen(new List_Roles_Screen(con, List_Roles_Screen::Filter_Alignment::freelance));
    } else {
       return false;
    }

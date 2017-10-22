@@ -7,10 +7,10 @@
 
 #include "../riketi/ref.hpp"
 
-#include "console.hpp"
-#include "help_screens.hpp"
-
 namespace maf {
+   struct Console;
+   struct Help_Screen;
+
    struct Base_Screen {
       // Make a new screen, with its owner set to `con`.
       Base_Screen(Console & con)
