@@ -17,6 +17,8 @@ namespace maf {
          : _console_ref{con}
       { }
 
+      virtual ~Base_Screen() = default;
+
       // Get the owning console for this screen.
       Console & console() { return *_console_ref; }
       const Console & console() const { return *_console_ref; }
