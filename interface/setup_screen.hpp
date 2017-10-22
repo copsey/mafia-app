@@ -11,6 +11,9 @@
 #include "names.hpp"
 
 namespace maf {
+   // FIXME: Place Setup_screen into separate 'screen' child namespace
+   // of 'maf'.
+    
    struct Setup_screen {
       // The rulebook to be used in the pending game.
       const Rulebook & rulebook() const;

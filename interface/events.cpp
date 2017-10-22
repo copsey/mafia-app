@@ -10,7 +10,7 @@ void maf::Event::write_summary(std::ostream &os) const {
 }
 
 void maf::Event::write_help(std::ostream &os) const {
-   os << "^HMissing Help Screen^/^hNo help has been written for the current game event.\n(this counts as a bug!)\n\nEnter ^cok^/ to leave this screen.";
+   os << "^TMissing Help Screen^/^hNo help has been written for the current game event.\n(this counts as a bug!)\n\nEnter ^cok^/ to leave this screen.";
 }
 
 void maf::Event::kick_player(const std::string& pl_name, Game_log& glog) {
@@ -68,7 +68,7 @@ void maf::Player_given_initial_role::write_full(std::ostream &os) const {
    auto rl_name = full_name(*_r);
    auto rl_alias = _r->alias();
 
-   os << "^G" << pl_name << "'s Role^/";
+   os << "^T" << pl_name << "'s Role^/";
 
    if (_is_private) {
       os << pl_name << ", your role is the "  << rl_name << ".";
@@ -102,7 +102,7 @@ void maf::Time_changed::do_commands(const std::vector<std::string> & commands) {
 void maf::Time_changed::write_full(std::ostream & os) const {
    switch (time) {
       case Time::day: {
-         os << "^GDay " << date << "^/";
+         os << "^TDay " << date << "^/";
          os << "^iDawn breaks, and dim sunlight beams onto the weary townsfolk...\n\n^/It is now day ";
          os << date;
          os << ". Anybody still asleep can wake up.";
@@ -110,7 +110,7 @@ void maf::Time_changed::write_full(std::ostream & os) const {
       }
 
       case Time::night: {
-         os << "^GNight " << date << "^/";
+         os << "^TNight " << date << "^/";
          os << "^iAs darkness sets in, the townsfolk return to the comforts of their shelters...\n\n^/It is now night ";
          os << date;
          os << ". Everybody still in the game should go to sleep.";
@@ -143,7 +143,7 @@ void maf::Obituary::do_commands(const std::vector<std::string> & commands) {
 }
 
 void maf::Obituary::write_full(std::ostream &os) const {
-   os << "^GObituary^/";
+   os << "^TObituary^/";
 
    if (_deaths_index < 0) {
       if (_deaths.size() == 0) {
@@ -224,7 +224,7 @@ void maf::Town_meeting::do_commands(const std::vector<std::string> & commands) {
 void maf::Town_meeting::write_full(std::ostream &os) const {
    /* FIXME: add in proper content. */
 
-   os << "^GDay " << _date << "^/";
+   os << "^TDay " << _date << "^/";
 
    if (_lynch_can_occur) {
       os << "Gathered outside the town hall are:\n";
@@ -278,7 +278,7 @@ void maf::Player_kicked::do_commands(const std::vector<std::string> & commands) 
 }
 
 void maf::Player_kicked::write_full(std::ostream &os) const {
-   os << "^G" << game_log().get_name(*player) << " kicked^/";
+   os << "^T" << game_log().get_name(*player) << " kicked^/";
    os << game_log().get_name(*player) << " was kicked from the game!\n";
    os << "They were the " << full_name(player->role()) << ".";
 }
@@ -297,7 +297,7 @@ void maf::Lynch_result::do_commands(const std::vector<std::string> & commands) {
 }
 
 void maf::Lynch_result::write_full(std::ostream &os) const {
-   os << "^GLynch Result^/";
+   os << "^TLynch Result^/";
 
    if (victim) {
       auto & victim_name = game_log().get_name(*victim);
@@ -342,7 +342,7 @@ void maf::Duel_result::write_full(std::ostream &os) const {
    auto& winner_name = glog.get_name(*winner);
    auto& loser_name = glog.get_name(*loser);
 
-   os << "^GDuel^/";
+   os << "^TDuel^/";
    os << caster_name;
    os << " has challenged ";
    os << target_name;
@@ -404,7 +404,7 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string> & command
 void maf::Choose_fake_role::write_full(std::ostream &os) const {
    auto & pl_name = game_log().get_name(*_player);
 
-   os << "^GChoose Fake Role^/";
+   os << "^TChoose Fake Role^/";
 
    if (_go_to_sleep) {
       os << pl_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
@@ -458,7 +458,7 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string> & commands) 
 
 void maf::Mafia_meeting::write_full(std::ostream &os) const {
    /* FIXME */
-   os << "^GMafia Meeting^/";
+   os << "^TMafia Meeting^/";
 
    if (_go_to_sleep) {
       os << "The mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^/ when you are ready to continue.";
@@ -514,7 +514,7 @@ void maf::Kill_use::write_full(std::ostream &os) const {
    auto & glog = game_log();
    auto & caster_name = glog.get_name(*_caster);
 
-   os << "^GKill Use^/";
+   os << "^TKill Use^/";
 
    if (_go_to_sleep) {
       os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
@@ -552,7 +552,7 @@ void maf::Heal_use::write_full(std::ostream &os) const {
    auto & glog = game_log();
    auto & caster_name = glog.get_name(*_caster);
 
-   os << "^GHeal Use^/";
+   os << "^THeal Use^/";
 
    if (_go_to_sleep) {
       os << caster_name << " should now go back to sleep.";
@@ -592,7 +592,7 @@ void maf::Investigate_use::write_full(std::ostream &os) const {
    auto & glog = game_log();
    auto & caster_name = glog.get_name(*_caster);
 
-   os << "^GInvestigation^/";
+   os << "^TInvestigation^/";
 
    if (_go_to_sleep) {
       os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
@@ -630,7 +630,7 @@ void maf::Peddle_use::write_full(std::ostream &os) const {
    auto & glog = game_log();
    auto & caster_name = glog.get_name(*_caster);
 
-   os << "^GPeddle^/";
+   os << "^TPeddle^/";
 
    if (_go_to_sleep) {
       os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
@@ -651,7 +651,7 @@ void maf::Boring_night::do_commands(const std::vector<std::string> & commands) {
 void maf::Boring_night::write_full(std::ostream &os) const {
    /* FIXME: show current date in title. (e.g. "Night 1") */
 
-   os << "^GCalm Night^/^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^/\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^/ to continue.";
+   os << "^TCalm Night^/^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^/\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^/ to continue.";
 }
 
 void maf::Investigation_result::do_commands(const std::vector<std::string> & commands) {
@@ -679,7 +679,7 @@ void maf::Investigation_result::write_full(std::ostream &os) const {
    auto & caster_name = glog.get_name(investigation.caster());
    auto & target_name = glog.get_name(investigation.target());
 
-   os << "^GInvestigation Result^/";
+   os << "^TInvestigation Result^/";
 
    if (_go_to_sleep) {
       os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
@@ -720,7 +720,7 @@ void maf::Game_ended::write_full(std::ostream &os) const {
       }
    }
 
-   os << "^GGame Over^/The game has ended!";
+   os << "^TGame Over^/The game has ended!";
 
    if (winners.size() > 0) {
       os << "\n\nThe following players won:\n";

@@ -9,6 +9,9 @@ namespace maf {
    struct Console;
 
    
+   // FIXME: Place all Questions into separate 'question' child namespace
+   // of 'maf'.
+    
    struct Question {
       // Signifies that a question failed to process a set of commands.
       struct Bad_commands { };

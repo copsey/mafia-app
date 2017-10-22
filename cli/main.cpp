@@ -6,8 +6,7 @@
 void print_output(const maf::Console & console) {
    for (auto & styled_string: console.output()) {
       switch(styled_string.style) {
-         case maf::Styled_string::Style::game_title:
-         case maf::Styled_string::Style::help_title:
+         case maf::Styled_string::Style::title:
             // ignore titles
             break;
          case maf::Styled_string::Style::command:
@@ -25,8 +24,7 @@ void print_output(const maf::Console & console) {
 void print_error_message(const maf::Console & console) {
    for (auto & styled_string: console.error_message()) {
       switch(styled_string.style) {
-         case maf::Styled_string::Style::game_title:
-         case maf::Styled_string::Style::help_title:
+         case maf::Styled_string::Style::title:
             // ignore titles
             break;
          case maf::Styled_string::Style::command:

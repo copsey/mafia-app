@@ -72,6 +72,12 @@ maf::Rulebook::Rulebook(Edition edition)
    });
 }
 
+std::vector<rkt::ref<const maf::Role>> maf::Rulebook::all_roles() const {
+   std::vector<rkt::ref<const Role>> v{};
+   for (auto & r: _roles) v.emplace_back(r);
+   return v;
+}
+
 std::vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
    std::vector<rkt::ref<const Role>> v{};
    for (auto & r: _roles) {
@@ -85,12 +91,6 @@ std::vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
    for (auto & r: _roles) {
       if (r.alignment() == Alignment::mafia) v.emplace_back(r);
    }
-   return v;
-}
-
-std::vector<rkt::ref<const maf::Role>> maf::Rulebook::all_roles() const {
-   std::vector<rkt::ref<const Role>> v{};
-   for (auto & r: _roles) v.emplace_back(r);
    return v;
 }
 

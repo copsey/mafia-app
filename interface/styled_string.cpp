@@ -44,33 +44,28 @@ maf::Styled_text maf::styled_text_from(std::istream &is) {
 
       switch (auto x = is.get()) {
          case 'g':
+            push_style = true;
             new_style = Styled_string::Style::game;
-            push_style = true;
-            break;
-
-         case 'G':
-            new_style = Styled_string::Style::game_title;
-            push_style = true;
-            break;
-
-         case 'i':
-            new_style = Styled_string::Style::game_italic;
-            push_style = true;
             break;
 
          case 'h':
-            new_style = Styled_string::Style::help;
             push_style = true;
+            new_style = Styled_string::Style::help;
             break;
 
-         case 'H':
-            new_style = Styled_string::Style::help_title;
+         case 'i':
             push_style = true;
+            new_style = Styled_string::Style::italic;
             break;
 
          case 'c':
-            new_style = Styled_string::Style::command;
             push_style = true;
+            new_style = Styled_string::Style::command;
+            break;
+
+         case 'T':
+            push_style = true;
+            new_style = Styled_string::Style::title;
             break;
 
          case '/': {

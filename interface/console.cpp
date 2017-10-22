@@ -45,7 +45,7 @@ maf::Console::Console() {
 bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    try {
       if (commands.size() == 0) {
-         throw error::unresolved_input("^h^HMissing input!^/Entering a blank input has no effect.\n(enter ^chelp^/ if you're unsure what to do.)");
+         throw error::unresolved_input("^h^TMissing input!^/Entering a blank input has no effect.\n(enter ^chelp^/ if you're unsure what to do.)");
       }
       else if (commands_match(commands, {"help"})) {
          if (has_game()) {
@@ -84,7 +84,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"info", ""})) {
          if (!has_game()) {
-            throw error::unresolved_input("^h^HNo game in progress!^/There is no game in progress to display information about.");
+            throw error::unresolved_input("^h^TNo game in progress!^/There is no game in progress to display information about.");
          } else {
             auto& pl_name = commands[1];
 
@@ -107,7 +107,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          if (commands_match(commands, {"ok"})) {
             clear_help_screen();
          } else {
-            throw error::unresolved_input("^h^HInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)");
+            throw error::unresolved_input("^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)");
          }
       }
       else if (has_question()) {
@@ -117,7 +117,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       }
       else if (commands_match(commands, {"end"})) {
          if (!has_game()) {
-            throw error::unresolved_input("^h^HNo game in progress!^/There is no game in progress to end.");
+            throw error::unresolved_input("^h^TNo game in progress!^/There is no game in progress to end.");
          } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
             end_game();
          } else {
@@ -152,7 +152,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
                begin_preset(i);
             } catch (error::invalid_preset) {
                std::stringstream err{};
-               err << "^h^HMissing preset!^/There is no preset defined with index ";
+               err << "^h^TMissing preset!^/There is no preset defined with index ";
                err << i;
                err << ".";
                throw error::unresolved_input(err);
@@ -161,7 +161,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             auto esc_i_str = copy_with_escaped_style_codes(i_str);
 
             std::stringstream err{};
-            err << "^h^HInvalid input!^/The string ^c";
+            err << "^h^TInvalid input!^/The string ^c";
             err << esc_i_str;
             err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
             throw error::unresolved_input(err);
@@ -169,7 +169,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             auto esc_i_str = copy_with_escaped_style_codes(i_str);
 
             std::stringstream err{};
-            err << "^h^HInvalid input!^/The string ^c";
+            err << "^h^TInvalid input!^/The string ^c";
             err << esc_i_str;
             err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
             throw error::unresolved_input(err);
@@ -420,15 +420,15 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      << "^/ could not be found.";
 //   }
    catch (const Question::Bad_commands &e) {
-      throw error::unresolved_input("^h^HInvalid input!^/Please answer the question being shown before trying to do anything else.");
+      throw error::unresolved_input("^h^TInvalid input!^/Please answer the question being shown before trying to do anything else.");
    }
    catch (const No_game_in_progress &e) {
-      throw error::unresolved_input("^h^HNo game in progress!^/There is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^/ to begin a new game, or ^chelp^/ for a list of usable commands.)");
+      throw error::unresolved_input("^h^TNo game in progress!^/There is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^/ to begin a new game, or ^chelp^/ for a list of usable commands.)");
    }
    catch (const Begin_game_failed &e) {
       switch (e.reason) {
          case Begin_game_failed::Reason::game_already_in_progress:
-            throw error::unresolved_input("^h^HGame in progress!^/A new game cannot begin until the current game ends.\n(enter ^cend^/ to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)");
+            throw error::unresolved_input("^h^TGame in progress!^/A new game cannot begin until the current game ends.\n(enter ^cend^/ to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)");
             break;
       }
    }
