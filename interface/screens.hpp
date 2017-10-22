@@ -11,9 +11,9 @@
 #include "help_screens.hpp"
 
 namespace maf {
-   struct base_screen {
+   struct Base_Screen {
       // Make a new screen, with its owner set to `con`.
-      base_screen(Console & con)
+      Base_Screen(Console & con)
          : _console_ref{con}
       { }
 
