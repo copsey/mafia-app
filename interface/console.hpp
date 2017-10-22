@@ -69,12 +69,12 @@ namespace maf {
       void clear_error_message();
 
       // Gets the help screen currently being stored, or nullptr if none exists.
-      const Help_screen * help_screen() const;
+      const Help_Screen * help_screen() const;
       // Checks if a help screen is currently being stored.
       bool has_help_screen() const;
       // Stores hs, deleting any help screen that is already being stored.
       // Automatically assumes ownership of hs.
-      void store_help_screen(Help_screen *hs);
+      void store_help_screen(Help_Screen *hs);
       // Deletes the current help screen, if one is being stored.
       void clear_help_screen();
 
@@ -121,7 +121,7 @@ namespace maf {
 
       std::unique_ptr<Game_log> _game_log{};
       Setup_screen _setup_screen{};
-      std::unique_ptr<Help_screen> _help_screen{};
+      std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
 
       void begin_game(const std::vector<std::string> &player_names,

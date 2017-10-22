@@ -4,22 +4,22 @@
 #include <functional>
 #include <ostream>
 
-#include "../riketi/box.hpp"
-
 #include "../logic/logic.hpp"
 
 #include "events.hpp"
 #include "game_log.hpp"
 
 namespace maf {
-   struct Help_screen {
+   struct Help_Screen {
       // Write a tagged string detailing the help screen to os.
       virtual void write(std::ostream &os) const = 0;
    };
 
 
-   struct Event_help_screen: Help_screen {
-      Event_help_screen(const Event &e): event{e} { }
+   struct Event_Help_Screen: Help_Screen {
+      Event_Help_Screen(const Event &e)
+         : event{e}
+      { }
 
       rkt::ref<const Event> event;
 
@@ -27,8 +27,10 @@ namespace maf {
    };
 
 
-   struct Role_info_screen: Help_screen {
-      Role_info_screen(const Role &role): role{role} { }
+   struct Role_Info_Screen: Help_Screen {
+      Role_Info_Screen(const Role &role)
+         : role{role}
+      { }
 
       rkt::ref<const Role> role;
 
@@ -36,28 +38,38 @@ namespace maf {
    };
 
 
-   struct List_roles_screen: Help_screen {
-      List_roles_screen(const Rulebook &rulebook, rkt::box<Alignment> alignment = {})
-      : rulebook{rulebook}, alignment{alignment} { }
+   struct List_Roles_Screen: Help_Screen {
+      // An optional filter, specifying the alignment of roles that should be displayed.
+      enum class Filter_Alignment { all, village, mafia, freelance };
+
+      // Create a help screen listing all of the roles present in `rulebook`.
+      //
+      // It is also possible to specify an optional alignment filter, in which case
+      // only roles of that alignment will be listed.
+      List_Roles_Screen(const Rulebook& rulebook, Filter_Alignment alignment = Filter_Alignment::all)
+         : _rulebook{rulebook}, _filter_alignment{alignment}
+      { }
 
       void write(std::ostream &os) const override;
 
-      rkt::ref<const Rulebook> rulebook;
-      rkt::box<Alignment> alignment;
+   private:
+      rkt::ref<const Rulebook> _rulebook;
+      Filter_Alignment _filter_alignment;
    };
 
 
-   struct Setup_help_screen: Help_screen {
+   struct Setup_Help_Screen: Help_Screen {
       void write(std::ostream &os) const override;
    };
 
 
    /// A screen presenting information on a given player.
-   struct Player_Info_Screen: Help_screen {
+   struct Player_Info_Screen: Help_Screen {
       /// Create an info screen for `player`, who should be a participant in the
       /// game managed by `game_log`.
       Player_Info_Screen(const Player & player, const Game_log & game_log)
-       : _player_ref{player}, _game_log_ref{game_log} { }
+         : _player_ref{player}, _game_log_ref{game_log}
+      { }
 
       void write(std::ostream & os) const override;
 

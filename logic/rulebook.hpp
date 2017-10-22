@@ -34,10 +34,15 @@ namespace maf {
          return _edition;
       }
 
+
+      // FIXME: Remove roles() function, in favour of all_roles().
       /// A vector containing every role defined in the rulebook.
       const std::vector<Role> & roles() const {
          return _roles;
       }
+
+      /// A vector containing every role defined in the rulebook.
+      std::vector<rkt::ref<const Role>> all_roles() const;
 
       /// A vector containing every village role defined in the rulebook.
       std::vector<rkt::ref<const Role>> village_roles() const;
