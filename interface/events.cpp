@@ -50,10 +50,10 @@ void maf::Event::kick_player(const std::string& pl_name, Game_log& glog) {
    }
 }
 
-void maf::Player_given_initial_role::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Player_given_initial_role::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
       if (_is_private) {
-         game_log.advance();
+         game_log().advance();
       } else {
          _is_private = true;
       }
@@ -64,25 +64,25 @@ void maf::Player_given_initial_role::do_commands(const std::vector<std::string>&
 
 void maf::Player_given_initial_role::write_full(std::ostream &os) const {
    auto & glog = game_log();
+   auto & pl_name = glog.get_name(*_p);
+   auto rl_name = full_name(*_r);
+   auto rl_alias = _r->alias();
+
+   os << "^G" << pl_name << "'s Role";
 
    if (_is_private) {
-      os << "^G" << glog.get_name(*_p) << "'s Role^g"
-      << glog.get_name(*_p) << ", your role is the "
-      << full_name(*_r) << ".";
+      os << "^g" << pl_name << ", your role is the "  << rl_name << ".";
 
       if (_w != nullptr) {
          /* FIXME */
-         os << "\nYou were randomly given this role from the ^c"
-         << _w->alias()
-         << "^g wildcard.";
+         os << "\nYou were randomly given this role from the ^c";
+         os << _w->alias();
+         os << "^g wildcard.";
       }
 
-      os << "^h\n\nTo see a full description of your role, enter ^chelp r "
-      << _r->alias()
-      << "^h.";
+      os << "^h\n\nTo see a full description of your role, enter ^chelp r " << rl_alias << "^h.";
    } else {
-      os << "^G" << glog.get_name(*_p) << "'s Role^g"
-      << glog.get_name(*_p) << ", you are about to be shown your role.";
+      os << "^g" << pl_name << ", you are about to be shown your role.";
    }
 }
 
@@ -90,34 +90,32 @@ void maf::Player_given_initial_role::write_summary(std::ostream &os) const {
    os << game_log().get_name(*_p) << " played as the " << full_name(*_r) << ".";
 }
 
-void maf::Time_changed::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Time_changed::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
-      game_log.advance();
+      game_log().advance();
    }
    else {
       throw error::bad_commands();
    }
 }
 
-void maf::Time_changed::write_full(std::ostream &os) const {
+void maf::Time_changed::write_full(std::ostream & os) const {
    switch (time) {
       case Time::day: {
-         os << "^GDay "
-         << date
-         << "^iDawn breaks, and dim sunlight beams onto the weary townsfolk...\n\n^gIt is now day "
-         << date
-         << ". Anybody still asleep can wake up.";
-      }
+         os << "^GDay " << date;
+         os << "^iDawn breaks, and dim sunlight beams onto the weary townsfolk...\n\n^gIt is now day ";
+         os << date;
+         os << ". Anybody still asleep can wake up.";
          break;
+      }
 
       case Time::night: {
-         os << "^GNight "
-         << date
-         << "^iAs darkness sets in, the townsfolk return to the comforts of their shelters...\n\n^gIt is now night "
-         << date
-         << ". Everybody still in the game should go to sleep.";
-      }
+         os << "^GNight " << date;
+         os << "^iAs darkness sets in, the townsfolk return to the comforts of their shelters...\n\n^gIt is now night ";
+         os << date;
+         os << ". Everybody still in the game should go to sleep.";
          break;
+      }
    }
 }
 
@@ -132,12 +130,12 @@ void maf::Time_changed::write_summary(std::ostream &os) const {
    }
 }
 
-void maf::Obituary::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Obituary::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
       if (_deaths_index + 1 < _deaths.size()) {
          ++_deaths_index;
       } else {
-         game_log.advance();
+         game_log().advance();
       }
    } else {
       throw error::bad_commands();
@@ -145,17 +143,19 @@ void maf::Obituary::do_commands(const std::vector<std::string>& commands, Game_l
 }
 
 void maf::Obituary::write_full(std::ostream &os) const {
+   os << "^G" << "Obituary";
+
    if (_deaths_index < 0) {
       if (_deaths.size() == 0) {
-         os << "^GObituary^gNobody died during the night.";
+         os << "^gNobody died during the night.";
       } else {
          /* FIXME: reword to remove use of "us". */
-         os << "^GObituary^gIt appears that " << _deaths.size() << " of us did not survive the night...";
+         os << "^gIt appears that " << _deaths.size() << " of us did not survive the night...";
       }
    } else {
       const Player& death = *_deaths[_deaths_index];
 
-      os << "^GObituary^g" << game_log().get_name(death) << " died during the night!";
+      os << "^g" << game_log().get_name(death) << " died during the night!";
       if (death.is_haunted()) {
          os << "\n\nA slip of paper was found by their bed. On it has been written the name \""
          << game_log().get_name(*death.haunter())
@@ -174,42 +174,37 @@ void maf::Obituary::write_summary(std::ostream &os) const {
    }
 }
 
-void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Town_meeting::do_commands(const std::vector<std::string> & commands) {
+   auto& glog = game_log();
+
    if (commands_match(commands, {"kick", ""})) {
-      const std::string& pl_name = commands[1];
-      kick_player(pl_name, game_log);
+      auto& pl_name = commands[1];
+      kick_player(pl_name, glog);
    }
    else if (commands_match(commands, {"duel", "", ""})) {
-      const Player &caster = game_log.find_player(commands[1]);
-      const Player &target = game_log.find_player(commands[2]);
+      const Player & caster = glog.find_player(commands[1]);
+      const Player & target = glog.find_player(commands[2]);
 
-      game_log.stage_duel(caster.id(), target.id());
-      game_log.advance();
+      glog.stage_duel(caster.id(), target.id());
+      glog.advance();
    }
    else if (_lynch_can_occur) {
       if (commands_match(commands, {"vote", "", ""})) {
-         const Player &voter = game_log.find_player(commands[1]);
-         const Player &target = game_log.find_player(commands[2]);
+         const Player & voter = glog.find_player(commands[1]);
+         const Player & target = glog.find_player(commands[2]);
 
-         game_log.cast_lynch_vote(voter.id(), target.id());
-         game_log.advance();
+         glog.cast_lynch_vote(voter.id(), target.id());
+         glog.advance();
       }
       else if (commands_match(commands, {"abstain", ""})) {
-         const Player &voter = game_log.find_player(commands[1]);
+         const Player &voter = glog.find_player(commands[1]);
 
-         game_log.clear_lynch_vote(voter.id());
-         game_log.advance();
+         glog.clear_lynch_vote(voter.id());
+         glog.advance();
       }
       else if (commands_match(commands, {"lynch"})) {
-         game_log.process_lynch_votes();
-         game_log.advance();
-      }
-      else if (commands_match(commands, {"duel", "", ""})) {
-         const Player &caster = game_log.find_player(commands[1]);
-         const Player &target = game_log.find_player(commands[2]);
-
-         game_log.stage_duel(caster.id(), target.id());
-         game_log.advance();
+         glog.process_lynch_votes();
+         glog.advance();
       }
       else {
          throw error::bad_commands();
@@ -217,8 +212,8 @@ void maf::Town_meeting::do_commands(const std::vector<std::string>& commands, Ga
    }
    else {
       if (commands_match(commands, {"night"})) {
-         game_log.begin_night();
-         game_log.advance();
+         glog.begin_night();
+         glog.advance();
       }
       else {
          throw error::bad_commands();
@@ -274,9 +269,9 @@ void maf::Town_meeting::write_summary(std::ostream &os) const {
    }
 }
 
-void maf::Player_kicked::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Player_kicked::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
-      game_log.advance();
+      game_log().advance();
    }
    else {
       throw error::bad_commands();
@@ -293,9 +288,9 @@ void maf::Player_kicked::write_summary(std::ostream &os) const {
    os << game_log().get_name(*player) << " was kicked.";
 }
 
-void maf::Lynch_result::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Lynch_result::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
-      game_log.advance();
+      game_log().advance();
    }
    else {
       throw error::bad_commands();
@@ -329,9 +324,9 @@ void maf::Lynch_result::write_summary(std::ostream &os) const {
    os << (victim ? game_log().get_name(*victim) : "Nobody") << " was lynched.";
 }
 
-void maf::Duel_result::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Duel_result::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
-      game_log.advance();
+      game_log().advance();
    }
    else {
       throw error::bad_commands();
@@ -379,10 +374,12 @@ void maf::Duel_result::write_summary(std::ostream &os) const {
    }
 }
 
-void maf::Choose_fake_role::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Choose_fake_role::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
@@ -394,10 +391,11 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string>& commands
       }
    } else {
       if (commands_match(commands, {"choose", ""})) {
-         const Role &fake_role = game_log.game().rulebook().get_role(commands[1]);
+         auto & fake_role_alias = commands[1];
+         auto & fake_role = glog.game().rulebook().get_role(fake_role_alias);
 
          _fake_role = &fake_role;
-         game_log.choose_fake_role(_player->id(), fake_role.id());
+         glog.choose_fake_role(_player->id(), fake_role.id());
       } else {
          throw error::bad_commands();
       }
@@ -432,10 +430,12 @@ void maf::Choose_fake_role::write_summary(std::ostream &os) const {
    }
 }
 
-void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Mafia_meeting::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
@@ -447,14 +447,14 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string>& commands, G
       }
    } else {
       if (commands_match(commands, {"kill", "", ""})) {
-         const Player &caster = game_log.find_player(commands[1]);
-         const Player &target = game_log.find_player(commands[2]);
+         const Player &caster = glog.find_player(commands[1]);
+         const Player &target = glog.find_player(commands[2]);
 
-         game_log.cast_mafia_kill(caster.id(), target.id());
+         glog.cast_mafia_kill(caster.id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
          /* FIXME: show "confirm skip?" screen. */
-         game_log.skip_mafia_kill();
+         glog.skip_mafia_kill();
          _go_to_sleep = true;
       } else {
          throw error::bad_commands();
@@ -489,21 +489,24 @@ void maf::Mafia_meeting::write_full(std::ostream &os) const {
    }
 }
 
-void maf::Kill_use::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Kill_use::do_commands(const std::vector<std::string> &commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"kill", ""})) {
-         const Player &target = game_log.find_player(commands[1]);
+         auto & target_name = commands[1];
+         auto & target = glog.find_player(target_name);
 
-         game_log.cast_kill(_caster->id(), target.id());
+         glog.cast_kill(_caster->id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         game_log.skip_kill(_caster->id());
+         glog.skip_kill(_caster->id());
          _go_to_sleep = true;
       } else {
          throw error::bad_commands();
@@ -512,32 +515,36 @@ void maf::Kill_use::do_commands(const std::vector<std::string>& commands, Game_l
 }
 
 void maf::Kill_use::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(*_caster);
+
+   os << "^GKill Use";
+
    if (_go_to_sleep) {
-      os <<"^GKill Use^g"
-      << game_log().get_name(*_caster)
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os << "^g" << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GKill Use^g"
-      << game_log().get_name(*_caster)
-      << ", you can choose to kill somebody this night.^h\n\nEnter ^ckill A^h to kill player A, or enter ^cskip^h if you don't wish to kill anybody.";
+      os << "^g" << caster_name << ", you can choose to kill somebody this night.^h\n\nEnter ^ckill A^h to kill player A, or enter ^cskip^h if you don't wish to kill anybody.";
    }
 }
 
-void maf::Heal_use::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Heal_use::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"heal", ""})) {
-         const Player &target = game_log.find_player(commands[1]);
+         auto & target_name = commands[1];
+         auto & target = glog.find_player(target_name);
 
-         game_log.cast_heal(_caster->id(), target.id());
+         glog.cast_heal(_caster->id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         game_log.skip_heal(_caster->id());
+         glog.skip_heal(_caster->id());
          _go_to_sleep = true;
       } else {
          throw error::bad_commands();
@@ -546,33 +553,38 @@ void maf::Heal_use::do_commands(const std::vector<std::string>& commands, Game_l
 }
 
 void maf::Heal_use::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(*_caster);
+
+   os << "^GHeal Use";
+
    if (_go_to_sleep) {
-      os << "^G" << "Heal Use";
-      os << "^g" << game_log().get_name(*_caster) << " should now go back to sleep.";
+      os << "^g" << caster_name << " should now go back to sleep.";
       os << "^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^G" << "Heal Use";
-      os << "^g" << game_log().get_name(*_caster);
-      os << ", you can choose to heal somebody this night.";
+      os << "^g" << caster_name << ", you can choose to heal somebody this night.";
       os << "^h\n\nEnter ^cheal A^h to heal player A, or enter ^cskip^h if you don't wish to heal anybody.";
    }
 }
 
-void maf::Investigate_use::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Investigate_use::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"check", ""})) {
-         const Player &target = game_log.find_player(commands[1]);
+         auto & target_name = commands[1];
+         auto & target = glog.find_player(target_name);
 
-         game_log.cast_investigate(_caster->id(), target.id());
+         glog.cast_investigate(_caster->id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         game_log.skip_investigate(_caster->id());
+         glog.skip_investigate(_caster->id());
          _go_to_sleep = true;
       } else {
          throw error::bad_commands();
@@ -581,32 +593,36 @@ void maf::Investigate_use::do_commands(const std::vector<std::string>& commands,
 }
 
 void maf::Investigate_use::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(*_caster);
+
+   os << "^GInvestigation";
+
    if (_go_to_sleep) {
-      os <<"^GInvestigation^g"
-      << game_log().get_name(*_caster)
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os <<" ^g" << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GInvestigation^g"
-      << game_log().get_name(*_caster)
-      << ", you can choose to investigate somebody this night.^h\n\nEnter ^ccheck A^h to investigate player A, or enter ^cskip^h if you don't wish to investigate anybody.";
+      os << "^g" << caster_name << ", you can choose to investigate somebody this night.^h\n\nEnter ^ccheck A^h to investigate player A, or enter ^cskip^h if you don't wish to investigate anybody.";
    }
 }
 
-void maf::Peddle_use::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Peddle_use::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       } else {
          throw error::bad_commands();
       }
    } else {
       if (commands_match(commands, {"target", ""})) {
-         const Player &target = game_log.find_player(commands[1]);
+         auto & target_name = commands[1];
+         auto & target = glog.find_player(target_name);
 
-         game_log.cast_peddle(_caster->id(), target.id());
+         glog.cast_peddle(_caster->id(), target.id());
          _go_to_sleep = true;
       } else if (commands_match(commands, {"skip"})) {
-         game_log.skip_peddle(_caster->id());
+         glog.skip_peddle(_caster->id());
          _go_to_sleep = true;
       } else {
          throw error::bad_commands();
@@ -615,20 +631,21 @@ void maf::Peddle_use::do_commands(const std::vector<std::string>& commands, Game
 }
 
 void maf::Peddle_use::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(*_caster);
+
+   os << "^GPeddle";
+
    if (_go_to_sleep) {
-      os <<"^GPeddle^g"
-      << game_log().get_name(*_caster)
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os << "^g" << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GPeddle^g"
-      << game_log().get_name(*_caster)
-      << ", you can choose to peddle drugs to somebody this night.^h\n\nEnter ^ctarget A^h to peddle drugs to player A, or enter ^cskip^h if you don't wish to peddle drugs to anybody.";
+      os << "^g" << caster_name << ", you can choose to peddle drugs to somebody this night.^h\n\nEnter ^ctarget A^h to peddle drugs to player A, or enter ^cskip^h if you don't wish to peddle drugs to anybody.";
    }
 }
 
-void maf::Boring_night::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Boring_night::do_commands(const std::vector<std::string> & commands) {
    if (commands_match(commands, {"ok"})) {
-      game_log.advance();
+      game_log().advance();
    }
    else {
       throw error::bad_commands();
@@ -641,10 +658,12 @@ void maf::Boring_night::write_full(std::ostream &os) const {
    os << "^GCalm Night^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^g\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^h to continue.";
 }
 
-void maf::Investigation_result::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Investigation_result::do_commands(const std::vector<std::string> & commands) {
+   auto & glog = game_log();
+
    if (_go_to_sleep) {
       if (commands_match(commands, {"ok"})) {
-         game_log.advance();
+         glog.advance();
       }
       else {
          throw error::bad_commands();
@@ -660,24 +679,21 @@ void maf::Investigation_result::do_commands(const std::vector<std::string>& comm
 }
 
 void maf::Investigation_result::write_full(std::ostream &os) const {
+   auto & glog = game_log();
+   auto & caster_name = glog.get_name(investigation.caster());
+   auto & target_name = glog.get_name(investigation.target());
+
+   os << "^GInvestigation Result";
+
    if (_go_to_sleep) {
-      os << "^GInvestigation Result^g"
-      << game_log().get_name(investigation.caster())
-      << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
+      os << "^g" << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^h to continue.";
    } else {
-      os << "^GInvestigation Result^g"
-      << game_log().get_name(investigation.caster())
-      << ", you have completed your investigation of "
-      << game_log().get_name(investigation.target())
-      << ".\n\n";
+      os << "^g" << caster_name << ", you have completed your investigation of " << target_name << ".\n\n";
 
       if (investigation.result()) {
-         os << game_log().get_name(investigation.target())
-         << " was behaving very suspiciously this night!";
+         os << target_name << " was behaving very suspiciously this night!";
       } else {
-         os << "The investigation was fruitless. "
-         << game_log().get_name(investigation.target())
-         << " appears to be innocent.";
+         os << "The investigation was fruitless. " << target_name << " appears to be innocent.";
       }
 
       os << "^h\n\nWhen you are ready, enter ^cok^h to continue.";
@@ -693,7 +709,7 @@ void maf::Investigation_result::write_summary(std::ostream &os) const {
    << ".";
 }
 
-void maf::Game_ended::do_commands(const std::vector<std::string>& commands, Game_log& game_log) {
+void maf::Game_ended::do_commands(const std::vector<std::string> & commands) {
    throw error::bad_commands();
 }
 

@@ -111,7 +111,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
       else if (has_question()) {
-         if (_question->do_commands(commands, *this)) {
+         if (_question->do_commands(commands)) {
             clear_question();
          }
       }
@@ -121,7 +121,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
             end_game();
          } else {
-            store_question(new Confirm_end_game());
+            store_question(new Confirm_end_game(*this));
          }
       }
       else if (has_game()) {
