@@ -64,7 +64,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             auto esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
             std::stringstream err{};
-            err << "^h^HInvalid alias!^/No role could be found whose alias is ^c";
+            err << "^h^TInvalid alias!^/No role could be found whose alias is ^c";
             err << esc_r_alias;
             err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist r^/ to see a list of each role and its alias.)";
             throw error::unresolved_input(err);
@@ -95,7 +95,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
                auto pl_name_esc = copy_with_escaped_style_codes(pl_name);
 
                std::stringstream err{};
-               err << "^h^HMissing player!^/";
+               err << "^h^TMissing player!^/";
                err << "A player named ^c";
                err << pl_name_esc;
                err << "^/ could not be found.";
@@ -128,14 +128,14 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          try {
             _game_log->do_commands(commands);
          } catch (error::bad_commands) {
-            throw error::unresolved_input("^h^HUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)");
+            throw error::unresolved_input("^h^TUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)");
          }
       }
       else if (commands_match(commands, {"begin"})) {
          try {
             begin_pending_game();
          } catch (error::cards_mismatch) {
-            throw error::unresolved_input("^h^HMismatch!^/A new game cannot begin with an unequal number of players and cards.");
+            throw error::unresolved_input("^h^TMismatch!^/A new game cannot begin with an unequal number of players and cards.");
          }
       }
       else if (commands_match(commands, {"preset"})) {
@@ -179,7 +179,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          try {
             _setup_screen.do_commands(commands);
          } catch (error::bad_commands) {
-            throw error::unresolved_input("^h^HUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)");
+            throw error::unresolved_input("^h^TUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)");
          }
       }
 
@@ -200,7 +200,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       return true;
    }
 //   catch (const Game::Lynch_vote_failed &e) {
-//      err << "^h^HLynch vote failed!^/";
+//      err << "^h^TLynch vote failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Lynch_vote_failed::Reason::game_ended:
@@ -231,7 +231,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Duel_failed &e) {
-//      err << "^h^HDuel failed!^/";
+//      err << "^h^TDuel failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Duel_failed::Reason::game_ended:
@@ -267,7 +267,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Begin_night_failed &e) {
-//      err << "^h^HCannot begin night!^/";
+//      err << "^h^TCannot begin night!^/";
 //
 //      switch (e.reason) {
 //         case Game::Begin_night_failed::Reason::game_ended:
@@ -283,7 +283,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Choose_fake_role_failed &e) {
-//      err << "^h^HChoose fake role failed!^/";
+//      err << "^h^TChoose fake role failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Choose_fake_role_failed::Reason::game_ended:
@@ -306,7 +306,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Mafia_kill_failed &e) {
-//      err << "^h^HMafia kill failed!^/";
+//      err << "^h^TMafia kill failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Mafia_kill_failed::Reason::game_ended:
@@ -337,7 +337,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Kill_failed &e) {
-//      err << "^h^HKill failed!^/";
+//      err << "^h^TKill failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Kill_failed::Reason::game_ended:
@@ -362,7 +362,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Heal_failed &e) {
-//      err << "^h^HHeal failed!^/";
+//      err << "^h^THeal failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Heal_failed::Reason::game_ended:
@@ -387,7 +387,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Investigate_failed &e) {
-//      err << "^h^HInvestigation failed!^/";
+//      err << "^h^TInvestigation failed!^/";
 //
 //      switch (e.reason) {
 //         case Game::Investigate_failed::Reason::game_ended:
@@ -412,10 +412,10 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
 //      }
 //   }
 //   catch (const Game::Skip_failed &e) {
-//      err << "^h^HSkip failed!^/The current ability, if one is showing, cannot be skipped.";
+//      err << "^h^TSkip failed!^/The current ability, if one is showing, cannot be skipped.";
 //   }
 //   catch (const Game_log::Player_not_found &e) {
-//      err << "^h^HPlayer not found!^/A player named ^c"
+//      err << "^h^TPlayer not found!^/A player named ^c"
 //      << e.name
 //      << "^/ could not be found.";
 //   }

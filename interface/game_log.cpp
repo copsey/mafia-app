@@ -143,9 +143,9 @@ void maf::Game_log::process_lynch_votes() {
          log_town_meeting();
       }
    } catch (error::game_has_ended) {
-      throw error::styled_exception("^h^HLynch failed!^/The game has already ended.");
+      throw error::styled_exception("^h^TLynch failed!^/The game has already ended.");
    } catch (error::bad_timing) {
-      throw error::styled_exception("^h^HLynch failed!^/A lynch cannot occur at this moment in time.");
+      throw error::styled_exception("^h^TLynch failed!^/A lynch cannot occur at this moment in time.");
    }
 }
 

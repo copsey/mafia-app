@@ -167,7 +167,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
          std::stringstream err{};
-         err << "^h^HInvalid name!^/The text ^c";
+         err << "^h^TInvalid name!^/The text ^c";
          err << esc_p_name;
          err << "^/ is not a valid name for a player.\n\nThe names of players must be at least 1 character long, and can only contain alphanumeric characters (a-z, A-Z, 0-9).";
          throw error::unresolved_input(err);
@@ -175,7 +175,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
          std::stringstream err{};
-         err << "^h^HPlayer already exists!^/A player named ^c";
+         err << "^h^TPlayer already exists!^/A player named ^c";
          err << esc_p_name;
          err << "^/ has already been selected to play in the next game.\n(Note that names are case-insensitive.)";
          throw error::unresolved_input(err);
@@ -190,7 +190,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_p_name = copy_with_escaped_style_codes(p_name);
 
          std::stringstream err{};
-         err << "^h^HMissing player!^/A player named ^c";
+         err << "^h^TMissing player!^/A player named ^c";
          err << esc_p_name;
          err << "^/ could not be found.";
          throw error::unresolved_input(err);
@@ -208,7 +208,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No role could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist r^/ to see a list of each role and its alias.)";
          throw error::unresolved_input(err);
@@ -223,7 +223,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No role could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist r^/ to see a list of each role and its alias.)";
          throw error::unresolved_input(err);
@@ -231,7 +231,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
          std::stringstream err{};
-         err << "^h^HRolecard not selected!^/No copies of the rolecard with alias ^c";
+         err << "^h^TRolecard not selected!^/No copies of the rolecard with alias ^c";
          err << esc_r_alias;
          err << "^/ have been selected.";
          throw error::unresolved_input(err);
@@ -246,7 +246,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_r_alias = copy_with_escaped_style_codes(r_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No role could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No role could be found whose alias is ^c";
          err << esc_r_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist r^/ to see a list of each role and its alias.)";
          throw error::unresolved_input(err);
@@ -264,7 +264,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No wildcard could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist w^/ to see a list of each wildcard and its alias.)";
          throw error::unresolved_input(err);
@@ -279,7 +279,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No wildcard could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist w^/ to see a list of each wildcard and its alias.)";
          throw error::unresolved_input(err);
@@ -287,7 +287,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
          std::stringstream err{};
-         err << "^h^HWildcard not selected!^/No copies of the wildcard with alias ^c";
+         err << "^h^TWildcard not selected!^/No copies of the wildcard with alias ^c";
          err << esc_w_alias;
          err << "^/ have been selected.";
          throw error::unresolved_input(err);
@@ -302,7 +302,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string>& commands) {
          std::string esc_w_alias = copy_with_escaped_style_codes(w_alias);
 
          std::stringstream err{};
-         err << "^h^HInvalid alias!^/No wildcard could be found whose alias is ^c";
+         err << "^h^TInvalid alias!^/No wildcard could be found whose alias is ^c";
          err << esc_w_alias;
          err << "^/.\nNote that aliases are case-sensitive.\n(enter ^clist w^/ to see a list of each wildcard and its alias.)";
          throw error::unresolved_input(err);

@@ -22,18 +22,18 @@ void maf::Event::kick_player(const std::string& pl_name, Game_log& glog) {
          glog.advance();
       } catch (error::game_has_ended) {
          std::stringstream err;
-         err << "^h^HKick failed!^/";
+         err << "^h^TKick failed!^/";
          err << glog.get_name(pl);
          err << " could not be kicked from the game, because the game has already ended.";
          throw error::unresolved_input(err);
       } catch (error::bad_timing) {
          std::stringstream err;
-         err << "^h^HKick failed!^/";
+         err << "^h^TKick failed!^/";
          err << "Players can only be kicked from the game during the day.";
          throw error::unresolved_input(err);
       } catch (error::repeat_action) {
          std::stringstream err;
-         err << "^h^HKick failed!^/";
+         err << "^h^TKick failed!^/";
          err << glog.get_name(pl);
          err << " has already been kicked from the game";
          throw error::unresolved_input(err);
@@ -42,7 +42,7 @@ void maf::Event::kick_player(const std::string& pl_name, Game_log& glog) {
       auto pl_name_esc = copy_with_escaped_style_codes(pl_name);
 
       std::stringstream err;
-      err << "^h^HKick failed!^/";
+      err << "^h^TKick failed!^/";
       err << "A player named ^c";
       err << pl_name_esc;
       err << "^/ could not be found.";
