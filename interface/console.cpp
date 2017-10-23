@@ -57,16 +57,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       else if (commands_match(commands, {"list", "r", "f"})) {
          store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::freelance});
       }
-      else if (commands_match(commands, {"info", ""})) {
-         if (!has_game()) {
-            err << "^TNo game in progress!^hThere is no game in progress to display information about.";
-         } else {
-            const std::string & approx_name = commands[1];
-            const Player & player = _game_log->find_player(approx_name);
-
-            store_help_screen(new Player_Info_Screen{*this, player});
-         }
-      }
       else if (has_help_screen()) {
          if (commands_match(commands, {"ok"})) {
             clear_help_screen();
@@ -77,15 +67,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       else if (has_question()) {
          if (_question->handle_commands(commands)) {
             clear_question();
-         }
-      }
-      else if (commands_match(commands, {"end"})) {
-         if (!has_game()) {
-            err << "^TNo game in progress!^hThere is no game in progress to end.";
-         } else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
-            end_game();
-         } else {
-            store_question(new Confirm_end_game(*this));
          }
       }
       else if (has_game()) {
