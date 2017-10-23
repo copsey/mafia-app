@@ -76,6 +76,8 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
       else if (has_question()) {
          if (_question->handle_commands(commands)) {
             clear_question();
+         } else {
+            err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
          }
       }
       else if (commands_match(commands, {"end"})) {
@@ -410,9 +412,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    catch (const Setup_Screen::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
-   catch (const Question::Bad_commands &e) {
-      err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
-   }
    catch (const No_game_in_progress &e) {
       err << "^TNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
    }
@@ -423,6 +422,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             break;
       }
    }
+
    if (err.tellp() == 0) {
       refresh_output();
       clear_error_message();

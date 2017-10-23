@@ -15,8 +15,6 @@ namespace maf {
    // of 'maf'.
     
    struct Question: Base_Screen {
-      struct Bad_commands {};
-
       using Base_Screen::Base_Screen;
 
       Help_Screen * get_help_screen() const override;

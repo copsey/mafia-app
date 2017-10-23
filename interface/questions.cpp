@@ -14,12 +14,10 @@ bool maf::Confirm_end_game::handle_commands(const std::vector<std::string> & com
    if (commands_match(commands, {"yes"})) {
       con.end_game();
       con.clear_question();
-   }
-   else if (commands_match(commands, {"no"})) {
+   } else if (commands_match(commands, {"no"})) {
       con.clear_question();
-   }
-   else {
-      throw Bad_commands();
+   } else {
+      return false;
    }
 
    return true;
@@ -33,12 +31,10 @@ void maf::Confirm_end_game::write(std::ostream &os) const {
 //   if (commands_match(commands, {"yes"})) {
 //      console.g
 //      return true;
-//   }
-//   else if (commands_match(commands, {"no"})) {
+//   } else if (commands_match(commands, {"no"})) {
 //      return true;
-//   }
-//   else {
-//      throw Bad_commands();
+//   } else {
+//      return false;
 //   }
 //}
 //
