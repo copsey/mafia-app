@@ -9,8 +9,9 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
-#include "names.hpp"
 #include "console.hpp"
+#include "errors.hpp"
+#include "names.hpp"
 
 bool maf::commands_match(const std::vector<std::string>& v1,
                          const std::vector<std::string>& v2) {
@@ -68,10 +69,8 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
       else if (has_help_screen()) {
-         if (commands_match(commands, {"ok"})) {
-            clear_help_screen();
-         } else {
-            err << "^TInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+         if (!_help_screen->handle_commands(commands)) {
+            err << "^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)";
          }
       }
       else if (has_question()) {
