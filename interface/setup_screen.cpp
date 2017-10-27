@@ -7,14 +7,14 @@
 #include "names.hpp"
 #include "setup_screen.hpp"
 
-const std::array<maf::Setup_Screen::Game_parameters, maf::Setup_Screen::num_presets> maf::Setup_Screen::_presets{
-   maf::Setup_Screen::Game_parameters{
+const std::array<maf::screen::Setup::Game_parameters, maf::screen::Setup::num_presets> maf::screen::Setup::_presets{
+   maf::screen::Setup::Game_parameters{
       {"Augustus", "Brutus", "Claudius", "Drusilla"},
       {maf::Role::ID::peasant, maf::Role::ID::racketeer, maf::Role::ID::coward},
       {maf::Wildcard::ID::village_basic},
       maf::Rulebook{}
    },
-   maf::Setup_Screen::Game_parameters{
+   maf::screen::Setup::Game_parameters{
       {"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
       {maf::Role::ID::peasant, maf::Role::ID::peasant,maf::Role::ID::doctor, maf::Role::ID::detective, maf::Role::ID::dealer, maf::Role::ID::musketeer},
       {},
@@ -22,70 +22,69 @@ const std::array<maf::Setup_Screen::Game_parameters, maf::Setup_Screen::num_pres
    }
 };
 
-const maf::Rulebook & maf::Setup_Screen::rulebook() const {
+const maf::Rulebook & maf::screen::Setup::rulebook() const {
    return _rulebook;
 }
 
-std::vector<std::string> maf::Setup_Screen::player_names() const {
+std::vector<std::string> maf::screen::Setup::player_names() const {
    return {_player_names.begin(), _player_names.end()};
 }
 
-std::vector<maf::Role::ID> maf::Setup_Screen::rolecard_ids() const {
+std::vector<maf::Role::ID> maf::screen::Setup::rolecard_ids() const {
    std::vector<Role::ID> v{};
-   for (auto& p: _role_ids) {
-      for (std::size_t i{0}; i < p.second; ++i) v.push_back(p.first);
+   for (auto& pair: _role_ids) {
+      for (std::size_t i{0}; i < pair.second; ++i) v.push_back(pair.first);
    }
    return v;
 }
 
-std::vector<maf::Wildcard::ID> maf::Setup_Screen::wildcard_ids() const {
+std::vector<maf::Wildcard::ID> maf::screen::Setup::wildcard_ids() const {
    std::vector<Wildcard::ID> v{};
-   for (const auto &p: _wildcard_ids) {
-      for (std::size_t i{0}; i < p.second; ++i) v.push_back(p.first);
+   for (auto& pair: _wildcard_ids) {
+      for (std::size_t i{0}; i < pair.second; ++i) v.push_back(pair.first);
    }
    return v;
 }
 
-bool maf::Setup_Screen::has_player(const std::string &name) const {
-   for (const std::string &s: _player_names) {
-      if (rkt::equal_up_to_case(s, name)) {
-         return true;
-      }
-   }
-   return false;
+bool maf::screen::Setup::has_player(const std::string & str) const {
+   auto matches_str = [&str](const std::string & name) {
+      return rkt::equal_up_to_case(name, str);
+   };
+
+   return rkt::any_of(_player_names, matches_str);
 }
 
-bool maf::Setup_Screen::has_rolecard(const std::string &alias) const {
+bool maf::screen::Setup::has_rolecard(const std::string & alias) const {
    Role::ID id = _rulebook.get_role(alias).id();
    return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
 }
 
-bool maf::Setup_Screen::has_wildcard(const std::string &alias) const {
+bool maf::screen::Setup::has_wildcard(const std::string & alias) const {
    Wildcard::ID id = _rulebook.get_wildcard(alias).id();
    return _wildcard_ids.count(id) != 0 && _wildcard_ids.at(id) != 0;
 }
 
-std::size_t maf::Setup_Screen::num_players() const {
+std::size_t maf::screen::Setup::num_players() const {
    return _player_names.size();
 }
 
-std::size_t maf::Setup_Screen::num_rolecards() const {
+std::size_t maf::screen::Setup::num_rolecards() const {
    std::size_t n{0};
-   for (auto &p: _role_ids) n += p.second;
+   for (auto& pair: _role_ids) n += pair.second;
    return n;
 }
 
-std::size_t maf::Setup_Screen::num_wildcards() const {
+std::size_t maf::screen::Setup::num_wildcards() const {
    std::size_t n{0};
-   for (auto &p: _wildcard_ids) n += p.second;
+   for (auto& pair: _wildcard_ids) n += pair.second;
    return n;
 }
 
-std::size_t maf::Setup_Screen::num_cards() const {
+std::size_t maf::screen::Setup::num_cards() const {
    return num_rolecards() + num_wildcards();
 }
 
-void maf::Setup_Screen::add_player(const std::string &name) {
+void maf::screen::Setup::add_player(const std::string & name) {
    if (rkt::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
       throw Bad_player_name{name};
    } else if (has_player(name)) {
@@ -95,30 +94,33 @@ void maf::Setup_Screen::add_player(const std::string &name) {
    }
 }
 
-void maf::Setup_Screen::add_rolecard(const std::string &alias) {
-   const Role &r = _rulebook.get_role(alias);
+void maf::screen::Setup::add_rolecard(const std::string & alias) {
+   auto& r = _rulebook.get_role(alias);
    ++_role_ids[r.id()];
 }
 
-void maf::Setup_Screen::add_wildcard(const std::string &alias) {
-   const Wildcard &w = _rulebook.get_wildcard(alias);
+void maf::screen::Setup::add_wildcard(const std::string & alias) {
+   auto& w = _rulebook.get_wildcard(alias);
    ++_wildcard_ids[w.id()];
 }
 
-void maf::Setup_Screen::remove_player(const std::string &name) {
-   auto it = rkt::find_if(_player_names, [&name](const std::string &s) {
-      return rkt::equal_up_to_case(s, name);
-   });
+void maf::screen::Setup::remove_player(const std::string & str) {
+   auto matches_str = [&str](const std::string & name) {
+      return rkt::equal_up_to_case(name, str);
+   };
+
+   auto it = rkt::find_if(_player_names, matches_str);
 
    if (it == _player_names.end()) {
-      throw Player_missing{name};
+      throw Player_missing{str};
    } else {
       _player_names.erase(it);
    }
 }
 
-void maf::Setup_Screen::remove_rolecard(const std::string &alias) {
-   const Role &r = _rulebook.get_role(alias);
+void maf::screen::Setup::remove_rolecard(const std::string & alias) {
+   auto& r = _rulebook.get_role(alias);
+
    if (_role_ids[r.id()] == 0) {
       throw Rolecard_unselected{r};
    } else {
@@ -126,8 +128,9 @@ void maf::Setup_Screen::remove_rolecard(const std::string &alias) {
    }
 }
 
-void maf::Setup_Screen::remove_wildcard(const std::string &alias) {
-   const Wildcard &w = _rulebook.get_wildcard(alias);
+void maf::screen::Setup::remove_wildcard(const std::string & alias) {
+   auto& w = _rulebook.get_wildcard(alias);
+
    if (_wildcard_ids[w.id()] == 0) {
       throw Wildcard_unselected{w};
    } else {
@@ -135,44 +138,44 @@ void maf::Setup_Screen::remove_wildcard(const std::string &alias) {
    }
 }
 
-void maf::Setup_Screen::clear_all_players() {
+void maf::screen::Setup::clear_all_players() {
    _player_names.clear();
 }
 
-void maf::Setup_Screen::clear_rolecards(const std::string &alias) {
-   const Role &r = _rulebook.get_role(alias);
+void maf::screen::Setup::clear_rolecards(const std::string & alias) {
+   auto& r = _rulebook.get_role(alias);
    _role_ids[r.id()] = 0;
 }
 
-void maf::Setup_Screen::clear_all_rolecards() {
+void maf::screen::Setup::clear_all_rolecards() {
    _role_ids.clear();
 }
 
-void maf::Setup_Screen::clear_wildcards(const std::string &alias) {
-   const Wildcard &w = _rulebook.get_wildcard(alias);
+void maf::screen::Setup::clear_wildcards(const std::string & alias) {
+   auto& w = _rulebook.get_wildcard(alias);
    _wildcard_ids[w.id()] = 0;
 }
 
-void maf::Setup_Screen::clear_all_wildcards() {
+void maf::screen::Setup::clear_all_wildcards() {
    _wildcard_ids.clear();
 }
 
-void maf::Setup_Screen::clear_all_cards() {
+void maf::screen::Setup::clear_all_cards() {
    clear_all_rolecards();
    clear_all_wildcards();
 }
 
-void maf::Setup_Screen::clear_all() {
+void maf::screen::Setup::clear_all() {
    clear_all_players();
    clear_all_cards();
 }
 
-void maf::Setup_Screen::begin_pending_game() {
+void maf::screen::Setup::begin_pending_game() {
    auto& con = this->console();
-   con.begin_game(this->player_names(), this->rolecard_ids(), this->wildcard_ids(), this->rulebook());
+   con.begin_game(player_names(), rolecard_ids(), wildcard_ids(), rulebook());
 }
 
-void maf::Setup_Screen::begin_preset(int i) {
+void maf::screen::Setup::begin_preset(int i) {
    auto& con = this->console();
 
    if (i >= 0 && i < num_presets) {
@@ -183,7 +186,7 @@ void maf::Setup_Screen::begin_preset(int i) {
    }
 }
 
-void maf::Setup_Screen::begin_random_preset() {
+void maf::screen::Setup::begin_random_preset() {
    std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
    auto i = uid(rkt::random_engine);
 
@@ -192,7 +195,7 @@ void maf::Setup_Screen::begin_random_preset() {
    con.begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
 }
 
-bool maf::Setup_Screen::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Setup::handle_commands(const std::vector<std::string> & commands) {
    if (Base_Screen::handle_commands(commands)) return true;
 
    if (commands_match(commands, {"begin"})) {
@@ -209,33 +212,25 @@ bool maf::Setup_Screen::handle_commands(const std::vector<std::string> & command
          throw Bad_preset_string{i_str};
       }
    } else if (commands_match(commands, {"add", "p", ""})) {
-      auto& pl_name = commands[2];
-      add_player(pl_name);
+      add_player(commands[2]);
    } else if (commands_match(commands, {"take", "p", ""})) {
-      auto& pl_name = commands[2];
-      remove_player(pl_name);
+      remove_player(commands[2]);
    } else if (commands_match(commands, {"clear", "p"})) {
       clear_all_players();
    } else if (commands_match(commands, {"add", "r", ""})) {
-      auto& r_alias = commands[2];
-      add_rolecard(r_alias);
+      add_rolecard(commands[2]);
    } else if (commands_match(commands, {"take", "r", ""})) {
-      auto& r_alias = commands[2];
-      remove_rolecard(r_alias);
+      remove_rolecard(commands[2]);
    } else if (commands_match(commands, {"clear", "r", ""})) {
-      auto& r_alias = commands[2];
-      clear_rolecards(r_alias);
+      clear_rolecards(commands[2]);
    } else if (commands_match(commands, {"clear", "r"})) {
       clear_all_rolecards();
    } else if (commands_match(commands, {"add", "w", ""})) {
-      auto& w_alias = commands[2];
-      add_wildcard(w_alias);
+      add_wildcard(commands[2]);
    } else if (commands_match(commands, {"take", "w", ""})) {
-      auto& w_alias = commands[2];
-      remove_wildcard(w_alias);
+      remove_wildcard(commands[2]);
    } else if (commands_match(commands, {"clear", "w", ""})) {
-      auto& w_alias = commands[2];
-      clear_wildcards(w_alias);
+      clear_wildcards(commands[2]);
    } else if (commands_match(commands, {"clear", "w"})) {
       clear_all_wildcards();
    } else if (commands_match(commands, {"clear", "c"})) {
@@ -243,13 +238,13 @@ bool maf::Setup_Screen::handle_commands(const std::vector<std::string> & command
    } else if (commands_match(commands, {"clear"})) {
       clear_all();
    } else {
-      throw Bad_commands{};
+      return false;
    }
 
    return true;
 }
 
-void maf::Setup_Screen::write(std::ostream &os) const {
+void maf::screen::Setup::write(std::ostream & os) const {
    os << "^h^TSetup^/^iMafia: a game of deduction and deceit...^/\n\nThis is where you can set up the next game to be played.\n\n";
 
    if (num_players() == 0) {
@@ -294,7 +289,7 @@ void maf::Setup_Screen::write(std::ostream &os) const {
    os << "\n\nTo see the commands which can be used on this screen, enter ^chelp^/.";
 }
 
-void maf::Setup_Screen::write_players_list(std::ostream &os) const {
+void maf::screen::Setup::write_players_list(std::ostream & os) const {
    for (auto it = _player_names.begin(), end = _player_names.end(); ; ) {
       os << "   " << *it;
 
@@ -306,7 +301,7 @@ void maf::Setup_Screen::write_players_list(std::ostream &os) const {
    }
 }
 
-void maf::Setup_Screen::write_cards_list(std::ostream &os) const {
+void maf::screen::Setup::write_cards_list(std::ostream & os) const {
    bool write_nl{false};
 
    for (auto& pair: _role_ids) {
@@ -335,7 +330,7 @@ void maf::Setup_Screen::write_cards_list(std::ostream &os) const {
    }
 }
 
-maf::Help_Screen * maf::Setup_Screen::get_help_screen() const {
+maf::Help_Screen * maf::screen::Setup::get_help_screen() const {
    auto& con = const_cast<Console &>(this->console());
    return new Setup_Help_Screen{con};
 }

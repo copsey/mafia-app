@@ -13,8 +13,7 @@ bool maf::Help_Screen::handle_commands(const std::vector<std::string> & commands
    if (commands_match(commands, {"ok"})) {
       con.clear_help_screen();
    } else {
-      throw error::bad_commands();
-//      err << "^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)";
+      return false;
    }
 
    return true;

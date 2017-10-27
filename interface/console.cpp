@@ -9,9 +9,10 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "console.hpp"
+#include "errors.hpp"
 #include "game_screens.hpp"
 #include "names.hpp"
-#include "console.hpp"
 
 bool maf::commands_match(const std::vector<std::string>& v1,
                          const std::vector<std::string>& v2) {
@@ -59,22 +60,30 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::freelance});
       }
       else if (has_help_screen()) {
-         if (commands_match(commands, {"ok"})) {
-            clear_help_screen();
-         } else {
-            err << "^TInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+         bool success = _help_screen->handle_commands(commands);
+
+         if (!success) {
+            err << "^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)";
          }
       }
       else if (has_question()) {
-         if (_question->handle_commands(commands)) {
+         bool success = _question->handle_commands(commands);
+
+         if (success) {
             clear_question();
+         } else {
+            err << "^h^TInvalid input!^/Please answer the question being shown before trying to do anything else.";
          }
       }
       else if (has_game()) {
          _game_log->do_commands(commands);
       }
       else {
-         _setup_screen.handle_commands(commands);
+         bool success = _setup_screen.handle_commands(commands);
+
+         if (!success) {
+            err << "^h^TUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)";
+         }
       }
 
       /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
@@ -357,44 +366,38 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    catch (const Event::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
-   catch (const Setup_Screen::Bad_player_name &e) {
+   catch (const screen::Setup::Bad_player_name &e) {
       err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
    }
-   catch (const Setup_Screen::Player_already_exists &e) {
+   catch (const screen::Setup::Player_already_exists &e) {
       err << "^TPlayer already exists!^hA player named ^c"
           << e.name
           << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
    }
-   catch (const Setup_Screen::Player_missing &e) {
+   catch (const screen::Setup::Player_missing &e) {
       err << "^TMissing player!^hA player named ^c"
           << e.name
           << "^h could not be found.";
    }
-   catch (const Setup_Screen::Rolecard_unselected &e) {
+   catch (const screen::Setup::Rolecard_unselected &e) {
       err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c"
           << e.role->alias()
           << "^h have been selected.";
    }
-   catch (const Setup_Screen::Wildcard_unselected &e) {
+   catch (const screen::Setup::Wildcard_unselected &e) {
       err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c"
       << e.wildcard->alias()
       << "^h have been selected.";
    }
-   catch (const Setup_Screen::Missing_preset &e) {
+   catch (const screen::Setup::Missing_preset &e) {
       err << "^h^TMissing preset!^/There is no preset defined for the index ";
       err << e.index;
       err << ".";
    }
-   catch (const Setup_Screen::Bad_preset_string &e) {
+   catch (const screen::Setup::Bad_preset_string &e) {
        err << "^h^TInvalid input!^/The string ^c";
        err << e.str;
        err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
-   }
-   catch (const Setup_Screen::Bad_commands &e) {
-      err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
-   }
-   catch (const Question::Bad_commands &e) {
-      err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
    }
    catch (const No_game_in_progress &e) {
       err << "^TNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
@@ -406,6 +409,7 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
             break;
       }
    }
+
    if (err.tellp() == 0) {
       refresh_output();
       clear_error_message();
