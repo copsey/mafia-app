@@ -86,6 +86,54 @@ maf::Help_Screen * maf::screen::Player_Given_Initial_Role::get_help_screen() con
 
 
 /*
+ * maf::screen::Time_Changed
+ */
+
+bool maf::screen::Time_Changed::handle_commands(const std::vector<std::string> & commands) {
+   if (Base_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      glog.advance();
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Time_Changed::write(std::ostream & os) const {
+   switch (time) {
+      case Time::day: {
+         os << "^TDay " << date << "^/";
+         os << "^iDawn breaks, and dim sunlight beams onto the weary townsfolk...\n\n^/It is now day ";
+         os << date;
+         os << ". Anybody still asleep can wake up.";
+         break;
+      }
+
+      case Time::night: {
+         os << "^TNight " << date << "^/";
+         os << "^iAs darkness sets in, the townsfolk return to the comforts of their shelters...\n\n^/It is now night ";
+         os << date;
+         os << ". Everybody still in the game should go to sleep.";
+         break;
+      }
+   }
+}
+
+maf::Help_Screen * maf::screen::Time_Changed::get_help_screen() const {
+   // FIXME: Add help screen for Time_Changed, or decide if none is needed.
+   // (only help would be indicating that command to continue to next
+   //  screen is "ok".)
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Town_Meeting
  */
 

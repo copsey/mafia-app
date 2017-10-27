@@ -43,6 +43,21 @@ namespace maf {
       };
 
 
+      struct Time_Changed: Game_Screen {
+         Time_Changed(Console & con, Date d, Time t)
+            : Game_Screen{con}, date{d}, time{t}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         Date date;
+         Time time;
+      };
+
+
       struct Town_Meeting: Game_Screen {
          Town_Meeting(Console & con,
                       std::vector<rkt::ref<const Player>> players,
