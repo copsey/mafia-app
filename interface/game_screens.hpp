@@ -49,6 +49,21 @@ namespace maf {
       };
 
 
+      struct Investigation_Result: Game_Screen {
+         Investigation_Result(Console & con, Investigation investigation)
+            : Game_Screen{con}, _inv{investigation}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         Investigation _inv;
+         int _page{0};
+      };
+
+
       struct Game_Ended: Game_Screen {
          using Game_Screen::Game_Screen;
 

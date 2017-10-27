@@ -4,6 +4,10 @@
 #include "help_screens.hpp"
 #include "questions.hpp"
 
+/*
+ * maf::Game_Screen
+ */
+
 maf::Game_log & maf::Game_Screen::game_log() const {
    return *console()._game_log;
 }
@@ -26,6 +30,12 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
 
    return true;
 }
+
+
+
+/*
+ * maf::screen::Town_Meeting
+ */
 
 bool maf::screen::Town_Meeting::handle_commands(const std::vector<std::string> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
@@ -127,6 +137,59 @@ maf::Help_Screen * maf::screen::Town_Meeting::get_help_screen() const {
 
    return nullptr;
 }
+
+
+
+/*
+ * maf::screen::Investigation_Result
+ */
+
+bool maf::screen::Investigation_Result::handle_commands(const std::vector<std::string> & commands) {
+   if (Base_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      if (_page == 1) glog.advance();
+      else _page++;
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Investigation_Result::write(std::ostream & os) const {
+   auto & glog = this->game_log();
+   auto & caster_name = glog.get_name(_inv.caster());
+   auto & target_name = glog.get_name(_inv.target());
+
+   os << "^TInvestigation Result^/";
+
+   if (_page == 0) {
+      os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
+   } else {
+      os << caster_name << ", you have completed your investigation of " << target_name << ".\n\n";
+
+      if (_inv.result()) {
+         os << target_name << " was behaving very suspiciously this night!";
+      } else {
+         os << "The investigation was fruitless. " << target_name << " appears to be innocent.";
+      }
+
+      os << "^h\n\nWhen you are ready, enter ^cok^/ to continue.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Investigation_Result::get_help_screen() const {
+   return nullptr;
+}
+
+
+
+/*
+ * maf::screen::Game_Ended
+ */
 
 bool maf::screen::Game_Ended::handle_commands(const std::vector<std::string> & commands) {
    auto& con = this->console();
