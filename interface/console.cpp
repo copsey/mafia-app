@@ -69,15 +69,19 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          }
       }
       else if (has_help_screen()) {
-         if (!_help_screen->handle_commands(commands)) {
+         bool success = _help_screen->handle_commands(commands);
+
+         if (!success) {
             err << "^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)";
          }
       }
       else if (has_question()) {
-         if (_question->handle_commands(commands)) {
+         bool success = _question->handle_commands(commands);
+
+         if (success) {
             clear_question();
          } else {
-            err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
+            err << "^h^TInvalid input!^/Please answer the question being shown before trying to do anything else.";
          }
       }
       else if (commands_match(commands, {"end"})) {
@@ -93,7 +97,11 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          _game_log->do_commands(commands);
       }
       else {
-         _setup_screen.handle_commands(commands);
+         bool success = _setup_screen.handle_commands(commands);
+
+         if (!success) {
+            err << "^h^TUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)";
+         }
       }
 
       /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
@@ -408,9 +416,6 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
        err << "^h^TInvalid input!^/The string ^c";
        err << e.str;
        err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
-   }
-   catch (const screen::Setup::Bad_commands &e) {
-      err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
    catch (const No_game_in_progress &e) {
       err << "^TNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";

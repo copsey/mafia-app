@@ -57,12 +57,9 @@ namespace maf {
             std::string str;
          };
 
-         // Signifies that a set of commands couldn't be interpreted.
-         struct Bad_commands { };
-
          // Make a blank setup screen.
          Setup(Console & con)
-         : Base_Screen{con}
+            : Base_Screen{con}
          { }
 
          // The rulebook to be used in the pending game.

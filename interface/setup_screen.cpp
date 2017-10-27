@@ -238,7 +238,7 @@ bool maf::screen::Setup::handle_commands(const std::vector<std::string> & comman
    } else if (commands_match(commands, {"clear"})) {
       clear_all();
    } else {
-      throw Bad_commands{};
+      return false;
    }
 
    return true;
