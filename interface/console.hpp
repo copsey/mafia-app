@@ -115,7 +115,7 @@ namespace maf {
       Styled_text _error_message{};
 
       std::unique_ptr<Game_log> _game_log{};
-      Setup_Screen _setup_screen;
+      screen::Setup _setup_screen;
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
    };

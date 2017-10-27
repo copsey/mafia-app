@@ -376,40 +376,40 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    catch (const Event::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
-   catch (const Setup_Screen::Bad_player_name &e) {
+   catch (const screen::Setup::Bad_player_name &e) {
       err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
    }
-   catch (const Setup_Screen::Player_already_exists &e) {
+   catch (const screen::Setup::Player_already_exists &e) {
       err << "^TPlayer already exists!^hA player named ^c"
           << e.name
           << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
    }
-   catch (const Setup_Screen::Player_missing &e) {
+   catch (const screen::Setup::Player_missing &e) {
       err << "^TMissing player!^hA player named ^c"
           << e.name
           << "^h could not be found.";
    }
-   catch (const Setup_Screen::Rolecard_unselected &e) {
+   catch (const screen::Setup::Rolecard_unselected &e) {
       err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c"
           << e.role->alias()
           << "^h have been selected.";
    }
-   catch (const Setup_Screen::Wildcard_unselected &e) {
+   catch (const screen::Setup::Wildcard_unselected &e) {
       err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c"
       << e.wildcard->alias()
       << "^h have been selected.";
    }
-   catch (const Setup_Screen::Missing_preset &e) {
+   catch (const screen::Setup::Missing_preset &e) {
       err << "^h^TMissing preset!^/There is no preset defined for the index ";
       err << e.index;
       err << ".";
    }
-   catch (const Setup_Screen::Bad_preset_string &e) {
+   catch (const screen::Setup::Bad_preset_string &e) {
        err << "^h^TInvalid input!^/The string ^c";
        err << e.str;
        err << "^/ could not be converted into a preset index. (i.e. a relatively-small integer)";
    }
-   catch (const Setup_Screen::Bad_commands &e) {
+   catch (const screen::Setup::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
    }
    catch (const No_game_in_progress &e) {
