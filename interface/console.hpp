@@ -12,6 +12,9 @@
 #include "styled_string.hpp"
 
 namespace maf {
+   class Game_Screen;
+
+
    // Decide whether or not the two given vectors of commands match, which is
    // true exactly when both vectors are of the same length and at each position
    // either one of the strings is empty or both strings are identical.
@@ -118,6 +121,8 @@ namespace maf {
       Setup_Screen _setup_screen;
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
+
+      friend class Game_Screen;
    };
 }
 

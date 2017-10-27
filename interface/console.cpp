@@ -9,6 +9,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "game_screens.hpp"
 #include "names.hpp"
 #include "console.hpp"
 
