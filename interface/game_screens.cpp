@@ -134,6 +134,60 @@ maf::Help_Screen * maf::screen::Time_Changed::get_help_screen() const {
 
 
 /*
+ * maf::screen::Obituary
+ */
+
+bool maf::screen::Obituary::handle_commands(const std::vector<std::string> & commands) {
+   if (Base_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      if (_deaths_index + 1 < _deaths.size()) {
+         ++_deaths_index;
+      } else {
+         glog.advance();
+      }
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Obituary::write(std::ostream & os) const {
+   os << "^TObituary^/";
+
+   if (_deaths_index < 0) {
+      if (_deaths.size() == 0) {
+         os << "Nobody died during the night.";
+      } else {
+         /* FIXME: reword to remove use of "us". */
+         os << "It appears that " << _deaths.size() << " of us did not survive the night...";
+      }
+   } else {
+      auto& glog = this->game_log();
+      auto& death = *_deaths[_deaths_index];
+
+      os << glog.get_name(death) << " died during the night!";
+
+      if (death.is_haunted()) {
+         os << "\n\nA slip of paper was found by their bed. On it has been written the name ^i";
+         os << game_log().get_name(*death.haunter());
+         os << "^/ over and over...";
+      }
+   }
+}
+
+maf::Help_Screen * maf::screen::Obituary::get_help_screen() const {
+   // FIXME
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Town_Meeting
  */
 

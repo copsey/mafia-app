@@ -1,6 +1,8 @@
 #ifndef MAFIA_INTERFACE_GAME_SCREENS
 #define MAFIA_INTERFACE_GAME_SCREENS
 
+#include <vector>
+
 #include "../riketi/ref.hpp"
 
 #include "../logic/logic.hpp"
@@ -55,6 +57,21 @@ namespace maf {
       private:
          Date date;
          Time time;
+      };
+
+
+      struct Obituary: Game_Screen {
+         Obituary(Console & con, std::vector<rkt::ref<const Player>> deaths)
+            : Game_Screen{con}, _deaths{deaths}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         std::vector<rkt::ref<const Player>> _deaths;
+         std::ptrdiff_t _deaths_index{-1};
       };
 
 
