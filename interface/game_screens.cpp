@@ -34,6 +34,58 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
 
 
 /*
+ * maf::screen::Player_Given_Initial_Role
+ */
+
+bool maf::screen::Player_Given_Initial_Role::handle_commands(const std::vector<std::string> & commands) {
+   if (Base_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      if (_page == 1) glog.advance();
+      else _page++;
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Player_Given_Initial_Role::write(std::ostream & os) const {
+   auto& glog = this->game_log();
+   auto& pl_name = glog.get_name(*_p_ref);
+
+   os << "^T" << pl_name << "'s Role^/";
+
+   if (_page == 0) {
+      auto rl_name = full_name(*_r_ref);
+      auto rl_alias = _r_ref->alias();
+
+      os << pl_name << ", your role is the "  << rl_name << ".";
+
+      if (_w_ptr != nullptr) {
+         /* FIXME */
+         os << "\nYou were randomly given this role from the ^c";
+         os << _w_ptr->alias();
+         os << "^/ wildcard.";
+      }
+
+      os << "^h\n\nTo see a full description of your role, enter ^chelp r " << rl_alias << "^/.";
+   } else {
+      os << pl_name << ", you are about to be shown your role.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Player_Given_Initial_Role::get_help_screen() const {
+   // FIXME: Add help screen for Player_Given_Initial_Role.
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Town_Meeting
  */
 

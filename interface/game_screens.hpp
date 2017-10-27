@@ -21,7 +21,28 @@ namespace maf {
       Game_log & game_log() const;
    };
 
+
    namespace screen {
+      struct Player_Given_Initial_Role: Game_Screen {
+         Player_Given_Initial_Role(Console & con,
+                                   const Player & player,
+                                   const Role & role,
+                                   const Wildcard * wildcard_ptr)
+            : Game_Screen{con}, _p_ref{player}, _r_ref{role}, _w_ptr{wildcard_ptr}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         rkt::ref<const Player> _p_ref;
+         rkt::ref<const Role> _r_ref;
+         const Wildcard *_w_ptr;
+         int _page{0};
+      };
+
+
       struct Town_Meeting: Game_Screen {
          Town_Meeting(Console & con,
                       std::vector<rkt::ref<const Player>> players,
