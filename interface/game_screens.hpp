@@ -47,6 +47,15 @@ namespace maf {
          const Player *_recent_vote_caster;
          const Player *_recent_vote_target;
       };
+
+
+      struct Game_Ended: Game_Screen {
+         using Game_Screen::Game_Screen;
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+      };
    }
 }
 

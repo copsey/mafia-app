@@ -19,11 +19,7 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
 
       con.store_help_screen(new Player_Info_Screen{con, pl});
    } else if (commands_match(commands, {"end"})) {
-      if (dynamic_cast<const Game_ended *>(&con.game_log().current_event())) {
-         con.end_game();
-      } else {
-         con.store_question(new Confirm_end_game{con});
-      }
+      con.store_question(new Confirm_end_game{con});
    } else {
       return false;
    }
@@ -129,5 +125,65 @@ void maf::screen::Town_Meeting::write(std::ostream & os) const {
 maf::Help_Screen * maf::screen::Town_Meeting::get_help_screen() const {
    // FIXME: Add help screen for Town_Meeting.
 
+   return nullptr;
+}
+
+bool maf::screen::Game_Ended::handle_commands(const std::vector<std::string> & commands) {
+   auto& con = this->console();
+   //auto& glog = this->game_log();
+
+   if (commands_match(commands, {"end"})) {
+      con.end_game();
+      return true;
+   }
+
+   return Game_Screen::handle_commands(commands);
+}
+
+void maf::screen::Game_Ended::write(std::ostream & os) const {
+   auto& glog = this->game_log();
+   auto& game = glog.game();
+
+   std::vector<rkt::ref<const Player>> winners{};
+   std::vector<rkt::ref<const Player>> losers{};
+
+   for (auto& pl: game.players()) {
+      if (pl.has_won()) {
+         winners.emplace_back(pl);
+      } else {
+         losers.emplace_back(pl);
+      }
+   }
+
+   os << "^TGame Over^/The game has ended!";
+
+   if (winners.size() > 0) {
+      os << "\n\nThe following players won:\n";
+
+      for (auto it = winners.begin(); it != winners.end(); ) {
+         auto& pl = **it;
+         os << "   " << game_log().get_name(pl) << ", the " << full_name(pl.role());
+         os << ((++it == winners.end()) ? "." : ",\n");
+      }
+   } else {
+      os << "\n\nNobody won.";
+   }
+
+   if (losers.size() > 0) {
+      os << "\n\nCommiserations go out to:\n";
+
+      for (auto it = losers.begin(); it != losers.end(); ) {
+         auto& pl = **it;
+         os << "   " << game_log().get_name(pl) << ", the " << full_name(pl.role());
+         os << ((++it == losers.end()) ? "." : ",\n");
+      }
+   } else {
+      os << "\n\nNobody lost.";
+   }
+
+   os << "^h\n\nTo return to the setup screen, enter ^cend^/.";
+}
+
+maf::Help_Screen * maf::screen::Game_Ended::get_help_screen() const {
    return nullptr;
 }
