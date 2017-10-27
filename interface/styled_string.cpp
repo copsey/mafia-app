@@ -3,6 +3,22 @@
 
 #include "styled_string.hpp"
 
+std::string maf::escape_tags(const std::string & str) {
+   std::string esc_str{};
+
+   for (auto ch: str) {
+      esc_str.push_back(ch);
+      if (ch == '^') esc_str.push_back('^');
+   }
+
+   return esc_str;
+}
+
+void maf::escape_and_write(const std::string & str, std::ostream & os) {
+   auto esc_str = escape_tags(str);
+   os << esc_str;
+}
+
 maf::Styled_text maf::styled_text_from(const std::string &tagged_s) {
    std::istringstream iss{tagged_s};
    return styled_text_from(iss);

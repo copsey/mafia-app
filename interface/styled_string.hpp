@@ -2,10 +2,18 @@
 #define MAFIA_STYLED_STRING_H
 
 #include <istream>
+#include <ostream>
 #include <string>
 #include <vector>
 
 namespace maf {
+   // Create a new string, identical to `str` but with each tag character
+   // '^' replaced with '^^'.
+   std::string escape_tags(const std::string & str);
+
+   // Write `str` to `os`, but print each '^' character as '^^' instead.
+   void escape_and_write(const std::string & str, std::ostream & os);
+
    // A string coupled with a suggested style.
    // A style is intended to entail such formatting properties as typeface,
    // font size, colour, etc.
