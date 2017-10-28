@@ -295,6 +295,43 @@ maf::Help_Screen * maf::screen::Town_Meeting::get_help_screen() const {
 
 
 /*
+ * maf::screen::Player_Kicked
+ */
+
+bool maf::screen::Player_Kicked::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   //auto& con = this->console();
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      glog.advance();
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Player_Kicked::write(std::ostream & os) const {
+   auto& glog = this->game_log();
+   auto& pl_name = glog.get_name(*_pl_ref);
+   auto r_name = full_name(_pl_ref->role());
+
+   os << "^T" << pl_name << " kicked^/";
+   os << pl_name << " was kicked from the game!\n";
+   os << "They were the " << r_name << ".";
+}
+
+maf::Help_Screen * maf::screen::Player_Kicked::get_help_screen() const {
+   // FIXME
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 

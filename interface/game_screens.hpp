@@ -102,6 +102,21 @@ namespace maf {
       };
 
 
+      struct Player_Kicked: Game_Screen {
+         Player_Kicked(Console & con, const Player & player, const Role & player_role)
+            : Game_Screen{con}, _pl_ref{player}, _pl_role_ref{player_role}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         rkt::ref<const Player> _pl_ref;
+         rkt::ref<const Role> _pl_role_ref;
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}
