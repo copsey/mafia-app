@@ -140,6 +140,21 @@ namespace maf {
       };
 
 
+      struct Duel_Result: Game_Screen {
+         Duel_Result(Console & con, const Player & caster, const Player & target)
+            : Game_Screen{con}, _caster_ref{caster}, _target_ref{target}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         rkt::ref<const Player> _caster_ref;
+         rkt::ref<const Player> _target_ref;
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}

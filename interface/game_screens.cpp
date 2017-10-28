@@ -386,6 +386,64 @@ maf::Help_Screen * maf::screen::Lynch_Result::get_help_screen() const {
 
 
 /*
+ * maf::screen::Duel_Result
+ */
+
+bool maf::screen::Duel_Result::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      glog.advance();
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Duel_Result::write(std::ostream & os) const {
+   auto& caster = *_caster_ref;
+   auto& target = *_target_ref;
+
+   auto& winner = (caster.is_alive() ? caster : target);
+   auto& loser = (caster.is_alive() ? target : caster);
+
+   auto& glog = game_log();
+   auto& caster_name = glog.get_name(caster);
+   auto& target_name = glog.get_name(target);
+   auto& winner_name = glog.get_name(winner);
+   auto& loser_name = glog.get_name(loser);
+
+   os << "^TDuel^/";
+   os << caster_name;
+   os << " has challenged ";
+   os << target_name;
+   os << " to a duel!^i\n\nThe pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!^/\n\nThe lifeless body of ";
+   os << loser_name;
+   os << " falls to the ground. ";
+   os << winner_name;
+   os << " lets out a sigh of relief.";
+
+   if (!winner.is_present()) {
+      os << "\n\nWith that, ";
+      os << winner_name;
+      os << " throws their gun to the ground and flees from the village.";
+   }
+
+   os << "^h\n\nWhen you have finished with this screen, enter ^cok^/.";
+}
+
+maf::Help_Screen * maf::screen::Duel_Result::get_help_screen() const {
+   // FIXME
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 
