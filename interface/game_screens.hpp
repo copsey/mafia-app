@@ -117,6 +117,29 @@ namespace maf {
       };
 
 
+      struct Lynch_Result: Game_Screen {
+         // Tag indicating that nobody was lynched.
+         struct no_lynch_t {};
+         static constexpr auto no_lynch = no_lynch_t{};
+
+         Lynch_Result(Console & con, no_lynch_t)
+            : Game_Screen{con}
+         { }
+
+         Lynch_Result(Console & con, const Player & victim, const Role & victim_role)
+            : Game_Screen{con}, _victim_ptr{&victim}, _victim_role_ptr{&victim_role}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         const Player * _victim_ptr{nullptr};
+         const Role * _victim_role_ptr{nullptr};
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}

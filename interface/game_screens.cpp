@@ -332,6 +332,60 @@ maf::Help_Screen * maf::screen::Player_Kicked::get_help_screen() const {
 
 
 /*
+ * maf::screen::Lynch_Result
+ */
+
+bool maf::screen::Lynch_Result::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   //auto& con = this->console();
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      glog.advance();
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Lynch_Result::write(std::ostream & os) const {
+   os << "^TLynch Result^/";
+
+   if (_victim_ptr) {
+      auto& victim = *_victim_ptr;
+      auto& victim_name = game_log().get_name(*_victim_ptr);
+
+      os << victim_name << " was lynched!\n";
+
+      if (_victim_role_ptr) {
+         auto& victim_role = *_victim_role_ptr;
+         auto victim_role_name = full_name(victim_role);
+
+         os << "They were a " << victim_role_name << ".";
+         if (victim.is_troll()) {
+            os << "^i\n\nA chill blows through the air. The townsfolk who voted to lynch ";
+            os << victim_name;
+            os << " look nervous...";
+         }
+      } else {
+         os << "Their role could not be determined.";
+      }
+   } else {
+      os << "Nobody was lynched today.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Lynch_Result::get_help_screen() const {
+   // FIXME
+
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 
