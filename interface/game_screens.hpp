@@ -248,6 +248,17 @@ namespace maf {
       };
 
 
+      struct Boring_Night: Game_Screen {
+         Boring_Night(Console & con)
+            : Game_Screen{con}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}

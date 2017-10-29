@@ -437,7 +437,6 @@ void maf::screen::Duel_Result::write(std::ostream & os) const {
 
 maf::Help_Screen * maf::screen::Duel_Result::get_help_screen() const {
    // FIXME
-
    return nullptr;
 }
 
@@ -824,6 +823,37 @@ void maf::screen::Peddle_Use::write(std::ostream & os) const {
 
 maf::Help_Screen * maf::screen::Peddle_Use::get_help_screen() const {
    // FIXME: decide whether or not to include a help screen
+   return nullptr;
+}
+
+
+
+/*
+ * maf::screen::Boring_Night
+ */
+
+bool maf::screen::Boring_Night::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      glog.advance();
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Boring_Night::write(std::ostream & os) const {
+   // FIXME: show current date in title. (e.g. "Night 1")
+
+   os << "^TCalm Night^/^iIt is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...^/\n\nNothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.^h\n\nEnter ^cok^/ to continue.";
+}
+
+maf::Help_Screen * maf::screen::Boring_Night::get_help_screen() const {
+   // FIXME
    return nullptr;
 }
 
