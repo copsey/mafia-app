@@ -218,6 +218,21 @@ namespace maf {
       };
 
 
+      struct Investigate_Use: Game_Screen {
+         Investigate_Use(Console & con, const Player & caster)
+            : Game_Screen{con}, _caster_ref{caster}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         rkt::ref<const Player> _caster_ref;
+         int _page{0};
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}
