@@ -650,6 +650,66 @@ maf::Help_Screen * maf::screen::Kill_Use::get_help_screen() const {
 
 
 /*
+ * maf::screen::Heal_Use
+ */
+
+bool maf::screen::Heal_Use::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   auto& glog = game_log();
+
+   if (commands_match(commands, {"heal", ""})) {
+      if (_page == 0) {
+         const Player & caster = *_caster_ref;
+         const Player & target = glog.find_player(commands[1]);
+
+         glog.cast_heal(caster.id(), target.id());
+         _page ++;
+      } else {
+         return false;
+      }
+   } else if (commands_match(commands, {"skip"})) {
+      if (_page == 0) {
+         const Player & caster = *_caster_ref;
+
+         glog.skip_heal(caster.id());
+         _page ++;
+      } else {
+         return false;
+      }
+   } else if (commands_match(commands, {"ok"})) {
+      if (_page == 1) glog.advance();
+      else return false;
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Heal_Use::write(std::ostream & os) const {
+   auto& glog = game_log();
+
+   const Player & caster = *_caster_ref;
+   auto& caster_name = glog.get_name(caster);
+
+   os << "^THeal Use^/";
+
+   if (_page == 1) {
+      os << caster_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
+   } else {
+      os << caster_name << ", you can choose to heal somebody this night.^h\n\nEnter ^cheal A^/ to heal player ^cA^/, or enter ^cskip^/ if you don't wish to heal anybody.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Heal_Use::get_help_screen() const {
+   // FIXME: decide whether or not to include a help screen
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 
