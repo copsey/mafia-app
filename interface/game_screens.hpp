@@ -170,6 +170,24 @@ namespace maf {
       };
 
 
+      struct Mafia_Meeting: Game_Screen {
+         Mafia_Meeting(Console & con,
+                       std::vector<rkt::ref<const Player>> mafiosi,
+                       bool is_initial_meeting)
+            : Game_Screen{con}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         std::vector<rkt::ref<const Player>> _mafiosi;
+         bool _initial;
+         int _page{0};
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}

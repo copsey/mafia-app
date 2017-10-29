@@ -506,6 +506,90 @@ maf::Help_Screen * maf::screen::Choose_Fake_Role::get_help_screen() const {
 
 
 /*
+ * maf::screen::Mafia_Meeting
+ */
+
+bool maf::screen::Mafia_Meeting::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   auto& glog = game_log();
+
+   if (commands_match(commands, {"ok"})) {
+      if (_initial) {
+         if (_page == 1) {
+            glog.advance();
+         } else {
+            _page ++;
+         }
+      } else {
+         if (_page == 1) glog.advance();
+         else return false;
+      }
+   } else if (commands_match(commands, {"kill", "", ""})) {
+      if (!_initial) {
+         const Player & caster = glog.find_player(commands[1]);
+         const Player & target = glog.find_player(commands[2]);
+
+         glog.cast_mafia_kill(caster.id(), target.id());
+         _page ++;
+      } else {
+         return false;
+      }
+   } else if (commands_match(commands, {"skip"})) {
+      if (!_initial) {
+         // FIXME: show "confirm skip?" screen.
+         glog.skip_mafia_kill();
+         _page ++;
+      } else {
+         return false;
+      }
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Mafia_Meeting::write(std::ostream & os) const {
+   // FIXME
+
+   os << "^TMafia Meeting^/";
+
+   if (_page == 1) {
+      os << "The mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^/ when you are ready to continue.";
+   } else if (_initial) {
+      os << "The mafia consists of:\n";
+
+      for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
+         const Player & pl = **it;
+
+         os << "   " << game_log().get_name(pl) << ", the " << full_name(pl.role());
+         os << ((++it == _mafiosi.end()) ? "." : ",\n");
+      }
+
+      os << "\n\nThere is not enough time left to organise a murder.";
+   } else {
+      os << "Seated around a polished walnut table are:\n";
+
+      for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
+         const Player & pl = **it;
+
+         os << "   " << game_log().get_name(pl) << ", the " << full_name(pl.role());
+         os << ((++it == _mafiosi.end()) ? "." : ",\n");
+      }
+
+      os << "\n\nThe mafia are ready to choose their next victim.^h\n\nEntering ^ckill A B^/ will make player ^cA^/ attempt to kill player ^cB^/. Player ^cA^/ must be a member of the mafia.\n\nIf the mafia have chosen not to kill anybody this night, enter ^cskip^/.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Mafia_Meeting::get_help_screen() const {
+   // FIXME
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 
