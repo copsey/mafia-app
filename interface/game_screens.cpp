@@ -38,7 +38,7 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
  */
 
 bool maf::screen::Player_Given_Initial_Role::handle_commands(const std::vector<std::string> & commands) {
-   if (Base_Screen::handle_commands(commands)) return true;
+   if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
 
@@ -90,7 +90,7 @@ maf::Help_Screen * maf::screen::Player_Given_Initial_Role::get_help_screen() con
  */
 
 bool maf::screen::Time_Changed::handle_commands(const std::vector<std::string> & commands) {
-   if (Base_Screen::handle_commands(commands)) return true;
+   if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
 
@@ -138,7 +138,7 @@ maf::Help_Screen * maf::screen::Time_Changed::get_help_screen() const {
  */
 
 bool maf::screen::Obituary::handle_commands(const std::vector<std::string> & commands) {
-   if (Base_Screen::handle_commands(commands)) return true;
+   if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
 
@@ -444,11 +444,73 @@ maf::Help_Screen * maf::screen::Duel_Result::get_help_screen() const {
 
 
 /*
+ * maf::screen::Choose_Fake_Role
+ */
+
+bool maf::screen::Choose_Fake_Role::handle_commands(const std::vector<std::string> & commands) {
+   if (Game_Screen::handle_commands(commands)) return true;
+
+   //auto& con = this->console();
+   auto& glog = this->game_log();
+
+   if (commands_match(commands, {"choose", ""})) {
+      if (_page == 0) {
+         auto& alias = commands[1];
+         auto& role = glog.game().rulebook().get_role(alias);
+
+         glog.choose_fake_role(_player_ref->id(), role.id());
+         _page ++;
+      } else {
+         return false;
+      }
+   } else if (commands_match(commands, {"ok"})) {
+      if (_page == 1) {
+         _page ++;
+      } else if (_page == 2) {
+         glog.advance();
+      } else {
+         return false;
+      }
+   } else {
+      return false;
+   }
+
+   return true;
+}
+
+void maf::screen::Choose_Fake_Role::write(std::ostream & os) const {
+   auto& glog = this->game_log();
+   const Player & pl = *_player_ref;
+   auto& pl_name = glog.get_name(pl);
+
+   os << "^TChoose Fake Role^/";
+
+   if (_page == 2) {
+      os << pl_name << " should now go back to sleep.^h\n\nWhen you are ready, enter ^cok^/ to continue.";
+   } else if (_page == 1) {
+      const Role & fake_role = *pl.fake_role();
+      auto fr_name = full_name(fake_role);
+      auto fr_alias = fake_role.alias();
+
+      os << pl_name << ", you have been given the " << fr_name << " as your fake role.\n\nYou must pretend that this is your real role for the remainder of the game. Breaking this rule will result in you being kicked from the game!\n\nNow would be a good time to study your fake role.^h\n\nEnter ^chelp r " << fr_alias << "^/ to see more information about your fake role.\nWhen you are ready, enter ^cok^/ to continue.";
+   } else {
+      os << pl_name << " needs to be given a fake role, which they must pretend is their true role for the rest of the game.^h\n\nIf they break the rules by contradicting their fake role, then they should be kicked from the game by entering ^ckick " << pl_name << "^/ during the day.\n\nTo choose the role with alias ^cA^/, enter ^cchoose A^/.";
+   }
+}
+
+maf::Help_Screen * maf::screen::Choose_Fake_Role::get_help_screen() const {
+   // FIXME
+   return nullptr;
+}
+
+
+
+/*
  * maf::screen::Investigation_Result
  */
 
 bool maf::screen::Investigation_Result::handle_commands(const std::vector<std::string> & commands) {
-   if (Base_Screen::handle_commands(commands)) return true;
+   if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
 

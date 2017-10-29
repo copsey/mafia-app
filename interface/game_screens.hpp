@@ -155,6 +155,21 @@ namespace maf {
       };
 
 
+      struct Choose_Fake_Role: Game_Screen {
+         Choose_Fake_Role(Console & con, const Player & player)
+            : Game_Screen{con}, _player_ref{player}
+         { }
+
+         bool handle_commands(const std::vector<std::string> & commands) override;
+         void write(std::ostream & os) const override;
+         Help_Screen * get_help_screen() const override;
+
+      private:
+         rkt::ref<const Player> _player_ref;
+         int _page{0};
+      };
+
+
       struct Investigation_Result: Game_Screen {
          Investigation_Result(Console & con, Investigation investigation)
             : Game_Screen{con}, _inv{investigation}
