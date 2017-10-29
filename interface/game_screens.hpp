@@ -16,6 +16,19 @@ namespace maf {
    struct Game_Screen: Base_Screen {
       using Base_Screen::Base_Screen;
 
+      // Handle the commands, acting as appropriate on the owning console.
+      //
+      // Should be overriden by derived classes to provide custom commands,
+      // calling `Game_Screen::handle_commands` to process the default set of
+      // commands shared by all game screens.
+      //
+      // @pre `this` is the screen currently being displayed by the owning
+      // console.
+      //
+      // @returns `true` if the commands were successfully processed, `false`
+      // otherwise.
+      //
+      // @throws `error::missing_commands` if `commands` is an empty vector.
       bool handle_commands(const std::vector<std::string> & commands) override;
 
    protected:

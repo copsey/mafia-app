@@ -26,8 +26,11 @@ namespace maf {
       // Handle the commands, acting as appropriate on the owning console.
       //
       // Should be overriden by derived classes to provide custom commands,
-      // calling `base_screen::handle_commands` to process the default set of
+      // calling `Base_Screen::handle_commands` to process the default set of
       // commands shared by all screens.
+      //
+      // @pre `this` is the screen currently being displayed by the owning
+      // console.
       //
       // @returns `true` if the commands were successfully processed, `false`
       // otherwise.

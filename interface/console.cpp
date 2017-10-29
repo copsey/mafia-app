@@ -24,7 +24,7 @@ bool maf::commands_match(const std::vector<std::string>& v1,
 }
 
 maf::Console::Console()
-   : _setup_screen{*this}
+   : _setup_screen{*this}, _screen_stack{rkt::ref<Base_Screen>(_setup_screen)}
 {
    refresh_output();
 }
@@ -461,6 +461,18 @@ void maf::Console::read_error_message(std::istream& is) {
 
 void maf::Console::clear_error_message() {
    _error_message.clear();
+}
+
+const maf::Base_Screen & maf::Console::current_screen() const {
+   return *_screen_stack.back();
+}
+
+void maf::Console::push_screen(Base_Screen & screen) {
+   _screen_stack.emplace_back(screen);
+}
+
+void maf::Console::pop_screen() {
+   _screen_stack.pop_back();
 }
 
 const maf::Help_Screen * maf::Console::help_screen() const {

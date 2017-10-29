@@ -3,6 +3,7 @@
 
 #include <array>
 #include <memory>
+#include <unordered_set>
 #include <utility>
 
 #include "game_log.hpp"
@@ -71,6 +72,14 @@ namespace maf {
       // Removes the current error message.
       void clear_error_message();
 
+      // Get the screen currently being displayed.
+      const Base_Screen & current_screen() const;
+      // Add `screen` onto the stack.
+      // It will become the screen currently being displayed.
+      void push_screen(Base_Screen & screen);
+      // Remove the screen currently being displayed from the stack.
+      void pop_screen();
+
       // Gets the help screen currently being stored, or nullptr if none exists.
       const Help_Screen * help_screen() const;
       // Checks if a help screen is currently being stored.
@@ -121,6 +130,9 @@ namespace maf {
       screen::Setup _setup_screen;
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
+
+      std::vector<rkt::ref<Base_Screen>> _screen_stack;
+      std::unordered_set<std::unique_ptr<Base_Screen>> _owned_screens{};
 
       friend class Game_Screen;
    };
