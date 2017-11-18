@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "../riketi/algorithm.hpp"
-#include "../riketi/enum.hpp"
 #include "../riketi/experimental/algorithm.hpp"
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
