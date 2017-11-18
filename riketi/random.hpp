@@ -31,9 +31,9 @@ namespace rkt {
 	// If `c` is empty, returns `std::end(c)` instead.
 	template <typename Cont, typename RNG>
 	container::iterator_type<Cont> pick_with(Cont & c, RNG && g) {
-		if (container::is_empty(c)) return std::end(c);
+		if (std::empty(c)) return std::end(c);
 		
-		auto n = container::size(c);
+		auto n = std::size(c);
 		std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
 		
 		auto b = std::begin(c);
@@ -42,9 +42,9 @@ namespace rkt {
 	}
 	template <typename Cont, typename RNG>
 	container::const_iterator_type<Cont> pick_with(const Cont & c, RNG && g) {
-		if (container::is_empty(c)) return std::end(c);
+		if (std::empty(c)) return std::end(c);
 		
-		auto n = container::size(c);
+		auto n = std::size(c);
 		std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
 		
 		auto b = std::begin(c);
