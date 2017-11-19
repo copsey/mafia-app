@@ -1,6 +1,7 @@
 #include "../riketi/algorithm.hpp"
 #include "../riketi/string.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"

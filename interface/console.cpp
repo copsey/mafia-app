@@ -7,8 +7,9 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
-#include "names.hpp"
+#include "command.hpp"
 #include "console.hpp"
+#include "names.hpp"
 
 const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
    maf::Console::Game_parameters{
@@ -469,26 +470,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 }
 
 bool maf::Console::input(std::string_view input) {
-   std::vector<std::string_view> v = {};
-
-   // split the input into commands, separated by space characters
-   //   e.g. "do X   with Y" -> {"do", "X", "with", "Y"}
-   {
-      auto i = input.data(), j = i;
-      auto end = input.data() + input.size();
-
-      for ( ; j != end; ) {
-         if (*j == ' ' || *j == '\t') {
-            if (i != j) v.emplace_back(i, j - i);
-            i = ++j;
-         } else {
-            ++j;
-         }
-      }
-
-      if (i != j) v.emplace_back(i, j - i);
-   }
-
+   auto v = parse_input(input);
    return do_commands(v);
 }
 

@@ -1,3 +1,4 @@
+#include "command.hpp"
 #include "console.hpp"
 #include "questions.hpp"
 

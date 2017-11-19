@@ -14,15 +14,6 @@
 #include "styled_string.hpp"
 
 namespace maf {
-   // Decide whether or not the given container of string-like objects matches the
-   // given array of commands, which is true exactly when `std::size(c) == std::size(arr)`
-   // and at each position `i`, either `std::empty(arr[i])` or `c[i] == arr[i]`.
-   template <typename Cont, std::size_t N>
-   bool commands_match(const Cont & c, const std::string_view (&arr)[N]);
-
-   template <typename Str, std::size_t N>
-   bool commands_match(const std::vector<Str> & v, const std::string_view (&arr)[N]);
-
    // Signifies that no preset is defined with index i.
    struct Missing_preset {
       int index;
@@ -141,42 +132,6 @@ namespace maf {
       void begin_pending_game();
       void begin_preset(int i);
    };
-}
-
-
-
-template <typename Cont, std::size_t N>
-bool maf::commands_match(const Cont & c, const std::string_view (&arr)[N])
-{
-   auto eq = [](auto& s1, std::string_view s2) {
-      return std::empty(s2) || s1 == s2;
-   };
-
-   return rkt::matches(c, arr, eq);
-}
-
-template <typename Str, std::size_t N>
-bool maf::commands_match(const std::vector<Str> & v, const::std::string_view (&arr)[N])
-{
-   auto eq = [](auto& s1, std::string_view s2) {
-      return std::empty(s2) || s1 == s2;
-   };
-
-   if constexpr(N == 0) {
-      return std::size(v) == 0;
-   } else if constexpr(N == 1) {
-      return std::size(v) == 1 && eq(v[0], arr[0]);
-   } else if constexpr(N == 2) {
-      return std::size(v) == 2 && eq(v[0], arr[0]) && eq(v[1], arr[1]);
-   } else if constexpr(N == 3) {
-      return std::size(v) == 3 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]);
-   } else if constexpr(N == 4) {
-      return std::size(v) == 4 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]);
-   } else if constexpr(N == 5) {
-      return std::size(v) == 5 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]) && eq(v[4], arr[4]);
-   } else {
-      return rkt::matches(v, arr, eq);
-   }
 }
 
 #endif
