@@ -5,6 +5,8 @@
 #include <memory>
 #include <utility>
 
+#include "../riketi/algorithm.hpp"
+
 #include "game_log.hpp"
 #include "help_screens.hpp"
 #include "questions.hpp"
@@ -12,11 +14,14 @@
 #include "styled_string.hpp"
 
 namespace maf {
-   // Decide whether or not the two given vectors of commands match, which is
-   // true exactly when both vectors are of the same length and at each position
-   // either one of the strings is empty or both strings are identical.
-   bool commands_match(const std::vector<std::string>& v1,
-                       const std::vector<std::string>& v2);
+   // Decide whether or not the given container of string-like objects matches the
+   // given array of commands, which is true exactly when `std::size(c) == std::size(arr)`
+   // and at each position `i`, either `std::empty(arr[i])` or `c[i] == arr[i]`.
+   template <typename Cont, std::size_t N>
+   bool commands_match(const Cont & c, const std::string_view (&arr)[N]);
+
+   template <typename Str, std::size_t N>
+   bool commands_match(const std::vector<Str> & v, const std::string_view (&arr)[N]);
 
    // Signifies that there is no game in progress at the moment.
    struct No_game_in_progress { };
@@ -40,7 +45,7 @@ namespace maf {
       // error_message() is empty.
       // Returns false if the commands are invalid for some reason. In this
       // case, output() remains unchanged and error_message() is non-empty.
-      bool do_commands(const std::vector<std::string> & commands);
+      bool do_commands(const std::vector<std::string_view> & commands);
       // Process the given input string, by seperating it into commands
       // delimited by whitespace. For example, the input "add p Brutus" becomes
       // {"add", "p", "Brutus"}.
@@ -48,7 +53,7 @@ namespace maf {
       // is empty.
       // Returns false if the input is invalid for some reason. In this case,
       // output() remains unchanged and error_message() is non-empty.
-      bool input(const std::string &input);
+      bool input(std::string_view input);
 
       // The most recent output. Never empty.
       const Styled_text & output() const;
@@ -119,6 +124,42 @@ namespace maf {
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
    };
+}
+
+
+
+template <typename Cont, std::size_t N>
+bool maf::commands_match(const Cont & c, const std::string_view (&arr)[N])
+{
+   auto eq = [](auto& s1, std::string_view s2) {
+      return std::empty(s2) || s1 == s2;
+   };
+
+   return rkt::matches(c, arr, eq);
+}
+
+template <typename Str, std::size_t N>
+bool maf::commands_match(const std::vector<Str> & v, const::std::string_view (&arr)[N])
+{
+   auto eq = [](auto& s1, std::string_view s2) {
+      return std::empty(s2) || s1 == s2;
+   };
+
+   if constexpr(N == 0) {
+      return std::size(v) == 0;
+   } else if constexpr(N == 1) {
+      return std::size(v) == 1 && eq(v[0], arr[0]);
+   } else if constexpr(N == 2) {
+      return std::size(v) == 2 && eq(v[0], arr[0]) && eq(v[1], arr[1]);
+   } else if constexpr(N == 3) {
+      return std::size(v) == 3 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]);
+   } else if constexpr(N == 4) {
+      return std::size(v) == 4 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]);
+   } else if constexpr(N == 5) {
+      return std::size(v) == 5 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]) && eq(v[4], arr[4]);
+   } else {
+      return rkt::matches(v, arr, eq);
+   }
 }
 
 #endif

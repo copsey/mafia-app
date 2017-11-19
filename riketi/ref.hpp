@@ -22,7 +22,7 @@ namespace rkt {
 		using type = t;
 		
 		// Create a reference to `obj`.
-		ref(type & obj) noexcept
+		constexpr ref(type & obj) noexcept
 			: ptr{std::addressof(obj)}
 		{ }
 		
@@ -72,4 +72,3 @@ namespace rkt {
 }
 
 #endif
-

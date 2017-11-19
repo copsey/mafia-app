@@ -4,8 +4,6 @@
 #include <sstream>
 
 #include "../riketi/algorithm.hpp"
-#include "../riketi/enum.hpp"
-#include "../riketi/experimental/algorithm.hpp"
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
@@ -13,22 +11,13 @@
 #include "errors.hpp"
 #include "names.hpp"
 
-bool maf::commands_match(const std::vector<std::string>& v1,
-                         const std::vector<std::string>& v2) {
-   auto pred = [](const std::string& s1, const std::string& s2) {
-      return s1.empty() || s2.empty() || s1 == s2;
-   };
-
-   return rkt::matches(v1, v2, pred);
-}
-
 maf::Console::Console()
    : _setup_screen{*this}
 {
    refresh_output();
 }
 
-bool maf::Console::do_commands(const std::vector<std::string>& commands) {
+bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
    std::stringstream err{}; // Write an error here if something goes wrong.
 
    try {
@@ -62,8 +51,8 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
          if (!has_game()) {
             err << "^TNo game in progress!^hThere is no game in progress to display information about.";
          } else {
-            const std::string & approx_name = commands[1];
-            const Player & player = _game_log->find_player(approx_name);
+            auto& approx_name = commands[1];
+            auto& player = _game_log->find_player(approx_name);
 
             store_help_screen(new Player_Info_Screen{*this, player});
          }
@@ -438,11 +427,28 @@ bool maf::Console::do_commands(const std::vector<std::string>& commands) {
    }
 }
 
-bool maf::Console::input(const std::string& input) {
-   auto commands = rkt::split_if_and_prune(input, [](char c) {
-      return std::isspace(c);
-   });
-   return do_commands(commands);
+bool maf::Console::input(std::string_view input) {
+   std::vector<std::string_view> v = {};
+
+   // split the input into commands, separated by space characters
+   //   e.g. "do X   with Y" -> {"do", "X", "with", "Y"}
+   {
+      auto i = input.data(), j = i;
+      auto end = input.data() + input.size();
+
+      for ( ; j != end; ) {
+         if (*j == ' ' || *j == '\t') {
+            if (i != j) v.emplace_back(i, j - i);
+            i = ++j;
+         } else {
+            ++j;
+         }
+      }
+
+      if (i != j) v.emplace_back(i, j - i);
+   }
+
+   return do_commands(v);
 }
 
 const maf::Styled_text & maf::Console::output() const {

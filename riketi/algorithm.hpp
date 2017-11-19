@@ -9,13 +9,13 @@
 namespace rkt {
 	// Check if `p(t)` is true for all `t` in `c`.
 	template <typename Cont, typename Pred>
-	bool all_of(const Cont & c, Pred p) {
+	bool all_of(Cont const& c, Pred p) {
 		return std::all_of(std::begin(c), std::end(c), p);
 	}
 	
 	// Check if `p(t)` is true for at least one `t` in `c`.
 	template <typename Cont, typename Pred>
-	bool any_of(const Cont & c, Pred p) {
+	bool any_of(Cont const& c, Pred p) {
 		return std::any_of(std::begin(c), std::end(c), p);
 	}
 	

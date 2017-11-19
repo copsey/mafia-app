@@ -46,20 +46,20 @@ std::vector<maf::Wildcard::ID> maf::screen::Setup::wildcard_ids() const {
    return v;
 }
 
-bool maf::screen::Setup::has_player(const std::string & str) const {
-   auto matches_str = [&str](const std::string & name) {
+bool maf::screen::Setup::has_player(std::string_view str) const {
+   auto matches_str = [&str](std::string_view name) {
       return rkt::equal_up_to_case(name, str);
    };
 
    return rkt::any_of(_player_names, matches_str);
 }
 
-bool maf::screen::Setup::has_rolecard(const std::string & alias) const {
+bool maf::screen::Setup::has_rolecard(std::string_view alias) const {
    Role::ID id = _rulebook.get_role(alias).id();
    return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
 }
 
-bool maf::screen::Setup::has_wildcard(const std::string & alias) const {
+bool maf::screen::Setup::has_wildcard(std::string_view alias) const {
    Wildcard::ID id = _rulebook.get_wildcard(alias).id();
    return _wildcard_ids.count(id) != 0 && _wildcard_ids.at(id) != 0;
 }
@@ -84,41 +84,41 @@ std::size_t maf::screen::Setup::num_cards() const {
    return num_rolecards() + num_wildcards();
 }
 
-void maf::screen::Setup::add_player(const std::string & name) {
+void maf::screen::Setup::add_player(std::string_view name) {
    if (rkt::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
-      throw Bad_player_name{name};
+      throw Bad_player_name{std::string{name}};
    } else if (has_player(name)) {
-      throw Player_already_exists{name};
+      throw Player_already_exists{std::string{name}};
    } else {
-      _player_names.insert(name);
+      _player_names.insert(std::string{name});
    }
 }
 
-void maf::screen::Setup::add_rolecard(const std::string & alias) {
+void maf::screen::Setup::add_rolecard(std::string_view alias) {
    auto& r = _rulebook.get_role(alias);
    ++_role_ids[r.id()];
 }
 
-void maf::screen::Setup::add_wildcard(const std::string & alias) {
+void maf::screen::Setup::add_wildcard(std::string_view alias) {
    auto& w = _rulebook.get_wildcard(alias);
    ++_wildcard_ids[w.id()];
 }
 
-void maf::screen::Setup::remove_player(const std::string & str) {
-   auto matches_str = [&str](const std::string & name) {
+void maf::screen::Setup::remove_player(std::string_view str) {
+   auto matches_str = [&str](std::string_view name) {
       return rkt::equal_up_to_case(name, str);
    };
 
    auto it = rkt::find_if(_player_names, matches_str);
 
    if (it == _player_names.end()) {
-      throw Player_missing{str};
+      throw Player_missing{std::string{str}};
    } else {
       _player_names.erase(it);
    }
 }
 
-void maf::screen::Setup::remove_rolecard(const std::string & alias) {
+void maf::screen::Setup::remove_rolecard(std::string_view alias) {
    auto& r = _rulebook.get_role(alias);
 
    if (_role_ids[r.id()] == 0) {
@@ -128,7 +128,7 @@ void maf::screen::Setup::remove_rolecard(const std::string & alias) {
    }
 }
 
-void maf::screen::Setup::remove_wildcard(const std::string & alias) {
+void maf::screen::Setup::remove_wildcard(std::string_view alias) {
    auto& w = _rulebook.get_wildcard(alias);
 
    if (_wildcard_ids[w.id()] == 0) {
@@ -142,7 +142,7 @@ void maf::screen::Setup::clear_all_players() {
    _player_names.clear();
 }
 
-void maf::screen::Setup::clear_rolecards(const std::string & alias) {
+void maf::screen::Setup::clear_rolecards(std::string_view alias) {
    auto& r = _rulebook.get_role(alias);
    _role_ids[r.id()] = 0;
 }
@@ -151,7 +151,7 @@ void maf::screen::Setup::clear_all_rolecards() {
    _role_ids.clear();
 }
 
-void maf::screen::Setup::clear_wildcards(const std::string & alias) {
+void maf::screen::Setup::clear_wildcards(std::string_view alias) {
    auto& w = _rulebook.get_wildcard(alias);
    _wildcard_ids[w.id()] = 0;
 }
@@ -204,6 +204,13 @@ bool maf::screen::Setup::handle_commands(const std::vector<std::string> & comman
       begin_random_preset();
    } else if (commands_match(commands, {"preset", ""})) {
       auto& i_str = commands[1];
+
+      // FIXME: replace `std::stoi` with `std::from_chars` when implemented in libc++
+      //   if (auto [ptr, ec] = std::from_chars(i_str.begin(), i_str.end(), i); ec == {}) {
+      //      begin_preset(i);
+      //   } else {
+      //      throw Bad_preset_string{i_str};
+      //   }
 
       try {
          auto i = std::stoi(i_str);

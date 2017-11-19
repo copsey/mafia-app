@@ -13,7 +13,7 @@ namespace maf {
    
    // FIXME: Place all Questions into separate 'question' child namespace
    // of 'maf'.
-    
+
    struct Question: Base_Screen {
       using Base_Screen::Base_Screen;
 

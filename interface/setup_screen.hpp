@@ -72,11 +72,11 @@ namespace maf {
          std::vector<Wildcard::ID> wildcard_ids() const;
 
          // Checks if a player with the given name already exists.
-         bool has_player(const std::string & name) const;
+         bool has_player(std::string_view name) const;
          // Checks if at least one rolecard with the given alias has been chosen.
-         bool has_rolecard(const std::string & alias) const;
+         bool has_rolecard(std::string_view alias) const;
          // Checks if at least one wildcard with the given alias has been chosen.
-         bool has_wildcard(const std::string & alias) const;
+         bool has_wildcard(std::string_view alias) const;
 
          // The total number of players that have been chosen.
          std::size_t num_players() const;
@@ -88,27 +88,27 @@ namespace maf {
          std::size_t num_cards() const;
 
          // Adds a new player with the given name.
-         void add_player(const std::string & name);
+         void add_player(std::string_view name);
          // Adds a single copy of the rolecard with the given alias.
-         void add_rolecard(const std::string & alias);
+         void add_rolecard(std::string_view alias);
          // Adds a single copy of the wildcard with the given alias.
-         void add_wildcard(const std::string & alias);
+         void add_wildcard(std::string_view alias);
 
          // Removes the player with the given name.
-         void remove_player(const std::string & name);
+         void remove_player(std::string_view name);
          // Removes a single copy of the rolecard with the given alias.
-         void remove_rolecard(const std::string & alias);
+         void remove_rolecard(std::string_view alias);
          // Removes a single copy of the wildcard with the given alias.
-         void remove_wildcard(const std::string & alias);
+         void remove_wildcard(std::string_view alias);
 
          // Removes all of the players that have been chosen.
          void clear_all_players();
          // Removes all copies of the rolecard with the given alias.
-         void clear_rolecards(const std::string & alias);
+         void clear_rolecards(std::string_view alias);
          // Removes all of the rolecards that have been chosen.
          void clear_all_rolecards();
          // Removes all copies of the wildcard with the given alias.
-         void clear_wildcards(const std::string & alias);
+         void clear_wildcards(std::string_view alias);
          // Removes all of the wildcards that have been chosen.
          void clear_all_wildcards();
          // Removes all of the cards that have been chosen.
@@ -128,7 +128,7 @@ namespace maf {
          //
          // @returns `true` if the commands were successfully processed, `false`
          // otherwise.
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
 
          // Write the setup screen to `os`.
          void write(std::ostream & os) const override;

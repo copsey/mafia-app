@@ -129,13 +129,13 @@ namespace maf {
       bool contains_role(Role::ID id) const;
 
       /// Whether the rulebook contains a role with the given alias.
-      bool contains_role(const std::string & alias) const;
+      bool contains_role(std::string_view alias) const;
 
       /// Whether the rulebook contains a wildcard with the given ID.
       bool contains_wildcard(Wildcard::ID id) const;
 
       /// Whether the rulebook contains a wildcard with the given alias.
-      bool contains_wildcard(const std::string & alias) const;
+      bool contains_wildcard(std::string_view alias) const;
 
       /// Get the role with the given ID.
       ///
@@ -150,12 +150,12 @@ namespace maf {
       /// Get the role with the given alias.
       ///
       // @throws `Missing_role_alias` if none could be found.
-      Role & get_role(const std::string & alias);
+      Role & get_role(std::string_view alias);
 
       /// Get the role with the given alias.
       ///
       // @throws `Missing_role_alias` if none could be found.
-      const Role & get_role(const std::string & alias) const;
+      const Role & get_role(std::string_view alias) const;
 
       /// Get the wildcard with the given ID.
       ///
@@ -170,12 +170,12 @@ namespace maf {
       /// Get the wildcard with the given alias.
       ///
       /// @throws `Missing_wildcard_alias` if none could be found.
-      Wildcard & get_wildcard(const std::string & alias);
+      Wildcard & get_wildcard(std::string_view alias);
 
       /// Get the wildcard with the given alias.
       ///
       /// @throws `Missing_wildcard_alias` if none could be found.
-      const Wildcard & get_wildcard(const std::string & alias) const;
+      const Wildcard & get_wildcard(std::string_view alias) const;
 
       /// Create and store a new role with the given ID.
       ///

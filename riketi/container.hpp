@@ -77,22 +77,26 @@ namespace rkt {
 		
 		// The number of elements that `c` contains.
 		template <typename Cont>
+		[[deprecated("use std::size instead")]]
 		size_type<Cont> size(const Cont & c) {
 			return c.size();
 		}
 		
 		template <typename T, std::size_t n>
+		[[deprecated("use std::size instead")]]
 		constexpr std::size_t size(T (& arr)[n]) {
 			return n;
 		}
 		
 		// Check if `c` is empty.
 		template <typename Cont>
+		[[deprecated("use std::empty instead")]]
 		bool is_empty(const Cont & c) {
 			return c.empty();
 		}
 		
 		template <typename T, std::size_t n>
+		[[deprecated("use std::empty instead")]]
 		constexpr bool is_empty(T (& arr)[n]) {
 			return n == 0;
 		}

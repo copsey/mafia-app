@@ -2,6 +2,7 @@
 #define MAFIA_GAME_LOG_H
 
 #include <memory>
+#include <string_view>
 
 #include "events.hpp"
 
@@ -55,7 +56,7 @@ namespace maf {
 
       // Handles the given commands, by passing them to the current event.
       // Throws an exception if the commands couldn't be handled.
-      void do_commands(const std::vector<std::string> &commands);
+      void do_commands(const std::vector<std::string_view> & commands);
 
       // Writes a transcript to os, containing a summary of every event which
       // has occurred so far, in chronological order.
@@ -67,13 +68,13 @@ namespace maf {
 
       // Finds the player whose name matches the given string, up to case.
       // Throws an exception if no such player could be found.
-      const Player & find_player(const std::string &name) const;
+      const Player & find_player(std::string_view name) const;
 
       /// Get the name of the given player.
-      const std::string & get_name(const Player & player) const;
+      std::string_view get_name(const Player & player) const;
 
       /// Get the name of the player with the given ID.
-      const std::string & get_name(Player::ID id) const;
+      std::string_view get_name(Player::ID id) const;
 
 
 
