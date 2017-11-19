@@ -14,11 +14,6 @@ std::string maf::escape_tags(std::string_view str) {
    return esc_str;
 }
 
-void maf::escape_and_write(std::string_view str, std::ostream & os) {
-   auto esc_str = escape_tags(str);
-   os << esc_str;
-}
-
 maf::Styled_text maf::styled_text_from(std::string_view tagged_str) {
    std::string str = {};
    Styled_text text = {};
