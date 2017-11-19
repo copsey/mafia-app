@@ -51,7 +51,7 @@ int main() {
 
       std::cout << '\n';
 
-      if (input == "quit") {
+      if (input == "quit" || input == "exit") {
          quit = true;
       } else if (console.input(input)) {
          print_output(console);

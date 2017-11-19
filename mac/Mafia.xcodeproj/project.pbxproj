@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F842C43A1F9BC023009CD3D5 /* screens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F842C4391F9BC023009CD3D5 /* screens.cpp */; };
+		F809EE2E1FC1975B003348BC /* command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F809EE2D1FC1975B003348BC /* command.cpp */; };
 		F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0621AF3B9DF00BF4992 /* AppDelegate.m */; };
 		F84FE0651AF3B9DF00BF4992 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0641AF3B9DF00BF4992 /* main.m */; };
 		F84FE0671AF3B9DF00BF4992 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F84FE0661AF3B9DF00BF4992 /* Images.xcassets */; };
@@ -31,6 +32,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F809EE2C1FC1975B003348BC /* command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
+		F809EE2D1FC1975B003348BC /* command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = command.cpp; sourceTree = "<group>"; };
 		F810404B1D49D9F9004E31CF /* time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = time.hpp; sourceTree = "<group>"; };
 		F811CB881B6AB07C002EF3E1 /* string.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
 		F828BC791B91069800439CA0 /* ref.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ref.hpp; sourceTree = "<group>"; };
@@ -145,6 +148,8 @@
 		F84FE07F1AF3BB1A00BF4992 /* interface */ = {
 			isa = PBXGroup;
 			children = (
+				F809EE2C1FC1975B003348BC /* command.hpp */,
+				F809EE2D1FC1975B003348BC /* command.cpp */,
 				F8D772D61AF4B42100E16BB6 /* console.hpp */,
 				F8D772D51AF4B42100E16BB6 /* console.cpp */,
 				F8D5DB341B84E43B00D032D6 /* events.hpp */,
@@ -289,6 +294,7 @@
 				F84FE0971AF3BB1A00BF4992 /* random.cpp in Sources */,
 				F880CA051B89BEC600144257 /* help_screens.cpp in Sources */,
 				F880CA0B1B8A606300144257 /* questions.cpp in Sources */,
+				F809EE2E1FC1975B003348BC /* command.cpp in Sources */,
 				F84FE0651AF3B9DF00BF4992 /* main.m in Sources */,
 				F886CDEF1B87014200915D2D /* player.cpp in Sources */,
 				F842C43A1F9BC023009CD3D5 /* screens.cpp in Sources */,

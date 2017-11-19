@@ -3,6 +3,7 @@
 
 #include <array>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "../riketi/algorithm.hpp"
@@ -14,15 +15,6 @@
 #include "styled_string.hpp"
 
 namespace maf {
-   // Decide whether or not the given container of string-like objects matches the
-   // given array of commands, which is true exactly when `std::size(c) == std::size(arr)`
-   // and at each position `i`, either `std::empty(arr[i])` or `c[i] == arr[i]`.
-   template <typename Cont, std::size_t N>
-   bool commands_match(const Cont & c, const std::string_view (&arr)[N]);
-
-   template <typename Str, std::size_t N>
-   bool commands_match(const std::vector<Str> & v, const std::string_view (&arr)[N]);
-
    // Signifies that there is no game in progress at the moment.
    struct No_game_in_progress { };
 
@@ -57,9 +49,9 @@ namespace maf {
 
       // The most recent output. Never empty.
       const Styled_text & output() const;
-      // Reads the tagged string contained in is, updating the output to display
+      // Read the tagged string `str`, updating the output to display
       // the styled text obtained.
-      void read_output(std::istream &is);
+      void read_output(std::string_view str);
       // Updates the output to display the appropriate screen.
       void refresh_output();
 
@@ -67,9 +59,9 @@ namespace maf {
       // The only styles that will ever appear here are help, help_title and
       // command.
       const Styled_text & error_message() const;
-      // Reads the tagged string contained in is, updating the error message to
+      // Reads the tagged string `str`, updating the error message to
       // display the styled text obtained.
-      void read_error_message(std::istream &is);
+      void read_error_message(std::string_view str);
       // Removes the current error message.
       void clear_error_message();
 
@@ -124,42 +116,6 @@ namespace maf {
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
    };
-}
-
-
-
-template <typename Cont, std::size_t N>
-bool maf::commands_match(const Cont & c, const std::string_view (&arr)[N])
-{
-   auto eq = [](auto& s1, std::string_view s2) {
-      return std::empty(s2) || s1 == s2;
-   };
-
-   return rkt::matches(c, arr, eq);
-}
-
-template <typename Str, std::size_t N>
-bool maf::commands_match(const std::vector<Str> & v, const::std::string_view (&arr)[N])
-{
-   auto eq = [](auto& s1, std::string_view s2) {
-      return std::empty(s2) || s1 == s2;
-   };
-
-   if constexpr(N == 0) {
-      return std::size(v) == 0;
-   } else if constexpr(N == 1) {
-      return std::size(v) == 1 && eq(v[0], arr[0]);
-   } else if constexpr(N == 2) {
-      return std::size(v) == 2 && eq(v[0], arr[0]) && eq(v[1], arr[1]);
-   } else if constexpr(N == 3) {
-      return std::size(v) == 3 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]);
-   } else if constexpr(N == 4) {
-      return std::size(v) == 4 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]);
-   } else if constexpr(N == 5) {
-      return std::size(v) == 5 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]) && eq(v[4], arr[4]);
-   } else {
-      return rkt::matches(v, arr, eq);
-   }
 }
 
 #endif
