@@ -22,7 +22,7 @@ namespace maf {
       // If false, then the tagged string outputted by write may have changed.
       //
       // Throws an exception if the commands couldn't be handled.
-      virtual bool do_commands(const std::vector<std::string> & commands) = 0;
+      virtual bool do_commands(const std::vector<std::string_view> & commands) = 0;
 
       // Writes a tagged string containing the question to os.
       virtual void write(std::ostream &os) const = 0;
@@ -48,7 +48,7 @@ namespace maf {
          : _console_ref(console)
       { }
 
-      bool do_commands(const std::vector<std::string> & commands) override;
+      bool do_commands(const std::vector<std::string_view> & commands) override;
       
       void write(std::ostream &os) const override;
 

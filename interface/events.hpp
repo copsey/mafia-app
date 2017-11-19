@@ -32,7 +32,7 @@ namespace maf {
 
       // Handles the given commands, acting on this event's game log as required.
       // Throws an exception if the commands couldn't be handled.
-      virtual void do_commands(const std::vector<std::string> & commands) = 0;
+      virtual void do_commands(const std::vector<std::string_view> & commands) = 0;
 
       // Writes a tagged string detailing the event to os.
       virtual void write_full(std::ostream & os) const = 0;
@@ -57,7 +57,7 @@ namespace maf {
          : Event{game_log}, _p{&player}, _r{&role}, _w{wildcard}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream & os) const override;
       void write_summary(std::ostream & os) const override;
@@ -78,7 +78,7 @@ namespace maf {
       Date date;
       Time time;
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream & os) const override;
       void write_summary(std::ostream & os) const override;
@@ -90,7 +90,7 @@ namespace maf {
          : Event{game_log}, _deaths{deaths}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream& os) const override;
       void write_summary(std::ostream& os) const override;
@@ -118,7 +118,7 @@ namespace maf {
            _recent_vote_target{recent_lynch_vote_target}
       { }
 
-      void do_commands(const std::vector<std::string>& commands) override;
+      void do_commands(const std::vector<std::string_view>& commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -138,7 +138,7 @@ namespace maf {
          : Event{game_log}, player{player}, player_role{player_role}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -159,7 +159,7 @@ namespace maf {
       // lynched / the role could not be determined.
       const Role *victim_role;
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -171,7 +171,7 @@ namespace maf {
          : Event{game_log}, caster{caster}, target{target}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -186,7 +186,7 @@ namespace maf {
          : Event{game_log}, _player{&player}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -205,7 +205,7 @@ namespace maf {
          : Event{game_log}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -221,7 +221,7 @@ namespace maf {
          : Event{game_log}, _caster{&caster}
       { }
 
-      void do_commands(const std::vector<std::string>& commands) override;
+      void do_commands(const std::vector<std::string_view>& commands) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -236,7 +236,7 @@ namespace maf {
          : Event{game_log}, _caster{&caster}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -251,7 +251,7 @@ namespace maf {
          : Event{game_log}, _caster{&caster}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -266,7 +266,7 @@ namespace maf {
          : Event{game_log}, _caster{&caster}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
 
@@ -281,7 +281,7 @@ namespace maf {
          : Event{game_log}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
    };
@@ -294,7 +294,7 @@ namespace maf {
 
       Investigation investigation;
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;
@@ -309,7 +309,7 @@ namespace maf {
          : Event{game_log}
       { }
 
-      void do_commands(const std::vector<std::string> & commands) override;
+      void do_commands(const std::vector<std::string_view> & commands) override;
 
       void write_full(std::ostream &os) const override;
       void write_summary(std::ostream &os) const override;

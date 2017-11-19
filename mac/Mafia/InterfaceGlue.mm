@@ -15,7 +15,7 @@
 }
 
 - (IBAction)readInput:(id)sender {
-   std::string str{[self.input.stringValue cStringUsingEncoding:NSUTF8StringEncoding]};
+   std::string_view str = {self.input.stringValue.UTF8String};
 
    if (_console.input(str)) {
       /* FIXME: make more reliable, i.e. "preset i" doesn't work with this method. */

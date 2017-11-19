@@ -1,7 +1,7 @@
 #include "console.hpp"
 #include "questions.hpp"
 
-bool maf::Confirm_end_game::do_commands(const std::vector<std::string> &commands) {
+bool maf::Confirm_end_game::do_commands(const std::vector<std::string_view> & commands) {
    if (commands_match(commands, {"yes"})) {
       _console_ref->end_game();
       return true;

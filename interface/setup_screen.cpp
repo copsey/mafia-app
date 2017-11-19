@@ -29,8 +29,8 @@ std::vector<maf::Wildcard::ID> maf::Setup_screen::wildcard_ids() const {
    return v;
 }
 
-bool maf::Setup_screen::has_player(const std::string &name) const {
-   for (const std::string &s: _player_names) {
+bool maf::Setup_screen::has_player(std::string_view name) const {
+   for (std::string_view s: _player_names) {
       if (rkt::equal_up_to_case(s, name)) {
          return true;
       }
@@ -38,12 +38,12 @@ bool maf::Setup_screen::has_player(const std::string &name) const {
    return false;
 }
 
-bool maf::Setup_screen::has_rolecard(const std::string &alias) const {
+bool maf::Setup_screen::has_rolecard(std::string_view alias) const {
    Role::ID id = _rulebook.get_role(alias).id();
    return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
 }
 
-bool maf::Setup_screen::has_wildcard(const std::string &alias) const {
+bool maf::Setup_screen::has_wildcard(std::string_view alias) const {
    Wildcard::ID id = _rulebook.get_wildcard(alias).id();
    return _wildcard_ids.count(id) != 0 && _wildcard_ids.at(id) != 0;
 }
@@ -68,39 +68,39 @@ std::size_t maf::Setup_screen::num_cards() const {
    return num_rolecards() + num_wildcards();
 }
 
-void maf::Setup_screen::add_player(const std::string &name) {
+void maf::Setup_screen::add_player(std::string_view name) {
    if (rkt::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
-      throw Bad_player_name{name};
+      throw Bad_player_name{std::string{name}};
    } else if (has_player(name)) {
-      throw Player_already_exists{name};
+      throw Player_already_exists{std::string{name}};
    } else {
-      _player_names.insert(name);
+      _player_names.insert(std::string{name});
    }
 }
 
-void maf::Setup_screen::add_rolecard(const std::string &alias) {
+void maf::Setup_screen::add_rolecard(std::string_view alias) {
    const Role &r = _rulebook.get_role(alias);
    ++_role_ids[r.id()];
 }
 
-void maf::Setup_screen::add_wildcard(const std::string &alias) {
+void maf::Setup_screen::add_wildcard(std::string_view alias) {
    const Wildcard &w = _rulebook.get_wildcard(alias);
    ++_wildcard_ids[w.id()];
 }
 
-void maf::Setup_screen::remove_player(const std::string &name) {
-   auto it = rkt::find_if(_player_names, [&name](const std::string &s) {
+void maf::Setup_screen::remove_player(std::string_view name) {
+   auto it = rkt::find_if(_player_names, [&name](std::string_view s) {
       return rkt::equal_up_to_case(s, name);
    });
 
    if (it == _player_names.end()) {
-      throw Player_missing{name};
+      throw Player_missing{std::string{name}};
    } else {
       _player_names.erase(it);
    }
 }
 
-void maf::Setup_screen::remove_rolecard(const std::string &alias) {
+void maf::Setup_screen::remove_rolecard(std::string_view alias) {
    const Role &r = _rulebook.get_role(alias);
    if (_role_ids[r.id()] == 0) {
       throw Rolecard_unselected{r};
@@ -109,7 +109,7 @@ void maf::Setup_screen::remove_rolecard(const std::string &alias) {
    }
 }
 
-void maf::Setup_screen::remove_wildcard(const std::string &alias) {
+void maf::Setup_screen::remove_wildcard(std::string_view alias) {
    const Wildcard &w = _rulebook.get_wildcard(alias);
    if (_wildcard_ids[w.id()] == 0) {
       throw Wildcard_unselected{w};
@@ -122,7 +122,7 @@ void maf::Setup_screen::clear_all_players() {
    _player_names.clear();
 }
 
-void maf::Setup_screen::clear_rolecards(const std::string &alias) {
+void maf::Setup_screen::clear_rolecards(std::string_view alias) {
    const Role &r = _rulebook.get_role(alias);
    _role_ids[r.id()] = 0;
 }
@@ -131,7 +131,7 @@ void maf::Setup_screen::clear_all_rolecards() {
    _role_ids.clear();
 }
 
-void maf::Setup_screen::clear_wildcards(const std::string &alias) {
+void maf::Setup_screen::clear_wildcards(std::string_view alias) {
    const Wildcard &w = _rulebook.get_wildcard(alias);
    _wildcard_ids[w.id()] = 0;
 }
@@ -154,7 +154,7 @@ std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
    return std::unique_ptr<Game_log>{new Game_log{player_names(), rolecard_ids(), wildcard_ids(), _rulebook}};
 }
 
-void maf::Setup_screen::do_commands(const std::vector<std::string> &commands) {
+void maf::Setup_screen::do_commands(const std::vector<std::string_view> & commands) {
    if (commands_match(commands, {"add", "p", ""})) {
       add_player(commands[2]);
    }
