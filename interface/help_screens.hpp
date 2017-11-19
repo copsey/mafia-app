@@ -14,7 +14,7 @@ namespace maf {
    struct Help_Screen: Base_Screen {
       using Base_Screen::Base_Screen;
 
-      virtual bool handle_commands(const std::vector<std::string> & commands) override;
+      virtual bool handle_commands(const std::vector<std::string_view> & commands) override;
       virtual Help_Screen * get_help_screen() const override;
    };
 

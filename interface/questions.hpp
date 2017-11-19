@@ -22,14 +22,14 @@ namespace maf {
 
 
 //   struct Confirm_no_lynch_votes: Question {
-//      bool do_commands(const std::vector<std::string> &commands) override;
+//      bool do_commands(const std::vector<std::string_view> &commands) override;
 //
 //      void write(std::ostream &os) const override;
 //   };
 
 
 //   struct Confirm_mafia_kill_skip: Question {
-//      bool do_commands(const std::vector<std::string> &commands) override;
+//      bool do_commands(const std::vector<std::string_view> &commands) override;
 //
 //      void write(std::ostream &os) const override;
 //   };
@@ -40,7 +40,7 @@ namespace maf {
          : Question(console)
       { }
 
-      bool handle_commands(const std::vector<std::string> & commands) override;
+      bool handle_commands(const std::vector<std::string_view> & commands) override;
       void write(std::ostream &os) const override;
    };
 }

@@ -6,7 +6,7 @@ maf::Help_Screen * maf::Question::get_help_screen() const {
    return nullptr;
 }
 
-bool maf::Confirm_end_game::handle_commands(const std::vector<std::string> & commands) {
+bool maf::Confirm_end_game::handle_commands(const std::vector<std::string_view> & commands) {
    if (Question::handle_commands(commands)) return true;
 
    auto& con = this->console();
@@ -27,7 +27,7 @@ void maf::Confirm_end_game::write(std::ostream &os) const {
    os << "^TEnd Game?^/You are about to end the current game.\nAre you sure that you want to do this? (^cyes^/ or ^cno^/)";
 }
 
-//bool maf::Confirm_mafia_kill_skip::do_commands(const std::vector<std::string> &commands, Console &console) {
+//bool maf::Confirm_mafia_kill_skip::do_commands(const std::vector<std::string_view> &commands, Console &console) {
 //   if (commands_match(commands, {"yes"})) {
 //      console.g
 //      return true;
