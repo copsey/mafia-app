@@ -464,7 +464,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       clear_error_message();
       return true;
    } else {
-      read_error_message(err);
+      read_error_message(err.str());
       return false;
    }
 }
@@ -478,8 +478,8 @@ const maf::Styled_text & maf::Console::output() const {
    return _output;
 }
 
-void maf::Console::read_output(std::istream &is) {
-   _output = styled_text_from(is);
+void maf::Console::read_output(std::string_view str) {
+   _output = styled_text_from(str);
 }
 
 void maf::Console::refresh_output() {
@@ -495,15 +495,15 @@ void maf::Console::refresh_output() {
       _setup_screen.write(ss);
    }
 
-   read_output(ss);
+   read_output(ss.str());
 }
 
 const maf::Styled_text & maf::Console::error_message() const {
    return _error_message;
 }
 
-void maf::Console::read_error_message(std::istream& is) {
-   _error_message = styled_text_from(is);
+void maf::Console::read_error_message(std::string_view str) {
+   _error_message = styled_text_from(str);
 }
 
 void maf::Console::clear_error_message() {
@@ -581,9 +581,9 @@ const maf::Rulebook & maf::Console::active_rulebook() const {
 }
 
 void maf::Console::begin_game(const std::vector<std::string> &pl_names,
-                                const std::vector<Role::ID> &r_ids,
-                                const std::vector<Wildcard::ID> &w_ids,
-                                const Rulebook &rulebook) {
+                              const std::vector<Role::ID> &r_ids,
+                              const std::vector<Wildcard::ID> &w_ids,
+                              const Rulebook &rulebook) {
    if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
    _game_log.reset(new Game_log{pl_names, r_ids, w_ids, rulebook});
 }

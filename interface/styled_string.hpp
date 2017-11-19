@@ -1,9 +1,9 @@
 #ifndef MAFIA_STYLED_STRING_H
 #define MAFIA_STYLED_STRING_H
 
-#include <istream>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace maf {
@@ -55,12 +55,8 @@ namespace maf {
    // Note that the default string style is Style::game, and hence game-styled
    // strings need not be prepended with ^g.
 
-   // Convert a tagged string into some styled text.
-   Styled_text styled_text_from(const std::string & tagged_s);
-
-   // Convert the tagged string obtained from is into some styled text.
-   // is.tellg() is assumed to be 0.
-   Styled_text styled_text_from(std::istream &is);
+   // Convert a tagged string into styled text.
+   Styled_text styled_text_from(std::string_view tagged_str);
 }
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <array>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "../riketi/algorithm.hpp"
@@ -53,9 +54,9 @@ namespace maf {
 
       // The most recent output. Never empty.
       const Styled_text & output() const;
-      // Reads the tagged string contained in is, updating the output to display
+      // Read the tagged string `str`, updating the output to display
       // the styled text obtained.
-      void read_output(std::istream &is);
+      void read_output(std::string_view str);
       // Updates the output to display the appropriate screen.
       void refresh_output();
 
@@ -63,9 +64,9 @@ namespace maf {
       // The only styles that will ever appear here are help, help_title and
       // command.
       const Styled_text & error_message() const;
-      // Reads the tagged string contained in is, updating the error message to
+      // Reads the tagged string `str`, updating the error message to
       // display the styled text obtained.
-      void read_error_message(std::istream &is);
+      void read_error_message(std::string_view str);
       // Removes the current error message.
       void clear_error_message();
 
