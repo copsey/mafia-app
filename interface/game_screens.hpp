@@ -29,7 +29,7 @@ namespace maf {
       // otherwise.
       //
       // @throws `error::missing_commands` if `commands` is an empty vector.
-      bool handle_commands(const std::vector<std::string> & commands) override;
+      bool handle_commands(const std::vector<std::string_view> & commands) override;
 
    protected:
       // Get a non-const reference to the `Game_log` of the owning console.
@@ -46,7 +46,7 @@ namespace maf {
             : Game_Screen{con}, _p_ref{player}, _r_ref{role}, _w_ptr{wildcard_ptr}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -63,7 +63,7 @@ namespace maf {
             : Game_Screen{con}, date{d}, time{t}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -78,7 +78,7 @@ namespace maf {
             : Game_Screen{con}, _deaths{deaths}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -101,7 +101,7 @@ namespace maf {
               _recent_vote_target{recent_lynch_vote_target}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -120,7 +120,7 @@ namespace maf {
             : Game_Screen{con}, _pl_ref{player}, _pl_role_ref{player_role}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -143,7 +143,7 @@ namespace maf {
             : Game_Screen{con}, _victim_ptr{&victim}, _victim_role_ptr{&victim_role}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -158,7 +158,7 @@ namespace maf {
             : Game_Screen{con}, _caster_ref{caster}, _target_ref{target}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -173,7 +173,7 @@ namespace maf {
             : Game_Screen{con}, _player_ref{player}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -190,7 +190,7 @@ namespace maf {
             : Game_Screen{con}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -206,7 +206,7 @@ namespace maf {
             : Game_Screen{con}, _caster_ref{caster}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -221,7 +221,7 @@ namespace maf {
             : Game_Screen{con}, _caster_ref{caster}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -236,7 +236,7 @@ namespace maf {
             : Game_Screen{con}, _caster_ref{caster}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -251,7 +251,7 @@ namespace maf {
             : Game_Screen{con}, _caster_ref{caster}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -266,7 +266,7 @@ namespace maf {
             : Game_Screen{con}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
       };
@@ -277,7 +277,7 @@ namespace maf {
             : Game_Screen{con}, _inv{investigation}
          { }
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
 
@@ -290,7 +290,7 @@ namespace maf {
       struct Game_Ended: Game_Screen {
          using Game_Screen::Game_Screen;
 
-         bool handle_commands(const std::vector<std::string> & commands) override;
+         bool handle_commands(const std::vector<std::string_view> & commands) override;
          void write(std::ostream & os) const override;
          Help_Screen * get_help_screen() const override;
       };

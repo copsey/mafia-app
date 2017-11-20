@@ -12,7 +12,7 @@ maf::Game_log & maf::Game_Screen::game_log() const {
    return *console()._game_log;
 }
 
-bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands) {
+bool maf::Game_Screen::handle_commands(const std::vector<std::string_view> & commands) {
    if (Base_Screen::handle_commands(commands)) return true;
 
    auto& con = this->console();
@@ -35,7 +35,7 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
  * maf::screen::Player_Given_Initial_Role
  */
 
-bool maf::screen::Player_Given_Initial_Role::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Player_Given_Initial_Role::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -52,7 +52,7 @@ bool maf::screen::Player_Given_Initial_Role::handle_commands(const std::vector<s
 
 void maf::screen::Player_Given_Initial_Role::write(std::ostream & os) const {
    auto& glog = this->game_log();
-   auto& pl_name = glog.get_name(*_p_ref);
+   std::string_view pl_name = glog.get_name(*_p_ref);
 
    os << "^T" << pl_name << "'s Role^/";
 
@@ -87,7 +87,7 @@ maf::Help_Screen * maf::screen::Player_Given_Initial_Role::get_help_screen() con
  * maf::screen::Time_Changed
  */
 
-bool maf::screen::Time_Changed::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Time_Changed::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -135,7 +135,7 @@ maf::Help_Screen * maf::screen::Time_Changed::get_help_screen() const {
  * maf::screen::Obituary
  */
 
-bool maf::screen::Obituary::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Obituary::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -189,7 +189,7 @@ maf::Help_Screen * maf::screen::Obituary::get_help_screen() const {
  * maf::screen::Town_Meeting
  */
 
-bool maf::screen::Town_Meeting::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Town_Meeting::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    //auto& con = this->console();
@@ -296,7 +296,7 @@ maf::Help_Screen * maf::screen::Town_Meeting::get_help_screen() const {
  * maf::screen::Player_Kicked
  */
 
-bool maf::screen::Player_Kicked::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Player_Kicked::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    //auto& con = this->console();
@@ -313,8 +313,8 @@ bool maf::screen::Player_Kicked::handle_commands(const std::vector<std::string> 
 
 void maf::screen::Player_Kicked::write(std::ostream & os) const {
    auto& glog = this->game_log();
-   auto& pl_name = glog.get_name(*_pl_ref);
-   auto r_name = full_name(_pl_ref->role());
+   std::string_view pl_name = glog.get_name(*_pl_ref);
+   std::string r_name = full_name(_pl_ref->role());
 
    os << "^T" << pl_name << " kicked^/";
    os << pl_name << " was kicked from the game!\n";
@@ -333,7 +333,7 @@ maf::Help_Screen * maf::screen::Player_Kicked::get_help_screen() const {
  * maf::screen::Lynch_Result
  */
 
-bool maf::screen::Lynch_Result::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Lynch_Result::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    //auto& con = this->console();
@@ -353,7 +353,7 @@ void maf::screen::Lynch_Result::write(std::ostream & os) const {
 
    if (_victim_ptr) {
       auto& victim = *_victim_ptr;
-      auto& victim_name = game_log().get_name(*_victim_ptr);
+      std::string_view victim_name = game_log().get_name(*_victim_ptr);
 
       os << victim_name << " was lynched!\n";
 
@@ -387,7 +387,7 @@ maf::Help_Screen * maf::screen::Lynch_Result::get_help_screen() const {
  * maf::screen::Duel_Result
  */
 
-bool maf::screen::Duel_Result::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Duel_Result::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -409,10 +409,10 @@ void maf::screen::Duel_Result::write(std::ostream & os) const {
    auto& loser = (caster.is_alive() ? target : caster);
 
    auto& glog = game_log();
-   auto& caster_name = glog.get_name(caster);
-   auto& target_name = glog.get_name(target);
-   auto& winner_name = glog.get_name(winner);
-   auto& loser_name = glog.get_name(loser);
+   std::string_view caster_name = glog.get_name(caster);
+   std::string_view target_name = glog.get_name(target);
+   std::string_view winner_name = glog.get_name(winner);
+   std::string_view loser_name = glog.get_name(loser);
 
    os << "^TDuel^/";
    os << caster_name;
@@ -444,7 +444,7 @@ maf::Help_Screen * maf::screen::Duel_Result::get_help_screen() const {
  * maf::screen::Choose_Fake_Role
  */
 
-bool maf::screen::Choose_Fake_Role::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Choose_Fake_Role::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    //auto& con = this->console();
@@ -478,7 +478,7 @@ bool maf::screen::Choose_Fake_Role::handle_commands(const std::vector<std::strin
 void maf::screen::Choose_Fake_Role::write(std::ostream & os) const {
    auto& glog = this->game_log();
    const Player & pl = *_player_ref;
-   auto& pl_name = glog.get_name(pl);
+   std::string_view pl_name = glog.get_name(pl);
 
    os << "^TChoose Fake Role^/";
 
@@ -506,7 +506,7 @@ maf::Help_Screen * maf::screen::Choose_Fake_Role::get_help_screen() const {
  * maf::screen::Mafia_Meeting
  */
 
-bool maf::screen::Mafia_Meeting::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Mafia_Meeting::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = game_log();
@@ -590,7 +590,7 @@ maf::Help_Screen * maf::screen::Mafia_Meeting::get_help_screen() const {
  * maf::screen::Kill_Use
  */
 
-bool maf::screen::Kill_Use::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Kill_Use::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = game_log();
@@ -628,7 +628,7 @@ void maf::screen::Kill_Use::write(std::ostream & os) const {
    auto& glog = game_log();
 
    const Player & caster = *_caster_ref;
-   auto& caster_name = glog.get_name(caster);
+   std::string_view caster_name = glog.get_name(caster);
 
    os << "^TKill Use^/";
 
@@ -650,7 +650,7 @@ maf::Help_Screen * maf::screen::Kill_Use::get_help_screen() const {
  * maf::screen::Heal_Use
  */
 
-bool maf::screen::Heal_Use::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Heal_Use::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = game_log();
@@ -688,7 +688,7 @@ void maf::screen::Heal_Use::write(std::ostream & os) const {
    auto& glog = game_log();
 
    const Player & caster = *_caster_ref;
-   auto& caster_name = glog.get_name(caster);
+   std::string_view caster_name = glog.get_name(caster);
 
    os << "^THeal Use^/";
 
@@ -710,7 +710,7 @@ maf::Help_Screen * maf::screen::Heal_Use::get_help_screen() const {
  * maf::screen::Investigate_Use
  */
 
-bool maf::screen::Investigate_Use::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Investigate_Use::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = game_log();
@@ -748,7 +748,7 @@ void maf::screen::Investigate_Use::write(std::ostream & os) const {
    auto& glog = game_log();
 
    const Player & caster = *_caster_ref;
-   auto& caster_name = glog.get_name(caster);
+   std::string_view caster_name = glog.get_name(caster);
 
    os << "^TInvestigation^/";
 
@@ -770,7 +770,7 @@ maf::Help_Screen * maf::screen::Investigate_Use::get_help_screen() const {
  * maf::screen::Peddle_Use
  */
 
-bool maf::screen::Peddle_Use::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Peddle_Use::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = game_log();
@@ -808,7 +808,7 @@ void maf::screen::Peddle_Use::write(std::ostream & os) const {
    auto& glog = game_log();
 
    const Player & caster = *_caster_ref;
-   auto& caster_name = glog.get_name(caster);
+   std::string_view caster_name = glog.get_name(caster);
 
    os << "^TPeddle^/";
 
@@ -830,7 +830,7 @@ maf::Help_Screen * maf::screen::Peddle_Use::get_help_screen() const {
  * maf::screen::Boring_Night
  */
 
-bool maf::screen::Boring_Night::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Boring_Night::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -861,7 +861,7 @@ maf::Help_Screen * maf::screen::Boring_Night::get_help_screen() const {
  * maf::screen::Investigation_Result
  */
 
-bool maf::screen::Investigation_Result::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Investigation_Result::handle_commands(const std::vector<std::string_view> & commands) {
    if (Game_Screen::handle_commands(commands)) return true;
 
    auto& glog = this->game_log();
@@ -877,9 +877,9 @@ bool maf::screen::Investigation_Result::handle_commands(const std::vector<std::s
 }
 
 void maf::screen::Investigation_Result::write(std::ostream & os) const {
-   auto & glog = this->game_log();
-   auto & caster_name = glog.get_name(_inv.caster());
-   auto & target_name = glog.get_name(_inv.target());
+   auto& glog = this->game_log();
+   std::string_view caster_name = glog.get_name(_inv.caster());
+   std::string_view target_name = glog.get_name(_inv.target());
 
    os << "^TInvestigation Result^/";
 
@@ -908,7 +908,7 @@ maf::Help_Screen * maf::screen::Investigation_Result::get_help_screen() const {
  * maf::screen::Game_Ended
  */
 
-bool maf::screen::Game_Ended::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Game_Ended::handle_commands(const std::vector<std::string_view> & commands) {
    auto& con = this->console();
    //auto& glog = this->game_log();
 
