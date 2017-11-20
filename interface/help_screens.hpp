@@ -23,8 +23,7 @@ namespace maf {
       // otherwise.
       //
       // @throws `error::missing_commands` if `commands` is an empty vector.
-      virtual bool handle_commands(const std::vector<std::string> & commands) override final;
-      
+      virtual bool handle_commands(const std::vector<std::string_view> & commands) override final;
       virtual Help_Screen * get_help_screen() const override;
    };
 

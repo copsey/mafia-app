@@ -36,7 +36,7 @@ namespace maf {
       // otherwise.
       //
       // @throws `error::missing_commands` if `commands` is an empty vector.
-      virtual bool handle_commands(const std::vector<std::string> & commands);
+      virtual bool handle_commands(const std::vector<std::string_view> & commands);
 
       // Write a tagged string to `os` containing the content of this screen.
       virtual void write(std::ostream & os) const = 0;

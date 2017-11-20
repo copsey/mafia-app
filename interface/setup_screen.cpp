@@ -195,7 +195,7 @@ void maf::screen::Setup::begin_random_preset() {
    con.begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
 }
 
-bool maf::screen::Setup::handle_commands(const std::vector<std::string> & commands) {
+bool maf::screen::Setup::handle_commands(const std::vector<std::string_view> & commands) {
    if (Base_Screen::handle_commands(commands)) return true;
 
    if (commands_match(commands, {"begin"})) {
@@ -213,10 +213,10 @@ bool maf::screen::Setup::handle_commands(const std::vector<std::string> & comman
       //   }
 
       try {
-         auto i = std::stoi(i_str);
+         auto i = std::stoi(std::string{i_str});
          begin_preset(i);
       } catch (std::logic_error) {
-         throw Bad_preset_string{i_str};
+         throw Bad_preset_string{i_str.data()};
       }
    } else if (commands_match(commands, {"add", "p", ""})) {
       add_player(commands[2]);

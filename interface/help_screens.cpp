@@ -5,7 +5,7 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-bool maf::Help_Screen::handle_commands(const std::vector<std::string> & commands) {
+bool maf::Help_Screen::handle_commands(const std::vector<std::string_view> & commands) {
    if (Base_Screen::handle_commands(commands)) return true;
 
    auto& con = this->console();
