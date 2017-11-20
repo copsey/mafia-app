@@ -1,5 +1,6 @@
 #include "game_screens.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
 #include "help_screens.hpp"
 #include "questions.hpp"
