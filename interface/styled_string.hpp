@@ -1,18 +1,14 @@
 #ifndef MAFIA_STYLED_STRING_H
 #define MAFIA_STYLED_STRING_H
 
-#include <istream>
-#include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace maf {
    // Create a new string, identical to `str` but with each tag character
    // '^' replaced with '^^'.
    std::string escape_tags(std::string_view str);
-
-   // Write `str` to `os`, but print each '^' character as '^^' instead.
-   void escape_and_write(std::string_view str, std::ostream & os);
 
    // A string coupled with a suggested style.
    // A style is intended to entail such formatting properties as typeface,
@@ -55,12 +51,8 @@ namespace maf {
    // Note that the default string style is Style::game, and hence game-styled
    // strings need not be prepended with ^g.
 
-   // Convert a tagged string into some styled text.
-   Styled_text styled_text_from(const std::string & tagged_s);
-
-   // Convert the tagged string obtained from is into some styled text.
-   // is.tellg() is assumed to be 0.
-   Styled_text styled_text_from(std::istream &is);
+   // Convert a tagged string into styled text.
+   Styled_text styled_text_from(std::string_view tagged_str);
 }
 
 #endif

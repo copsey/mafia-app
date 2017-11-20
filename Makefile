@@ -1,5 +1,6 @@
 src = \
 	cli/main.cpp \
+	interface/command.cpp \
 	interface/console.cpp \
 	interface/events.cpp \
 	interface/game_log.cpp \

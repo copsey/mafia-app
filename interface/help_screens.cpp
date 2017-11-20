@@ -1,5 +1,6 @@
 #include "../riketi/algorithm.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
 #include "errors.hpp"
 #include "help_screens.hpp"

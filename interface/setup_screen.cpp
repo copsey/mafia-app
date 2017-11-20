@@ -2,6 +2,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
 #include "help_screens.hpp"
 #include "names.hpp"

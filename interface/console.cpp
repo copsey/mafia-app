@@ -7,6 +7,7 @@
 #include "../riketi/random.hpp"
 #include "../riketi/string.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
 #include "errors.hpp"
 #include "game_screens.hpp"
@@ -404,32 +405,13 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       clear_error_message();
       return true;
    } else {
-      read_error_message(err);
+      read_error_message(err.str());
       return false;
    }
 }
 
 bool maf::Console::input(std::string_view input) {
-   std::vector<std::string_view> v = {};
-
-   // split the input into commands, separated by space characters
-   //   e.g. "do X   with Y" -> {"do", "X", "with", "Y"}
-   {
-      auto i = input.data(), j = i;
-      auto end = input.data() + input.size();
-
-      for ( ; j != end; ) {
-         if (*j == ' ' || *j == '\t') {
-            if (i != j) v.emplace_back(i, j - i);
-            i = ++j;
-         } else {
-            ++j;
-         }
-      }
-
-      if (i != j) v.emplace_back(i, j - i);
-   }
-
+   auto v = parse_input(input);
    return do_commands(v);
 }
 
@@ -437,8 +419,8 @@ const maf::Styled_text & maf::Console::output() const {
    return _output;
 }
 
-void maf::Console::read_output(std::istream &is) {
-   _output = styled_text_from(is);
+void maf::Console::read_output(std::string_view str) {
+   _output = styled_text_from(str);
 }
 
 void maf::Console::refresh_output() {
@@ -454,15 +436,15 @@ void maf::Console::refresh_output() {
       _setup_screen.write(ss);
    }
 
-   read_output(ss);
+   read_output(ss.str());
 }
 
 const maf::Styled_text & maf::Console::error_message() const {
    return _error_message;
 }
 
-void maf::Console::read_error_message(std::istream& is) {
-   _error_message = styled_text_from(is);
+void maf::Console::read_error_message(std::string_view str) {
+   _error_message = styled_text_from(str);
 }
 
 void maf::Console::clear_error_message() {
