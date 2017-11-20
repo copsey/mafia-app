@@ -3,7 +3,7 @@
 
 #include "styled_string.hpp"
 
-std::string maf::escape_tags(const std::string & str) {
+std::string maf::escape_tags(std::string_view str) {
    std::string esc_str{};
 
    for (auto ch: str) {
@@ -14,7 +14,7 @@ std::string maf::escape_tags(const std::string & str) {
    return esc_str;
 }
 
-void maf::escape_and_write(const std::string & str, std::ostream & os) {
+void maf::escape_and_write(std::string_view str, std::ostream & os) {
    auto esc_str = escape_tags(str);
    os << esc_str;
 }

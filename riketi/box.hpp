@@ -22,7 +22,8 @@ namespace rkt {
 	//   + copy constructible & assignable,
 	//   + move constructible & assignable.
 	template <typename T>
-	struct box {
+	struct [[deprecated("use std::optional instead")]] box
+	{
 		// The type of object contained in the box.
 		using type = T;
 		
@@ -166,7 +167,7 @@ namespace rkt {
 		
 		// Remove the object from `this`, if one exists.
 		void clear() {
-			if (std::is_trivially_destructible<T>::value) {
+			if constexpr(std::is_trivially_destructible<T>::value) {
 				_empty = true;
 			} else {
 				if (!_empty) {

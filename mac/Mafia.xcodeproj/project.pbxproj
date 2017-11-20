@@ -52,7 +52,6 @@
 		F84FE08A1AF3BB1A00BF4992 /* role.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = role.hpp; sourceTree = "<group>"; };
 		F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rulebook.cpp; sourceTree = "<group>"; };
 		F84FE08D1AF3BB1A00BF4992 /* rulebook.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rulebook.hpp; sourceTree = "<group>"; };
-		F84FE08F1AF3BB1A00BF4992 /* enum.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = enum.hpp; sourceTree = "<group>"; };
 		F84FE0911AF3BB1A00BF4992 /* random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = random.cpp; sourceTree = "<group>"; };
 		F84FE0921AF3BB1A00BF4992 /* random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = random.hpp; sourceTree = "<group>"; };
 		F857A1771B9AECE500BF7C83 /* MafiaPlaylist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MafiaPlaylist.h; sourceTree = "<group>"; };
@@ -60,7 +59,6 @@
 		F858FAD31AFF5A16004D7058 /* names.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = names.hpp; sourceTree = "<group>"; };
 		F8612BE91D456E7D00054E96 /* iterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = iterator.hpp; sourceTree = "<group>"; };
 		F8612BEA1D45701000054E96 /* string.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = string.cpp; sourceTree = "<group>"; };
-		F8612BED1D45713800054E96 /* algorithm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = algorithm.hpp; sourceTree = "<group>"; };
 		F880CA031B89BEC600144257 /* help_screens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = help_screens.cpp; sourceTree = "<group>"; };
 		F880CA041B89BEC600144257 /* help_screens.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = help_screens.hpp; sourceTree = "<group>"; };
 		F880CA091B8A606300144257 /* questions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = questions.cpp; sourceTree = "<group>"; };
@@ -203,8 +201,6 @@
 				F8454CDF1B8DE939005CD124 /* box.hpp */,
 				F8A431881B5113A700155991 /* char.hpp */,
 				F8C765E61B7F371F008BC683 /* container.hpp */,
-				F84FE08F1AF3BB1A00BF4992 /* enum.hpp */,
-				F8612BEC1D45713800054E96 /* experimental */,
 				F8612BE91D456E7D00054E96 /* iterator.hpp */,
 				F8882E5C1B8CE995009166BB /* map.hpp */,
 				F84FE0921AF3BB1A00BF4992 /* random.hpp */,
@@ -215,14 +211,6 @@
 			);
 			name = riketi;
 			path = ../riketi;
-			sourceTree = "<group>";
-		};
-		F8612BEC1D45713800054E96 /* experimental */ = {
-			isa = PBXGroup;
-			children = (
-				F8612BED1D45713800054E96 /* algorithm.hpp */,
-			);
-			path = experimental;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -322,7 +310,7 @@
 		F84FE0771AF3B9E000BF4992 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -368,7 +356,7 @@
 		F84FE0781AF3B9E000BF4992 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -409,7 +397,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Mafia/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
@@ -422,7 +409,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Mafia/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;

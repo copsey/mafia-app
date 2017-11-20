@@ -6,9 +6,9 @@
 #include "game_log.hpp"
 
 maf::Game_log::Game_log(const std::vector<std::string> &player_names,
-                          const std::vector<Role::ID> &role_ids,
-                          const std::vector<Wildcard::ID> &wildcard_ids,
-                          const Rulebook &rulebook)
+                        const std::vector<Role::ID> &role_ids,
+                        const std::vector<Wildcard::ID> &wildcard_ids,
+                        const Rulebook &rulebook)
 : _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names} {
    if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
       throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
@@ -62,7 +62,7 @@ void maf::Game_log::advance() {
    }
 }
 
-void maf::Game_log::do_commands(const std::vector<std::string> &commands) {
+void maf::Game_log::do_commands(const std::vector<std::string_view> & commands) {
    _log[_log_index]->do_commands(commands);
 }
 
@@ -85,21 +85,21 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
    throw Game::Player_not_found{id};
 }
 
-const maf::Player & maf::Game_log::find_player(const std::string &name) const {
+const maf::Player & maf::Game_log::find_player(std::string_view name) const {
    for (Player::ID i = 0; i < _player_names.size(); ++i) {
       if (rkt::equal_up_to_case(name, _player_names[i])) {
          return _game.players()[i];
       }
    }
 
-   throw Player_not_found{name};
+   throw Player_not_found{std::string{name}};
 }
 
-const std::string & maf::Game_log::get_name(const maf::Player & player) const {
+std::string_view maf::Game_log::get_name(const maf::Player & player) const {
    return get_name(player.id());
 }
 
-const std::string & maf::Game_log::get_name(Player::ID id) const {
+std::string_view maf::Game_log::get_name(Player::ID id) const {
    return _player_names[id];
 }
 

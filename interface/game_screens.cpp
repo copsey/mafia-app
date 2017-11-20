@@ -31,8 +31,6 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string> & commands
    return true;
 }
 
-
-
 /*
  * maf::screen::Player_Given_Initial_Role
  */

@@ -133,7 +133,7 @@ bool maf::Rulebook::contains_role(Role::ID id) const {
    return false;
 }
 
-bool maf::Rulebook::contains_role(const std::string & alias) const {
+bool maf::Rulebook::contains_role(std::string_view alias) const {
    for (auto & r: _roles) {
       if (r.alias() == alias) return true;
    }
@@ -149,7 +149,7 @@ bool maf::Rulebook::contains_wildcard(Wildcard::ID id) const {
    return false;
 }
 
-bool maf::Rulebook::contains_wildcard(const std::string & alias) const {
+bool maf::Rulebook::contains_wildcard(std::string_view alias) const {
    for (auto & w: _wildcards) {
       if (w.alias() == alias) return true;
    }
@@ -173,20 +173,20 @@ const maf::Role & maf::Rulebook::get_role(Role::ID id) const {
    throw Missing_role_ID{id};
 }
 
-maf::Role & maf::Rulebook::get_role(const std::string & alias) {
+maf::Role & maf::Rulebook::get_role(std::string_view alias) {
    for (auto & r: _roles) {
       if (r.alias() == alias) return r;
    }
 
-   throw Missing_role_alias{alias};
+   throw Missing_role_alias{std::string{alias}};
 }
 
-const maf::Role & maf::Rulebook::get_role(const std::string & alias) const {
+const maf::Role & maf::Rulebook::get_role(std::string_view alias) const {
    for (auto & r: _roles) {
       if (r.alias() == alias) return r;
    }
 
-   throw Missing_role_alias{alias};
+   throw Missing_role_alias{std::string{alias}};
 }
 
 maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) {
@@ -205,20 +205,20 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) const {
    throw Missing_wildcard_ID{id};
 }
 
-maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) {
+maf::Wildcard & maf::Rulebook::get_wildcard(std::string_view alias) {
    for (auto & w: _wildcards) {
       if (w.alias() == alias) return w;
    }
 
-   throw Missing_wildcard_alias{alias};
+   throw Missing_wildcard_alias{std::string{alias}};
 }
 
-const maf::Wildcard & maf::Rulebook::get_wildcard(const std::string & alias) const {
+const maf::Wildcard & maf::Rulebook::get_wildcard(std::string_view alias) const {
    for (auto & w: _wildcards) {
       if (w.alias() == alias) return w;
    }
 
-   throw Missing_wildcard_alias{alias};
+   throw Missing_wildcard_alias{std::string{alias}};
 }
 
 maf::Role & maf::Rulebook::new_role(Role::ID id) {

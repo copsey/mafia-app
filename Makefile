@@ -18,7 +18,7 @@ src = \
 
 
 build:
-	c++ -std=c++11 $(src) -o mafia
+	c++ -std=c++1z $(src) -o mafia
 
 clean:
 	rm -f ./mafia
