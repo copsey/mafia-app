@@ -32,6 +32,8 @@ bool maf::Game_Screen::handle_commands(const std::vector<std::string_view> & com
    return true;
 }
 
+
+
 /*
  * maf::screen::Player_Given_Initial_Role
  */
@@ -124,8 +126,7 @@ void maf::screen::Time_Changed::write(std::ostream & os) const {
 
 maf::Help_Screen * maf::screen::Time_Changed::get_help_screen() const {
    // FIXME: Add help screen for Time_Changed, or decide if none is needed.
-   // (only help would be indicating that command to continue to next
-   //  screen is "ok".)
+   // (only help would be indicating that command to continue to next screen is "ok".)
 
    return nullptr;
 }
@@ -535,7 +536,8 @@ bool maf::screen::Mafia_Meeting::handle_commands(const std::vector<std::string_v
       }
    } else if (commands_match(commands, {"skip"})) {
       if (!_initial) {
-         // FIXME: show "confirm skip?" screen.
+         // FIXME: Display yes/no "Confirm Skip?" question before proceeding
+
          glog.skip_mafia_kill();
          _page ++;
       } else {
@@ -608,6 +610,8 @@ bool maf::screen::Kill_Use::handle_commands(const std::vector<std::string_view> 
       }
    } else if (commands_match(commands, {"skip"})) {
       if (_page == 0) {
+         // FIXME: Display yes/no "Confirm Skip?" question before proceeding
+
          const Player & caster = *_caster_ref;
 
          glog.skip_kill(caster.id());
@@ -668,6 +672,8 @@ bool maf::screen::Heal_Use::handle_commands(const std::vector<std::string_view> 
       }
    } else if (commands_match(commands, {"skip"})) {
       if (_page == 0) {
+         // FIXME: Display yes/no "Confirm Skip?" question before proceeding
+
          const Player & caster = *_caster_ref;
 
          glog.skip_heal(caster.id());
@@ -728,6 +734,8 @@ bool maf::screen::Investigate_Use::handle_commands(const std::vector<std::string
       }
    } else if (commands_match(commands, {"skip"})) {
       if (_page == 0) {
+         // FIXME: Display yes/no "Confirm Skip?" question before proceeding
+
          const Player & caster = *_caster_ref;
 
          glog.skip_investigate(caster.id());
@@ -788,6 +796,8 @@ bool maf::screen::Peddle_Use::handle_commands(const std::vector<std::string_view
       }
    } else if (commands_match(commands, {"skip"})) {
       if (_page == 0) {
+         // FIXME: Display yes/no "Confirm Skip?" question before proceeding
+
          const Player & caster = *_caster_ref;
 
          glog.skip_peddle(caster.id());

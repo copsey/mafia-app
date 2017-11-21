@@ -23,40 +23,17 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
    std::stringstream err{}; // Write an error here if something goes wrong.
 
    try {
+      // FIXME: Move test for `commands.size() == 0` into Base_Screen::handle_commands.
+      //   This is dependent on new exceptions being implemented.
       if (commands.size() == 0) {
          err << "^TMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
-      }
-      else if (commands_match(commands, {"help"})) {
-         if (has_game()) {
-            store_help_screen(new Event_Help_Screen{*this, _game_log->current_event()});
-         } else {
-            store_help_screen(new Setup_Help_Screen{*this});
-         }
-      }
-      else if (commands_match(commands, {"help", "r", ""})) {
-         const Role & r = active_rulebook().get_role(commands[2]);
-         store_help_screen(new Role_Info_Screen{*this, r});
-      }
-      else if (commands_match(commands, {"list", "r"})) {
-         store_help_screen(new List_Roles_Screen{*this});
-      }
-      else if (commands_match(commands, {"list", "r", "v"})) {
-         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::village});
-      }
-      else if (commands_match(commands, {"list", "r", "m"})) {
-         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::mafia});
-      }
-      else if (commands_match(commands, {"list", "r", "f"})) {
-         store_help_screen(new List_Roles_Screen{*this, List_Roles_Screen::Filter_Alignment::freelance});
-      }
-      else if (has_help_screen()) {
+      } else if (has_help_screen()) {
          bool success = _help_screen->handle_commands(commands);
 
          if (!success) {
             err << "^h^TInvalid input!^/Please leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^/)";
          }
-      }
-      else if (has_question()) {
+      } else if (has_question()) {
          bool success = _question->handle_commands(commands);
 
          if (success) {
@@ -64,29 +41,15 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
          } else {
             err << "^h^TInvalid input!^/Please answer the question being shown before trying to do anything else.";
          }
-      }
-      else if (has_game()) {
+      } else if (has_game()) {
          _game_log->do_commands(commands);
-      }
-      else {
+      } else {
          bool success = _setup_screen.handle_commands(commands);
 
          if (!success) {
             err << "^h^TUnrecognised input!^/The text that you entered couldn't be recognised.\n(enter ^chelp^/ if you're unsure what to do.)";
          }
       }
-
-      /* FIXME: add  "list w", "list w v", "list w m", "list w f". */
-
-      /* FIXME: "add p A B C" should result in players A, B, C all being chosen. */
-
-      /* FIXME: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game. */
-
-      /* FIXME: list p random, a utility command to generate a list of the players in a game, in a random order.
-       (for example, when asking people to choose their lynch votes, without the option to change.)
-       list p should be context-aware, i.e. it should show pending players if no game is in progress, and actual players if a game is in progress. */
-
-      /* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
    }
    catch (const Rulebook::Missing_role_alias &e) {
       err << "^TInvalid alias!^hNo role could be found whose alias is ^c"

@@ -249,6 +249,10 @@ bool maf::screen::Setup::handle_commands(const std::vector<std::string_view> & c
       return false;
    }
 
+   // FIXME: "add p A B C" should result in players A, B, C all being chosen.
+
+   // FIXME: enter "auto" to automatically choose enough random cards for the currently-selected players to start a new game.
+
    return true;
 }
 
