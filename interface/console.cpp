@@ -13,9 +13,7 @@
 #include "game_screens.hpp"
 #include "names.hpp"
 
-maf::Console::Console()
-   : _setup_screen{*this}, _screen_stack{rkt::ref<Base_Screen>(_setup_screen)}
-{
+maf::Console::Console() {
    refresh_output();
 }
 
@@ -414,16 +412,73 @@ void maf::Console::clear_error_message() {
    _error_message.clear();
 }
 
-const maf::Base_Screen & maf::Console::current_screen() const {
-   return *_screen_stack.back();
+void maf::Console::store_screen(Base_Screen & scr) {
+   _owned_screens.emplace_back(&scr);
 }
 
-void maf::Console::push_screen(Base_Screen & screen) {
-   _screen_stack.emplace_back(screen);
+void maf::Console::delete_screen(Base_Screen & scr) {
+   auto is_scr = [&scr](const std::unique_ptr<Base_Screen> & other) {
+      return other.get() == &scr;
+   };
+   rkt::remove_if(_owned_screens, is_scr);
 }
 
-void maf::Console::pop_screen() {
-   _screen_stack.pop_back();
+void maf::Console::delete_all_screens() {
+   _owned_screens.clear();
+}
+
+void maf::Console::push_viewstack(Base_Screen & screen) {
+   _view_stack.push_back(screen);
+   store_screen(screen);
+}
+
+void maf::Console::pop_viewstack() {
+   if (_view_stack.empty()) throw error::empty_stack();
+
+   Base_Screen & screen = *_view_stack.back();
+   _view_stack.pop_back();
+   delete_screen(screen);
+}
+
+void maf::Console::clear_viewstack() {
+   for (rkt::ref<Base_Screen> screen_ref: _view_stack) {
+      delete_screen(*screen_ref);
+   }
+   _view_stack.clear();
+}
+
+void maf::Console::push_gamestack(Game_Screen & screen) {
+   _game_stack.push_back(screen);
+   store_screen(screen);
+}
+
+void maf::Console::pop_gamestack() {
+   if (_game_stack.empty()) throw error::empty_stack();
+
+   Game_Screen & screen = *_game_stack.front();
+   _game_stack.pop_front();
+   delete_screen(screen);
+}
+
+void maf::Console::advance_gamestack() {
+   if (_game_stack.empty()) throw error::empty_stack();
+
+   Game_Screen & screen = *_game_stack.front();
+   _game_stack.pop_front();
+   _view_stack.push_back(screen);
+}
+
+void maf::Console::clear_gamestack() {
+   for (rkt::ref<Game_Screen> screen_ref : _game_stack) {
+      delete_screen(*screen_ref);
+   }
+   _game_stack.clear();
+}
+
+void maf::Console::clear_stacks() {
+   _view_stack.clear();
+   _game_stack.clear();
+   delete_all_screens();
 }
 
 const maf::Help_Screen * maf::Console::help_screen() const {

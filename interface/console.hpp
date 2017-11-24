@@ -2,9 +2,9 @@
 #define MAFIA_CONSOLE_H
 
 #include <array>
+#include <deque>
 #include <memory>
 #include <string_view>
-#include <unordered_set>
 #include <utility>
 
 #include "../riketi/algorithm.hpp"
@@ -68,13 +68,43 @@ namespace maf {
       // Removes the current error message.
       void clear_error_message();
 
-      // Get the screen currently being displayed.
-      const Base_Screen & current_screen() const;
-      // Add `screen` onto the stack.
-      // It will become the screen currently being displayed.
-      void push_screen(Base_Screen & screen);
-      // Remove the screen currently being displayed from the stack.
-      void pop_screen();
+      // Add `scr` onto the front of the view-stack.
+      // Ownership of the screen is automatically assumed by `this`.
+      //
+      // Should be followed by a call to `this->refresh_output()`.
+      void push_viewstack(Base_Screen & scr);
+      // Remove the screen at the front of the view-stack.
+      // The screen is automatically deleted, if owned by `this`.
+      //
+      // Should be followed by a call to `this->refresh_output()`.
+      //
+      // @throws `error::empty_stack` if the view-stack is empty.
+      void pop_viewstack();
+      // Remove all screens from the view-stack.
+      // The screens owned by `this` are automatically deleted.
+      void clear_viewstack();
+
+      // Add `screen` onto the back of the game-stack.
+      // Ownership of the screen is automatically assumed by `this`.
+      void push_gamestack(Game_Screen & screen);
+      // Remove the screen at the front of the game-stack.
+      // The screen is automatically deleted.
+      //
+      // @throws `error::empty_stack` if the game-stack is empty.
+      void pop_gamestack();
+      // Move the screen at the front of the game-stack onto the front of the view-stack.
+      //
+      // Should be followed by a call to `this->refresh_output()`.
+      //
+      // @throws `error::empty_stack` if the game-stack is empty.
+      void advance_gamestack();
+      // Remove all screens from the game-stack.
+      // The screens are automatically deleted.
+      void clear_gamestack();
+
+      // Clear both the view-stack and the game-stack.
+      // All screens owned by `this` are deleted.
+      void clear_stacks();
 
       // Gets the help screen currently being stored, or nullptr if none exists.
       const Help_Screen * help_screen() const;
@@ -123,12 +153,21 @@ namespace maf {
       Styled_text _error_message{};
 
       std::unique_ptr<Game_log> _game_log{};
-      screen::Setup _setup_screen;
+      screen::Setup _setup_screen{*this};
       std::unique_ptr<Help_Screen> _help_screen{};
       std::unique_ptr<Question> _question{};
 
-      std::vector<rkt::ref<Base_Screen>> _screen_stack;
-      std::unordered_set<std::unique_ptr<Base_Screen>> _owned_screens{};
+      std::vector<rkt::ref<Base_Screen>> _view_stack{rkt::ref<Base_Screen>(_setup_screen)};
+      std::deque<rkt::ref<Game_Screen>> _game_stack{};
+      std::vector<std::unique_ptr<Base_Screen>> _owned_screens{};
+
+      // Assume ownership of the given screen.
+      void store_screen(Base_Screen & screen);
+      // Delete the given screen.
+      // Has no effect if `screen` is not owned by `this`.
+      void delete_screen(Base_Screen & screen);
+      // Delete all of the screens owned by `this`.
+      void delete_all_screens();
 
       friend class Game_Screen;
    };
