@@ -2,6 +2,7 @@
 #define RIKETI_ITERATOR
 
 #include <iterator>
+#include <type_traits>
 
 namespace rkt {
 	namespace iterator {
@@ -38,14 +39,12 @@ namespace rkt {
 		static constexpr bool value = test<A>(nullptr);
 	};
 	
-	#if __cplusplus >= 201402L
-		// Check if `A` is an iterator.
-		//
-		// This test is rather crude. `A` is defined to be an iterator
-		// precisely when it has an associated iterator category.
-		template <typename A>
-		constexpr bool is_iterator = store_is_iterator<A>::value;
-	#endif
+	// Check if `A` is an iterator.
+	//
+	// This test is rather crude. `A` is defined to be an iterator
+	// precisely when it has an associated iterator category.
+	template <typename A>
+	constexpr bool is_iterator = store_is_iterator<A>::value;
 }
 
 #endif
@@ -56,12 +55,12 @@ namespace rkt {
 	
 	namespace rkt {
 		template <typename Iter>
-		struct _store_value_type<Iter, enable_if<store_is_iterator<Iter>::value>> {
+		struct _store_value_type<Iter, std::enable_if_t<store_is_iterator<Iter>::value>> {
 			using type = iterator::value_type<Iter>;
 		};
 		
 		template <typename Iter>
-		struct _store_difference_type<Iter, enable_if<store_is_iterator<Iter>::value>> {
+		struct _store_difference_type<Iter, std::enable_if_t<store_is_iterator<Iter>::value>> {
 			using type = iterator::difference_type<Iter>;
 		};
 	}

@@ -2,6 +2,7 @@
 #define RIKETI_CONTAINER
 
 #include <cstddef>
+#include <type_traits>
 
 namespace rkt {
 	namespace container {
@@ -127,14 +128,12 @@ namespace rkt {
 		static constexpr bool value = true;
 	};
 	
-	#if __cplusplus >= 201402L
-		// Check if `A` is a container.
-		//
-		// This test is rather crude. `A` is defined to be a container
-		// precisely when it has associated value and iterator types.
-		template <typename A>
-		constexpr bool is_container = store_is_container<A>::value;
-	#endif
+	// Check if `A` is a container.
+	//
+	// This test is rather crude. `A` is defined to be a container
+	// precisely when it has associated value and iterator types.
+	template <typename A>
+	constexpr bool is_container = store_is_container<A>::value;
 }
 
 #endif
@@ -145,17 +144,17 @@ namespace rkt {
 	
 	namespace rkt {
 		template <typename Cont>
-		struct _store_value_type<Cont, enable_if<store_is_container<Cont>::value>> {
+		struct _store_value_type<Cont, std::enable_if_t<store_is_container<Cont>::value>> {
 			using type = container::value_type<Cont>;
 		};
 		
 		template <typename Cont>
-		struct _store_size_type<Cont, enable_if<store_is_container<Cont>::value>> {
+		struct _store_size_type<Cont, std::enable_if_t<store_is_container<Cont>::value>> {
 			using type = container::size_type<Cont>;
 		};
 		
 		template <typename Cont>
-		struct _store_difference_type<Cont, enable_if<store_is_container<Cont>::value>> {
+		struct _store_difference_type<Cont, std::enable_if_t<store_is_container<Cont>::value>> {
 			using type = container::difference_type<Cont>;
 		};
 	}

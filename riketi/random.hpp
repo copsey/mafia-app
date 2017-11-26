@@ -34,7 +34,7 @@ namespace rkt {
 		if (std::empty(c)) return std::end(c);
 		
 		auto n = std::size(c);
-		std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
+		std::uniform_int_distribution<decltype(n)> dist(0, n - 1);
 		
 		auto b = std::begin(c);
 		std::advance(b, dist(g));
@@ -45,7 +45,7 @@ namespace rkt {
 		if (std::empty(c)) return std::end(c);
 		
 		auto n = std::size(c);
-		std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
+		std::uniform_int_distribution<decltype(n)> dist(0, n - 1);
 		
 		auto b = std::begin(c);
 		std::advance(b, dist(g));

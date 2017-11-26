@@ -167,7 +167,12 @@ namespace rkt {
 		
 		// Remove the object from `this`, if one exists.
 		void clear() {
-			if constexpr(std::is_trivially_destructible<T>::value) {
+			#if __cplusplus >= 201703L
+				if constexpr(std::is_trivially_destructible<T>::value)
+			#else
+				if (std::is_trivially_destructible<T>::value)
+			#endif
+			{
 				_empty = true;
 			} else {
 				if (!_empty) {

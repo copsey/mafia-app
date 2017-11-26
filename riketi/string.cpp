@@ -7,7 +7,7 @@
 bool rkt::equal_up_to_case(std::string_view s1, std::string_view s2) {
 	if (s1.size() != s2.size()) return false;
 	
-	for (std::string_view::size_type i{0}; i != s1.size(); ++i) {
+	for (std::string_view::size_type i = 0; i != s1.size(); ++i) {
 		if (std::toupper(s1[i]) != std::toupper(s2[i])) return false;
 	}
 	
