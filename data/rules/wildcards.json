@@ -1,0 +1,62 @@
+{
+  wildcards: [
+    {
+      id: "any",
+      weights: [
+        {
+          weight: "1"
+        }
+      ]
+    },
+    
+    {
+      id: "v_any",
+      weights: [
+        {
+          alignment: "v",
+          weight: "1"
+        }
+      ]
+    },
+    
+    {
+      id: "v_basic",
+      weights: [
+        {
+          alias: "peas",
+          weight: 5
+        },
+        
+        {
+          alias: "doc",
+          weight: 2
+        },
+        
+        {
+          alias: "det",
+          weight: 3
+        }, 
+      ]
+    },
+    
+    {
+      id: "m_any",
+      weights: [
+        {
+          alignment: "m",
+          weight: "1"
+        }
+      ]
+    },
+    
+    {
+      id: "f_any",
+      weights: [
+        {
+          alignment: "f",
+          weight: "1"
+        }
+      ]
+    },
+  ]
+}
