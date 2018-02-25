@@ -1,5 +1,6 @@
 # Build
-./mafia
+mafia
+build
 mac/build
 
 # Xcode
