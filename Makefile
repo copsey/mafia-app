@@ -1,3 +1,5 @@
+CXXFLAGS=-std=c++1z
+
 src = \
 	cli/main.cpp \
 	interface/command.cpp \
@@ -17,12 +19,20 @@ src = \
 	riketi/random.cpp \
 	riketi/string.cpp \
 
+objs = $(addprefix build/,$(src:.cpp=.o))
 
-build:
-	c++ -std=c++1z $(src) -o mafia
+
+mafia: $(objs)
+	$(CXX) $(CXXFLAGS) $(objs) -o mafia
+
+$(objs): build/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
 
 clean:
-	rm -f ./mafia
+	rm -r ./build
+	rm ./mafia
 
 
 .PHONY: clean
