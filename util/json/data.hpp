@@ -4,6 +4,7 @@
 #include <istream>
 
 #include "../ios/repeat.hpp"
+#include "pretty_print.hpp"
 
 namespace json {
 	struct j_data {
@@ -29,6 +30,7 @@ namespace json {
 		friend std::istream& read_data(std::istream&, j_data&);
 		friend std::ostream& write_data(std::ostream&, const j_data&);
 		friend std::ostream& pretty_print_data(std::ostream&, const j_data&, util::repeat_t<const char*, std::string>);
+		friend pretty_print_t<std::ostream> & operator<< (pretty_print_t<std::ostream> &, const j_data &);
 	};
 	
 	std::istream& read_data(std::istream& in, j_data& data);
@@ -39,6 +41,10 @@ namespace json {
 		std::ostream& out,
 		const j_data& data,
 		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
+	
+	// Pretty print a j_data to out.
+	auto operator<< (pretty_print_t<std::ostream> & out, const j_data & data)
+		-> pretty_print_t<std::ostream> &;
 }
 
 #endif

@@ -8,6 +8,7 @@
 
 #include "../ios/repeat.hpp"
 #include "data.hpp"
+#include "pretty_print.hpp"
 #include "string.hpp"
 
 namespace json {
@@ -24,6 +25,10 @@ namespace json {
 		std::ostream& out,
 		const j_object& obj,
 		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
+	
+	// Pretty print a j_object to out.
+	auto operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
+		-> pretty_print_t<std::ostream> &;
 }
 
 #endif

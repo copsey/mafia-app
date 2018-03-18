@@ -78,3 +78,27 @@ std::ostream& json::pretty_print_array(
 	out << "\n" << this_indent << ']';
 	return out;
 }
+
+auto json::operator<< (pretty_print_t<std::ostream> & out, const j_array & arr)
+	-> json::pretty_print_t<std::ostream> &
+{
+	// write the opening brace
+	out << '[';
+	
+	// write the key-value pairs
+	out.inc();
+	for (auto i = arr.begin(); i != arr.end(); ++i) {
+		// write a leading comma for all but the first pair
+		if (i != arr.begin()) out << ",";
+		
+		out << "\n" << out.indent();
+		out << (*i);
+	}
+	out.dec();
+	
+	// write the closing brace
+	out << "\n" << out.indent();
+	out << ']';
+
+	return out;
+}

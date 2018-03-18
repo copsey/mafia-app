@@ -101,3 +101,30 @@ std::ostream& json::pretty_print_object(
 	out << "\n" << this_indent << '}';
 	return out;
 }
+
+auto json::operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
+	-> json::pretty_print_t<std::ostream> &
+{
+	// write the opening brace
+	out << '{';
+	
+	// write the key-value pairs
+	out.inc();
+	for (auto i = obj.begin(); i != obj.end(); ++i) {
+		const j_string& key  = (*i).first;
+		const j_data&   data = (*i).second;
+		
+		// write a leading comma for all but the first pair
+		if (i != obj.begin()) out << ",";
+		
+		out << "\n" << out.indent();
+		out << key << ": " << data;
+	}
+	out.dec();
+	
+	// write the closing brace
+	out << "\n" << out.indent();
+	out << '}';
+	
+	return out;
+}

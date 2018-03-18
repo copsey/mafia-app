@@ -154,10 +154,10 @@ std::istream& json::read_data(std::istream& in, j_data& data) {
 	{
 		istream_backup backup{in};
 
-		j_null null = nullptr;
-		if (read_null(in, null)) {
+		j_null null;
+		if (in >> null) {
 			data.free_ptr();
-			data._ptr  = null;
+			data._ptr  = nullptr;
 			data._type = j_data::datatype::null;
 			return in;
 		}
@@ -208,7 +208,7 @@ std::ostream& json::write_data(std::ostream& out, const j_data& data) {
 			write_int(out, *static_cast<j_int*>(data._ptr));
 			break;
 		case j_data::datatype::null:
-			write_null(out, *static_cast<j_null*>(data._ptr));
+			out << *static_cast<j_null*>(data._ptr);
 			break;
 		case j_data::datatype::obj:
 			write_object(out, *static_cast<j_object*>(data._ptr));
@@ -237,7 +237,7 @@ std::ostream& json::pretty_print_data(
 			write_int(out, *static_cast<j_int*>(data._ptr));
 			break;
 		case j_data::datatype::null:
-			write_null(out, *static_cast<j_null*>(data._ptr));
+			out << *static_cast<j_null*>(data._ptr);
 			break;
 		case j_data::datatype::obj:
 			pretty_print_object(out, *static_cast<j_object*>(data._ptr), indent);
@@ -248,4 +248,17 @@ std::ostream& json::pretty_print_data(
 	}
 	
 	return out;
+}
+
+auto json::operator<< (pretty_print_t<std::ostream> & out, const j_data & data)
+	-> json::pretty_print_t<std::ostream> &
+{
+	switch (data._type) {
+		case j_data::datatype::arr:   return out << *static_cast<j_array*>(data._ptr);
+		case j_data::datatype::b:     return out << *static_cast<j_bool*>(data._ptr);
+		case j_data::datatype::i:     return out << *static_cast<j_int*>(data._ptr);
+		case j_data::datatype::null:  return out << *static_cast<j_null*>(data._ptr);
+		case j_data::datatype::obj:   return out << *static_cast<j_object*>(data._ptr);
+		case j_data::datatype::str:   return out << *static_cast<j_string*>(data._ptr);
+	}
 }
