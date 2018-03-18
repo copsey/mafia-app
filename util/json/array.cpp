@@ -1,36 +1,33 @@
 #include <utility>
 
-#include "../istream.hpp"
+#include "../ios/discard.hpp"
+#include "../ios/istream.hpp"
 #include "array.hpp"
-#include "pretty_print.hpp"
+
+using util::discard;
+using util::istream_backup;
 
 std::istream& json::read_array(std::istream& in, j_array& arr) {
 	j_array new_arr {};
 	
 	// read the opening brace
-	if (!util::consume(in, '[')) return in;
+	if (!(in >> discard('['))) return in;
 	
 	// read the array's elements
 	while (true) {
-		auto pos = in.tellg();
+		istream_backup backup{in};
 		
 		// all but first element will have a preceding comma
-		if (new_arr.size() != 0) util::consume(in, ',');
+		if (new_arr.size() != 0) in >> discard(',');
 		
 		j_data data {};
-		read_data(in, data);
-		
-		if (in) {
-			new_arr.push_back(std::move(data));
-		} else {
-			in.clear();
-			in.seekg(pos);
-			break;
-		}
+		if (!read_data(in, data)) break;
+
+		new_arr.push_back(std::move(data));
 	}
 	
 	// read the closing brace
-	if (!util::consume(in, ']')) return in;
+	if (!(in >> discard(']'))) return in;
 	
 	arr = std::move(new_arr);
 	return in;
@@ -56,7 +53,13 @@ std::ostream& json::write_array(std::ostream& out, const j_array& arr) {
 	return out;
 }
 
-std::ostream& json::pretty_print_array(std::ostream& out, const j_array& arr, int indent_level) {
+std::ostream& json::pretty_print_array(
+	std::ostream& out,
+	const j_array& arr,
+	util::repeat_t<const char*, std::string> this_indent)
+{
+	auto next_indent = this_indent + 1;
+
 	// write the opening brace
 	out << '[';
 	
@@ -67,14 +70,11 @@ std::ostream& json::pretty_print_array(std::ostream& out, const j_array& arr, in
 		// write a leading comma for all but the first element
 		if (i != arr.begin()) out << ",";
 		
-		out << "\n" << indent(indent_level + 1);
-		pretty_print_data(out, data, indent_level + 1);
+		out << "\n" << next_indent;
+		pretty_print_data(out, data, next_indent);
 	}
 	
 	// write the closing brace
-	out << "\n";
-	for (int l = 0; l < indent_level; ++l) out << "  ";
-	out << ']';
-	
+	out << "\n" << this_indent << ']';
 	return out;
 }

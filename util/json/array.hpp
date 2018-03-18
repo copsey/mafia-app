@@ -5,6 +5,7 @@
 #include <ostream>
 #include <vector>
 
+#include "../ios/repeat.hpp"
 #include "data.hpp"
 
 namespace json {
@@ -14,7 +15,10 @@ namespace json {
 	
 	std::ostream& write_array(std::ostream& out, const j_array& arr);
 	
-	std::ostream& pretty_print_array(std::ostream& out, const j_array& arr, int indent_level = 0);
+	std::ostream& pretty_print_array(
+		std::ostream& out,
+		const j_array& arr,
+		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
 }
 
 #endif

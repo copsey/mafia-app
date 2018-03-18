@@ -1,10 +1,12 @@
 #include <utility>
 
-#include "../istream.hpp"
+#include "../ios/discard.hpp"
 #include "string.hpp"
 
+using util::discard;
+
 std::istream& json::read_string(std::istream& in, j_string& str) {
-	util::consume(in, '\"');
+	in >> discard('\"');
 	
 	std::string new_str {};
 	for (std::ios::int_type ch = in.get(); in && ch != '\"'; ch = in.get()) {

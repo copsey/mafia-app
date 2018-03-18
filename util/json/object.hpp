@@ -6,6 +6,7 @@
 #include <ostream>
 #include <string>
 
+#include "../ios/repeat.hpp"
 #include "data.hpp"
 #include "string.hpp"
 
@@ -19,7 +20,10 @@ namespace json {
 	
 	std::ostream& write_object(std::ostream& out, const j_object& obj);
 	
-	std::ostream& pretty_print_object(std::ostream& out, const j_object& obj, int indent_level = 0);
+	std::ostream& pretty_print_object(
+		std::ostream& out,
+		const j_object& obj,
+		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
 }
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <istream>
 
+#include "../ios/repeat.hpp"
+
 namespace json {
 	struct j_data {
 		// Create some null data.
@@ -26,14 +28,17 @@ namespace json {
 		
 		friend std::istream& read_data(std::istream&, j_data&);
 		friend std::ostream& write_data(std::ostream&, const j_data&);
-		friend std::ostream& pretty_print_data(std::ostream&, const j_data&, int);
+		friend std::ostream& pretty_print_data(std::ostream&, const j_data&, util::repeat_t<const char*, std::string>);
 	};
 	
 	std::istream& read_data(std::istream& in, j_data& data);
 	
 	std::ostream& write_data(std::ostream& out, const j_data& data);
 	
-	std::ostream& pretty_print_data(std::ostream& out, const j_data& data, int indent_level = 0);
+	std::ostream& pretty_print_data(
+		std::ostream& out,
+		const j_data& data,
+		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
 }
 
 #endif

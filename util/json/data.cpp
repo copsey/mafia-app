@@ -1,6 +1,7 @@
 #include <utility>
 
-#include "../istream.hpp"
+#include "../ios/istream.hpp"
+
 #include "array.hpp"
 #include "bool.hpp"
 #include "data.hpp"
@@ -8,6 +9,8 @@
 #include "null.hpp"
 #include "object.hpp"
 #include "string.hpp"
+
+using util::istream_backup;
 
 json::j_data::j_data(const j_data& other):
 	_type {other._type}
@@ -105,77 +108,90 @@ void json::j_data::free_ptr() {
 }
 
 std::istream& json::read_data(std::istream& in, j_data& data) {
-	j_array* arr_ptr = new j_array {};
-	auto pos = in.tellg();
-	if (read_array(in, *arr_ptr)) {
-		data.free_ptr();
-		data._ptr = arr_ptr;
-		data._type = j_data::datatype::arr;
-		return in;
+	// try to read a j_array
+	{
+		istream_backup backup{in};
+
+		j_array* arr_ptr = new j_array {};
+		if (read_array(in, *arr_ptr)) {
+			data.free_ptr();
+			data._ptr  = arr_ptr;
+			data._type = j_data::datatype::arr;
+			return in;
+		}
+		delete arr_ptr;
 	}
-	in.clear();
-	in.seekg(pos);
-	delete arr_ptr;
-	
-	j_bool* b_ptr = new j_bool {};
-	pos = in.tellg();
-	if (read_bool(in, *b_ptr)) {
-		data.free_ptr();
-		data._ptr = b_ptr;
-		data._type = j_data::datatype::b;
-		return in;
+
+	// try to read a j_bool
+	{
+		istream_backup backup{in};
+
+		j_bool* b_ptr = new j_bool {};
+		if (read_bool(in, *b_ptr)) {
+			data.free_ptr();
+			data._ptr  = b_ptr;
+			data._type = j_data::datatype::b;
+			return in;
+		}
+		delete b_ptr;
 	}
-	in.clear();
-	in.seekg(pos);
-	delete b_ptr;
-	
-	j_int* i_ptr = new j_int {};
-	pos = in.tellg();
-	if (read_int(in, *i_ptr)) {
-		data.free_ptr();
-		data._ptr = i_ptr;
-		data._type = j_data::datatype::i;
-		return in;
+
+	// try to read a j_int
+	{
+		istream_backup backup{in};
+
+		j_int* i_ptr = new j_int {};
+		if (read_int(in, *i_ptr)) {
+			data.free_ptr();
+			data._ptr  = i_ptr;
+			data._type = j_data::datatype::i;
+			return in;
+		}
+		delete i_ptr;
 	}
-	in.clear();
-	in.seekg(pos);
-	delete i_ptr;
 	
-	j_null null = nullptr;
-	pos = in.tellg();
-	if (read_null(in, null)) {
-		data.free_ptr();
-		data._ptr = null;
-		data._type = j_data::datatype::null;
-		return in;
+	// try to read a j_null
+	{
+		istream_backup backup{in};
+
+		j_null null = nullptr;
+		if (read_null(in, null)) {
+			data.free_ptr();
+			data._ptr  = null;
+			data._type = j_data::datatype::null;
+			return in;
+		}
 	}
-	in.clear();
-	in.seekg(pos);
+
+	// try to read a j_object
+	{
+		istream_backup backup{in};
 	
-	j_object* obj_ptr = new j_object {};
-	pos = in.tellg();
-	if (read_object(in, *obj_ptr)) {
-		data.free_ptr();
-		data._ptr = obj_ptr;
-		data._type = j_data::datatype::obj;
-		return in;
+		j_object* obj_ptr = new j_object {};
+		if (read_object(in, *obj_ptr)) {
+			data.free_ptr();
+			data._ptr  = obj_ptr;
+			data._type = j_data::datatype::obj;
+			return in;
+		}
+		delete obj_ptr;
 	}
-	in.clear();
-	in.seekg(pos);
-	delete obj_ptr;
-	
-	j_string* str_ptr = new j_string {};
-	pos = in.tellg();
-	if (read_string(in, *str_ptr)) {
-		data.free_ptr();
-		data._ptr = str_ptr;
-		data._type = j_data::datatype::str;
-		return in;
+
+	// try to read a j_string
+	{
+		istream_backup backup{in};
+
+		j_string* str_ptr = new j_string {};
+		if (read_string(in, *str_ptr)) {
+			data.free_ptr();
+			data._ptr  = str_ptr;
+			data._type = j_data::datatype::str;
+			return in;
+		}
+		delete str_ptr;
 	}
-	in.clear();
-	in.seekg(pos);
-	delete str_ptr;
 	
+	// failed to read any value, so input failed
 	in.setstate(std::ios::failbit);
 	return in;
 }
@@ -205,10 +221,14 @@ std::ostream& json::write_data(std::ostream& out, const j_data& data) {
 	return out;
 }
 
-std::ostream& json::pretty_print_data(std::ostream& out, const j_data& data, int indent_level) {
+std::ostream& json::pretty_print_data(
+	std::ostream& out,
+	const j_data& data,
+	util::repeat_t<const char*, std::string> indent)
+{
 	switch (data._type) {
 		case j_data::datatype::arr:
-			pretty_print_array(out, *static_cast<j_array*>(data._ptr), indent_level);
+			pretty_print_array(out, *static_cast<j_array*>(data._ptr), indent);
 			break;
 		case j_data::datatype::b:
 			write_bool(out, *static_cast<j_bool*>(data._ptr));
@@ -220,7 +240,7 @@ std::ostream& json::pretty_print_data(std::ostream& out, const j_data& data, int
 			write_null(out, *static_cast<j_null*>(data._ptr));
 			break;
 		case j_data::datatype::obj:
-			pretty_print_object(out, *static_cast<j_object*>(data._ptr), indent_level);
+			pretty_print_object(out, *static_cast<j_object*>(data._ptr), indent);
 			break;
 		case j_data::datatype::str:
 			write_string(out, *static_cast<j_string*>(data._ptr));

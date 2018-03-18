@@ -1,9 +1,12 @@
 #include <utility>
 
-#include "../istream.hpp"
+#include "../ios/discard.hpp"
+#include "../ios/istream.hpp"
 #include "object.hpp"
-#include "pretty_print.hpp"
 #include "string.hpp"
+
+using util::discard;
+using util::istream_backup;
 
 namespace json {
 	std::istream& read_pair(std::istream& in, j_object& obj);
@@ -14,7 +17,7 @@ std::istream& json::read_pair(std::istream& in, j_object& obj) {
 	read_string(in, key);
 	if (obj.count(key) > 0) in.setstate(std::ios::failbit);
 	
-	util::consume(in, ':');
+	in >> discard(':');
 	
 	j_data data;
 	read_data(in, data);
@@ -28,26 +31,20 @@ std::istream& json::read_object(std::istream& in, j_object& obj) {
 	j_object new_obj {};
 	
 	// read the opening brace
-	if (!util::consume(in, '{')) return in;
+	if (!(in >> discard('{'))) return in;
 	
 	// read the key-value pairs
 	while (true) {
-		auto pos = in.tellg();
+		istream_backup backup{in};
 		
 		// all but first pair will have a preceding comma
-		if (new_obj.size() != 0) util::consume(in, ',');
+		if (new_obj.size() != 0) in >> discard(',');
 		
-		read_pair(in, new_obj);
-		
-		if (!in) {
-			in.clear();
-			in.seekg(pos);
-			break;
-		}
+		if (!read_pair(in, new_obj)) break;
 	}
 	
 	// read the closing brace
-	if (!util::consume(in, '}')) return in;
+	if (!(in >> discard('}'))) return in;
 	
 	obj = std::move(new_obj);
 	return in;
@@ -76,7 +73,13 @@ std::ostream& json::write_object(std::ostream& out, const j_object& obj) {
 	return out;
 }
 
-std::ostream& json::pretty_print_object(std::ostream& out, const j_object& obj, int indent_level) {
+std::ostream& json::pretty_print_object(
+	std::ostream& out,
+	const j_object& obj,
+	util::repeat_t<const char*, std::string> this_indent)
+{
+	auto next_indent = this_indent + 1;
+
 	// write the opening brace
 	out << '{';
 	
@@ -88,16 +91,13 @@ std::ostream& json::pretty_print_object(std::ostream& out, const j_object& obj, 
 		// write a leading comma for all but the first pair
 		if (i != obj.begin()) out << ",";
 		
-		out << "\n" << indent(indent_level + 1);
+		out << "\n" << next_indent;
 		write_string(out, key);
 		out << ": ";
-		pretty_print_data(out, data, indent_level + 1);
+		pretty_print_data(out, data, next_indent);
 	}
 	
 	// write the closing brace
-	out << "\n";
-	for (int l = 0; l < indent_level; ++l) out << "  ";
-	out << '}';
-	
+	out << "\n" << this_indent << '}';
 	return out;
 }
