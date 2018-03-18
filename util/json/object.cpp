@@ -73,35 +73,6 @@ std::ostream& json::write_object(std::ostream& out, const j_object& obj) {
 	return out;
 }
 
-std::ostream& json::pretty_print_object(
-	std::ostream& out,
-	const j_object& obj,
-	util::repeat_t<const char*, std::string> this_indent)
-{
-	auto next_indent = this_indent + 1;
-
-	// write the opening brace
-	out << '{';
-	
-	// write the key-value pairs
-	for (auto i = obj.begin(); i != obj.end(); ++i) {
-		const j_string& key  = (*i).first;
-		const j_data&   data = (*i).second;
-		
-		// write a leading comma for all but the first pair
-		if (i != obj.begin()) out << ",";
-		
-		out << "\n" << next_indent;
-		write_string(out, key);
-		out << ": ";
-		pretty_print_data(out, data, next_indent);
-	}
-	
-	// write the closing brace
-	out << "\n" << this_indent << '}';
-	return out;
-}
-
 auto json::operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
 	-> json::pretty_print_t<std::ostream> &
 {
@@ -109,18 +80,20 @@ auto json::operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
 	out << '{';
 	
 	// write the key-value pairs
-	out.inc();
-	for (auto i = obj.begin(); i != obj.end(); ++i) {
-		const j_string& key  = (*i).first;
-		const j_data&   data = (*i).second;
-		
-		// write a leading comma for all but the first pair
-		if (i != obj.begin()) out << ",";
-		
-		out << "\n" << out.indent();
-		out << key << ": " << data;
+	{
+		auto block = get_indent_block(out);
+
+		for (auto i = obj.begin(); i != obj.end(); ++i) {
+			const j_string& key  = (*i).first;
+			const j_data&   data = (*i).second;
+			
+			// write a leading comma for all but the first pair
+			if (i != obj.begin()) out << ",";
+			
+			out << "\n" << out.indent();
+			out << key << ": " << data;
+		}
 	}
-	out.dec();
 	
 	// write the closing brace
 	out << "\n" << out.indent();

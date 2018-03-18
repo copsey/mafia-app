@@ -98,6 +98,46 @@ namespace json {
 		base_str << x;
 		return out;
 	}
+
+	template <typename Stream>
+	// A resource used to automatically manage one indentation level
+	// of a pretty-printed stream.
+	struct indent_block_t {
+		// The type of the pretty-printed stream.
+		using stream_type      = pretty_print_t<Stream>;
+		// The type of the underlying stream.
+		using base_stream_type = Stream;
+
+		// Create a new block, incrementing the stream's indent level.
+		indent_block_t(stream_type & stream):
+			stream_p {&stream}
+		{
+			stream_p->inc();
+		}
+
+		// Destroy this block, restoring the initial indent level.
+		~indent_block_t() {
+			stream_p->dec();
+		}
+
+		indent_block_t(const indent_block_t &) = delete;
+		indent_block_t(indent_block_t &&)      = default;
+
+		indent_block_t & operator= (const indent_block_t &) = delete;
+		indent_block_t & operator= (indent_block_t &&)      = default;
+
+		// The stream being managed by this block.
+		stream_type &       stream() { return *stream_p; }
+		const stream_type & stream() const { return *stream_p; }
+
+	private:
+		stream_type * stream_p;
+	};
+
+	template <typename Stream>
+	indent_block_t<Stream> get_indent_block(pretty_print_t<Stream> & str) {
+		return indent_block_t<Stream> {str};
+	}
 }
 
 #endif

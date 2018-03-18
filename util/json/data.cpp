@@ -1,10 +1,11 @@
+#include "data.hpp"
+
 #include <utility>
 
 #include "../ios/istream.hpp"
 
 #include "array.hpp"
 #include "bool.hpp"
-#include "data.hpp"
 #include "int.hpp"
 #include "null.hpp"
 #include "object.hpp"
@@ -212,35 +213,6 @@ std::ostream& json::write_data(std::ostream& out, const j_data& data) {
 			break;
 		case j_data::datatype::obj:
 			write_object(out, *static_cast<j_object*>(data._ptr));
-			break;
-		case j_data::datatype::str:
-			write_string(out, *static_cast<j_string*>(data._ptr));
-			break;
-	}
-	
-	return out;
-}
-
-std::ostream& json::pretty_print_data(
-	std::ostream& out,
-	const j_data& data,
-	util::repeat_t<const char*, std::string> indent)
-{
-	switch (data._type) {
-		case j_data::datatype::arr:
-			pretty_print_array(out, *static_cast<j_array*>(data._ptr), indent);
-			break;
-		case j_data::datatype::b:
-			write_bool(out, *static_cast<j_bool*>(data._ptr));
-			break;
-		case j_data::datatype::i:
-			write_int(out, *static_cast<j_int*>(data._ptr));
-			break;
-		case j_data::datatype::null:
-			out << *static_cast<j_null*>(data._ptr);
-			break;
-		case j_data::datatype::obj:
-			pretty_print_object(out, *static_cast<j_object*>(data._ptr), indent);
 			break;
 		case j_data::datatype::str:
 			write_string(out, *static_cast<j_string*>(data._ptr));

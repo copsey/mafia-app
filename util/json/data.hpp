@@ -3,7 +3,6 @@
 
 #include <istream>
 
-#include "../ios/repeat.hpp"
 #include "pretty_print.hpp"
 
 namespace json {
@@ -36,11 +35,6 @@ namespace json {
 	std::istream& read_data(std::istream& in, j_data& data);
 	
 	std::ostream& write_data(std::ostream& out, const j_data& data);
-	
-	std::ostream& pretty_print_data(
-		std::ostream& out,
-		const j_data& data,
-		util::repeat_t<const char*, std::string> indent = util::repeat("  "));
 	
 	// Pretty print a j_data to out.
 	auto operator<< (pretty_print_t<std::ostream> & out, const j_data & data)
