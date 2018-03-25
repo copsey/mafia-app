@@ -20,7 +20,7 @@ namespace json {
 	
 	std::ostream& write_object(std::ostream& out, const j_object& obj);
 	
-	// Pretty print a j_object to out.
+	// Pretty print a JSON object to out.
 	auto operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
 		-> pretty_print_t<std::ostream> &;
 }

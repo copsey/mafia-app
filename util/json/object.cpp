@@ -90,13 +90,13 @@ auto json::operator<< (pretty_print_t<std::ostream> & out, const j_object & obj)
 			// write a leading comma for all but the first pair
 			if (i != obj.begin()) out << ",";
 			
-			out << "\n" << out.indent();
+			out << indent_line;
 			out << key << ": " << data;
 		}
 	}
 	
 	// write the closing brace
-	out << "\n" << out.indent();
+	out << indent_line;
 	out << '}';
 	
 	return out;

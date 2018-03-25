@@ -36,7 +36,7 @@ namespace json {
 	
 	std::ostream& write_data(std::ostream& out, const j_data& data);
 	
-	// Pretty print a j_data to out.
+	// Pretty print a JSON value to out.
 	auto operator<< (pretty_print_t<std::ostream> & out, const j_data & data)
 		-> pretty_print_t<std::ostream> &;
 }

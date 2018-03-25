@@ -15,7 +15,7 @@ namespace json {
 	
 	std::ostream& write_array(std::ostream& out, const j_array& arr);
 	
-	// Pretty print a j_array to out.
+	// Pretty print a JSON array to out.
 	auto operator<< (pretty_print_t<std::ostream> & out, const j_array & arr)
 		-> pretty_print_t<std::ostream> &;
 }

@@ -59,6 +59,12 @@ namespace json {
 			return indent_type {ind_s, level};
 		}
 
+		// Check if no errors have occurred in the underlying stream.
+		explicit operator bool () const { return static_cast<bool>(*str_p); }
+
+		// Check if an error has occurred in the underlying stream.
+		bool operator! () const { return !(*str_p); }
+
 	private:
 		stream_type* str_p;
 		string_type  ind_s;
@@ -137,6 +143,17 @@ namespace json {
 	template <typename Stream>
 	indent_block_t<Stream> get_indent_block(pretty_print_t<Stream> & str) {
 		return indent_block_t<Stream> {str};
+	}
+
+	// An I/O manipulator used to write newlines to pretty-printed streams,
+	// with indentation included as appropriate.
+	struct indent_line_t { };
+	constexpr auto indent_line = indent_line_t {};
+
+	template <class Stream>
+	// Write a newline to the stream, with indenting automatically applied.
+	pretty_print_t<Stream> & operator<< (pretty_print_t<Stream> & out, indent_line_t) {
+		return out << '\n' << out.indent();
 	}
 }
 
