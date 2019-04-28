@@ -20,7 +20,7 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
       });
    }
 
-   if (_game.has_ended()) {
+   if (_game.game_has_ended()) {
       store_event(new Game_ended(*this));
       return;
    }
@@ -108,7 +108,7 @@ void maf::Game_log::kick_player(Player::ID id) {
    const Player &player = find_player(id);
    store_event(new Player_kicked{*this, player, player.role()});
 
-   if (_game.has_ended()) {
+   if (_game.game_has_ended()) {
       log_game_ended();
    } else {
       log_town_meeting();
@@ -134,7 +134,7 @@ void maf::Game_log::process_lynch_votes() {
    const Player *victim = _game.process_lynch_votes();
    log_lynch_result(victim);
 
-   if (_game.has_ended()) {
+   if (_game.game_has_ended()) {
       log_game_ended();
    } else {
       log_town_meeting();
@@ -148,8 +148,7 @@ void maf::Game_log::stage_duel(Player::ID caster_id, Player::ID target_id) {
    _game.stage_duel(caster.id(), target.id());
    log_duel_result(caster, target);
 
-   if (_game.has_ended()) {
-      log_game_ended();
+game_has_ended      log_game_ended();
    } else {
       log_town_meeting();
    }
@@ -315,7 +314,7 @@ void maf::Game_log::try_to_log_night_ended() {
          log_obituary(_game.date() - 1);
       }
 
-      if (_game.has_ended()) {
+      if (_game.game_has_ended()) {
          log_game_ended();
       } else {
          log_town_meeting();

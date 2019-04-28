@@ -111,7 +111,7 @@ void maf::Game::kick_player(Player::ID id)
 {
 	Player& player = find_player(id);
 
-	if (_has_ended)
+	if (game_has_ended())
 		throw Kick_failed{player, Kick_failed::Reason::game_ended};
 	if (!is_day())
 		throw Kick_failed{player, Kick_failed::Reason::bad_timing};
@@ -158,7 +158,7 @@ void maf::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id)
 	Player& voter = find_player(voter_id);
 	Player& target = find_player(target_id);
 
-	if (has_ended())
+	if (game_has_ended())
 		throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::game_ended};
 	if (!lynch_can_occur())
 		throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::bad_timing};
@@ -176,7 +176,7 @@ void maf::Game::clear_lynch_vote(Player::ID voter_id)
 {
 	Player& voter = find_player(voter_id);
 
-	if (has_ended())
+	if (game_has_ended())
 		throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::game_ended};
 	if (!lynch_can_occur())
 		throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::bad_timing};
@@ -188,7 +188,7 @@ void maf::Game::clear_lynch_vote(Player::ID voter_id)
 
 maf::Player const* maf::Game::process_lynch_votes()
 {
-	if (has_ended())
+	if (game_has_ended())
 		throw Lynch_failed{Lynch_failed::Reason::game_ended};
 	if (!lynch_can_occur())
 		throw Lynch_failed{Lynch_failed::Reason::bad_timing};
@@ -211,7 +211,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (has_ended())
+	if (game_has_ended())
 		throw Duel_failed{caster, target, Duel_failed::Reason::game_ended};
 	if (!is_day())
 		throw Duel_failed{caster, target, Duel_failed::Reason::bad_timing};
@@ -250,7 +250,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id)
 
 void maf::Game::begin_night()
 {
-	if (has_ended())
+	if (game_has_ended())
 		throw Begin_night_failed{Begin_night_failed::Reason::game_ended};
 	if (is_night())
 		throw Begin_night_failed{Begin_night_failed::Reason::already_night};
@@ -288,7 +288,7 @@ void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id)
 	Player& player = find_player(player_id);
 	const Role& fake_role = _rulebook.get_role(fake_role_id);
 
-	if (_has_ended)
+	if (game_has_ended())
 		throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};
 	if (!is_night())
 		throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::bad_timing};
@@ -312,7 +312,7 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (has_ended())
+	if (game_has_ended())
 		throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::game_ended};
 	if (!is_night())
 		throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::bad_timing};
@@ -336,7 +336,7 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id)
 
 void maf::Game::skip_mafia_kill()
 {
-	if (has_ended())
+	if (game_has_ended())
 		throw Skip_failed{};
 	if (!is_night())
 		throw Skip_failed{};
@@ -357,7 +357,7 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Kill_failed{caster, target, Kill_failed::Reason::game_ended};
 	if (none_of(caster.compulsory_abilities(), is_kill))
 		throw Kill_failed{caster, target, Kill_failed::Reason::caster_cannot_kill};
@@ -380,7 +380,7 @@ void maf::Game::skip_kill(Player::ID caster_id)
 
 	Player& caster = find_player(caster_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Skip_failed{};
 	if (none_of(caster.compulsory_abilities(), is_kill))
 		throw Skip_failed{};
@@ -399,7 +399,7 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Heal_failed{caster, target, Heal_failed::Reason::game_ended};
 	if (none_of(caster.compulsory_abilities(), is_heal))
 		throw Heal_failed{caster, target, Heal_failed::Reason::caster_cannot_heal};
@@ -416,13 +416,14 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id)
 
 void maf::Game::skip_heal(Player::ID caster_id)
 {
-	auto is_heal = [](const Ability & abl) {
+	auto is_heal = [](const Ability & abl)
+	{
 		return abl.id == Ability::ID::heal;
 	};
 
 	Player& caster = find_player(caster_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Skip_failed{};
 	if (none_of(caster.compulsory_abilities(), is_heal))
 		throw Skip_failed{};
@@ -441,7 +442,7 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Investigate_failed{caster, target, Investigate_failed::Reason::game_ended};
 	if (none_of(caster.compulsory_abilities(), is_investigate))
 		throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_cannot_investigate};
@@ -464,7 +465,7 @@ void maf::Game::skip_investigate(Player::ID caster_id)
 
 	Player& caster = find_player(caster_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Skip_failed{};
 	if (none_of(caster.compulsory_abilities(), is_investigate))
 		throw Skip_failed{};
@@ -483,7 +484,7 @@ void maf::Game::cast_peddle(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Peddle_failed{caster, target, Peddle_failed::Reason::game_ended};
 	if (none_of(caster.compulsory_abilities(), is_peddle))
 		throw Peddle_failed{caster, target, Peddle_failed::Reason::caster_cannot_peddle};
@@ -504,7 +505,7 @@ void maf::Game::skip_peddle(Player::ID caster_id)
 
 	Player& caster = find_player(caster_id);
 
-	if (this->has_ended())
+	if (game_has_ended())
 		throw Skip_failed{};
 
 	if (none_of(caster.compulsory_abilities(), is_peddle))
@@ -515,7 +516,7 @@ void maf::Game::skip_peddle(Player::ID caster_id)
 	try_to_end_night();
 }
 
-bool maf::Game::has_ended() const
+bool maf::Game::game_has_ended() const
 {
 	return _has_ended;
 }

@@ -368,7 +368,7 @@ namespace maf
 		}
 
 		// Whether or not the game has ended.
-		bool has_ended() const;
+		bool game_has_ended() const;
 
 	private:
 		std::vector<Player> _players{};
