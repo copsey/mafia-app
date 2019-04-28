@@ -144,7 +144,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
             throw invalid_argument(err_msg);
          }
 
-		 auto& val = (*val_it).first;
+		 auto& val = (*val_it).second;
          tagged_str.append(escape_tags(val));
          
          j = k + 1;
