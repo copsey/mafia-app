@@ -7,8 +7,8 @@ std::string maf::escape_tags(std::string_view str) {
    std::string esc_str = {};
 
    for (auto ch: str) {
+      if (ch == '^' || ch == '{' || ch == '}') esc_str.push_back('^');
       esc_str.push_back(ch);
-      if (ch == '^') esc_str.push_back('^');
    }
 
    return esc_str;
@@ -23,12 +23,18 @@ maf::Styled_text maf::styled_text_from(std::string_view tagged_str) {
 
    for (auto i = tagged_str.begin(), j = i, end = tagged_str.end(); i != end; ) {
       j = std::find(j, end, '^');
-
+      
       if (j == end) {
          str.append(i, j);
 
          i = j;
-      } else {
+      }
+      else {
+         // e.g.
+         //      i                  j
+         //      |                  |
+         // ...^^ some example text ^cand so on...
+
          ++j;
 
          if (j == end) {
@@ -37,7 +43,13 @@ maf::Styled_text maf::styled_text_from(std::string_view tagged_str) {
             err_msg.append(tagged_str);
 
             throw std::invalid_argument(err_msg);
-         } else {
+         }
+         else {
+            // e.g.
+            //      i                   j
+            //      |                   |
+            // ...^^ some example text ^cand so on...
+
             auto new_style = Styled_string::Style::game;
             bool push_style = false;
             bool pop_style = false;
@@ -74,7 +86,24 @@ maf::Styled_text maf::styled_text_from(std::string_view tagged_str) {
 
                // replace "^^" with "^" in output
                case '^': {
-                  str.append(i, j);
+                  str.append(i, j-1);
+                  str.append('^');
+                  i = ++j;
+                  break;
+               }
+               
+               // replace "^{" with "{" in output
+               case '{': {
+                  str.append(i, j-1);
+                  std.append('{');
+                  i = ++j;
+                  break;
+               }
+               
+               // replace "^}" with "}" in output
+               case '}': {
+                  str.append(i, j-1);
+                  std.append('}');
                   i = ++j;
                   break;
                }
@@ -113,7 +142,8 @@ maf::Styled_text maf::styled_text_from(std::string_view tagged_str) {
                }
 
                i = ++j;
-            } else if (pop_style) {
+            }
+            else if (pop_style) {
                str.append(i, j - 1); // [i,j-1) excludes the tag "^/"
 
                if (!str.empty()) {
