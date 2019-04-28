@@ -36,6 +36,7 @@ maf::Console::Console() {
 
 bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
    std::stringstream err{}; // Write an error here if something goes wrong.
+   TextParams err_params = {}; // (include parameters for error message here)
 
    try {
       if (commands.size() == 0) {
@@ -114,7 +115,8 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 //             result.ec == std::errc{})
 //         {
 //            begin_preset(i);
-//         } else {
+//         }
+//         else {
 //            err << "^TInvalid input!^hThe string ^c";
 //            err << i_str;
 //            err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
@@ -125,10 +127,11 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
          try {
             i = std::stoi(std::string{i_str});
             i_str_valid = true;
-         } catch (std::logic_error) {
-            err << "^TInvalid input!^hThe string ^c";
-            err << i_str;
-            err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
+         }
+         catch (std::logic_error) {
+            err_params["str"] = i_str;
+            
+            err << "^TInvalid input!^hThe string ^c{str}^h could not be converted into a preset index. (i.e. a relatively-small integer)";
             i_str_valid = false;
          }
 
@@ -151,25 +154,23 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       /* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
    }
    catch (const Rulebook::Missing_role_alias &e) {
-      err << "^TInvalid alias!^hNo role could be found whose alias is ^c"
-      << e.alias
-      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+      err_params["alias"] = e.alias;
+      
+      err << "^TInvalid alias!^hNo role could be found whose alias is ^c{alias}^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
    }
    catch (const Rulebook::Missing_wildcard_alias &e) {
-      err << "^TInvalid alias!^hNo wildcard could be found whose alias is ^c"
-      << e.alias
-      << "^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+      err_params["alias"] = e.alias;
+      
+      err << "^TInvalid alias!^hNo wildcard could be found whose alias is ^c{alias}^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
    }
    catch (const Game::Kick_failed &e) {
-      auto params = map<string, string> {};
-      params["player"] = _game_log->get_name(*e.player);
+      err_params["player"] = _game_log->get_name(*e.player);
       
       err << "^TKick failed!^h";
 
       switch (e.reason) {
          case Game::Kick_failed::Reason::game_ended:
-            err << params["player"]
-                << " could not be kicked from the game, because the game has already ended.";
+            err << "{player} could not be kicked from the game, because the game has already ended.";
             break;
 
          case Game::Kick_failed::Reason::bad_timing:
@@ -177,8 +178,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             break;
 
          case Game::Kick_failed::Reason::already_kicked:
-            err << params["player"]
-                << " has already been kicked from the game";
+            err << "{player} has already been kicked from the game";
             break;
       }
    }
@@ -196,9 +196,8 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       }
    }
    catch (const Game::Lynch_vote_failed &e) {
-      auto params = map<string, string> {};
-      params["voter"] = _game_log->get_name(*e.voter);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["voter"] = _game_log->get_name(*e.voter);
+      err_params["target"] = _game_log->get_name(*e.target);
       
       err << "^TLynch vote failed!^h";
 
@@ -212,17 +211,11 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             break;
 
          case Game::Lynch_vote_failed::Reason::voter_is_not_present:
-            err << params["voter"]
-            << " is unable to cast a lynch vote, as they are no longer present in the game.";
+            err << "{voter} is unable to cast a lynch vote, as they are no longer present in the game.";
             break;
 
          case Game::Lynch_vote_failed::Reason::target_is_not_present:
-            err << params["voter"]
-            << " cannot cast a lynch vote against "
-            << params["target"]
-            << ", because "
-            << params["target"]
-            << " is no longer present in the game.";
+            err << "{voter} cannot cast a lynch vote against {target}, because {target} is no longer present in the game.";
             break;
 
          case Game::Lynch_vote_failed::Reason::voter_is_target:
@@ -231,9 +224,8 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       }
    }
    catch (const Game::Duel_failed &e) {
-      auto params = map<string, string> {};
-      params["caster"] = _game_log->get_name(*e.caster);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["caster"] = _game_log->get_name(*e.caster);
+      err_params["target"] = _game_log->get_name(*e.target);
 
       err << "^TDuel failed!^h";
 
@@ -247,17 +239,11 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_is_not_present:
-            err << params["caster"]
-            << " is unable to initiate a duel, as they are no longer present in the game.";
+            err << "{caster} is unable to initiate a duel, as they are no longer present in the game.";
             break;
 
          case Game::Duel_failed::Reason::target_is_not_present:
-            err << params["caster"]
-            << " cannot initiate a duel against "
-            << params["target"]
-            << ", because "
-            << params["target"]
-            << " is no longer present in the game.";
+            err << "{caster} cannot initiate a duel against {target}, because {target} is no longer present in the game.";
             break;
 
          case Game::Duel_failed::Reason::caster_is_target:
@@ -265,8 +251,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             break;
 
          case Game::Duel_failed::Reason::caster_has_no_duel:
-            err << params["caster"]
-            << " has no duel ability to use.";
+            err << "{caster} has no duel ability to use.";
             break;
       }
    }
@@ -287,8 +272,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       }
    }
    catch (const Game::Choose_fake_role_failed &e) {
-      auto params = map<string, string> {};
-      params["player"] = _game_log->get_name(*e.player);
+      err_params["player"] = _game_log->get_name(*e.player);
       
       err << "^TChoose fake role failed!^h";
 
@@ -302,20 +286,17 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             break;
 
          case Game::Choose_fake_role_failed::Reason::player_is_not_faker:
-            err << params["player"]
-            << " doesn't need to be given a fake role.";
+            err << "{player} doesn't need to be given a fake role.";
             break;
 
          case Game::Choose_fake_role_failed::Reason::already_chosen:
-            err << params["player"]
-            << " has already been given a fake role.";
+            err << "{player} has already been given a fake role.";
             break;
       }
    }
    catch (const Game::Mafia_kill_failed &e) {
-      auto params = map<string, string> {};
-      params["caster"] = _game_log->get_name(*e.caster);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["caster"] = _game_log->get_name(*e.caster);
+      err_params["target"] = _game_log->get_name(*e.target);
       
       err << "^TMafia kill failed!^h";
 
@@ -330,27 +311,22 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             err << "Either the mafia have already used their kill this night, or there are no members of the mafia remaining to perform a kill.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_present:
-            err << params["caster"]
-            << " cannot perform the mafia's kill, as they are no longer in the game.";
+            err << "{caster} cannot perform the mafia's kill, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_not_in_mafia:
-            err << params["caster"]
-            << " cannot perform the mafia's kill, as they are not part of the mafia.";
+            err << "{caster} cannot perform the mafia's kill, as they are not part of the mafia.";
             break;
          case Game::Mafia_kill_failed::Reason::target_is_not_present:
-            err << params["target"]
-            << " cannot be targetted to kill by the mafia, as they are no longer in the game.";
+            err << "{target} cannot be targetted to kill by the mafia, as they are no longer in the game.";
             break;
          case Game::Mafia_kill_failed::Reason::caster_is_target:
-            err << params["caster"]
-            << " is not allowed to kill themself.\n(nice try.)";
+            err << "{caster} is not allowed to kill themself.\n(nice try.)";
             break;
       }
    }
    catch (const Game::Kill_failed &e) {
-      auto params = map<string, string> {};
-      params["caster"] = _game_log->get_name(*e.caster);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["caster"] = _game_log->get_name(*e.caster);
+      err_params["target"] = _game_log->get_name(*e.target);
       
       err << "^TKill failed!^h";
 
@@ -359,27 +335,19 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             err << "The game has already ended.";
             break;
          case Game::Kill_failed::Reason::caster_cannot_kill:
-            err << params["caster"]
-            << " cannot use a kill ability right now.";
+            err << "{caster} cannot use a kill ability right now.";
             break;
          case Game::Kill_failed::Reason::target_is_not_present:
-            err << params["caster"]
-            << " cannot kill "
-            << params["target"]
-            << ", because "
-            << params["target"]
-            << " is no longer present in the game.";
+            err << "{caster} cannot kill {target}, because {target} is no longer present in the game.";
             break;
          case Game::Kill_failed::Reason::caster_is_target:
-            err << params["caster"]
-            << " is not allowed to kill themself.\n(nice try.)";
+            err << "{caster} is not allowed to kill themself.\n(nice try.)";
             break;
       }
    }
    catch (const Game::Heal_failed &e) {
-      auto params = map<string, string> {};
-      params["caster"] = _game_log->get_name(*e.caster);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["caster"] = _game_log->get_name(*e.caster);
+      err_params["target"] = _game_log->get_name(*e.target);
       
       err << "^THeal failed!^h";
 
@@ -387,28 +355,23 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
          case Game::Heal_failed::Reason::game_ended:
             err << "The game has already ended.";
             break;
+
          case Game::Heal_failed::Reason::caster_cannot_heal:
-            err << params["caster"]
-            << " cannot use a heal ability right now.";
+            err << "{caster} cannot use a heal ability right now.";
             break;
+
          case Game::Heal_failed::Reason::target_is_not_present:
-            err << params["caster"]
-            << " cannot heal "
-            << params["target"]
-            << ", because "
-            << params["target"]
-            << " is no longer present in the game.";
+            err << "{caster} cannot heal {target}, because {target} is no longer present in the game.";
             break;
+
          case Game::Heal_failed::Reason::caster_is_target:
-            err << params["caster"]
-            << " is not allowed to heal themself.";
+            err << "{caster} is not allowed to heal themself.";
             break;
       }
    }
    catch (const Game::Investigate_failed &e) {
-      auto params = map<string, string> {};
-      params["caster"] = _game_log->get_name(*e.caster);
-      params["target"] = _game_log->get_name(*e.target);
+      err_params["caster"] = _game_log->get_name(*e.caster);
+      err_params["target"] = _game_log->get_name(*e.target);
       
       err << "^TInvestigation failed!^h";
 
@@ -416,21 +379,17 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
          case Game::Investigate_failed::Reason::game_ended:
             err << "The game has already ended.";
             break;
+
          case Game::Investigate_failed::Reason::caster_cannot_investigate:
-            err << params["caster"]
-            << " cannot investigate anybody right now.";
+            err << "{caster} cannot investigate anybody right now.";
             break;
+
          case Game::Investigate_failed::Reason::target_is_not_present:
-            err << params["caster"]
-            << " cannot investigate "
-            << params["target"]
-            << ", because "
-            << params["target"]
-            << " is no longer present in the game.";
+            err << "{caster} cannot investigate {target}, because {target} is no longer present in the game.";
             break;
+
          case Game::Investigate_failed::Reason::caster_is_target:
-            err << params["caster"]
-            << " is not allowed to investigate themself.";
+            err << "{caster} is not allowed to investigate themself.";
             break;
       }
    }
@@ -441,9 +400,9 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       err << "^TMismatch!^hA new game cannot begin with an unequal number of players and cards.";
    }
    catch (const Game_log::Player_not_found &e) {
-      err << "^TPlayer not found!^hA player named ^c"
-      << e.name
-      << "^h could not be found.";
+      err_params["player"] = e.name;
+      
+      err << "^TPlayer not found!^hA player named ^c{name}^h could not be found.";
    }
    catch (const Event::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
@@ -452,24 +411,24 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
    }
    catch (const Setup_screen::Player_already_exists &e) {
-      err << "^TPlayer already exists!^hA player named ^c"
-          << e.name
-          << "^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
+      err_params["player"] = e.name;
+      
+      err << "^TPlayer already exists!^hA player named ^c{player}^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
    }
    catch (const Setup_screen::Player_missing &e) {
-      err << "^TMissing player!^hA player named ^c"
-          << e.name
-          << "^h could not be found.";
+      err_params["player"] = e.name;
+      
+      err << "^TMissing player!^hA player named ^c{player}^h could not be found.";
    }
    catch (const Setup_screen::Rolecard_unselected &e) {
-      err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c"
-          << e.role->alias()
-          << "^h have been selected.";
+      err_params["alias"] = e.role->alias();
+      
+      err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c{alias}^h have been selected.";
    }
    catch (const Setup_screen::Wildcard_unselected &e) {
-      err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c"
-      << e.wildcard->alias()
-      << "^h have been selected.";
+      err_params["alias"] = e.wildcard->alias();
+      
+      err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c{alias}^h have been selected.";
    }
    catch (const Setup_screen::Bad_commands &e) {
       err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
@@ -488,17 +447,18 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
       }
    }
    catch (const Missing_preset &e) {
-      err << "^TMissing preset!^hThere is no preset defined for the index "
-      << e.index
-      << ".";
+      err_params["index"] = std::to_string(e.index);
+      
+      err << "^TMissing preset!^hThere is no preset defined for the index {index}.";
    }
 
    if (err.tellp() == 0) {
       refresh_output();
       clear_error_message();
       return true;
-   } else {
-      read_error_message(err.str());
+   }
+   else {
+      read_error_message(err.str(), err_params);
       return false;
    }
 }
@@ -532,15 +492,18 @@ void maf::Console::refresh_output() {
    read_output(ss.str());
 }
 
-const maf::Styled_text & maf::Console::error_message() const {
+const maf::Styled_text & maf::Console::error_message() const
+{
    return _error_message;
 }
 
-void maf::Console::read_error_message(std::string_view str) {
-   _error_message = styled_text_from(str);
+void maf::Console::read_error_message(std::string_view str, TextParams const& params)
+{
+   _error_message = styled_text_from(str, params);
 }
 
-void maf::Console::clear_error_message() {
+void maf::Console::clear_error_message()
+{
    _error_message.clear();
 }
 

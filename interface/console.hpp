@@ -66,7 +66,7 @@ namespace maf {
       const Styled_text & error_message() const;
       // Reads the tagged string `str`, updating the error message to
       // display the styled text obtained.
-      void read_error_message(std::string_view str);
+      void read_error_message(std::string_view str, TextParams const& params = {});
       // Removes the current error message.
       void clear_error_message();
 
