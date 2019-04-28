@@ -341,7 +341,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
             err << "{caster} cannot kill {target}, because {target} is no longer present in the game.";
             break;
          case Game::Kill_failed::Reason::caster_is_target:
-            err << "{caster} is not allowed to kill themself.\n(nice try.)";
+            err << "{caster} is not allowed to kill themself.\n(nice try.)^{s^}s";
             break;
       }
    }
@@ -472,24 +472,25 @@ const maf::Styled_text & maf::Console::output() const {
    return _output;
 }
 
-void maf::Console::read_output(std::string_view str) {
-   _output = styled_text_from(str);
+void maf::Console::read_output(std::string_view str, TextParams const& params) {
+   _output = styled_text_from(str, params);
 }
 
 void maf::Console::refresh_output() {
    std::stringstream ss{};
+	TextParams params = {};
 
    if (has_help_screen()) {
       _help_screen->write(ss);
    } else if (has_question()) {
       _question->write(ss);
    } else if (has_game()) {
-      _game_log->current_event().write_full(ss);
+      _game_log->current_event().write_full(ss, params);
    } else {
       _setup_screen.write(ss);
    }
 
-   read_output(ss.str());
+   read_output(ss.str(), params);
 }
 
 const maf::Styled_text & maf::Console::error_message() const

@@ -6,6 +6,7 @@
 
 #include "../riketi/ref.hpp"
 
+#include "styled_string.hpp"
 #include "../logic/logic.hpp"
 
 namespace maf {
@@ -35,7 +36,7 @@ namespace maf {
       virtual void do_commands(const std::vector<std::string_view> & commands) = 0;
 
       // Writes a tagged string detailing the event to os.
-      virtual void write_full(std::ostream & os) const = 0;
+      virtual void write_full(std::ostream & os, TextParams& params) const = 0;
       // Writes a summary of the event to os.
       // (this is a "normal" string, and not a tagged string.)
       // By default, nothing is written at all.
@@ -59,7 +60,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream & os) const override;
+      void write_full(std::ostream & os, TextParams& params) const override;
       void write_summary(std::ostream & os) const override;
 
    private:
@@ -80,7 +81,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream & os) const override;
+      void write_full(std::ostream & os, TextParams& params) const override;
       void write_summary(std::ostream & os) const override;
    };
 
@@ -92,7 +93,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream& os) const override;
+      void write_full(std::ostream& os, TextParams& params) const override;
       void write_summary(std::ostream& os) const override;
 
    private:
@@ -120,7 +121,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view>& commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
 
    private:
@@ -140,7 +141,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
 
       rkt::ref<const Player> player;
@@ -161,7 +162,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
    };
 
@@ -173,7 +174,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
 
       rkt::ref<const Player> caster;
@@ -188,7 +189,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
 
    private:
@@ -207,7 +208,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
 
    private:
       std::vector<rkt::ref<const Player>> _mafiosi;
@@ -223,7 +224,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view>& commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
 
    private:
       const Player *_caster;
@@ -238,7 +239,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
 
    private:
       const Player *_caster;
@@ -253,7 +254,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
 
    private:
       const Player *_caster;
@@ -268,7 +269,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
 
    private:
       const Player *_caster;
@@ -283,7 +284,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
    };
 
 
@@ -296,7 +297,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
 
    private:
@@ -311,7 +312,7 @@ namespace maf {
 
       void do_commands(const std::vector<std::string_view> & commands) override;
 
-      void write_full(std::ostream &os) const override;
+      void write_full(std::ostream &os, TextParams& params) const override;
       void write_summary(std::ostream &os) const override;
    };
 }

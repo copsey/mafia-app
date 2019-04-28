@@ -56,7 +56,7 @@ namespace maf {
       const Styled_text & output() const;
       // Read the tagged string `str`, updating the output to display
       // the styled text obtained.
-      void read_output(std::string_view str);
+      void read_output(std::string_view str, TextParams const& params);
       // Updates the output to display the appropriate screen.
       void refresh_output();
 
