@@ -3,24 +3,24 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-void maf::Event_Help_Screen::write(std::ostream& os) const {
-   event->write_help(os);
+void maf::Event_Help_Screen::write(std::ostream &os, TextParams& params) const {
+   event->write_help(os, params);
 }
 
-void maf::Role_Info_Screen::write(std::ostream& os) const {
+void maf::Role_Info_Screen::write(std::ostream &os, TextParams& params) const {
    /* FIXME */
 
+   params["role"] = full_name(*role);
+
    os << "^h^TMissing Role Info^/";
-   os << "No extra help could be found for the ";
-   os << full_name(*role);
-   os << ".\n(this counts as a bug!)";
+   os << "No extra help could be found for the {role}.\n(this counts as a bug!)";
 
 //   os << "^h^THelp: " << full_name(_r->id()) << "^/";
 //
 //   os << "To leave this screen, enter ^cok^/.";
 }
 
-void maf::List_Roles_Screen::write(std::ostream &os) const {
+void maf::List_Roles_Screen::write(std::ostream &os, TextParams& params) const {
    std::vector<rkt::ref<const Role>> filtered_roles{};
 
    switch (_filter_alignment) {
@@ -118,30 +118,37 @@ void maf::List_Roles_Screen::write(std::ostream &os) const {
    os << "\n\nTo leave this screen, enter ^cok^/.";
 }
 
-void maf::Setup_Help_Screen::write(std::ostream &os) const {
+void maf::Setup_Help_Screen::write(std::ostream &os, TextParams& params) const {
    os << "^h^THelp: Setup^/The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.\n\nTo add a player called ^cname^/ to the next game, enter ^cadd p name^/. The player can be removed again by entering ^ctake p name^/. To remove all of the players that have been selected, enter ^cclear p^/.\n\nA single copy of the rolecard with alias ^cthat^/ can be added by entering ^cadd r that^/, and a single copy removed by entering ^ctake r that^/. You can remove all copies of the rolecard by entering ^cclear r that^/, and you can remove every rolecard that has been selected by entering ^cclear r^/.\n\nSimilar effects can be achieved for the wildcard with alias ^cthat^/ by using the commands ^cadd w that^/, ^ctake w that^/, ^cclear w that^/, and ^cclear w^/ respectively. In addition, every card that has been selected (both rolecards and wildcards) can be removed through the use of the command ^cclear c^/.\n\nTo clear absolutely everything (both players and cards), enter ^cclear^/.\n\nOnce you have finished choosing players and cards, you can enter ^cbegin^/ to start a new game. Alternatively, you can enter ^cpreset i^/ to start a particular preconfigured game, or just ^cpreset^/ to start a random preset. (note: at the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)\n\nYou can get extra information on the role with alias ^cthat^/ by entering ^chelp r that^/, and you can see a list of every role in the rulebook by entering ^clist r^/. To see a list of only the village roles, you can enter ^clist r v^/. Similarly, the command ^clist r m^/ will list the mafia roles, and the command ^clist r f^/ will list the freelance roles.\n\nThe commands ^chelp w that^/, ^clist w^/, ^clist w v^/, ^clist w m^/, and ^clist w f^/ have similar effects for wildcards.\n\nTo leave this screen, enter ^cok^/.";
 }
 
-void maf::Player_Info_Screen::write(std::ostream & os) const {
+void maf::Player_Info_Screen::write(std::ostream &os, TextParams& params) const {
    const Player & player = *_player_ref;
    const Game & game = _game_log_ref->game();
    const Game_log & game_log = *_game_log_ref;
+   
+   params["player"] = game_log.get_name(player);
+   params["role"] = full_name(player.role());
+   
+   if (player.has_fake_role()) {
+      params["wildcard.alias"] = player.wildcard()->alias();
+   }
+   
+   if (player.lynch_vote()) {
+      params["lynchVote"] = game_log.get_name(*player.lynch_vote());
+   }
 
-   os << "^h^TInfo: " << game_log.get_name(player) << "^/";
+   os << "^h^TInfo: {player}^/";
 
-   os << "Your role is the " << full_name(player.role()) << ".";
+   os << "Your role is the {role}.";
    if (player.has_fake_role()) {
       // FIXME
-      os << " You were randomly given this role from the ^c"
-      << player.wildcard()->alias()
-      << "^/ wildcard.";
+      os << " You were randomly given this role from the ^c{wildcard.alias}^/ wildcard.";
    }
 
    if (game.time() == Time::day) {
       if (player.lynch_vote()) {
-         os << "\n\nYou are voting to lynch "
-         << game_log.get_name(*player.lynch_vote())
-         << ".";
+         os << "\n\nYou are voting to lynch {lynchVote}.";
       } else {
          os << "\n\nYou are not voting to lynch anyone.";
       }

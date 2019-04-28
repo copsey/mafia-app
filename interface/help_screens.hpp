@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include "../logic/logic.hpp"
+#include "styled_string.hpp"
 
 #include "events.hpp"
 #include "game_log.hpp"
@@ -12,7 +13,7 @@
 namespace maf {
    struct Help_Screen {
       // Write a tagged string detailing the help screen to os.
-      virtual void write(std::ostream &os) const = 0;
+      virtual void write(std::ostream &os, TextParams& params) const = 0;
    };
 
 
@@ -23,7 +24,7 @@ namespace maf {
 
       rkt::ref<const Event> event;
 
-      void write(std::ostream &os) const override;
+      void write(std::ostream &os, TextParams& params) const override;
    };
 
 
@@ -34,7 +35,7 @@ namespace maf {
 
       rkt::ref<const Role> role;
 
-      void write(std::ostream &os) const override;
+      void write(std::ostream &os, TextParams& params) const override;
    };
 
 
@@ -50,7 +51,7 @@ namespace maf {
          : _rulebook{rulebook}, _filter_alignment{alignment}
       { }
 
-      void write(std::ostream &os) const override;
+      void write(std::ostream &os, TextParams& params) const override;
 
    private:
       rkt::ref<const Rulebook> _rulebook;
@@ -59,7 +60,7 @@ namespace maf {
 
 
    struct Setup_Help_Screen: Help_Screen {
-      void write(std::ostream &os) const override;
+      void write(std::ostream &os, TextParams& params) const override;
    };
 
 
@@ -71,7 +72,7 @@ namespace maf {
          : _player_ref{player}, _game_log_ref{game_log}
       { }
 
-      void write(std::ostream & os) const override;
+      void write(std::ostream& os, TextParams& params) const override;
 
    private:
       rkt::ref<const Player> _player_ref;

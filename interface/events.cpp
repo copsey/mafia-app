@@ -3,15 +3,18 @@
 #include "events.hpp"
 #include "names.hpp"
 
-void maf::Event::write_summary(std::ostream &os) const {
+void maf::Event::write_summary(std::ostream &os) const
+{
    // By default, write nothing.
 }
 
-void maf::Event::write_help(std::ostream &os) const {
+void maf::Event::write_help(std::ostream &os, TextParams& params) const
+{
    os << "^TMissing Help Screen^/^hNo help has been written for the current game event.\n(this counts as a bug!)\n\nEnter ^cok^/ to leave this screen.";
 }
 
-void maf::Player_given_initial_role::do_commands(const std::vector<std::string_view> & commands) {
+void maf::Player_given_initial_role::do_commands(const std::vector<std::string_view> & commands)
+{
    if (commands_match(commands, {"ok"})) {
       if (_is_private) {
          game_log().advance();
@@ -317,7 +320,8 @@ void maf::Lynch_result::write_full(std::ostream &os, TextParams& params) const {
    }
 }
 
-void maf::Lynch_result::write_summary(std::ostream &os) const {
+void maf::Lynch_result::write_summary(std::ostream &os) const
+{
 	if (victim) {
 		os << game_log().get_name(*victim) << " was lynched.";
 	}
@@ -326,7 +330,8 @@ void maf::Lynch_result::write_summary(std::ostream &os) const {
 	}
 }
 
-void maf::Duel_result::do_commands(const std::vector<std::string_view> & commands) {
+void maf::Duel_result::do_commands(const std::vector<std::string_view> & commands)
+{
    if (commands_match(commands, {"ok"})) {
       game_log().advance();
    }

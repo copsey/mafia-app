@@ -481,12 +481,15 @@ void maf::Console::refresh_output() {
 	TextParams params = {};
 
    if (has_help_screen()) {
-      _help_screen->write(ss);
-   } else if (has_question()) {
+      _help_screen->write(ss, params);
+   }
+   else if (has_question()) {
       _question->write(ss);
-   } else if (has_game()) {
+   }
+   else if (has_game()) {
       _game_log->current_event().write_full(ss, params);
-   } else {
+   }
+   else {
       _setup_screen.write(ss);
    }
 

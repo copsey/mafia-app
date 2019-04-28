@@ -43,7 +43,7 @@ namespace maf {
       virtual void write_summary(std::ostream & os) const;
       // Writes a tagged string to os containing help with the event.
       // By default, complains that no help has been written for the event.
-      virtual void write_help(std::ostream & os) const;
+      virtual void write_help(std::ostream & os, TextParams& params) const;
 
    private:
       rkt::ref<Game_log> _game_log_ref;
