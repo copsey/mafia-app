@@ -12,7 +12,7 @@ namespace maf {
    std::string escape_tags(std::string_view str);
    
    // Check if `param` is an allowed name for a styled-text parameter.
-   // This is true if it matches the regex /^[a-zA-Z0-9_]+$/.
+   // This is true if it matches the regex /^[a-zA-Z0-9_\.]+$/.
    bool is_param_name(std::string_view param);
 
    // A string coupled with a suggested style.

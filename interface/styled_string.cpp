@@ -88,6 +88,7 @@ bool maf::is_param_name(string_view param)
          case '8':
          case '9':
          case '_':
+		 case '.':
             break;
          
          default:
