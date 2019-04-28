@@ -71,7 +71,8 @@ namespace maf {
 
    // Convert a tagged string into styled text, using `params` as a dictionary of
    // text replacements.
-   Styled_text styled_text_from(std::string_view tagged_str, TextParams const& params);
+   Styled_text styled_text_from(std::string_view tagged_str,
+                                TextParams const& params = {});
 }
 
 #endif
