@@ -10,6 +10,8 @@ using std::vector;
 using rkt::any_of;
 using rkt::none_of;
 
+using WC = maf::Win_condition;
+
 maf::Game::Game(const vector<Role::ID> & role_ids,
                 const vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
@@ -211,36 +213,46 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id)
 	Player& caster = find_player(caster_id);
 	Player& target = find_player(target_id);
 
-	if (game_has_ended())
-		throw Duel_failed{caster, target, Duel_failed::Reason::game_ended};
-	if (!is_day())
-		throw Duel_failed{caster, target, Duel_failed::Reason::bad_timing};
-	if (!caster.is_present())
-		throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_not_present};
-	if (!target.is_present())
-		throw Duel_failed{caster, target, Duel_failed::Reason::target_is_not_present};
-	if (&caster == &target)
-		throw Duel_failed{caster, target, Duel_failed::Reason::caster_is_target};
-	if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel)
-		throw Duel_failed{caster, target, Duel_failed::Reason::caster_has_no_duel};
+	if (game_has_ended()) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::game_ended);
+	}
+	if (!is_day()) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::bad_timing);
+	}
+	if (!caster.is_present()) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::caster_is_not_present);
+	}
+	if (!target.is_present()) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::target_is_not_present);
+	}
+	if (&caster == &target) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::caster_is_target);
+	}
+	if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::caster_has_no_duel);
+	}
 
 	double s = caster.duel_strength() + target.duel_strength();
-	/* FIXME: throw exception if s <= 0 */
-	double p = caster.duel_strength() / s;
+	if (s <= 0.0) {
+		throw Duel_failed(caster, target, Duel_failed::Reason::bad_probability);
+	}
 
+	double p = caster.duel_strength() / s;
 	std::bernoulli_distribution bd{p};
 
 	Player *winner, *loser;
+
 	if (bd(rkt::random_engine)) {
 		winner = &caster;
 		loser = &target;
-	} else {
+	}
+	else {
 		winner = &target;
 		loser = &caster;
 	}
 
 	winner->win_duel();
-	if (winner->win_condition() == Win_condition::win_duel) {
+	if (winner->win_condition() == WC::win_duel) {
 		winner->leave();
 	}
 	loser->kill(_date, _time);

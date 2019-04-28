@@ -123,7 +123,8 @@ namespace maf
 				caster_is_not_present,
 				target_is_not_present,
 				caster_is_target,
-				caster_has_no_duel
+				caster_has_no_duel,
+				bad_probability
 			};
 
 			Duel_failed(const Player &caster,
