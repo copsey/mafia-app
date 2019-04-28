@@ -111,7 +111,7 @@
    NSAlert *alert = [[NSAlert alloc] init];
    NSMutableString *informativeText = [NSMutableString string];
 
-   for (const maf::Styled_string::Styled_string &styled_str : _console.error_message()) {
+   for (const maf::Styled_string &styled_str : _console.error_message()) {
       NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 
       switch (styled_str.style) {

@@ -22,9 +22,9 @@
 		F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8882E591B8CE4E6009166BB /* wildcard.cpp */; };
 		F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */; };
 		F8A27DD31B887AA600A50614 /* role.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8A27DD21B887AA600A50614 /* role.cpp */; };
+		F8A4A9822275E84F0028057E /* styled_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D3F4B01B859F91007D134B /* styled_string.cpp */; };
 		F8C84C011AF7ED05007243BA /* Application.xib in Resources */ = {isa = PBXBuildFile; fileRef = F8C84C001AF7ED05007243BA /* Application.xib */; };
 		F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */; };
-		F8D3F4B11B859F91007D134B /* styled_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D3F4B01B859F91007D134B /* styled_string.cpp */; };
 		F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* events.cpp */; };
 		F8D646E71B85F36200E72222 /* game_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D646E51B85F36200E72222 /* game_log.cpp */; };
 		F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D772D51AF4B42100E16BB6 /* console.cpp */; };
@@ -284,13 +284,13 @@
 				F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */,
 				F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */,
 				F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */,
-				F8D3F4B11B859F91007D134B /* styled_string.cpp in Sources */,
 				F84FE0971AF3BB1A00BF4992 /* random.cpp in Sources */,
 				F880CA051B89BEC600144257 /* help_screens.cpp in Sources */,
 				F880CA0B1B8A606300144257 /* questions.cpp in Sources */,
 				F809EE2E1FC1975B003348BC /* command.cpp in Sources */,
 				F84FE0651AF3B9DF00BF4992 /* main.m in Sources */,
 				F886CDEF1B87014200915D2D /* player.cpp in Sources */,
+				F8A4A9822275E84F0028057E /* styled_string.cpp in Sources */,
 				F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */,
 				F858FAD41AFF5A16004D7058 /* names.cpp in Sources */,
 				F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */,

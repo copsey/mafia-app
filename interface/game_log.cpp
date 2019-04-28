@@ -148,7 +148,8 @@ void maf::Game_log::stage_duel(Player::ID caster_id, Player::ID target_id) {
    _game.stage_duel(caster.id(), target.id());
    log_duel_result(caster, target);
 
-game_has_ended      log_game_ended();
+   if (_game.game_has_ended()) {
+	   log_game_ended();
    } else {
       log_town_meeting();
    }

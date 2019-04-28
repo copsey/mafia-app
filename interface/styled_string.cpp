@@ -19,7 +19,7 @@ string maf::escape_tags(string_view str)
    return esc_str;
 }
 
-bool is_param_name(string_view param)
+bool maf::is_param_name(string_view param)
 {
    if (param.empty()) return false;
    
@@ -143,8 +143,9 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
             
             throw invalid_argument(err_msg);
          }
-         
-         tagged_str.append(escape_tags(*val_it));
+
+		 auto& val = (*val_it).first;
+         tagged_str.append(escape_tags(val));
          
          j = k + 1;
       }
@@ -225,7 +226,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
                // replace "^{" with "{" in output
                case '{': {
                   str.append(i, j-1);
-                  std += '{';
+                  str += '{';
                   i = ++j;
                   break;
                }
@@ -233,7 +234,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
                // replace "^}" with "}" in output
                case '}': {
                   str.append(i, j-1);
-                  std += '}';
+                  str += '}';
                   i = ++j;
                   break;
                }
