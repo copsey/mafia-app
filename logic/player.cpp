@@ -44,7 +44,7 @@ void maf::Player::refresh() {
    _lynch_vote = nullptr;
    
    _healed = false;
-   _high = false;
+   _on_drugs = false;
 }
 
 const std::vector<maf::Ability> & maf::Player::compulsory_abilities() const {
@@ -70,11 +70,11 @@ void maf::Player::cast_lynch_vote(const Player & target) {
 }
 
 bool maf::Player::is_suspicious() const {
-   return role().is_suspicious() || _high;
+   return role().is_suspicious() || _on_drugs;
 }
 
 void maf::Player::give_drugs() {
-   _high = true;
+   _on_drugs = true;
 }
 
 void maf::Player::haunt(const Player &haunter) {

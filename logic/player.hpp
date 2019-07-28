@@ -257,28 +257,28 @@ namespace maf {
    private:
       ID _id;
 
-      const Role * _role_ptr{nullptr};
-      const Wildcard * _wildcard_ptr{nullptr};
+      const Role * _role_ptr = nullptr;
+      const Wildcard * _wildcard_ptr = nullptr;
 
-      const Role * _fake_role_ptr{nullptr};
+      const Role * _fake_role_ptr = nullptr;
 
-      bool _alive{true};
-      bool _present{true};
-      bool _kicked{false};
+      bool _alive = true;
+      bool _present = true;
+      bool _kicked = false;
       Date _date_of_death;
       Time _time_of_death;
 
-      std::vector<Ability> _compulsory_abilities{};
+      std::vector<Ability> _compulsory_abilities = {};
 
-      const Player * _lynch_vote{nullptr};
-      const Player * _haunter{nullptr};
+      const Player * _lynch_vote = nullptr;
+      const Player * _haunter = nullptr;
 
-      bool _lynched{false};
-      bool _won_duel{false};
-      bool _won_game{false};
+      bool _lynched = false;
+      bool _won_duel = false;
+      bool _won_game = false;
 
-      bool _healed{false};
-      bool _high{false};
+      bool _healed = false;
+      bool _on_drugs = false;
    };
 
    /// Check if two players are the same.
