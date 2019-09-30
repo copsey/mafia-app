@@ -168,7 +168,7 @@ void maf::Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id)
 		throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_not_present};
 	if (!target.is_present())
 		throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::target_is_not_present};
-	if (&voter == &target)
+	if (voter == target)
 		throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_target};
 
 	voter.cast_lynch_vote(target);
@@ -225,7 +225,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id)
 	if (!target.is_present()) {
 		throw Duel_failed(caster, target, Duel_failed::Reason::target_is_not_present);
 	}
-	if (&caster == &target) {
+	if (caster == target) {
 		throw Duel_failed(caster, target, Duel_failed::Reason::caster_is_target);
 	}
 	if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel) {
@@ -336,7 +336,7 @@ void maf::Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id)
 		throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
 	if (!target.is_present())
 		throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::target_is_not_present};
-	if (&caster == &target)
+	if (caster == target)
 		throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_target};
 
 	_mafia_can_use_kill = false;
@@ -375,7 +375,7 @@ void maf::Game::cast_kill(Player::ID caster_id, Player::ID target_id)
 		throw Kill_failed{caster, target, Kill_failed::Reason::caster_cannot_kill};
 	if (!target.is_present())
 		throw Kill_failed{caster, target, Kill_failed::Reason::target_is_not_present};
-	if (&caster == &target)
+	if (caster == target)
 		Kill_failed{caster, target, Kill_failed::Reason::caster_is_target};
 
 	_pending_kills.emplace_back(&caster, &target);
@@ -417,7 +417,7 @@ void maf::Game::cast_heal(Player::ID caster_id, Player::ID target_id)
 		throw Heal_failed{caster, target, Heal_failed::Reason::caster_cannot_heal};
 	if (!target.is_present())
 		throw Heal_failed{caster, target, Heal_failed::Reason::target_is_not_present};
-	if (&caster == &target)
+	if (caster == target)
 		Heal_failed{caster, target, Heal_failed::Reason::caster_is_target};
 
 	_pending_heals.emplace_back(&caster, &target);
@@ -460,7 +460,7 @@ void maf::Game::cast_investigate(Player::ID caster_id, Player::ID target_id)
 		throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_cannot_investigate};
 	if (!target.is_present())
 		throw Investigate_failed{caster, target, Investigate_failed::Reason::target_is_not_present};
-	if (&caster == &target)
+	if (caster == target)
 		throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_is_target};
 
 	_pending_investigations.emplace_back(&caster, &target);
