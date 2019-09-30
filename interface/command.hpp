@@ -9,7 +9,7 @@
 namespace maf {
    // Decide whether or not sequence `seq` of string-like objects matches the
    // array `arr` of commands, which is true exactly when `std::size(seq) == std::size(arr)`
-   // and at each position `i`, either `std::empty(arr[i])` or `seq[i] == arr[i]`.
+   // and at each position `i`, either `arr[i]` is the blank string or `seq[i] == arr[i]`.
    template <typename Seq, std::size_t N>
    bool commands_match(const Seq & seq, const std::string_view (&arr)[N]);
 
@@ -36,7 +36,7 @@ bool maf::commands_match(const Seq & seq, const std::string_view (&arr)[N])
 }
 
 template <typename Str, std::size_t N>
-bool maf::commands_match(const std::vector<Str> & v, const::std::string_view (&arr)[N])
+bool maf::commands_match(const std::vector<Str> & v, const std::string_view (&arr)[N])
 {
    auto eq = [](auto& s1, std::string_view s2) {
       return std::empty(s2) || s1 == s2;
