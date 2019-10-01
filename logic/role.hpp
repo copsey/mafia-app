@@ -1,7 +1,7 @@
 #ifndef MAFIA_LOGIC_ROLE
 #define MAFIA_LOGIC_ROLE
 
-#include "../riketi/box.hpp"
+#include <optional>
 
 namespace maf {
 	class Rulebook;
@@ -77,14 +77,16 @@ namespace maf {
 
 		/// The ability of the role, if it has one.
 		///
-		/// Undefined behaviour if the role has no ability.
-		Ability ability() const {
-			return _ability_box.get();
+		/// @throws `std::bad_optional_access` if the role has no ability.
+		Ability ability() const
+		{
+			return _ability_or_none.value();
 		}
 
 		/// Whether the role has an ability.
-		bool has_ability() const {
-			return _ability_box.is_full();
+		bool has_ability() const
+		{
+			return _ability_or_none.has_value();
 		}
 
 		/// The condition that the role needs to satisfy to win.
@@ -123,7 +125,7 @@ namespace maf {
 	private:
 		ID _id;
 		Alignment _alignment{Alignment::freelance};
-		rkt::box<Ability> _ability_box{};
+		std::optional<Ability> _ability_or_none{};
 		Win_condition _win_condition{Win_condition::survive};
 		Peace_condition _peace_condition{Peace_condition::always_peaceful};
 		bool _suspicious{false};
