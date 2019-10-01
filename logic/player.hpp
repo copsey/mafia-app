@@ -40,13 +40,13 @@ namespace maf {
 		}
 
 		// Get the player's win condition.
-	  // This is fully determined by their role.
-	  //
-	  // Note that the behaviour of this function is undefined if the player
-	  // has not been assigned a role yet.
-	  Win_condition win_condition() const {
-		  return _role_ptr->win_condition();
-	  }
+		// This is fully determined by their role.
+		//
+		// Note that the behaviour of this function is undefined if the player
+		// has not been assigned a role yet.
+		Win_condition win_condition() const {
+			return _role_ptr->win_condition();
+		}
 
 		// Get the player's peace condition.
 		// This is fully determined by their role.
