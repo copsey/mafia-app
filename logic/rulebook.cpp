@@ -1,5 +1,8 @@
 #include "rulebook.hpp"
 
+#include "role_ref.hpp"
+
+
 maf::Rulebook::Rulebook(Edition edition) : _edition{edition}
 {
 	if (edition != 1) throw Bad_edition{edition};
@@ -125,20 +128,8 @@ std::vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() 
 	return v;
 }
 
-bool maf::Rulebook::contains_role(Role::ID id) const {
-	for (auto & r: _roles) {
-		if (r.id() == id) return true;
-	}
-
-	return false;
-}
-
-bool maf::Rulebook::contains_role(std::string_view alias) const {
-	for (auto & r: _roles) {
-		if (r.alias() == alias) return true;
-	}
-
-	return false;
+bool maf::Rulebook::contains(RoleRef r_ref) const {
+	return r_ref.member_of(*this);
 }
 
 bool maf::Rulebook::contains_wildcard(Wildcard::ID id) const {
@@ -165,14 +156,6 @@ maf::Role & maf::Rulebook::get_role(Role::ID id) {
 	throw Missing_role_ID{id};
 }
 
-const maf::Role & maf::Rulebook::get_role(Role::ID id) const {
-	for (auto & r: _roles) {
-		if (r.id() == id) return r;
-	}
-
-	throw Missing_role_ID{id};
-}
-
 maf::Role & maf::Rulebook::get_role(std::string_view alias) {
 	for (auto & r: _roles) {
 		if (r.alias() == alias) return r;
@@ -181,12 +164,8 @@ maf::Role & maf::Rulebook::get_role(std::string_view alias) {
 	throw Missing_role_alias{std::string{alias}};
 }
 
-const maf::Role & maf::Rulebook::get_role(std::string_view alias) const {
-	for (auto & r: _roles) {
-		if (r.alias() == alias) return r;
-	}
-
-	throw Missing_role_alias{std::string{alias}};
+maf::Role const& maf::Rulebook::look_up(RoleRef r_ref) const {
+	return r_ref.resolve(*this);
 }
 
 maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) {
@@ -222,7 +201,7 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(std::string_view alias) const 
 }
 
 maf::Role & maf::Rulebook::new_role(Role::ID id) {
-	if (contains_role(id)) {
+	if (contains(id)) {
 		throw Preexisting_role_ID{id};
 	}
 

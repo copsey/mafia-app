@@ -11,6 +11,8 @@
 #include "wildcard.hpp"
 
 namespace maf {
+	class RoleRef;
+
 	struct Rulebook {
 		/// Edition of the rules.
 		///
@@ -125,11 +127,8 @@ namespace maf {
 		/// rulebook.
 		std::vector<rkt::ref<const Wildcard>> freelance_wildcards() const;
 
-		/// Whether the rulebook contains a role with the given ID.
-		bool contains_role(Role::ID id) const;
-
-		/// Whether the rulebook contains a role with the given alias.
-		bool contains_role(std::string_view alias) const;
+		/// Whether the rulebook contains a given role.
+		bool contains(RoleRef r_ref) const;
 
 		/// Whether the rulebook contains a wildcard with the given ID.
 		bool contains_wildcard(Wildcard::ID id) const;
@@ -142,20 +141,15 @@ namespace maf {
 		/// @throws `Missing_role_ID` if none could be found.
 		Role & get_role(Role::ID id);
 
-		/// Get the role with the given ID.
-		///
-		/// @throws `Missing_role_ID` if none could be found.
-		const Role & get_role(Role::ID id) const;
-
 		/// Get the role with the given alias.
 		///
 		// @throws `Missing_role_alias` if none could be found.
 		Role & get_role(std::string_view alias);
 
 		/// Get the role with the given alias.
-		///
-		// @throws `Missing_role_alias` if none could be found.
-		const Role & get_role(std::string_view alias) const;
+		/// 
+		/// Throw `std::out_of_range` if none could be found.
+		Role const& look_up(RoleRef r_ref) const;
 
 		/// Get the wildcard with the given ID.
 		///

@@ -21,8 +21,8 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
 
 	vector<Card> cards{};
 
-	for (Role::ID id : role_ids) {
-		cards.emplace_back(_rulebook.get_role(id), nullptr);
+	for (Role::ID r_id : role_ids) {
+		cards.emplace_back(_rulebook.look_up(r_id), nullptr);
 	}
 
 	for (Wildcard::ID id : wildcard_ids) {
@@ -48,6 +48,16 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
 const maf::Rulebook & maf::Game::rulebook() const
 {
 	return _rulebook;
+}
+
+bool maf::Game::contains(RoleRef r_ref) const
+{
+	return rulebook().contains(r_ref);
+}
+
+maf::Role const& maf::Game::look_up(RoleRef r_ref) const
+{
+	return rulebook().look_up(r_ref);
 }
 
 const vector<maf::Player> & maf::Game::players() const
@@ -298,7 +308,7 @@ void maf::Game::begin_night()
 void maf::Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id)
 {
 	Player& player = find_player(player_id);
-	const Role& fake_role = _rulebook.get_role(fake_role_id);
+	const Role& fake_role = _rulebook.look_up(fake_role_id);
 
 	if (game_has_ended())
 		throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};

@@ -3,6 +3,7 @@
 #include <map>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 #include "../riketi/algorithm.hpp"
 #include "../riketi/random.hpp"
@@ -50,8 +51,14 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 			}
 		}
 		else if (commands_match(commands, {"help", "r", ""})) {
-			const Role &r = active_rulebook().get_role(commands[2]);
-			store_help_screen(new Role_Info_Screen(r));
+			RoleRef r_ref = commands[2];
+
+			try {
+				auto& role = active_rulebook().look_up(r_ref);
+				store_help_screen(new Role_Info_Screen(role));
+			} catch (std::out_of_range) {
+				throw Rulebook::Missing_role_alias{std::string(commands[2])};
+			}
 		}
 		else if (commands_match(commands, {"list", "r"})) {
 			store_help_screen(new List_Roles_Screen(active_rulebook()));

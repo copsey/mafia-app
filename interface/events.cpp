@@ -390,11 +390,14 @@ void maf::Choose_fake_role::do_commands(const std::vector<std::string_view> & co
 		}
 	} else {
 		if (commands_match(commands, {"choose", ""})) {
-			auto & fake_role_alias = commands[1];
-			auto & fake_role = glog.game().rulebook().get_role(fake_role_alias);
+			RoleRef fake_role_ref = commands[1];
 
-			_fake_role = &fake_role;
-			glog.choose_fake_role(_player->id(), fake_role.id());
+			try {
+				auto & fake_role = glog.look_up(fake_role_ref);
+				glog.choose_fake_role(_player->id(), fake_role.id());
+			} catch (std::out_of_range) {
+				throw Rulebook::Missing_role_alias{std::string(commands[2])};
+			}
 		} else {
 			throw Bad_commands{};
 		}

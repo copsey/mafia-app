@@ -7,6 +7,7 @@
 #include "../riketi/ref.hpp"
 
 #include "wildcard.hpp"
+#include "role_ref.hpp"
 #include "rulebook.hpp"
 
 maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
@@ -47,7 +48,7 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 		std::vector<double> probabilities = _dist.probabilities();
 
 		for (std::size_t i{0}; i < _role_ids.size(); ++i) {
-			const Role & r = rulebook.get_role(_role_ids[i]);
+			auto& r = rulebook.look_up(_role_ids[i]);
 			if (r.alignment() != alignment) {
 				double p = probabilities[i];
 				if (p > 0.0) return false;
@@ -97,7 +98,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
 		return *role_refs[dist(rkt::random_engine)];
 	} else {
-		return rulebook.get_role(_role_ids[_dist(rkt::random_engine)]);
+		return rulebook.look_up(_role_ids[_dist(rkt::random_engine)]);
 	}
 }
 

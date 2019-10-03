@@ -38,6 +38,12 @@ namespace maf {
 		// The game being managed.
 		const Game & game() const;
 
+		// methods inherited from Game
+		//
+		bool contains(RoleRef r_ref) const;
+		Role const& look_up(RoleRef r_ref) const;
+		//
+
 		// The current event in the log.
 		// There will always be at least one event.
 		const Event & current_event() const {

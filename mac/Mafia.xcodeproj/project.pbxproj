@@ -23,6 +23,7 @@
 		F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */; };
 		F8A27DD31B887AA600A50614 /* role.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8A27DD21B887AA600A50614 /* role.cpp */; };
 		F8A4A9822275E84F0028057E /* styled_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D3F4B01B859F91007D134B /* styled_string.cpp */; };
+		F8BC030E234621A20009732C /* role_ref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8BC030D234621A20009732C /* role_ref.cpp */; };
 		F8C84C011AF7ED05007243BA /* Application.xib in Resources */ = {isa = PBXBuildFile; fileRef = F8C84C001AF7ED05007243BA /* Application.xib */; };
 		F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */; };
 		F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* events.cpp */; };
@@ -69,6 +70,8 @@
 		F8A27DD21B887AA600A50614 /* role.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = role.cpp; sourceTree = "<group>"; };
 		F8A431881B5113A700155991 /* char.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = char.hpp; sourceTree = "<group>"; };
 		F8AA931F1B4ECD1E00A66DD0 /* algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = algorithm.hpp; sourceTree = "<group>"; };
+		F8BC030C234621990009732C /* role_ref.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = role_ref.hpp; sourceTree = "<group>"; };
+		F8BC030D234621A20009732C /* role_ref.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = role_ref.cpp; sourceTree = "<group>"; };
 		F8C765E61B7F371F008BC683 /* container.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = container.hpp; sourceTree = "<group>"; };
 		F8C84C001AF7ED05007243BA /* Application.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Application.xib; sourceTree = "<group>"; };
 		F8C84C901AF4F80A00B40E54 /* InterfaceGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InterfaceGlue.h; sourceTree = "<group>"; };
@@ -176,6 +179,8 @@
 				F886CDEE1B87014200915D2D /* player.cpp */,
 				F84FE08A1AF3BB1A00BF4992 /* role.hpp */,
 				F8A27DD21B887AA600A50614 /* role.cpp */,
+				F8BC030C234621990009732C /* role_ref.hpp */,
+				F8BC030D234621A20009732C /* role_ref.cpp */,
 				F84FE08D1AF3BB1A00BF4992 /* rulebook.hpp */,
 				F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */,
 				F810404B1D49D9F9004E31CF /* time.hpp */,
@@ -280,6 +285,7 @@
 				F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */,
 				F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */,
 				F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */,
+				F8BC030E234621A20009732C /* role_ref.cpp in Sources */,
 				F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */,
 				F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */,
 				F84FE0971AF3BB1A00BF4992 /* random.cpp in Sources */,

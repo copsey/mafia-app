@@ -4,6 +4,7 @@
 #include "../riketi/ref.hpp"
 
 #include "player.hpp"
+#include "role_ref.hpp"
 #include "rulebook.hpp"
 
 namespace maf
@@ -286,6 +287,12 @@ namespace maf
 
 		// The rulebook being used to run the game.
 		const Rulebook & rulebook() const;
+
+		// methods inherited from Rulebook
+		//
+		bool contains(RoleRef r_ref) const;
+		Role const& look_up(RoleRef r_ref) const;
+		//
 
 		// The participating players, both present and not present.
 		const std::vector<Player> & players() const;

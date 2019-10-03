@@ -40,8 +40,16 @@ bool maf::Setup_screen::has_player(std::string_view name) const {
 }
 
 bool maf::Setup_screen::has_rolecard(std::string_view alias) const {
-	Role::ID id = _rulebook.get_role(alias).id();
-	return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
+	RoleRef r_ref = alias;
+
+	try {
+		auto& role = _rulebook.look_up(r_ref);
+		auto id = role.id();
+
+		return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
+	} catch (std::out_of_range) {
+		throw Rulebook::Missing_role_alias{std::string(alias)};
+	}
 }
 
 bool maf::Setup_screen::has_wildcard(std::string_view alias) const {
@@ -80,8 +88,14 @@ void maf::Setup_screen::add_player(std::string_view name) {
 }
 
 void maf::Setup_screen::add_rolecard(std::string_view alias) {
-	const Role &r = _rulebook.get_role(alias);
-	++_role_ids[r.id()];
+	RoleRef r_ref = alias;
+
+	try {
+		const Role &r = _rulebook.look_up(r_ref);
+		++_role_ids[r.id()];
+	} catch (std::out_of_range) {
+		throw Rulebook::Missing_role_alias{std::string(alias)};
+	}
 }
 
 void maf::Setup_screen::add_wildcard(std::string_view alias) {
@@ -102,11 +116,17 @@ void maf::Setup_screen::remove_player(std::string_view name) {
 }
 
 void maf::Setup_screen::remove_rolecard(std::string_view alias) {
-	const Role &r = _rulebook.get_role(alias);
-	if (_role_ids[r.id()] == 0) {
-		throw Rolecard_unselected{r};
-	} else {
-		--_role_ids[r.id()];
+	RoleRef r_ref = alias;
+
+	try {
+		auto& role = _rulebook.look_up(r_ref);
+		if (_role_ids[role.id()] == 0) {
+			throw Rolecard_unselected{role};
+		} else {
+			--_role_ids[role.id()];
+		}
+	} catch (std::out_of_range) {
+		throw Rulebook::Missing_role_alias{std::string(alias)};
 	}
 }
 
@@ -124,8 +144,14 @@ void maf::Setup_screen::clear_all_players() {
 }
 
 void maf::Setup_screen::clear_rolecards(std::string_view alias) {
-	const Role &r = _rulebook.get_role(alias);
-	_role_ids[r.id()] = 0;
+	RoleRef r_ref = alias;
+
+	try {
+		auto& role = _rulebook.look_up(r_ref);
+		_role_ids[role.id()] = 0;
+	} catch (std::out_of_range) {
+		throw Rulebook::Missing_role_alias{std::string(alias)};
+	}
 }
 
 void maf::Setup_screen::clear_all_rolecards() {

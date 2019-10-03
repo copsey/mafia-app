@@ -55,6 +55,16 @@ const maf::Game & maf::Game_log::game() const {
 	return _game;
 }
 
+bool maf::Game_log::contains(RoleRef r_ref) const
+{
+	return this->game().contains(r_ref);
+}
+
+maf::Role const& maf::Game_log::look_up(RoleRef r_ref) const
+{
+	return this->game().look_up(r_ref);
+}
+
 void maf::Game_log::advance() {
 	if (_log_index + 1 < _log.size()) {
 		++_log_index;
