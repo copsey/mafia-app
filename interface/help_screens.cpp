@@ -3,11 +3,16 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-void maf::Event_Help_Screen::write(std::ostream &os, TextParams& params) const {
+using std::ostream;
+using size = std::size_t;
+using std::vector;
+
+
+void maf::Event_Help_Screen::write(ostream &os, TextParams& params) const {
 	event->write_help(os, params);
 }
 
-void maf::Role_Info_Screen::write(std::ostream &os, TextParams& params) const {
+void maf::Role_Info_Screen::write(ostream &os, TextParams& params) const {
 	/* FIXME */
 
 	params["role"] = full_name(*role);
@@ -20,8 +25,8 @@ void maf::Role_Info_Screen::write(std::ostream &os, TextParams& params) const {
 //	os << "To leave this screen, enter ^cok^/.";
 }
 
-void maf::List_Roles_Screen::write(std::ostream &os, TextParams& params) const {
-	std::vector<rkt::ref<const Role>> filtered_roles{};
+void maf::List_Roles_Screen::write(ostream &os, TextParams& params) const {
+	vector<rkt::ref<const Role>> filtered_roles{};
 
 	switch (_filter_alignment) {
 		case Filter_Alignment::all:
@@ -69,7 +74,7 @@ void maf::List_Roles_Screen::write(std::ostream &os, TextParams& params) const {
 			break;
 	}
 
-	for (std::size_t i{0}; i < filtered_roles.size(); ++i) {
+	for (size i{0}; i < filtered_roles.size(); ++i) {
 		const Role & r = *filtered_roles[i];
 
 		os << "   the " << full_name(r) << ", alias " << "^c" << r.alias() << "^/";
@@ -118,11 +123,11 @@ void maf::List_Roles_Screen::write(std::ostream &os, TextParams& params) const {
 	os << "\n\nTo leave this screen, enter ^cok^/.";
 }
 
-void maf::Setup_Help_Screen::write(std::ostream &os, TextParams& params) const {
+void maf::Setup_Help_Screen::write(ostream &os, TextParams& params) const {
 	os << "^h^THelp: Setup^/The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.\n\nTo add a player called ^cname^/ to the next game, enter ^cadd p name^/. The player can be removed again by entering ^ctake p name^/. To remove all of the players that have been selected, enter ^cclear p^/.\n\nA single copy of the rolecard with alias ^cthat^/ can be added by entering ^cadd r that^/, and a single copy removed by entering ^ctake r that^/. You can remove all copies of the rolecard by entering ^cclear r that^/, and you can remove every rolecard that has been selected by entering ^cclear r^/.\n\nSimilar effects can be achieved for the wildcard with alias ^cthat^/ by using the commands ^cadd w that^/, ^ctake w that^/, ^cclear w that^/, and ^cclear w^/ respectively. In addition, every card that has been selected (both rolecards and wildcards) can be removed through the use of the command ^cclear c^/.\n\nTo clear absolutely everything (both players and cards), enter ^cclear^/.\n\nOnce you have finished choosing players and cards, you can enter ^cbegin^/ to start a new game. Alternatively, you can enter ^cpreset i^/ to start a particular preconfigured game, or just ^cpreset^/ to start a random preset. (note: at the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)\n\nYou can get extra information on the role with alias ^cthat^/ by entering ^chelp r that^/, and you can see a list of every role in the rulebook by entering ^clist r^/. To see a list of only the village roles, you can enter ^clist r v^/. Similarly, the command ^clist r m^/ will list the mafia roles, and the command ^clist r f^/ will list the freelance roles.\n\nThe commands ^chelp w that^/, ^clist w^/, ^clist w v^/, ^clist w m^/, and ^clist w f^/ have similar effects for wildcards.\n\nTo leave this screen, enter ^cok^/.";
 }
 
-void maf::Player_Info_Screen::write(std::ostream &os, TextParams& params) const {
+void maf::Player_Info_Screen::write(ostream &os, TextParams& params) const {
 	const Player & player = *_player_ref;
 	const Game & game = _game_log_ref->game();
 	const Game_log & game_log = *_game_log_ref;

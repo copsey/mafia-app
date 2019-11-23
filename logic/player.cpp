@@ -1,5 +1,8 @@
 #include "player.hpp"
 
+using std::vector;
+
+
 void maf::Player::assign_role(const Role & role) {
 	_role_ptr = &role;
 	_fake_role_ptr = nullptr;
@@ -47,7 +50,7 @@ void maf::Player::refresh() {
 	_on_drugs = false;
 }
 
-const std::vector<maf::Ability> & maf::Player::compulsory_abilities() const {
+const vector<maf::Ability> & maf::Player::compulsory_abilities() const {
 	return _compulsory_abilities;
 }
 

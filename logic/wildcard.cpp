@@ -10,6 +10,10 @@
 #include "role_ref.hpp"
 #include "rulebook.hpp"
 
+using size = std::size_t;
+using std::vector;
+
+
 maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 	_id{id},
 	_role_ids{rkt::key_begin(weights), rkt::key_end(weights)},
@@ -45,9 +49,9 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 		return std::none_of(rulebook.roles_begin(), rulebook.roles_end(), wrong_alignment);
 	} else {
-		std::vector<double> probabilities = _dist.probabilities();
+		vector<double> probabilities = _dist.probabilities();
 
-		for (std::size_t i{0}; i < _role_ids.size(); ++i) {
+		for (size i{0}; i < _role_ids.size(); ++i) {
 			auto& r = rulebook.look_up(_role_ids[i]);
 			if (r.alignment() != alignment) {
 				double p = probabilities[i];
@@ -61,8 +65,8 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 	if (uses_evaluator()) {
-		std::vector<rkt::ref<const Role>> role_refs{};
-		std::vector<double> weights{};
+		vector<rkt::ref<const Role>> role_refs{};
+		vector<double> weights{};
 
 		auto evaluate_role = [&](const Role & role) {
 			double w = _evaluator(role);
@@ -95,7 +99,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 			throw std::logic_error{err.str()};
 		}
 
-		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
+		std::discrete_distribution<size> dist{weights.begin(), weights.end()};
 		return *role_refs[dist(rkt::random_engine)];
 	} else {
 		return rulebook.look_up(_role_ids[_dist(rkt::random_engine)]);

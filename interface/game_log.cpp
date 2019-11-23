@@ -5,9 +5,13 @@
 
 #include "game_log.hpp"
 
-maf::Game_log::Game_log(const std::vector<std::string> &player_names,
-                        const std::vector<Role::ID> &role_ids,
-                        const std::vector<Wildcard::ID> &wildcard_ids,
+using std::string;
+using std::string_view;
+using std::vector;
+
+maf::Game_log::Game_log(const vector<string> &player_names,
+                        const vector<Role::ID> &role_ids,
+                        const vector<Wildcard::ID> &wildcard_ids,
                         const Rulebook &rulebook)
 : _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names}
 {
@@ -29,7 +33,7 @@ maf::Game_log::Game_log(const std::vector<std::string> &player_names,
 	_game.begin_night();
 	store_event(new Time_changed{*this, 0, Time::night});
 
-	std::vector<Event *> new_events{};
+	vector<Event *> new_events{};
 
 	if (_game.num_players_left(Alignment::mafia) > 0) {
 		new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), true});
@@ -73,7 +77,7 @@ void maf::Game_log::advance() {
 	}
 }
 
-void maf::Game_log::do_commands(const std::vector<std::string_view> & commands) {
+void maf::Game_log::do_commands(const vector<string_view> & commands) {
 	_log[_log_index]->do_commands(commands);
 }
 
@@ -96,21 +100,21 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
 	throw Game::Player_not_found{id};
 }
 
-const maf::Player & maf::Game_log::find_player(std::string_view name) const {
+const maf::Player & maf::Game_log::find_player(string_view name) const {
 	for (Player::ID i = 0; i < _player_names.size(); ++i) {
 		if (rkt::equal_up_to_case(name, _player_names[i])) {
 			return _game.players()[i];
 		}
 	}
 
-	throw Player_not_found{std::string{name}};
+	throw Player_not_found{string{name}};
 }
 
-std::string_view maf::Game_log::get_name(const maf::Player & player) const {
+string_view maf::Game_log::get_name(const maf::Player & player) const {
 	return get_name(player.id());
 }
 
-std::string_view maf::Game_log::get_name(Player::ID id) const {
+string_view maf::Game_log::get_name(Player::ID id) const {
 	return _player_names[id];
 }
 
@@ -170,7 +174,7 @@ void maf::Game_log::begin_night() {
 	_game.begin_night();
 	log_time_changed();
 
-	std::vector<Event *> new_events{};
+	vector<Event *> new_events{};
 
 	if (_game.mafia_can_use_kill()) {
 		new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), false});
@@ -277,7 +281,7 @@ void maf::Game_log::log_time_changed() {
 }
 
 void maf::Game_log::log_obituary(Date date) {
-	std::vector<rkt::ref<const Player>> deaths{};
+	vector<rkt::ref<const Player>> deaths{};
 	for (const Player &p: _game.players()) {
 		if (p.is_dead() && p.time_of_death() == Time::night && p.date_of_death() == date) {
 			deaths.emplace_back(p);

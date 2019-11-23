@@ -3,6 +3,9 @@
 
 #include "../interface/console.hpp"
 
+using std::string;
+
+
 void print_output(const maf::Console & console) {
    for (auto & styled_string: console.output()) {
       switch(styled_string.style) {
@@ -46,7 +49,7 @@ int main() {
    for (bool quit = false; !quit; ) {
       std::cout << ">> ";
 
-      std::string input;
+      string input;
       std::getline(std::cin, input);
 
       std::cout << '\n';

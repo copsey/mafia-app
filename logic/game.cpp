@@ -4,7 +4,9 @@
 
 #include "game.hpp"
 
+using std::map;
 using std::pair;
+using size = std::size_t;
 using std::vector;
 
 using rkt::any_of;
@@ -85,12 +87,12 @@ vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment align
 	return vec;
 }
 
-std::size_t maf::Game::num_players_left() const
+size maf::Game::num_players_left() const
 {
 	return rkt::count_if(_players, std::mem_fn(&Player::is_present));
 }
 
-std::size_t maf::Game::num_players_left(Alignment alignment) const
+size maf::Game::num_players_left(Alignment alignment) const
 {
 	auto pred = [alignment](Player const& pl) {
 		return pl.is_present() && pl.alignment() == alignment;
@@ -136,8 +138,8 @@ void maf::Game::kick_player(Player::ID id)
 
 const maf::Player* maf::Game::next_lynch_victim() const
 {
-	std::map<const Player*, std::size_t> votes_per_player{};
-	std::size_t total_votes = 0;
+	map<const Player*, size> votes_per_player{};
+	size total_votes = 0;
 
 	for (const Player& voter : _players) {
 		if (voter.is_present() && voter.has_lynch_vote()) {
@@ -146,7 +148,7 @@ const maf::Player* maf::Game::next_lynch_victim() const
 		}
 	}
 
-	auto less_votes = [](const pair<const Player*, std::size_t>& p1, const pair<const Player*, std::size_t>& p2) {
+	auto less_votes = [](const pair<const Player*, size>& p1, const pair<const Player*, size>& p2) {
 		return p1.second < p2.second;
 	};
 
@@ -649,9 +651,9 @@ bool maf::Game::try_to_end()
 {
 	if (_has_ended) return true;
 
-	std::size_t num_players_left = 0;
-	std::size_t num_village_left = 0;
-	std::size_t num_mafia_left = 0;
+	size num_players_left = 0;
+	size num_village_left = 0;
+	size num_mafia_left = 0;
 
 	bool check_for_village_eliminated = false;
 	bool check_for_mafia_eliminated = false;

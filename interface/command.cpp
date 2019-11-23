@@ -1,11 +1,15 @@
 #include "command.hpp"
 
-std::vector<std::string_view> maf::parse_input(std::string_view str) {
-	std::vector<std::string_view> v = {};
+using std::string_view;
+using std::vector;
+
+vector<string_view> maf::parse_input(string_view str) {
+	vector<string_view> v = {};
 
 	{
-		auto i = str.data(), j = i;
-		auto end = str.data() + str.size();
+		      auto i   = str.data();
+		      auto j   = i;
+		const auto end = str.data() + str.size();
 
 		for ( ; j != end; ) {
 			if (*j == ' ' || *j == '\t') {

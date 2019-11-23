@@ -2,7 +2,11 @@
 #include "console.hpp"
 #include "questions.hpp"
 
-bool maf::Confirm_end_game::do_commands(const std::vector<std::string_view> & commands) {
+using std::ostream;
+using std::string_view;
+using std::vector;
+
+bool maf::Confirm_end_game::do_commands(const vector<string_view> & commands) {
 	if (commands_match(commands, {"yes"})) {
 		_console_ref->end_game();
 		return true;
@@ -15,11 +19,11 @@ bool maf::Confirm_end_game::do_commands(const std::vector<std::string_view> & co
 	}
 }
 
-void maf::Confirm_end_game::write(std::ostream &os) const {
+void maf::Confirm_end_game::write(ostream &os) const {
 	os << "^TEnd Game?^/You are about to end the current game.\nAre you sure that you want to do this? (^cyes^/ or ^cno^/)";
 }
 
-// bool maf::Confirm_mafia_kill_skip::do_commands(const std::vector<std::string> &commands, Console &console) {
+// bool maf::Confirm_mafia_kill_skip::do_commands(const vector<string_view> &commands, Console &console) {
 // 	if (commands_match(commands, {"yes"})) {
 // 		console.g
 // 		return true;
@@ -32,6 +36,6 @@ void maf::Confirm_end_game::write(std::ostream &os) const {
 // 	}
 // }
 
-// void maf::Confirm_mafia_kill_skip::write(std::ostream &os) const {
+// void maf::Confirm_mafia_kill_skip::write(ostream &os) const {
 // 	os << "^TSkip?^/You are about to skip the mafia's nightly kill.\nAre you sure that you want to do this? (^cyes^/ or ^cno^/)";
 // }
