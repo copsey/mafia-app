@@ -1,17 +1,14 @@
 #include <algorithm>
 #include <sstream>
-#include <stdexcept>
 
 #include "../riketi/map.hpp"
 #include "../riketi/random.hpp"
 #include "../riketi/ref.hpp"
 
+#include "../common/stdlib.h"
 #include "wildcard.hpp"
 #include "role_ref.hpp"
 #include "rulebook.hpp"
-
-using size = std::size_t;
-using std::vector;
 
 
 maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
@@ -26,14 +23,14 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with a negative role weight.";
 
-		throw std::invalid_argument{err.str()};
+		throw invalid_argument{err.str()};
 	}
 
 	if (std::all_of(rkt::item_begin(weights), rkt::item_end(weights), is_zero)) {
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with every role weight set to zero.";
 
-		throw std::invalid_argument{err.str()};
+		throw invalid_argument{err.str()};
 	}
 }
 

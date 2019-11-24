@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
 
+#include "../common/stdlib.h"
 #include "../interface/console.hpp"
-
-using std::string;
 
 
 void print_output(const maf::Console & console) {

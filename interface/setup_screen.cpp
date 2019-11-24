@@ -1,17 +1,11 @@
 #include "../riketi/algorithm.hpp"
 #include "../riketi/string.hpp"
 
+#include "../common/stdlib.h"
 #include "command.hpp"
 #include "console.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"
-
-
-using std::ostream;
-using size = std::size_t;
-using std::string;
-using std::string_view;
-using std::vector;
 
 
 const maf::Rulebook & maf::Setup_screen::rulebook() const {

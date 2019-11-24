@@ -1,7 +1,5 @@
 #include "command.hpp"
-
-using std::string_view;
-using std::vector;
+#include "../common/stdlib.h"
 
 vector<string_view> maf::parse_input(string_view str) {
 	vector<string_view> v = {};

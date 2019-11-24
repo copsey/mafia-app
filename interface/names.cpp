@@ -1,6 +1,6 @@
+#include "../common/stdlib.h"
 #include "names.hpp"
 
-using std::string;
 
 string maf::full_name(const Role &r) {
 	return full_name(r.id());

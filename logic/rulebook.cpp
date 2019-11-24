@@ -1,10 +1,6 @@
+#include "../common/stdlib.h"
 #include "role_ref.hpp"
 #include "rulebook.hpp"
-
-using std::map;
-using std::string;
-using std::string_view;
-using std::vector;
 
 
 maf::Rulebook::Rulebook(Edition edition) : _edition{edition}

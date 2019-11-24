@@ -1,11 +1,8 @@
 #include "../riketi/algorithm.hpp"
 
+#include "../common/stdlib.h"
 #include "help_screens.hpp"
 #include "names.hpp"
-
-using std::ostream;
-using size = std::size_t;
-using std::vector;
 
 
 void maf::Event_Help_Screen::write(ostream &os, TextParams& params) const {

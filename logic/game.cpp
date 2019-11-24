@@ -2,17 +2,14 @@
 #include "../riketi/random.hpp"
 #include "../riketi/ref.hpp"
 
+#include "../common/stdlib.h"
 #include "game.hpp"
-
-using std::map;
-using std::pair;
-using size = std::size_t;
-using std::vector;
 
 using rkt::any_of;
 using rkt::none_of;
 
 using WC = maf::Win_condition;
+
 
 maf::Game::Game(const vector<Role::ID> & role_ids,
                 const vector<Wildcard::ID> & wildcard_ids,

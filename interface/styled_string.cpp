@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "../common/stdlib.h"
 #include "styled_string.hpp"
 
 using std::invalid_argument;
-using std::string;
-using std::string_view;
+
 
 string maf::escape_tags(string_view str)
 {

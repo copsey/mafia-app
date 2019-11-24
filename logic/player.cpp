@@ -1,6 +1,5 @@
+#include "../common/stdlib.h"
 #include "player.hpp"
-
-using std::vector;
 
 
 void maf::Player::assign_role(const Role & role) {

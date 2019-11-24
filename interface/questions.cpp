@@ -1,10 +1,8 @@
+#include "../common/stdlib.h"
 #include "command.hpp"
 #include "console.hpp"
 #include "questions.hpp"
 
-using std::ostream;
-using std::string_view;
-using std::vector;
 
 bool maf::Confirm_end_game::do_commands(const vector<string_view> & commands) {
 	if (commands_match(commands, {"yes"})) {

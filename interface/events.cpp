@@ -2,11 +2,7 @@
 #include "console.hpp"
 #include "events.hpp"
 #include "names.hpp"
-
-using std::ostream;
-using std::string;
-using std::string_view;
-using std::vector;
+#include "../common/stdlib.h"
 
 void maf::Event::write_summary(ostream &os) const
 {

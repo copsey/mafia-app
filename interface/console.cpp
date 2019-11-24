@@ -1,6 +1,5 @@
 #include <ctime>
 #include <fstream>
-#include <map>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -12,11 +11,7 @@
 #include "command.hpp"
 #include "console.hpp"
 #include "names.hpp"
-
-using std::map;
-using std::string;
-using std::string_view;
-using std::vector;
+#include "../common/stdlib.h"
 
 const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
 	maf::Console::Game_parameters{

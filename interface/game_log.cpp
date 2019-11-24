@@ -4,10 +4,7 @@
 #include "../riketi/string.hpp"
 
 #include "game_log.hpp"
-
-using std::string;
-using std::string_view;
-using std::vector;
+#include "../common/stdlib.h"
 
 maf::Game_log::Game_log(const vector<string> &player_names,
                         const vector<Role::ID> &role_ids,
