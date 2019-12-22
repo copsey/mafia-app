@@ -235,7 +235,7 @@
 		F84FE0541AF3B9DF00BF4992 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Ponderous Programs";
 				TargetAttributes = {
 					F84FE05B1AF3B9DF00BF4992 = {
@@ -400,6 +400,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Mafia/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
@@ -412,6 +413,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Mafia/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;

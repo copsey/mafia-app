@@ -141,7 +141,7 @@
 
 + (NSDictionary *)gameItalicStyleAttributes {
    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-   paragraphStyle.alignment = NSCenterTextAlignment;
+   paragraphStyle.alignment = NSTextAlignmentCenter;
    return @{NSFontAttributeName: [NSFont fontWithName:@"Times New Roman Italic" size:14],
             NSParagraphStyleAttributeName: paragraphStyle};
 }

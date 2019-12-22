@@ -50,7 +50,7 @@
    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
 
    // Whether or not music should be played is determined.
-   self.togglePlaysMusicButton.state = ([preferences boolForKey:@"playsMusic"]) ? NSOnState : NSOffState;
+   self.togglePlaysMusicButton.state = ([preferences boolForKey:@"playsMusic"]) ? NSControlStateValueOn : NSControlStateValueOff;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -92,7 +92,7 @@
 }
 
 - (void)togglePlaysMusic:(id)sender {
-   BOOL playsMusic = ([sender state] == NSOnState);
+   BOOL playsMusic = ([sender state] == NSControlStateValueOn);
    [[NSUserDefaults standardUserDefaults] setBool:playsMusic forKey:@"playsMusic"];
    [self setPlaysMusic:playsMusic];
 }
