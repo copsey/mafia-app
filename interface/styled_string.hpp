@@ -25,7 +25,7 @@ namespace maf {
 			italic,  // Italic modifier on current style. Used for descriptive text.
 			command, // Commands that can be inputted into the console.
 			title    // Title of section. A maximum of one title can occur
-						// per message, as the first item.
+			         // per message, as the first item.
 		};
 
 		std::string string{};
