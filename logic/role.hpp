@@ -2,6 +2,7 @@
 #define MAFIA_LOGIC_ROLE
 
 #include <optional>
+#include <string_view>
 
 namespace maf {
 	class Rulebook;
@@ -66,9 +67,8 @@ namespace maf {
 		}
 
 		/// The alias of the role.
-		///
-		/// Note that this is fully determined by its ID.
-		const char * alias() const;
+		/// Equivalent to `alias(this->id())`.
+		std::string_view alias() const;
 
 		/// The alignment of the role.
 		Alignment alignment() const {
@@ -137,7 +137,7 @@ namespace maf {
 	};
 
 	/// The alias corresponding to the given role ID.
-	const char * alias(Role::ID id);
+	std::string_view alias(Role::ID id);
 }
 
 #endif
