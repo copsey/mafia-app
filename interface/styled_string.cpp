@@ -19,62 +19,89 @@ string maf::escape_tags(string_view str)
 	return esc_str;
 }
 
-maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const& params)
+std::string maf::substitute_params(std::string_view str_with_params, TextParams const& params)
 {
-	string tagged_str = "";
+	using iterator_type = std::string_view::const_iterator;
+	
+	std::string str;
+	
+	iterator_type begin = str_with_params.begin();
+	iterator_type end = str_with_params.end();
+	
+	for (iterator_type i = begin, j; ; ) {
+		// Find the next parameter to be substituted.
+		// Stop when there are no more parameters in the string.
+		
+		j = std::find(i, end, '{');
+		str.append(i, j);
+		if (j == end) return str;
+		
+		// e.g.
+		//         i            j
+		//         |            |
+		// "{lorem} ipsum dolor {sit} amet ..."
+		
+		// Find the range between the two curly brackets, '{' and '}'.
+		// It's an error if the closing bracket '}' is missing.
+		
+		i = j + 1;
+		j = std::find(i, end, '}');
+		if (j == end) {
+			std::string err_msg = "Too many '{' chars in the following string:\n";
+			err_msg.append(str_with_params);
+			throw invalid_argument(err_msg);
+		}
+		
+		// e.g.
+		//                       i  j
+		//                       |  |
+		// "{lorem} ipsum dolor {sit} amet ..."
+		
+		// Check that the parameter name in the range {i,j} is valid.
+		
+		if (!is_param_name(i, j)) {
+			std::string err_msg = "Invalid parameter name \"";
+			err_msg.append(i, j);
+			err_msg.append("\" in the following string:\n");
+			err_msg.append(str_with_params);
+			throw invalid_argument(err_msg);
+		}
+		
+		// Look up the parameter name in the dictionary.
+		// It's an error if the parameter is missing.
+		
+		std::string key{i, j};
+		auto val_iter = params.find(key);
+		
+		if (val_iter == params.end()) {
+			string err_msg = "Unrecognised parameter name \"";
+			err_msg.append(key);
+			err_msg.append("\" in the following string:\n");
+			err_msg.append(str_with_params);
+			throw invalid_argument(err_msg);
+		}
+		
+		// Append the parameter's value to the string,
+		// and prepare for the next loop iteration.
+		
+		std::string_view val = (*val_iter).second;
+		str.append(escape_tags(val));
+		
+		i = j + 1;
+	}
+}
+
+maf::Styled_text maf::styled_text_from(string_view str_with_params_and_tags, TextParams const& params)
+{
 	string str = "";
 	Styled_text text = {};
 
 	Styled_string::Style style_stack[8] = {Styled_string::Style::game};
 	auto style_i = std::begin(style_stack);
 	
-	for (auto i = paramed_str.begin(), j = i, end = paramed_str.end(); i != end; ) {
-		j = std::find(j, end, '{');
-		tagged_str.append(i,j);
-		
-		if (j != end) {
-			++j;
-			auto k = std::find(j, end, '}');
-			
-			if (k == end) {
-				string err_msg = "Too many '{' chars in the following tagged string:\n";
-				err_msg.append(paramed_str);
-				
-				throw invalid_argument(err_msg);
-			}
-			
-			auto key = string(j,k);
-			
-			if (!is_param_name(key)) {
-				string err_msg = "Invalid parameter name \"";
-				err_msg.append(key);
-				err_msg.append("\" in the following tagged string:\n");
-				err_msg.append(paramed_str);
-				
-				throw invalid_argument(err_msg);
-			}
-			
-			auto val_it = params.find(key);
-			
-			if (val_it == params.end()) {
-				string err_msg = "Unrecognised parameter with name \"";
-				err_msg.append(key);
-				err_msg.append("\" in the following tagged string:\n");
-				err_msg.append(paramed_str);
-				
-				throw invalid_argument(err_msg);
-			}
+	auto str_with_tags = substitute_params(str_with_params_and_tags, params);
 
-		 auto& val = (*val_it).second;
-			tagged_str.append(escape_tags(val));
-			
-			j = k + 1;
-		}
-		
-		i = j;
-	}
-
-	for (auto i = tagged_str.begin(), j = i, end = tagged_str.end(); i != end; ) {
+	for (auto i = str_with_tags.begin(), j = i, end = str_with_tags.end(); i != end; ) {
 		j = std::find(j, end, '^');
 		
 		if (j == end) {
@@ -92,7 +119,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
 
 			if (j == end) {
 				string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
-				err_msg.append(paramed_str);
+				err_msg.append(str_with_params_and_tags);
 
 				throw invalid_argument(err_msg);
 			}
@@ -164,7 +191,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
 						string err_msg = "The tag ^";
 						err_msg += ch;
 						err_msg.append(" is invalid, and appears in the following tagged string:\n");
-						err_msg.append(paramed_str);
+						err_msg.append(str_with_params_and_tags);
 
 						throw invalid_argument(err_msg);
 					}
@@ -183,7 +210,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
 
 						if (style_i == std::end(style_stack)) {
 							string err_msg = "Attempted to push too many style tags onto the stack, in the following tagged string:\n";
-							err_msg.append(paramed_str);
+							err_msg.append(str_with_params_and_tags);
 
 							throw invalid_argument(err_msg);
 						} else {
@@ -203,7 +230,7 @@ maf::Styled_text maf::styled_text_from(string_view paramed_str, TextParams const
 
 					if (style_i == std::begin(style_stack)) {
 						string err_msg = "Attempted to pop too many style tags from the stack, in the following tagged string:\n";
-						err_msg.append(paramed_str);
+						err_msg.append(str_with_params_and_tags);
 
 						throw invalid_argument(err_msg);
 					} else {

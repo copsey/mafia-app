@@ -102,6 +102,17 @@ namespace maf {
 	// will be transformed to:
 	//     "This is my TAGGED STRING."
 
+	/// Find all strings of the form "{name}" in `str_with_params`, and replace them
+	/// with the corresponding value `params["name"]`.
+	///
+	/// @throws `std::invalid_argument` if an invalid parameter name is encountered.
+	/// (See `is_param_name` for more information.)
+	/// @throws `std::invalid_argument` for any parameter names that cannot be
+	/// found in `params`.
+	/// @throws `std::invalid_argument` if there are more opening braces "{"
+	/// than closing braces "}" in `str_with_params`.
+	std::string substitute_params(std::string_view str_with_params, TextParams const& params);
+
 	// Convert a tagged string into styled text, using `params` as a dictionary of
 	// text replacements.
 	Styled_text styled_text_from(std::string_view tagged_str,
