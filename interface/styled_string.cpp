@@ -49,12 +49,12 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		// "Nulla ^{sit^} amet ..."
 		
 		// If the brace is preceded by a caret '^', treat it as an escaped character:
-		// append the substring "^{" or "^}" and go to the next loop iteration.
+		// append the brace '{' or '}' and go to the next loop iteration.
 		
 		if (j != begin) {
 			char prev_ch = *(j - 1);
 			if (prev_ch == '^') {
-				str += {'^', *j};
+				str += *j;
 				i = j + 1;
 				continue;
 			}
