@@ -22,27 +22,55 @@ string maf::escape_tags(string_view str)
 std::string maf::substitute_params(std::string_view str_with_params, TextParams const& params)
 {
 	using iterator_type = std::string_view::const_iterator;
+	auto is_brace = [](char ch) { return ch == '{' || ch == '}'; };
 	
 	std::string str;
+	str.reserve(str_with_params.size()); // new string will have (roughly) same length as old string
 	
 	iterator_type begin = str_with_params.begin();
 	iterator_type end = str_with_params.end();
 	
 	for (iterator_type i = begin, j; ; ) {
-		// Find the next parameter to be substituted.
-		// Stop when there are no more parameters in the string.
+		// Find the next brace, either '{' or '}'.
+		// Stop when there are no more braces in the string.
 		
-		j = std::find(i, end, '{');
+		j = std::find_if(i, end, is_brace);
 		str.append(i, j);
 		if (j == end) return str;
 		
-		// e.g.
+		// e.g. 1
 		//         i            j
 		//         |            |
 		// "{lorem} ipsum dolor {sit} amet ..."
 		
-		// Find the range between the two curly brackets, '{' and '}'.
-		// It's an error if the closing bracket '}' is missing.
+		// e.g. 2
+		//          i   j
+		//          |   |
+		// "Nulla ^{sit^} amet ..."
+		
+		// If the brace is preceded by a caret '^', treat it as an escaped character:
+		// append the substring "^{" or "^}" and go to the next loop iteration.
+		
+		if (j != begin) {
+			char prev_ch = *(j - 1);
+			if (prev_ch == '^') {
+				str += {'^', *j};
+				i = j + 1;
+				continue;
+			}
+		}
+		
+		// Otherwise, check the type of brace identified. We're trying to form a
+		// parameter name here, so a closing brace '}' counts as an error.
+		
+		if (*j == '}') {
+			std::string err_msg = "Too many '}' chars in the following string:\n";
+			err_msg.append(str_with_params);
+			throw invalid_argument(err_msg);
+		}
+		
+		// Find the range between the two braces, '{' and '}'.
+		// It's an error if the closing brace '}' is missing.
 		
 		i = j + 1;
 		j = std::find(i, end, '}');

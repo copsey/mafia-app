@@ -88,29 +88,32 @@ namespace maf {
 	//    ^T = title
 	// ^/ closes the current tag, so that what follows uses the previous tag.
 	// (Note that the maximum-supported tag depth is 9, including the default.)
-	// ^^ prints a single '^' character. The appearance of any other two-
-	// character substring of the form ^x results in an exception.
+	//
+	// ^^ prints a single '^' character. Similarly, ^{ prints a single '{' character,
+	// and ^} prints a single '}' character.
+	//
+	// The appearance of any other two-character substring of the form ^x results in
+	// an exception.
+	//
 	// Note that the default string style is Style::game, and hence game-styled
 	// strings need not be prepended with ^g.
-	// 
-	// This method also supports an optional dictionary of strings, called "params".
-	// Each param uses the syntax "{exampleParam}", and is replaced by the value
-	// from `params` when the styled text is generated.
-	// 
-	// For example, if `params == { {"word1", "TAGGED"}, {"word2", "STRING"} }`, then
-	//     "This is my {word1} {word2}."
-	// will be transformed to:
-	//     "This is my TAGGED STRING."
 
-	/// Find all strings of the form "{name}" in `str_with_params`, and replace them
-	/// with the corresponding value `params["name"]`.
+	/// Find all strings of the form "{substitute}" in `str_with_params`, and replace them
+	/// with the corresponding value from `params`.
+	///
+	/// Braces preceded by carets "^" are considered escaped and are ignored.
+	///
+	/// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`, then
+	///     "This is my {word1} {word2} with ^{braces^}."
+	/// will be transformed into
+	///     "This is my NEW STRING with ^{braces^}."
 	///
 	/// @throws `std::invalid_argument` if an invalid parameter name is encountered.
 	/// (See `is_param_name` for more information.)
 	/// @throws `std::invalid_argument` for any parameter names that cannot be
 	/// found in `params`.
-	/// @throws `std::invalid_argument` if there are more opening braces "{"
-	/// than closing braces "}" in `str_with_params`.
+	/// @throws `std::invalid_argument` if there are different numbers of (unescaped)
+	/// opening braces "{" and closing braces "}".
 	std::string substitute_params(std::string_view str_with_params, TextParams const& params);
 
 	// Convert a tagged string into styled text, using `params` as a dictionary of
