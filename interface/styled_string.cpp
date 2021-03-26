@@ -32,6 +32,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 	
 	for (iterator_type i = begin, j; ; ) {
 		// Find the next brace, either '{' or '}'.
+		// Append all of the text up to (but excluding) the brace.
 		// Stop when there are no more braces in the string.
 		
 		j = std::find_if(i, end, is_brace);
@@ -48,16 +49,13 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		//          |   |
 		// "Nulla ^{sit^} amet ..."
 		
-		// If the brace is preceded by a caret '^', treat it as an escaped character:
-		// append the brace '{' or '}' and go to the next loop iteration.
+		// If the brace is preceded by a caret '^',
+		// append the brace and go to the next loop iteration.
 		
-		if (j != begin) {
-			char prev_ch = *(j - 1);
-			if (prev_ch == '^') {
-				str += *j;
-				i = j + 1;
-				continue;
-			}
+		if (j != begin && *(j - 1) == '^') {
+			str += *j;
+			i = j + 1;
+			continue;
 		}
 		
 		// Otherwise, check the type of brace identified. We're trying to form a
@@ -119,161 +117,123 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 	}
 }
 
-maf::Styled_text maf::styled_text_from(string_view str_with_params_and_tags, TextParams const& params)
+maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 {
-	string str = "";
-	Styled_text text = {};
-
-	Styled_string::Style style_stack[8] = {Styled_string::Style::game};
-	auto style_i = std::begin(style_stack);
+	using iterator_type = std::string_view::const_iterator;
 	
-	auto str_with_tags = substitute_params(str_with_params_and_tags, params);
+	string str;
+	Styled_text text;
+	Styled_string::Style style_stack[9] = {Styled_string::Style::game};
+	auto style_iter = std::begin(style_stack);
+	
+	iterator_type begin = str_with_tags.begin();
+	iterator_type end = str_with_tags.end();
 
-	for (auto i = str_with_tags.begin(), j = i, end = str_with_tags.end(); i != end; ) {
-		j = std::find(j, end, '^');
+	for (iterator_type i = begin, j; ; ) {
+		// Find the next caret '^'.
+		// Copy all of the text up to (but excluding) the caret.
+		// Stop when there are no more carets in the input.
 		
+		j = std::find(i, end, '^');
+		str.append(i, j);
 		if (j == end) {
-			str.append(i, j);
-
-			i = j;
+			if (!str.empty()) text.emplace_back(str, *style_iter);
+			return text;
 		}
-		else {
-			// e.g.
-			//      i                  j
-			//      |                  |
-			// ...^^ some example text ^cand so on...
+		
+		// e.g.
+		//      i                  j
+		//      |                  |
+		// ...^^ some example text ^cand so on...
+		
+		// Check there's a character after the caret.
+		// It's an error if there are no more characters.
+		
+		i = j + 1;
+		if (i == end) {
+			string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
+			err_msg.append(str_with_tags);
+			throw invalid_argument(err_msg);
+		}
+		
+		// e.g.
+		//                         ji
+		//                         ||
+		// ...^^ some example text ^cand so on...
 
-			++j;
+		auto new_style = Styled_string::Style::game;
+		bool push_style = false;
+		bool pop_style = false;
 
-			if (j == end) {
-				string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
-				err_msg.append(str_with_params_and_tags);
+		switch (auto ch = *i) {
+			case 'g':
+			case 'h':
+			case 'i':
+			case 'c':
+			case 'T':
+				push_style = true;
+				new_style = get_style(ch);
+				break;
 
-				throw invalid_argument(err_msg);
-			}
-			else {
-				// e.g.
-				//      i                   j
-				//      |                   |
-				// ...^^ some example text ^cand so on...
+			case '/':
+				pop_style = true;
+				break;
 
-				auto new_style = Styled_string::Style::game;
-				bool push_style = false;
-				bool pop_style = false;
+			// Replace "^^" with "^" in the output.
+			// Likewise for "^{" -> "{" and "^}" -> "}".
+			case '^':
+			case '{':
+			case '}':
+				str += ch;
+				break;
 
-				switch (auto ch = *j) {
-					case 'g':
-						push_style = true;
-						new_style = Styled_string::Style::game;
-						break;
-
-					case 'h':
-						push_style = true;
-						new_style = Styled_string::Style::help;
-						break;
-
-					case 'i':
-						push_style = true;
-						new_style = Styled_string::Style::italic;
-						break;
-
-					case 'c':
-						push_style = true;
-						new_style = Styled_string::Style::command;
-						break;
-
-					case 'T':
-						push_style = true;
-						new_style = Styled_string::Style::title;
-						break;
-
-					case '/':
-						pop_style = true;
-						break;
-
-					// replace "^^" with "^" in output
-					case '^': {
-						str.append(i, j-1);
-						str += '^';
-						i = ++j;
-						break;
-					}
-					
-					// replace "^{" with "{" in output
-					case '{': {
-						str.append(i, j-1);
-						str += '{';
-						i = ++j;
-						break;
-					}
-					
-					// replace "^}" with "}" in output
-					case '}': {
-						str.append(i, j-1);
-						str += '}';
-						i = ++j;
-						break;
-					}
-
-					default: {
-						string err_msg = "The tag ^";
-						err_msg += ch;
-						err_msg.append(" is invalid, and appears in the following tagged string:\n");
-						err_msg.append(str_with_params_and_tags);
-
-						throw invalid_argument(err_msg);
-					}
-				}
-
-				if (push_style) {
-					str.append(i, j - 1); // [i,j-1) excludes the tag "^x"
-
-					if (*style_i != new_style) {
-						if (!str.empty()) {
-							text.emplace_back(str, *style_i);
-							str.clear();
-						}
-
-						++style_i;
-
-						if (style_i == std::end(style_stack)) {
-							string err_msg = "Attempted to push too many style tags onto the stack, in the following tagged string:\n";
-							err_msg.append(str_with_params_and_tags);
-
-							throw invalid_argument(err_msg);
-						} else {
-							*style_i = new_style;
-						}
-					}
-
-					i = ++j;
-				}
-				else if (pop_style) {
-					str.append(i, j - 1); // [i,j-1) excludes the tag "^/"
-
-					if (!str.empty()) {
-						text.emplace_back(str, *style_i);
-						str.clear();
-					}
-
-					if (style_i == std::begin(style_stack)) {
-						string err_msg = "Attempted to pop too many style tags from the stack, in the following tagged string:\n";
-						err_msg.append(str_with_params_and_tags);
-
-						throw invalid_argument(err_msg);
-					} else {
-						--style_i;
-					}
-
-					i = ++j;
-				}
+			default: {
+				std::string err_msg = "The tag ^";
+				err_msg += ch;
+				err_msg.append(" is invalid, and appears in the following tagged string:\n");
+				err_msg.append(str_with_tags);
+				throw std::invalid_argument(err_msg);
 			}
 		}
-	}
+		
+		// Check if the style needs to be changed.
+		// If so, append the current block of text and update the style stack.
+		
+		bool style_has_changed = (push_style && *style_iter != new_style) || pop_style;
 
-	if (!str.empty()) {
-		text.emplace_back(str, *style_i);
+		if (style_has_changed) {
+			if (!str.empty()) {
+				text.emplace_back(str, *style_iter);
+				str.clear();
+			}
+			
+			if (push_style) {
+				++style_iter;
+				if (style_iter == std::end(style_stack)) {
+					std::string err_msg = "Attempted to push too many style tags onto the stack, in the following tagged string:\n";
+					err_msg.append(str_with_tags);
+					throw std::invalid_argument(err_msg);
+				}
+				
+				*style_iter = new_style;
+			} else { // pop_style
+				if (style_iter == std::begin(style_stack)) {
+					std::string err_msg = "Attempted to pop too many style tags from the stack, in the following tagged string:\n";
+					err_msg.append(str_with_tags);
+					throw std::invalid_argument(err_msg);
+				}
+				--style_iter;
+			}
+		}
+		
+		// Prepare for the next loop iteration.
+		
+		++i;
 	}
+}
 
-	return text;
+maf::Styled_text maf::styled_text_from(std::string_view str_with_params_and_tags, TextParams const& params)
+{
+	auto str_with_tags = substitute_params(str_with_params_and_tags, params);
+	return apply_tags(str_with_tags);
 }

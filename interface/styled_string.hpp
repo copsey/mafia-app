@@ -7,8 +7,8 @@
 #include <vector>
 
 namespace maf {
-	// Create a new string, identical to `str` but with each tag character
-	// '^' replaced with '^^'.
+	// Create a new string, identical to `str` but with each character
+	// '^' replaced with the string "^^".
 	std::string escape_tags(std::string_view str);
 	
 	// Check if the range of characters in {i,j} gives an allowed name
@@ -23,14 +23,17 @@ namespace maf {
 		
 		for (; i != j; ++i) {
 			switch (*i) {
-				case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h':
-				case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p':
-				case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x':
-				case 'y': case 'z': case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-				case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N':
-				case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
-				case 'W': case 'X': case 'Y': case 'Z': case '0': case '1': case '2': case '3':
-				case '4': case '5': case '6': case '7': case '8': case '9': case '_': case '.':
+				case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+				case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
+				case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':
+				case 's': case 't': case 'u': case 'v': case 'w': case 'x':
+				case 'y': case 'z': case 'A': case 'B': case 'C': case 'D':
+				case 'E': case 'F': case 'G': case 'H': case 'I': case 'J':
+				case 'K': case 'L': case 'M': case 'N': case 'O': case 'P':
+				case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
+				case 'W': case 'X': case 'Y': case 'Z': case '_': case '.':
+				case '0': case '1': case '2': case '3': case '4': case '5':
+				case '6': case '7': case '8': case '9':
 					break;
 				
 				default:
@@ -53,72 +56,110 @@ namespace maf {
 	// font size, colour, etc.
 	struct Styled_string {
 		enum class Style {
-			game,    // Default style during game.
-			help,    // Game set-up and general help.
-			italic,  // Italic modifier on current style. Used for descriptive text.
+			game,    // Default style.
+			help,    // Game setup and general help.
+			italic,  // Italic modifier on current style. Used for descriptive
+			         // text.
 			command, // Commands that can be inputted into the console.
-			title    // Title of section. A maximum of one title can occur
+			title    // Title of section. A maximum of one title should occur
 			         // per message, as the first item.
 		};
 
-		std::string string{};
+		std::string string;
 		Style style{Style::game};
 
 		Styled_string() = default;
 
 		Styled_string(std::string string, Style style)
-			: string{string}, style{style}
+		: string{string}, style{style}
 		{ }
 	};
+
+	// Convert the character 'x' at the end of a tag "^x" into its
+	// corresponding style.
+	//
+	// The following characters are recognised:
+	//   'g' -> `Style::game`
+	//   'h' -> `Style::help`
+	//   'i' -> `Style::italic`
+	//   'c' -> `Style::command`
+	//   'T' -> `Style::title`
+	//
+	// If `ch` is not in the list above, return `Styled_string::Style::game`.
+	inline Styled_string::Style get_style(char ch)
+	{
+		switch (ch) {
+			case 'g':  return Styled_string::Style::game;
+			case 'h':  return Styled_string::Style::help;
+			case 'i':  return Styled_string::Style::italic;
+			case 'c':  return Styled_string::Style::command;
+			case 'T':  return Styled_string::Style::title;
+			default:   return Styled_string::Style::game;
+		}
+	}
 
 	// A vector of styled strings, used to form a block of text.
 	using Styled_text = std::vector<Styled_string>;
 	
-	// A map from strings to strings, used as substitutions (e.g. "{exampleStr}")
-	// when creating a block of text.
+	// A map from strings to strings, used as substitutions when creating a
+	// block of text.
 	using TextParams = std::map<std::string, std::string>;
 
-	// Often, styled text is created from what is called a tagged string: this is
-	// simply a std::string containing formatting codes of the form ^x.
+	// Find all strings of the form "{substitute}" in `str_with_params`, and
+	// replace them with the corresponding value from `params`.
+	//
+	// Braces preceded by carets "^" are considered escaped and are ignored.
+	//
+	// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`,
+	// then
+	//     "This is my {word1} {word2} with ^{braces^}."
+	// will be transformed into
+	//     "This is my NEW STRING with ^{braces^}."
+	//
+	// @throws `std::invalid_argument` if an invalid parameter name is
+	// encountered. (See `is_param_name` for more information.)
+	// @throws `std::invalid_argument` for any parameter names that cannot be
+	// found in `params`.
+	// @throws `std::invalid_argument` if there are different numbers of
+	// (unescaped) opening braces "{" and closing braces "}".
+	std::string substitute_params(std::string_view str_with_params,
+								  TextParams const& params);
+
+	// Often, styled text is created from what is called a _tagged string_:
+	// this is simply a `std::string` containing substrings of the form "^x",
+	// which are referred to as tags.
+	//
+	// This function parses a given string to find all of its tags and perform
+	// some actions on the string as described below.
+	//
 	// The following tags are possible:
-	//    ^g = game
-	//    ^h = help
-	//    ^i = italic
-	//    ^c = command
-	//    ^T = title
-	// ^/ closes the current tag, so that what follows uses the previous tag.
-	// (Note that the maximum-supported tag depth is 9, including the default.)
+	//   ^g - Create a new block of text using the style returned by
+	//        `get_style(x)`, where `x` is the character following '^' for
+	//        this tag. The previous style is pushed onto a stack, which can
+	//        hold a maximum of 8 styles.
+	//   ^h - See above.
+	//   ^i - See above.
+	//   ^c - See above.
+	//   ^T - See above.
+	//   ^/ - Close the current block of text, so that what follows uses the
+	//        previous style.
+	//   ^^ - Print a single '^' character.
+	//   ^{ - Print a single '{' character.
+	//   ^} - Print a single '}' character.
 	//
-	// ^^ prints a single '^' character. Similarly, ^{ prints a single '{' character,
-	// and ^} prints a single '}' character.
+	// The default string style is `Styled_string::Style::game`, which means
+	// strings don't need to begin with "^g".
 	//
-	// The appearance of any other two-character substring of the form ^x results in
-	// an exception.
-	//
-	// Note that the default string style is Style::game, and hence game-styled
-	// strings need not be prepended with ^g.
+	// @throws `std::invalid_argument` if any tag "^x" is encountered that is
+	// not in the list above.
+	// @throws `std::invalid_argument` if the maximum depth of the style
+	// stack is exceeded.
+	Styled_text apply_tags(std::string_view str_with_tags);
 
-	/// Find all strings of the form "{substitute}" in `str_with_params`, and replace them
-	/// with the corresponding value from `params`.
-	///
-	/// Braces preceded by carets "^" are considered escaped and are ignored.
-	///
-	/// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`, then
-	///     "This is my {word1} {word2} with ^{braces^}."
-	/// will be transformed into
-	///     "This is my NEW STRING with ^{braces^}."
-	///
-	/// @throws `std::invalid_argument` if an invalid parameter name is encountered.
-	/// (See `is_param_name` for more information.)
-	/// @throws `std::invalid_argument` for any parameter names that cannot be
-	/// found in `params`.
-	/// @throws `std::invalid_argument` if there are different numbers of (unescaped)
-	/// opening braces "{" and closing braces "}".
-	std::string substitute_params(std::string_view str_with_params, TextParams const& params);
-
-	// Convert a tagged string into styled text, using `params` as a dictionary of
-	// text replacements.
-	Styled_text styled_text_from(std::string_view tagged_str,
+	// Convert a tagged string into styled text, using `params` as a
+	// dictionary of text replacements. See `substitute_params` and
+	// `apply_tags` for more information.
+	Styled_text styled_text_from(std::string_view str_with_params_and_tags,
 	                             TextParams const& params = {});
 }
 
