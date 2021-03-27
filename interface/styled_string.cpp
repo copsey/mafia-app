@@ -7,16 +7,28 @@
 using std::invalid_argument;
 
 
-string maf::escape_tags(string_view str)
+std::string maf::escape_tags(std::string_view input)
 {
-	string esc_str = {};
-
-	for (auto ch: str) {
-		if (ch == '^' || ch == '{' || ch == '}') esc_str.push_back('^');
-		esc_str.push_back(ch);
+	using iterator_type = std::string_view::iterator;
+	
+	auto needs_escaping = [](char ch) {
+		return ch == '^' || ch == '{' || ch == '}';
+	};
+	
+	string output;
+	output.reserve(input.size());
+	
+	iterator_type begin = input.begin();
+	iterator_type end = input.end();
+	
+	for (iterator_type i = begin, j; /**/; i = j + 1) {
+		j = std::find_if(i, end, needs_escaping);
+		output.append(i, j);
+		if (j == end) return output;
+		
+		output += '^';
+		output += *j;
 	}
-
-	return esc_str;
 }
 
 std::string maf::substitute_params(std::string_view str_with_params, TextParams const& params)
