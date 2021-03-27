@@ -111,16 +111,7 @@ void maf::Obituary::do_commands(const vector<string_view> & commands) {
 
 void maf::Obituary::write_full(ostream &os, TextParams& params) const
 {
-	params["num_deaths"] = _deaths.size();
-
-	if (_deaths_index >= 0) {
-		Player const& deceased = *_deaths[_deaths_index];
-		params["deceased"] = escape_tags(game_log().get_name(deceased));
-
-		if (deceased.haunter()) {
-			params["haunter"] = escape_tags(game_log().get_name(*deceased.haunter()));
-		}
-	}
+	params["num_deaths"] = std::to_string(_deaths.size());
 
 	os << "^TObituary^/";
 
@@ -132,10 +123,12 @@ void maf::Obituary::write_full(ostream &os, TextParams& params) const
 			os << "It appears that {num_deaths} of us did not survive the night...";
 		}
 	} else {
-		const Player& death = *_deaths[_deaths_index];
+		const Player& deceased = *_deaths[_deaths_index];
+		params["deceased"] = escape_tags(game_log().get_name(deceased));
 
 		os << "{deceased} died during the night!";
-		if (death.is_haunted()) {
+		if (deceased.is_haunted()) {
+			params["haunter"] = escape_tags(game_log().get_name(*deceased.haunter()));
 			os << "\n\nA slip of paper was found by their bed. On it has been written the name \"{haunter}\" over and over...";
 		}
 	}
