@@ -613,7 +613,7 @@ void maf::Console::end_game() {
 	if (has_game()) {
 		std::time_t t = std::time(nullptr);
 
-		std::ofstream ofs{"/Users/Jack_Copsey/Developer/misc/mafia/misc/game_history.txt", std::ofstream::app};
+		std::ofstream ofs{"/Users/Jack/Documents/Developer/Projects/mafia/misc/game_history.txt", std::ofstream::app};
 		ofs << "\n====== ";
 		ofs << std::put_time(std::localtime(&t), "%F %T");
 		ofs << " ======\n\n";
