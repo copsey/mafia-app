@@ -157,8 +157,29 @@ namespace maf {
 	// found in `params`.
 	// @throws `std::invalid_argument` if there are different numbers of
 	// (unescaped) opening braces "{" and closing braces "}".
-	std::string substitute_params(std::string_view str_with_params,
+	std::string substitute_params(std::string_view input,
 								  TextParams const& params);
+
+	// Error code for exceptions that can be thrown when calling `apply_tags`.
+	enum class apply_tags_errc {
+		dangling_caret,
+		invalid_tag,
+		too_many_styles,
+		extra_closing_tag
+	};
+
+	// Type for exceptions that can be thrown when calling `apply_tags`.
+	struct apply_tags_error {
+		// Error code for this exception.
+		apply_tags_errc errc;
+		
+		// Position in input string where error occurred.
+		std::string_view::iterator i;
+		
+		apply_tags_error(apply_tags_errc errc, std::string_view::iterator i)
+		: errc{errc}, i{i}
+		{ }
+	};
 
 	// Often, styled text is created from what is called a _tagged string_:
 	// this is simply a `std::string` containing substrings of the form "^x",
@@ -183,17 +204,15 @@ namespace maf {
 	// onto a stack that can hold a maximum of 8 styles. The default style is
 	// `game`, so that the input string doesn't need to begin with "^g".
 	//
-	// @throws `std::invalid_argument` if any tag "^x" is encountered that is
-	// not in the list above.
-	// @throws `std::invalid_argument` if the maximum depth of the style
-	// stack is exceeded.
+	// @throws `apply_tags_error{apply_tags_errc::dangling_caret, ...}` if
+	// there's an unescaped "^" character at the end of the input string.
+	// @throws `apply_tags_error{apply_tags_errc::invalid_tag, ...}` if any
+	// tag "^x" is encountered that is not in the list above.
+	// @throws `apply_tags_error{apply_tags_errc::too_many_styles, ...}` if
+	// the maximum depth of the style stack is exceeded.
+	// @throws `apply_tags_error{apply_tags_errc::extra_closing_tag, ...}`
+	// if there's a "^/" tag without a corresponding block of text.
 	Styled_text apply_tags(std::string_view input);
-
-	// Convert a tagged string into styled text, using `params` as a
-	// dictionary of text replacements. See `substitute_params` and
-	// `apply_tags` for more information.
-	Styled_text styled_text_from(std::string_view str_with_params_and_tags,
-	                             TextParams const& params = {});
 }
 
 #endif

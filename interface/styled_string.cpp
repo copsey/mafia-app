@@ -137,9 +137,7 @@ maf::Styled_text maf::apply_tags(std::string_view input)
 		
 		i = j; ++i;
 		if (i == end) {
-			std::string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
-			err_msg.append(input);
-			throw std::invalid_argument(err_msg);
+			throw apply_tags_error{apply_tags_errc::dangling_caret, j};
 		}
 		
 		// e.g.
@@ -173,13 +171,8 @@ maf::Styled_text maf::apply_tags(std::string_view input)
 				current_block += ch;
 				break;
 
-			default: {
-				std::string err_msg = "The tag ^";
-				err_msg += ch;
-				err_msg.append(" is invalid, and appears in the following tagged string:\n");
-				err_msg.append(input);
-				throw std::invalid_argument(err_msg);
-			}
+			default:
+				throw apply_tags_error{apply_tags_errc::invalid_tag, j};
 		}
 		
 		// Check if the style needs to be changed.
@@ -196,17 +189,13 @@ maf::Styled_text maf::apply_tags(std::string_view input)
 			if (push_style) {
 				++style_iter;
 				if (style_iter == std::end(style_stack)) {
-					std::string err_msg = "Attempted to push too many style tags onto the stack, in the following tagged string:\n";
-					err_msg.append(input);
-					throw std::invalid_argument(err_msg);
+					throw apply_tags_error{apply_tags_errc::too_many_styles, i};
 				}
 				
 				*style_iter = new_style;
 			} else { // pop_style
 				if (style_iter == std::begin(style_stack)) {
-					std::string err_msg = "Attempted to pop too many style tags from the stack, in the following tagged string:\n";
-					err_msg.append(input);
-					throw std::invalid_argument(err_msg);
+					throw apply_tags_error{apply_tags_errc::extra_closing_tag, i};
 				}
 				--style_iter;
 			}
@@ -216,10 +205,4 @@ maf::Styled_text maf::apply_tags(std::string_view input)
 		
 		++i;
 	}
-}
-
-maf::Styled_text maf::styled_text_from(std::string_view str_with_params_and_tags, TextParams const& params)
-{
-	auto str_with_tags = substitute_params(str_with_params_and_tags, params);
-	return apply_tags(str_with_tags);
 }

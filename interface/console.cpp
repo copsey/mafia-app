@@ -476,8 +476,49 @@ const maf::Styled_text & maf::Console::output() const {
 	return _output;
 }
 
-void maf::Console::read_output(string_view str, TextParams const& params) {
-	_output = styled_text_from(str, params);
+void maf::Console::read_output(string_view raw_output, TextParams const& params)
+{
+	auto tagged_output = substitute_params(raw_output, params);
+	
+	try {
+		_output = apply_tags(tagged_output);
+	} catch (apply_tags_error const& error) {
+		std::string err_msg = "Error --- ";
+		auto iter = error.i;
+		auto pos = iter - std::string_view{tagged_output}.begin();
+		
+		switch (error.errc) {
+			case apply_tags_errc::dangling_caret:
+				err_msg += "There is a dangling '^' at the end of the following tagged string:";
+				break;
+				
+			case apply_tags_errc::extra_closing_tag:
+				err_msg += "Attempted to pop too many style tags from the stack, at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following tagged string:";
+				break;
+				
+			case apply_tags_errc::invalid_tag:
+				err_msg += "The tag \"";
+				err_msg += {*iter, *(iter + 1)};
+				err_msg += "\" is invalid, and appears at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following tagged string:";
+				break;
+				
+			case apply_tags_errc::too_many_styles:
+				err_msg += "Attempted to push too many style tags onto the stack, at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following tagged string:";
+				break;
+		}
+		
+		err_msg += "\n\n";
+		
+		_output = {
+			{err_msg, Styled_string::Style::game},
+			{tagged_output, Styled_string::Style::command}};
+	}
 }
 
 void maf::Console::refresh_output() {
@@ -505,9 +546,14 @@ const maf::Styled_text & maf::Console::error_message() const
 	return _error_message;
 }
 
-void maf::Console::read_error_message(string_view str, TextParams const& params)
+void maf::Console::read_error_message(string_view raw_err_msg, TextParams const& params)
 {
-	_error_message = styled_text_from(str, params);
+	auto tagged_err_msg = substitute_params(raw_err_msg, params);
+	
+	// TODO: Catch exceptions when parsing the tagged string
+	// Might make sense to show another error message in this case, explaining
+	// why the original error message couldn't be parsed?
+	_error_message = apply_tags(tagged_err_msg);
 }
 
 void maf::Console::clear_error_message()
@@ -562,7 +608,7 @@ bool maf::Console::has_game() const {
 }
 
 void maf::Console::end_game() {
-	/* FIXME: set location where history is saved. */
+	// TODO: Choose file location where history is saved
 
 	if (has_game()) {
 		std::time_t t = std::time(nullptr);
