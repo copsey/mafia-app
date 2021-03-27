@@ -332,10 +332,7 @@ void maf::Duel_result::do_commands(const vector<string_view> & commands)
 }
 
 void maf::Duel_result::write_full(ostream &os, TextParams& params) const {
-	auto& winner = (caster->is_alive() ? caster : target);
-	auto& loser = (caster->is_alive() ? target : caster);
-
-	auto& glog = game_log();
+	auto & glog = game_log();
 
 	params["caster"] = escape_tags(glog.get_name(*caster));
 	params["target"] = escape_tags(glog.get_name(*target));
@@ -354,10 +351,11 @@ void maf::Duel_result::write_full(ostream &os, TextParams& params) const {
 
 void maf::Duel_result::write_summary(ostream &os) const {
 	auto & glog = game_log();
+	
 	auto caster_name = glog.get_name(*caster);
 	auto target_name = glog.get_name(*target);
 
-	if (caster->is_alive()) { // FIXME: unstable code, as the caster may not be alive later in the game if the rules change, yet still won the duel
+	if (winner == caster) {
 		os << caster_name << " won a duel against " << target_name << ".";
 	} else {
 		os << caster_name << " lost a duel against " << target_name << ".";

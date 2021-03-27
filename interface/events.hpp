@@ -170,8 +170,8 @@ namespace maf {
 
 
 	struct Duel_result: Event {
-		Duel_result(Game_log & game_log, const Player & caster, const Player & target)
-			: Event{game_log}, caster{caster}, target{target}
+		Duel_result(Game_log & game_log, const Player & caster, const Player & target, const Player & winner, const Player & loser)
+		: Event{game_log}, caster{caster}, target{target}, winner{winner}, loser{loser}
 		{ }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
@@ -181,6 +181,8 @@ namespace maf {
 
 		rkt::ref<const Player> caster;
 		rkt::ref<const Player> target;
+		rkt::ref<const Player> winner;
+		rkt::ref<const Player> loser;
 	};
 
 

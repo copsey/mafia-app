@@ -296,7 +296,10 @@ void maf::Game_log::log_lynch_result(const Player *victim) {
 }
 
 void maf::Game_log::log_duel_result(const Player &caster, const Player &target) {
-	store_event(new Duel_result{*this, caster, target});
+	auto & winner = caster.is_alive() ? caster : target;
+	auto & loser  = caster.is_alive() ? target : caster;
+	
+	store_event(new Duel_result{*this, caster, target, winner, loser});
 }
 
 void maf::Game_log::log_boring_night() {
