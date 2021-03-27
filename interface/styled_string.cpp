@@ -1,10 +1,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "../common/stdlib.h"
 #include "styled_string.hpp"
-
-using std::invalid_argument;
 
 
 std::string maf::escaped(std::string_view input)
@@ -15,7 +12,7 @@ std::string maf::escaped(std::string_view input)
 		return ch == '^' || ch == '{' || ch == '}';
 	};
 	
-	string output;
+	std::string output;
 	output.reserve(input.size());
 	
 	iterator_type begin = input.begin();
@@ -77,7 +74,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		if (*j == '}') {
 			std::string err_msg = "Too many '}' chars in the following string:\n";
 			err_msg.append(str_with_params);
-			throw invalid_argument(err_msg);
+			throw std::invalid_argument(err_msg);
 		}
 		
 		// Find the range between the two braces, '{' and '}'.
@@ -88,7 +85,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		if (j == end) {
 			std::string err_msg = "Too many '{' chars in the following string:\n";
 			err_msg.append(str_with_params);
-			throw invalid_argument(err_msg);
+			throw std::invalid_argument(err_msg);
 		}
 		
 		// e.g.
@@ -103,7 +100,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 			err_msg.append(i, j);
 			err_msg.append("\" in the following string:\n");
 			err_msg.append(str_with_params);
-			throw invalid_argument(err_msg);
+			throw std::invalid_argument(err_msg);
 		}
 		
 		// Look up the parameter name in the dictionary.
@@ -114,11 +111,11 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		auto val_iter = params.find(key);
 		
 		if (val_iter == params.end()) {
-			string err_msg = "Unrecognised parameter name \"";
+			std::string err_msg = "Unrecognised parameter name \"";
 			err_msg.append(key);
 			err_msg.append("\" in the following string:\n");
 			err_msg.append(str_with_params);
-			throw invalid_argument(err_msg);
+			throw std::invalid_argument(err_msg);
 		}
 		
 		// Append the parameter's value to the string,
@@ -135,7 +132,7 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 {
 	using iterator_type = std::string_view::const_iterator;
 	
-	string str;
+	std::string str;
 	Styled_text text;
 	Styled_string::Style style_stack[9] = {Styled_string::Style::game};
 	auto style_iter = std::begin(style_stack);
@@ -165,9 +162,9 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 		
 		i = j + 1;
 		if (i == end) {
-			string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
+			std::string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
 			err_msg.append(str_with_tags);
-			throw invalid_argument(err_msg);
+			throw std::invalid_argument(err_msg);
 		}
 		
 		// e.g.
