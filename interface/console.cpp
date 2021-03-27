@@ -133,7 +133,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 				i_str_valid = true;
 			}
 			catch (std::logic_error) {
-				err_params["str"] = escape_tags(i_str);
+				err_params["str"] = escaped(i_str);
 				
 				err << "^TInvalid input!^hThe string ^c{str}^h could not be converted into a preset index. (i.e. a relatively-small integer)";
 				i_str_valid = false;
@@ -168,7 +168,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err << "^TInvalid alias!^hNo wildcard could be found whose alias is ^c{alias}^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
 	}
 	catch (const Game::Kick_failed &e) {
-		err_params["player"] = escape_tags(_game_log->get_name(*e.player));
+		err_params["player"] = escaped(_game_log->get_name(*e.player));
 		
 		err << "^TKick failed!^h";
 
@@ -200,8 +200,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Lynch_vote_failed &e) {
-		err_params["voter"] = escape_tags(_game_log->get_name(*e.voter));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["voter"] = escaped(_game_log->get_name(*e.voter));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
 		err << "^TLynch vote failed!^h";
 
@@ -228,8 +228,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Duel_failed &e) {
-		err_params["caster"] = escape_tags(_game_log->get_name(*e.caster));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 
 		err << "^TDuel failed!^h";
 
@@ -276,7 +276,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Choose_fake_role_failed &e) {
-		err_params["player"] = escape_tags(_game_log->get_name(*e.player));
+		err_params["player"] = escaped(_game_log->get_name(*e.player));
 		
 		err << "^TChoose fake role failed!^h";
 
@@ -299,8 +299,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Mafia_kill_failed &e) {
-		err_params["caster"] = escape_tags(_game_log->get_name(*e.caster));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
 		err << "^TMafia kill failed!^h";
 
@@ -329,8 +329,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Kill_failed &e) {
-		err_params["caster"] = escape_tags(_game_log->get_name(*e.caster));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
 		err << "^TKill failed!^h";
 
@@ -350,8 +350,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Heal_failed &e) {
-		err_params["caster"] = escape_tags(_game_log->get_name(*e.caster));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
 		err << "^THeal failed!^h";
 
@@ -374,8 +374,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Investigate_failed &e) {
-		err_params["caster"] = escape_tags(_game_log->get_name(*e.caster));
-		err_params["target"] = escape_tags(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
 		err << "^TInvestigation failed!^h";
 
@@ -404,7 +404,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err << "^TMismatch!^hA new game cannot begin with an unequal number of players and cards.";
 	}
 	catch (const Game_log::Player_not_found &e) {
-		err_params["player"] = escape_tags(e.name);
+		err_params["player"] = escaped(e.name);
 		
 		err << "^TPlayer not found!^hA player named ^c{name}^h could not be found.";
 	}
@@ -415,12 +415,12 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
 	}
 	catch (const Setup_screen::Player_already_exists &e) {
-		err_params["player"] = escape_tags(e.name);
+		err_params["player"] = escaped(e.name);
 		
 		err << "^TPlayer already exists!^hA player named ^c{player}^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
 	}
 	catch (const Setup_screen::Player_missing &e) {
-		err_params["player"] = escape_tags(e.name);
+		err_params["player"] = escaped(e.name);
 		
 		err << "^TMissing player!^hA player named ^c{player}^h could not be found.";
 	}

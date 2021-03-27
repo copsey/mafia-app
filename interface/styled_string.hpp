@@ -7,9 +7,12 @@
 #include <vector>
 
 namespace maf {
-	// Create a new string, identical to `str` but with each character
-	// '^' replaced with the string "^^".
-	std::string escape_tags(std::string_view str);
+	// Create a new string, identical to `str` but with the following
+	// substitutions:
+	//   - Each '^' character is replaced with "^^"
+	//   - Each '{' character is replaced with "^{"
+	//   - Each '}' character is replaced with "^}"
+	std::string escaped(std::string_view str);
 	
 	// Check if the range of characters in {i,j} gives an allowed name
 	// for a styled-text parameter.

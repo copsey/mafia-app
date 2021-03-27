@@ -7,7 +7,7 @@
 using std::invalid_argument;
 
 
-std::string maf::escape_tags(std::string_view input)
+std::string maf::escaped(std::string_view input)
 {
 	using iterator_type = std::string_view::iterator;
 	

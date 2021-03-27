@@ -32,7 +32,7 @@ void maf::Player_given_initial_role::write_full(ostream &os, TextParams& params)
 {
 	auto & glog = game_log();
 
-	params["player"] = escape_tags(glog.get_name(*_p));
+	params["player"] = escaped(glog.get_name(*_p));
 	params["role.name"] = full_name(*_r);
 	params["role.alias"] = _r->alias();
 
@@ -124,11 +124,11 @@ void maf::Obituary::write_full(ostream &os, TextParams& params) const
 		}
 	} else {
 		const Player& deceased = *_deaths[_deaths_index];
-		params["deceased"] = escape_tags(game_log().get_name(deceased));
+		params["deceased"] = escaped(game_log().get_name(deceased));
 
 		os << "{deceased} died during the night!";
 		if (deceased.is_haunted()) {
-			params["haunter"] = escape_tags(game_log().get_name(*deceased.haunter()));
+			params["haunter"] = escaped(game_log().get_name(*deceased.haunter()));
 			os << "\n\nA slip of paper was found by their bed. On it has been written the name \"{haunter}\" over and over...";
 		}
 	}
@@ -220,16 +220,16 @@ void maf::Town_meeting::write_full(ostream &os, TextParams& params) const {
 		for (auto it = _players.begin(); it != _players.end(); ) {
 			auto& p_ref = *it;
 			os << "   ";
-			os << escape_tags(game_log().get_name(*p_ref));
+			os << escaped(game_log().get_name(*p_ref));
 			if (p_ref->lynch_vote() != nullptr) {
 				os << ", voting to lynch ";
-				os << escape_tags(game_log().get_name(*(p_ref->lynch_vote())));
+				os << escaped(game_log().get_name(*(p_ref->lynch_vote())));
 			}
 			os << ((++it == _players.end()) ? "." : ",\n");
 		}
 
 		os << "\n\nAs it stands, "
-		<< (_next_lynch_victim ? escape_tags(game_log().get_name(*_next_lynch_victim)) : "nobody")
+		<< (_next_lynch_victim ? escaped(game_log().get_name(*_next_lynch_victim)) : "nobody")
 		<< " will be lynched.^h\n\nEnter ^clynch^/ to submit the current lynch votes. Daytime abilities may also be used at this point.";
 	} else {
 		os << "^iWith little time left in the day, the townsfolk prepare themselves for another night of uncertainty...^/\n\n";
@@ -238,7 +238,7 @@ void maf::Town_meeting::write_full(ostream &os, TextParams& params) const {
 		for (auto it = _players.begin(); it != _players.end(); ) {
 			auto& p_ref = *it;
 			os << "   ";
-			os << escape_tags(game_log().get_name(*p_ref));
+			os << escaped(game_log().get_name(*p_ref));
 			os << ((++it == _players.end()) ? "." : ",\n");
 		}
 
@@ -267,7 +267,7 @@ void maf::Player_kicked::do_commands(const vector<string_view> &commands) {
 
 void maf::Player_kicked::write_full(ostream &os, TextParams& params) const
 {
-	params["player"] = escape_tags(game_log().get_name(*player));
+	params["player"] = escaped(game_log().get_name(*player));
 	params["role"] = full_name(player->role());
 
 	os << "^T{player} kicked^/";
@@ -292,7 +292,7 @@ void maf::Lynch_result::write_full(ostream &os, TextParams& params) const {
 	os << "^TLynch Result^/";
 
 	if (victim) {
-		params["victim"] = escape_tags(game_log().get_name(*victim));
+		params["victim"] = escaped(game_log().get_name(*victim));
 		
 		os << "{victim} was lynched!\n";
 
@@ -334,10 +334,10 @@ void maf::Duel_result::do_commands(const vector<string_view> & commands)
 void maf::Duel_result::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(*caster));
-	params["target"] = escape_tags(glog.get_name(*target));
-	params["winner"] = escape_tags(glog.get_name(*winner));
-	params["loser"] = escape_tags(glog.get_name(*loser));
+	params["caster"] = escaped(glog.get_name(*caster));
+	params["target"] = escaped(glog.get_name(*target));
+	params["winner"] = escaped(glog.get_name(*winner));
+	params["loser"] = escaped(glog.get_name(*loser));
 
 	os << "^TDuel^/";
 	os << "{caster} has challenged {target} to a duel!^i\n\nThe pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!^/\n\nThe lifeless body of {loser} falls to the ground. {winner} lets out a sigh of relief.";
@@ -395,7 +395,7 @@ void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
 
 void maf::Choose_fake_role::write_full(ostream &os, TextParams& params) const
 {
-	params["player"] = escape_tags(game_log().get_name(*_player));
+	params["player"] = escaped(game_log().get_name(*_player));
 
 	if (_fake_role) {
 		params["fakeRole.name"] = full_name(*_fake_role);
@@ -466,7 +466,7 @@ void maf::Mafia_meeting::write_full(ostream &os, TextParams& params) const
 		for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
 			auto& p_ref = *it;
 			
-			auto player_name = escape_tags(game_log().get_name(*p_ref));
+			auto player_name = escaped(game_log().get_name(*p_ref));
 			auto player_role = full_name(p_ref->role());
 			
 			os << "   " << player_name << ", the " << player_role;
@@ -480,7 +480,7 @@ void maf::Mafia_meeting::write_full(ostream &os, TextParams& params) const
 		for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
 			auto& p_ref = *it;
 			
-			auto player_name = escape_tags(game_log().get_name(*p_ref));
+			auto player_name = escaped(game_log().get_name(*p_ref));
 			auto player_role = full_name(p_ref->role());
 			
 			os << "   " << player_name << ", the " << player_role;
@@ -519,7 +519,7 @@ void maf::Kill_use::do_commands(const vector<string_view> &commands) {
 void maf::Kill_use::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(*_caster));
+	params["caster"] = escaped(glog.get_name(*_caster));
 
 	os << "^TKill Use^/";
 
@@ -559,7 +559,7 @@ void maf::Heal_use::do_commands(const vector<string_view> & commands) {
 void maf::Heal_use::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(*_caster));
+	params["caster"] = escaped(glog.get_name(*_caster));
 
 	os << "^THeal Use^/";
 
@@ -600,7 +600,7 @@ void maf::Investigate_use::do_commands(const vector<string_view> & commands) {
 void maf::Investigate_use::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(*_caster));
+	params["caster"] = escaped(glog.get_name(*_caster));
 
 	os << "^TInvestigation^/";
 
@@ -639,7 +639,7 @@ void maf::Peddle_use::do_commands(const vector<string_view> & commands) {
 void maf::Peddle_use::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(*_caster));
+	params["caster"] = escaped(glog.get_name(*_caster));
 
 	os << "^TPeddle^/";
 
@@ -689,8 +689,8 @@ void maf::Investigation_result::do_commands(const vector<string_view> & commands
 void maf::Investigation_result::write_full(ostream &os, TextParams& params) const {
 	auto & glog = game_log();
 
-	params["caster"] = escape_tags(glog.get_name(investigation.caster()));
-	params["target"] = escape_tags(glog.get_name(investigation.target()));
+	params["caster"] = escaped(glog.get_name(investigation.caster()));
+	params["target"] = escaped(glog.get_name(investigation.target()));
 
 	os << "^TInvestigation Result^/";
 
@@ -746,7 +746,7 @@ void maf::Game_ended::write_full(ostream &os, TextParams& params) const
 		for (auto it = winners.begin(); it != winners.end(); ) {
 			const Player &player = **it;
 			
-			auto player_name = escape_tags(game_log().get_name(player));
+			auto player_name = escaped(game_log().get_name(player));
 			auto player_role = full_name(player.role());
 			
 			os << "   " << player_name << ", the " << player_role;
@@ -762,7 +762,7 @@ void maf::Game_ended::write_full(ostream &os, TextParams& params) const
 		for (auto it = losers.begin(); it != losers.end(); ) {
 			const Player &player = **it;
 			
-			auto player_name = escape_tags(game_log().get_name(player));
+			auto player_name = escaped(game_log().get_name(player));
 			auto player_role = full_name(player.role());
 			
 			os << "   " << player_name << ", the " << player_role;
