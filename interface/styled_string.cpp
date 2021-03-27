@@ -1,32 +1,7 @@
-#include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 #include "styled_string.hpp"
-
-
-std::string maf::escaped(std::string_view input)
-{
-	using iterator_type = std::string_view::iterator;
-	
-	auto needs_escaping = [](char ch) {
-		return ch == '^' || ch == '{' || ch == '}';
-	};
-	
-	std::string output;
-	output.reserve(input.size());
-	
-	iterator_type begin = input.begin();
-	iterator_type end = input.end();
-	
-	for (iterator_type i = begin, j; /**/; i = j + 1) {
-		j = std::find_if(i, end, needs_escaping);
-		output.append(i, j);
-		if (j == end) return output;
-		
-		output += '^';
-		output += *j;
-	}
-}
 
 std::string maf::substitute_params(std::string_view str_with_params, TextParams const& params)
 {
@@ -40,12 +15,12 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 	iterator_type begin = str_with_params.begin();
 	iterator_type end = str_with_params.end();
 	
-	for (iterator_type i = begin, j; ; ) {
+	for (auto i = begin; ; ) {
 		// Find the next brace, either '{' or '}'.
 		// Append all of the text up to (but excluding) the brace.
 		// Stop when there are no more braces in the string.
 		
-		j = std::find_if(i, end, is_brace);
+		auto j = std::find_if(i, end, is_brace);
 		str.append(i, j);
 		if (j == end) return str;
 		
@@ -64,7 +39,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		
 		if (j != begin && *(j - 1) == '^') {
 			str += *j;
-			i = j + 1;
+			i = j; ++i;
 			continue;
 		}
 		
@@ -80,7 +55,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		// Find the range between the two braces, '{' and '}'.
 		// It's an error if the closing brace '}' is missing.
 		
-		i = j + 1;
+		i = j; ++i;
 		j = std::find(i, end, '}');
 		if (j == end) {
 			std::string err_msg = "Too many '{' chars in the following string:\n";
@@ -124,7 +99,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		std::string_view val = (*val_iter).second;
 		str.append(val);
 		
-		i = j + 1;
+		i = j; ++i;
 	}
 }
 
@@ -140,12 +115,12 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 	iterator_type begin = str_with_tags.begin();
 	iterator_type end = str_with_tags.end();
 
-	for (iterator_type i = begin, j; ; ) {
+	for (auto i = begin; ; ) {
 		// Find the next caret '^'.
 		// Copy all of the text up to (but excluding) the caret.
 		// Stop when there are no more carets in the input.
 		
-		j = std::find(i, end, '^');
+		auto j = std::find(i, end, '^');
 		str.append(i, j);
 		if (j == end) {
 			if (!str.empty()) text.emplace_back(str, *style_iter);
@@ -160,7 +135,7 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 		// Check there's a character after the caret.
 		// It's an error if there are no more characters.
 		
-		i = j + 1;
+		i = j; ++i;
 		if (i == end) {
 			std::string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
 			err_msg.append(str_with_tags);

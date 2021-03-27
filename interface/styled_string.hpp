@@ -1,30 +1,58 @@
 #ifndef MAFIA_STYLED_STRING_H
 #define MAFIA_STYLED_STRING_H
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace maf {
+	// Create a new string based on the range of characters in {begin, end},
+	// but with the following substitutions:
+	//   - Each '^' character is replaced with "^^"
+	//   - Each '{' character is replaced with "^{"
+	//   - Each '}' character is replaced with "^}"
+	//
+	// @pre {begin, end} is a valid range.
+	template <typename ForwardIterator>
+	std::string escaped(ForwardIterator begin, ForwardIterator end)
+	{
+		auto needs_escaping = [](char ch) {
+			return ch == '^' || ch == '{' || ch == '}';
+		};
+
+		std::string output;
+
+		for (auto i = begin; ; ) {
+			auto j = std::find_if(i, end, needs_escaping);
+			output.append(i, j);
+			if (j == end) return output;
+
+			output += {'^', *j};
+			i = j; ++i;
+		}
+	}
+
 	// Create a new string, identical to `str` but with the following
 	// substitutions:
 	//   - Each '^' character is replaced with "^^"
 	//   - Each '{' character is replaced with "^{"
 	//   - Each '}' character is replaced with "^}"
-	std::string escaped(std::string_view str);
-	
-	// Check if the range of characters in {i,j} gives an allowed name
-	// for a styled-text parameter.
-	// This is true if it matches the regex /^[a-zA-Z0-9_\.]+$/.
-	//
-	// @pre {i,j} is a valid range.
-	template <typename Iter>
-	bool is_param_name(Iter i, Iter j)
+	inline std::string escaped(std::string_view str_view)
 	{
-		if (i == j) return false;
-		
-		for (; i != j; ++i) {
+		return escaped(str_view.begin(), str_view.end());
+	}
+	
+	// Check if the range of characters in {begin, end} gives an allowed name
+	// for a styled-text parameter. This is true if it matches the regex
+	// /^[a-zA-Z0-9_\.]+$/.
+	//
+	// @pre {begin, end} is a valid range.
+	template <typename InputIterator>
+	bool is_param_name(InputIterator begin, InputIterator end)
+	{
+		for (auto i = begin; i != end; ++i) {
 			switch (*i) {
 				case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 				case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
@@ -44,7 +72,7 @@ namespace maf {
 			}
 		}
 		
-		return true;
+		return begin != end;
 	}
 	
 	// Check if `param` is an allowed name for a styled-text parameter.
@@ -134,7 +162,7 @@ namespace maf {
 
 	// Often, styled text is created from what is called a _tagged string_:
 	// this is simply a `std::string` containing substrings of the form "^x",
-	// which are referred to as tags.
+	// which are referred to as _tags_.
 	//
 	// This function parses a given string to find all of its tags and perform
 	// some actions on the string as described below.
