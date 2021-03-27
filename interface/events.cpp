@@ -296,19 +296,16 @@ void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
 }
 
 void maf::Lynch_result::write_full(ostream &os, TextParams& params) const {
-	params["victim"] = escape_tags(game_log().get_name(*victim));
-
-	if (victim_role) {
-		params["victim.role"] = full_name(victim_role->id());
-	}
-
-
 	os << "^TLynch Result^/";
 
 	if (victim) {
+		params["victim"] = escape_tags(game_log().get_name(*victim));
+		
 		os << "{victim} was lynched!\n";
 
 		if (victim_role) {
+			params["victim.role"] = full_name(victim_role->id());
+			
 			os << "They were a {victim.role}.";
 			if (victim_role->is_troll()) {
 				os << "^i\n\nA chill blows through the air. The townsfolk who voted to lynch {victim} look nervous...";
