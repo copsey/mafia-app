@@ -165,31 +165,29 @@ namespace maf {
 	// which are referred to as _tags_.
 	//
 	// This function parses a given string to find all of its tags and perform
-	// some actions on the string as described below.
+	// a sequence of actions on the string as described below.
 	//
 	// The following tags are possible:
-	//   ^g - Create a new block of text using the style returned by
-	//        `get_style(x)`, where `x` is the character following '^' for
-	//        this tag. The previous style is pushed onto a stack, which can
-	//        hold a maximum of 8 styles.
-	//   ^h - See above.
-	//   ^i - See above.
-	//   ^c - See above.
-	//   ^T - See above.
-	//   ^/ - Close the current block of text, so that what follows uses the
-	//        previous style.
+	//   ^g - Start a new block of text using the `game` style.
+	//   ^h - Start a new block of text using the `help` style.
+	//   ^i - Start a new block of text using the `italic` style.
+	//   ^c - Start a new block of text using the `command` style.
+	//   ^T - Start a new block of text using the `title` style.
+	//   ^/ - Close the current block of text, and start a new block of text
+	//        using the previous style.
 	//   ^^ - Print a single '^' character.
 	//   ^{ - Print a single '{' character.
 	//   ^} - Print a single '}' character.
 	//
-	// The default string style is `Styled_string::Style::game`, which means
-	// strings don't need to begin with "^g".
+	// Whenever a new block of text is created, the previous style is pushed
+	// onto a stack that can hold a maximum of 8 styles. The default style is
+	// `game`, so that the input string doesn't need to begin with "^g".
 	//
 	// @throws `std::invalid_argument` if any tag "^x" is encountered that is
 	// not in the list above.
 	// @throws `std::invalid_argument` if the maximum depth of the style
 	// stack is exceeded.
-	Styled_text apply_tags(std::string_view str_with_tags);
+	Styled_text apply_tags(std::string_view input);
 
 	// Convert a tagged string into styled text, using `params` as a
 	// dictionary of text replacements. See `substitute_params` and

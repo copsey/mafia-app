@@ -103,17 +103,17 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 	}
 }
 
-maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
+maf::Styled_text maf::apply_tags(std::string_view input)
 {
 	using iterator_type = std::string_view::const_iterator;
 	
-	std::string str;
-	Styled_text text;
+	std::string current_block;
+	Styled_text output;
 	Styled_string::Style style_stack[9] = {Styled_string::Style::game};
 	auto style_iter = std::begin(style_stack);
 	
-	iterator_type begin = str_with_tags.begin();
-	iterator_type end = str_with_tags.end();
+	iterator_type begin = input.begin();
+	iterator_type end = input.end();
 
 	for (auto i = begin; ; ) {
 		// Find the next caret '^'.
@@ -121,10 +121,10 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 		// Stop when there are no more carets in the input.
 		
 		auto j = std::find(i, end, '^');
-		str.append(i, j);
+		current_block.append(i, j);
 		if (j == end) {
-			if (!str.empty()) text.emplace_back(str, *style_iter);
-			return text;
+			if (!current_block.empty()) output.emplace_back(current_block, *style_iter);
+			return output;
 		}
 		
 		// e.g.
@@ -138,7 +138,7 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 		i = j; ++i;
 		if (i == end) {
 			std::string err_msg = "There is a dangling '^' at the end of the following tagged string:\n";
-			err_msg.append(str_with_tags);
+			err_msg.append(input);
 			throw std::invalid_argument(err_msg);
 		}
 		
@@ -170,14 +170,14 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 			case '^':
 			case '{':
 			case '}':
-				str += ch;
+				current_block += ch;
 				break;
 
 			default: {
 				std::string err_msg = "The tag ^";
 				err_msg += ch;
 				err_msg.append(" is invalid, and appears in the following tagged string:\n");
-				err_msg.append(str_with_tags);
+				err_msg.append(input);
 				throw std::invalid_argument(err_msg);
 			}
 		}
@@ -188,16 +188,16 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 		bool style_has_changed = (push_style && *style_iter != new_style) || pop_style;
 
 		if (style_has_changed) {
-			if (!str.empty()) {
-				text.emplace_back(str, *style_iter);
-				str.clear();
+			if (!current_block.empty()) {
+				output.emplace_back(current_block, *style_iter);
+				current_block.clear();
 			}
 			
 			if (push_style) {
 				++style_iter;
 				if (style_iter == std::end(style_stack)) {
 					std::string err_msg = "Attempted to push too many style tags onto the stack, in the following tagged string:\n";
-					err_msg.append(str_with_tags);
+					err_msg.append(input);
 					throw std::invalid_argument(err_msg);
 				}
 				
@@ -205,7 +205,7 @@ maf::Styled_text maf::apply_tags(std::string_view str_with_tags)
 			} else { // pop_style
 				if (style_iter == std::begin(style_stack)) {
 					std::string err_msg = "Attempted to pop too many style tags from the stack, in the following tagged string:\n";
-					err_msg.append(str_with_tags);
+					err_msg.append(input);
 					throw std::invalid_argument(err_msg);
 				}
 				--style_iter;
