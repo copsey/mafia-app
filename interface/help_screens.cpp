@@ -129,7 +129,7 @@ void maf::Player_Info_Screen::write(ostream &os, TextParams& params) const {
 	const Game & game = _game_log_ref->game();
 	const Game_log & game_log = *_game_log_ref;
 	
-	params["player"] = game_log.get_name(player);
+	params["player"] = escape_tags(game_log.get_name(player));
 	params["role"] = full_name(player.role());
 	
 	if (player.has_fake_role()) {
@@ -137,7 +137,7 @@ void maf::Player_Info_Screen::write(ostream &os, TextParams& params) const {
 	}
 	
 	if (player.lynch_vote()) {
-		params["lynchVote"] = game_log.get_name(*player.lynch_vote());
+		params["lynchVote"] = escape_tags(game_log.get_name(*player.lynch_vote()));
 	}
 
 	os << "^h^TInfo: {player}^/";
@@ -159,7 +159,7 @@ void maf::Player_Info_Screen::write(ostream &os, TextParams& params) const {
 	for (const Investigation& inv: game.investigations()) {
 		if (inv.caster() == player) {
 			os << "\n\nYou checked ";
-			os << game_log.get_name(inv.target());
+			os << escape_tags(game_log.get_name(inv.target()));
 			os << " on night ";
 			os << inv.date();
 			os << ", who appeared to be ";

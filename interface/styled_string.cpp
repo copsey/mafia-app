@@ -25,7 +25,8 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 	auto is_brace = [](char ch) { return ch == '{' || ch == '}'; };
 	
 	std::string str;
-	str.reserve(str_with_params.size()); // new string will have (roughly) same length as old string
+	str.reserve(str_with_params.size()); // new string will have (roughly)
+	                                     // same length as old string
 	
 	iterator_type begin = str_with_params.begin();
 	iterator_type end = str_with_params.end();
@@ -58,8 +59,8 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 			continue;
 		}
 		
-		// Otherwise, check the type of brace identified. We're trying to form a
-		// parameter name here, so a closing brace '}' counts as an error.
+		// Otherwise, check the type of brace identified. We're trying to form
+		// a parameter name here, so a closing brace '}' counts as an error.
 		
 		if (*j == '}') {
 			std::string err_msg = "Too many '}' chars in the following string:\n";
@@ -96,7 +97,8 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		// Look up the parameter name in the dictionary.
 		// It's an error if the parameter is missing.
 		
-		std::string key{i, j};
+		auto length = static_cast<std::string_view::size_type>(j - i);
+		std::string_view key{i, length};
 		auto val_iter = params.find(key);
 		
 		if (val_iter == params.end()) {
@@ -111,7 +113,7 @@ std::string maf::substitute_params(std::string_view str_with_params, TextParams 
 		// and prepare for the next loop iteration.
 		
 		std::string_view val = (*val_iter).second;
-		str.append(escape_tags(val));
+		str.append(val);
 		
 		i = j + 1;
 	}

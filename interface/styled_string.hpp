@@ -101,9 +101,13 @@ namespace maf {
 	// A vector of styled strings, used to form a block of text.
 	using Styled_text = std::vector<Styled_string>;
 	
-	// A map from strings to strings, used as substitutions when creating a
-	// block of text.
-	using TextParams = std::map<std::string, std::string>;
+	// A map from strings (treated as parameter names) to strings (treated as
+	// substitutions).
+	//
+	// Note that the map only holds views into its keys, whereas the values
+	// are fully owned. Typically, the parameter name will be a compile-time
+	// constant.
+	using TextParams = std::map<std::string_view, std::string>;
 
 	// Find all strings of the form "{substitute}" in `str_with_params`, and
 	// replace them with the corresponding value from `params`.
