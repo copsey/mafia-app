@@ -156,15 +156,15 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 			glog.kick_player(pl.id());
 			glog.advance();
 		}
-		else if (commands_match(commands, {"vote", "", ""})) {
-			const Player &voter = glog.find_player(commands[1]);
-			const Player &target = glog.find_player(commands[2]);
+		else if (commands_match(commands, {"", "vote", ""})) {
+			auto & voter = glog.find_player(commands[0]);
+			auto & target = glog.find_player(commands[2]);
 
 			glog.cast_lynch_vote(voter.id(), target.id());
 			glog.advance();
 		}
-		else if (commands_match(commands, {"abstain", ""})) {
-			const Player &voter = glog.find_player(commands[1]);
+		else if (commands_match(commands, {"", "abstain"})) {
+			auto & voter = glog.find_player(commands[0]);
 
 			glog.clear_lynch_vote(voter.id());
 			glog.advance();
@@ -173,9 +173,9 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 			glog.process_lynch_votes();
 			glog.advance();
 		}
-		else if (commands_match(commands, {"duel", "", ""})) {
-			const Player &caster = glog.find_player(commands[1]);
-			const Player &target = glog.find_player(commands[2]);
+		else if (commands_match(commands, {"", "duel", ""})) {
+			auto & caster = glog.find_player(commands[0]);
+			auto & target = glog.find_player(commands[2]);
 
 			glog.stage_duel(caster.id(), target.id());
 			glog.advance();
@@ -194,8 +194,8 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 			glog.kick_player(pl.id());
 			glog.advance();
 		}
-		else if (commands_match(commands, {"duel", "", ""})) {
-			const Player & caster = glog.find_player(commands[1]);
+		else if (commands_match(commands, {"", "duel", ""})) {
+			const Player & caster = glog.find_player(commands[0]);
 			const Player & target = glog.find_player(commands[2]);
 
 			glog.stage_duel(caster.id(), target.id());
