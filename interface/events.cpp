@@ -438,14 +438,14 @@ void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
 		}
 	} else {
 		if (commands_match(commands, {"kill", ""}) && _mafiosi.size() == 1) {
-			Player const& caster = *(_mafiosi.front());
-			Player const& target = glog.find_player(commands[1]);
+			auto & caster = *(_mafiosi.front());
+			auto & target = glog.find_player(commands[1]);
 
 			glog.cast_mafia_kill(caster.id(), target.id());
 			_go_to_sleep = true;
-		} else if (commands_match(commands, {"kill", "", ""})) {
-			const Player &caster = glog.find_player(commands[1]);
-			const Player &target = glog.find_player(commands[2]);
+		} else if (commands_match(commands, {"", "kill", ""})) {
+			auto & caster = glog.find_player(commands[0]);
+			auto & target = glog.find_player(commands[2]);
 
 			glog.cast_mafia_kill(caster.id(), target.id());
 			_go_to_sleep = true;
@@ -504,7 +504,7 @@ void maf::Mafia_meeting::write_full(std::ostream & out, TextParams& params) cons
 		out << "\n";
 		out << "The mafia are ready to choose their next victim.\n";
 		out << "\n";
-		out << "^hEntering ^ckill A B^/ will make player ^cA^/ attempt to kill player ^cB^/. Player ^cA^/ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter ^cskip^/ instead.";
+		out << "^hEntering ^cA kill B^/ will make player ^cA^/ attempt to kill player ^cB^/. Player ^cA^/ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter ^cskip^/ instead.";
 	}
 }
 
