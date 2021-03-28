@@ -107,29 +107,6 @@ namespace maf {
 		{ }
 	};
 
-	// Convert the character 'x' at the end of a tag "^x" into its
-	// corresponding style.
-	//
-	// The following characters are recognised:
-	//   'g' -> `Style::game`
-	//   'h' -> `Style::help`
-	//   'i' -> `Style::italic`
-	//   'c' -> `Style::command`
-	//   'T' -> `Style::title`
-	//
-	// If `ch` is not in the list above, return `Styled_string::Style::game`.
-	inline Styled_string::Style get_style(char ch)
-	{
-		switch (ch) {
-			case 'g':  return Styled_string::Style::game;
-			case 'h':  return Styled_string::Style::help;
-			case 'i':  return Styled_string::Style::italic;
-			case 'c':  return Styled_string::Style::command;
-			case 'T':  return Styled_string::Style::title;
-			default:   return Styled_string::Style::game;
-		}
-	}
-
 	// A vector of styled strings, used to form a block of text.
 	using Styled_text = std::vector<Styled_string>;
 	
@@ -140,6 +117,53 @@ namespace maf {
 	// are fully owned. Typically, the parameter name will be a compile-time
 	// constant.
 	using TextParams = std::map<std::string_view, std::string>;
+
+	namespace _impl {
+		inline Styled_string::Style get_style(char ch)
+		{
+			switch (ch) {
+				case 'g':  return Styled_string::Style::game;
+				case 'h':  return Styled_string::Style::help;
+				case 'i':  return Styled_string::Style::italic;
+				case 'c':  return Styled_string::Style::command;
+				case 'T':  return Styled_string::Style::title;
+				default:   return Styled_string::Style::game;
+			}
+		}
+		
+		struct StyleStack {
+			Styled_string::Style top() const { return *iter; }
+			
+			bool push(Styled_string::Style new_style) {
+				if (std::next(iter) == std::end(stack)) return false;
+				
+				++iter;
+				*iter = new_style;
+				return true;
+			}
+			
+			bool pop() {
+				if (iter == std::begin(stack)) return false;
+				
+				--iter;
+				return true;
+			}
+			
+		private:
+			Styled_string::Style stack[9] = {Styled_string::Style::game};
+			Styled_string::Style * iter = std::begin(stack);
+		};
+
+		inline void move_block(Styled_text & text,
+							   std::string & block,
+							   Styled_string::Style style)
+		{
+			if (!block.empty()) {
+				text.emplace_back(block, style);
+				block.clear();
+			}
+		}
+	}
 
 	// Error code for exceptions that can be thrown when calling
 	// `substitute_params`.
@@ -209,8 +233,8 @@ namespace maf {
 		
 		std::string output;
 		
-		for (auto i = begin; ; ) {
-			auto j = std::find_if(i, end, is_brace);
+		for (BidirectionalIterator i = begin, j; /**/; i = std::next(j)) {
+			j = std::find_if(i, end, is_brace);
 			output.append(i, j);
 			if (j == end) return output;
 			
@@ -226,7 +250,6 @@ namespace maf {
 			
 			if (j != begin && *std::prev(j) == '^') {
 				output += *j;
-				i = j; ++i;
 				continue;
 			}
 			
@@ -235,7 +258,7 @@ namespace maf {
 				throw substitute_params_error{errc, j};
 			}
 			
-			i = j; ++i;
+			i = std::next(j);
 			j = std::find(i, end, '}');
 			if (j == end) {
 				auto errc = substitute_params_errc::too_many_opening_braces;
@@ -264,8 +287,6 @@ namespace maf {
 			
 			std::string_view val = (*param_iter).second;
 			output += val;
-			
-			i = j; ++i;
 		}
 	}
 	
@@ -300,8 +321,9 @@ namespace maf {
 	// this is simply a `std::string` containing substrings of the form "^x",
 	// which are referred to as _tags_.
 	//
-	// This function parses a given string to find all of its tags and perform
-	// a sequence of actions on the string as described below.
+	// This function parses the string contained in the range `{begin,end}` to
+	// find all of its tags and perform a sequence of actions as described
+	// below.
 	//
 	// The following tags are possible:
 	//   ^g - Start a new block of text using the `game` style.
@@ -319,6 +341,8 @@ namespace maf {
 	// onto a stack that can hold a maximum of 8 styles. The default style is
 	// `game`, so that the input string doesn't need to begin with "^g".
 	//
+	// @pre `{begin,end}` is a valid range.
+	//
 	// @throws `apply_tags_error` with code `dangling_caret` if there's an
 	// unescaped '^' character at the end of the input string.
 	//
@@ -330,7 +354,84 @@ namespace maf {
 	//
 	// @throws `apply_tags_error` with code `extra_closing_tag` if there's a
 	// "^/" tag without a corresponding block of text.
-	Styled_text apply_tags(std::string_view input);
+	template <typename ForwardIterator>
+	Styled_text apply_tags(ForwardIterator begin, ForwardIterator end)
+	{
+		std::string block;
+		Styled_text output;
+		_impl::StyleStack style_stack;
+
+		for (ForwardIterator i = begin, j; /**/; ++i) {
+			auto current_style = style_stack.top();
+			
+			j = std::find(i, end, '^');
+			block.append(i, j);
+			if (j == end) {
+				_impl::move_block(output, block, current_style);
+				return output;
+			}
+			
+			// e.g.
+			//      i                  j
+			//      |                  |
+			// ...^^ some example text ^cand so on...
+			
+			i = std::next(j);
+			if (i == end) {
+				auto errc = apply_tags_errc::dangling_caret;
+				throw apply_tags_error{errc, j};
+			}
+			
+			// e.g.
+			//                         ji
+			//                         ||
+			// ...^^ some example text ^cand so on...
+
+			switch (char ch = *i) {
+				case 'g':
+				case 'h':
+				case 'i':
+				case 'c':
+				case 'T': {
+					auto new_style = _impl::get_style(ch);
+					
+					if (current_style != new_style) {
+						if (!style_stack.push(new_style)) {
+							auto errc = apply_tags_errc::too_many_styles;
+							throw apply_tags_error{errc, i};
+						}
+						
+						_impl::move_block(output, block, current_style);
+					}
+					
+					break;
+				}
+
+				case '/':
+					if (!style_stack.pop()) {
+						auto errc = apply_tags_errc::extra_closing_tag;
+						throw apply_tags_error{errc, i};
+					}
+					
+					_impl::move_block(output, block, current_style);
+					break;
+
+				case '^':
+				case '{':
+				case '}':
+					block += ch;
+					break;
+
+				default:
+					throw apply_tags_error{apply_tags_errc::invalid_tag, j};
+			}
+		}
+	}
+
+	inline Styled_text apply_tags(std::string_view input)
+	{
+		return apply_tags(input.begin(), input.end());
+	}
 }
 
 #endif
