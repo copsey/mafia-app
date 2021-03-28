@@ -478,10 +478,52 @@ const maf::Styled_text & maf::Console::output() const {
 
 void maf::Console::read_output(string_view raw_output, TextParams const& params)
 {
-	auto tagged_output = substitute_params(raw_output, params);
+	std::string tagged_output;
 	
 	try {
+		tagged_output = substitute_params(raw_output, params);
 		_output = apply_tags(tagged_output);
+	} catch (substitute_params_error const& error) {
+		std::string err_msg = "Error --- ";
+		auto iter1 = error.i;
+		auto iter2 = error.j;
+		auto pos = iter1 - raw_output.begin();
+		
+		switch (error.errc) {
+			case substitute_params_errc::invalid_parameter_name:
+				err_msg += "Invalid parameter name \"";
+				err_msg.append(iter1, iter2);
+				err_msg += "\" at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following string:";
+				break;
+				
+			case substitute_params_errc::missing_parameter:
+				err_msg += "Unrecognised parameter name \"";
+				err_msg.append(iter1, iter2);
+				err_msg += "\" at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following string:";
+				break;
+			
+			case substitute_params_errc::too_many_closing_braces:
+				err_msg += "Unexpected '}' at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following string:";
+				break;
+				
+			case substitute_params_errc::too_many_opening_braces:
+				err_msg += "No closing brace found for '{' at position ";
+				err_msg += std::to_string(pos);
+				err_msg += " in the following string:";
+				break;
+		}
+		
+		err_msg += "\n\n";
+		
+		_output = {
+			{err_msg, Styled_string::Style::game},
+			{std::string{raw_output}, Styled_string::Style::command}};
 	} catch (apply_tags_error const& error) {
 		std::string err_msg = "Error --- ";
 		auto iter = error.i;
@@ -548,6 +590,7 @@ const maf::Styled_text & maf::Console::error_message() const
 
 void maf::Console::read_error_message(string_view raw_err_msg, TextParams const& params)
 {
+	// TODO: Catch exceptions when substituting parameters
 	auto tagged_err_msg = substitute_params(raw_err_msg, params);
 	
 	// TODO: Catch exceptions when parsing the tagged string

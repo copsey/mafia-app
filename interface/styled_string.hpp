@@ -140,6 +140,42 @@ namespace maf {
 	// constant.
 	using TextParams = std::map<std::string_view, std::string>;
 
+	// Error code for exceptions that can be thrown when calling
+	// `substitute_params`.
+	enum class substitute_params_errc {
+		invalid_parameter_name,
+		missing_parameter,
+		too_many_opening_braces,
+		too_many_closing_braces
+	};
+
+	// Type for exceptions that can be thrown when calling
+	// `substitute_params`.
+	struct substitute_params_error {
+		// Error code for this exception.
+		substitute_params_errc errc;
+
+		// Position in input string where error occurred.
+		std::string_view::iterator i;
+		
+		// (Optional) iterator that forms a range {i,j} when paired with i.
+		//
+		// Only used by invalid_parameter_name and missing_parameter to
+		// signify where in the input string the parameter name occurs.
+		std::string_view::iterator j{};
+
+		substitute_params_error(substitute_params_errc errc,
+								std::string_view::iterator i)
+		: errc{errc}, i{i}
+		{ }
+		
+		substitute_params_error(substitute_params_errc errc,
+								std::string_view::iterator i,
+								std::string_view::iterator j)
+		: errc{errc}, i{i}, j{j}
+		{ }
+	};
+
 	// Find all strings of the form "{substitute}" in `str_with_params`, and
 	// replace them with the corresponding value from `params`.
 	//
