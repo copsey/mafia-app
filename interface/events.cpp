@@ -437,7 +437,13 @@ void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
 			throw Bad_commands{};
 		}
 	} else {
-		if (commands_match(commands, {"kill", "", ""})) {
+		if (commands_match(commands, {"kill", ""}) && _mafiosi.size() == 1) {
+			Player const& caster = *(_mafiosi.front());
+			Player const& target = glog.find_player(commands[1]);
+
+			glog.cast_mafia_kill(caster.id(), target.id());
+			_go_to_sleep = true;
+		} else if (commands_match(commands, {"kill", "", ""})) {
 			const Player &caster = glog.find_player(commands[1]);
 			const Player &target = glog.find_player(commands[2]);
 
@@ -453,15 +459,15 @@ void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
 	}
 }
 
-void maf::Mafia_meeting::write_full(ostream &os, TextParams& params) const
+void maf::Mafia_meeting::write_full(std::ostream & out, TextParams& params) const
 {
 	/* FIXME */
-	os << "^TMafia Meeting^/";
+	out << "^TMafia Meeting^/";
 
 	if (_go_to_sleep) {
-		os << "The mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^/ when you are ready to continue.";
+		out << "The mafia have nothing more to discuss for now, and should go back to sleep.^h\n\nEnter ^cok^/ when you are ready to continue.";
 	} else if (_initial) {
-		os << "The mafia consists of:\n";
+		out << "The mafia consists of:\n";
 
 		for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
 			auto& p_ref = *it;
@@ -469,25 +475,36 @@ void maf::Mafia_meeting::write_full(ostream &os, TextParams& params) const
 			auto player_name = escaped(game_log().get_name(*p_ref));
 			auto player_role = full_name(p_ref->role());
 			
-			os << "   " << player_name << ", the " << player_role;
-			os << ((++it == _mafiosi.end()) ? "." : ",\n");
+			out << "   " << player_name << ", the " << player_role;
+			out << ((++it == _mafiosi.end()) ? "." : ",\n");
 		}
 
-		os << "\n\nThere is not enough time left to organise a murder.";
+		out << "\n\nThere is not enough time left to organise a murder.";
+	} else if (_mafiosi.size() == 1) {
+		params["mafioso"] = escaped(game_log().get_name(*(_mafiosi.front())));
+		params["mafioso.role"] = full_name(_mafiosi.front()->role());
+
+		out << "Seated alone at a polished walnut table is {mafioso}.\n";
+		out << "\n";
+		out << "The mafia are ready to choose their next victim.\n";
+		out << "\n";
+		out << "^hEntering ^ckill A^/ will make {mafioso} attempt to kill player ^cA^/. If the mafia have chosen not to kill anybody this night, enter ^cskip^/ instead.";
 	} else {
-		os << "Seated around a polished walnut table are:\n";
+		out << "Seated around a polished walnut table are:\n";
 
 		for (auto it = _mafiosi.begin(); it != _mafiosi.end(); ) {
-			auto& p_ref = *it;
+			auto & player_ref = *it;
+			auto player_name = escaped(game_log().get_name(*player_ref));
+			auto player_role = full_name(player_ref->role());
 			
-			auto player_name = escaped(game_log().get_name(*p_ref));
-			auto player_role = full_name(p_ref->role());
-			
-			os << "   " << player_name << ", the " << player_role;
-			os << ((++it == _mafiosi.end()) ? "." : ",\n");
+			out << "   " << player_name << ", the " << player_role;
+			out << ((++it == _mafiosi.end()) ? ".\n" : ",\n");
 		}
 
-		os << "\n\nThe mafia are ready to choose their next victim.^h\n\nEntering ^ckill A B^/ will make player ^cA^/ attempt to kill player ^cB^/. Player ^cA^/ must be a member of the mafia.\n\nIf the mafia have chosen not to kill anybody this night, enter ^cskip^/.";
+		out << "\n";
+		out << "The mafia are ready to choose their next victim.\n";
+		out << "\n";
+		out << "^hEntering ^ckill A B^/ will make player ^cA^/ attempt to kill player ^cB^/. Player ^cA^/ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter ^cskip^/ instead.";
 	}
 }
 
