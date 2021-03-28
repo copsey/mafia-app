@@ -481,14 +481,14 @@ void maf::Mafia_meeting::write_full(std::ostream & out, TextParams& params) cons
 
 		out << "\n\nThere is not enough time left to organise a murder.";
 	} else if (_mafiosi.size() == 1) {
-		params["mafioso"] = escaped(game_log().get_name(*(_mafiosi.front())));
-		params["mafioso.role"] = full_name(_mafiosi.front()->role());
+		params["player"] = escaped(game_log().get_name(*(_mafiosi.front())));
+		params["role"] = full_name(_mafiosi.front()->role());
 
-		out << "Seated alone at a polished walnut table is {mafioso}.\n";
+		out << "Seated alone at a polished walnut table is {player}.\n";
 		out << "\n";
 		out << "The mafia are ready to choose their next victim.\n";
 		out << "\n";
-		out << "^hEntering ^ckill A^/ will make {mafioso} attempt to kill player ^cA^/. If the mafia have chosen not to kill anybody this night, enter ^cskip^/ instead.";
+		out << "^hEntering ^ckill A^/ will make {player} attempt to kill player ^cA^/. If {player} doesn't want to kill anybody this night, enter ^cskip^/ instead.";
 	} else {
 		out << "Seated around a polished walnut table are:\n";
 
