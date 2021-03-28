@@ -406,7 +406,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 	catch (const Game_log::Player_not_found &e) {
 		err_params["player"] = escaped(e.name);
 		
-		err << "^TPlayer not found!^hA player named ^c{name}^h could not be found.";
+		err << "^TPlayer not found!^hA player named ^c{player}^h could not be found.";
 	}
 	catch (const Event::Bad_commands &e) {
 		err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
