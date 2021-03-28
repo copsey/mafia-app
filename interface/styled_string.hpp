@@ -2,6 +2,7 @@
 #define MAFIA_STYLED_STRING_H
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <string>
 #include <string_view>
@@ -176,8 +177,8 @@ namespace maf {
 		{ }
 	};
 
-	// Find all strings of the form "{substitute}" in `str_with_params`, and
-	// replace them with the corresponding value from `params`.
+	// Find all strings of the form "{substitute}" in the range `{begin,end}`,
+	// and replace them with the corresponding value from `params`.
 	//
 	// Braces preceded by carets "^" are considered escaped and are ignored.
 	//
@@ -187,14 +188,92 @@ namespace maf {
 	// will be transformed into
 	//     "This is my NEW STRING with ^{braces^}."
 	//
-	// @throws `std::invalid_argument` if an invalid parameter name is
-	// encountered. (See `is_param_name` for more information.)
-	// @throws `std::invalid_argument` for any parameter names that cannot be
-	// found in `params`.
-	// @throws `std::invalid_argument` if there are different numbers of
-	// (unescaped) opening braces "{" and closing braces "}".
-	std::string substitute_params(std::string_view input,
-								  TextParams const& params);
+	// @pre `{begin,end}` is a valid range.
+	//
+	// @throws `substitute_params_error` with code `invalid_parameter_name` if
+	// an invalid parameter name is encountered. (See `is_param_name` for more
+	// information.)
+	//
+	// @throws `substitute_params_error` with code `missing_parameter` for any
+	// parameter names that cannot be found in `params`.
+	//
+	// @throws `substitute_params_error` with code `too_many_opening_braces`
+	// or `too_many_closing_braces` if there are different numbers of
+	// (unescaped) opening braces '{' and closing braces '}'.
+	template <typename BidirectionalIterator>
+	std::string substitute_params(BidirectionalIterator begin,
+								  BidirectionalIterator end,
+								  TextParams const& params)
+	{
+		auto is_brace = [](char ch) { return ch == '{' || ch == '}'; };
+		
+		std::string output;
+		
+		for (auto i = begin; ; ) {
+			auto j = std::find_if(i, end, is_brace);
+			output.append(i, j);
+			if (j == end) return output;
+			
+			// e.g. 1
+			//         i            j
+			//         |            |
+			// "{Lorem} ipsum dolor {sit} amet"
+			
+			// e.g. 2
+			//          i   j
+			//          |   |
+			// "Nulla ^{sit^} amet"
+			
+			if (j != begin && *std::prev(j) == '^') {
+				output += *j;
+				i = j; ++i;
+				continue;
+			}
+			
+			if (*j == '}') {
+				auto errc = substitute_params_errc::too_many_closing_braces;
+				throw substitute_params_error{errc, j};
+			}
+			
+			i = j; ++i;
+			j = std::find(i, end, '}');
+			if (j == end) {
+				auto errc = substitute_params_errc::too_many_opening_braces;
+				throw substitute_params_error{errc, std::prev(i)};
+			}
+			
+			// e.g.
+			//                       i  j
+			//                       |  |
+			// "{Lorem} ipsum dolor {sit} amet"
+			
+			if (!is_param_name(i, j)) {
+				auto errc = substitute_params_errc::invalid_parameter_name;
+				throw substitute_params_error{errc, i, j};
+			}
+			
+			auto distance = std::distance(i, j);
+			auto length = static_cast<std::string_view::size_type>(distance);
+			std::string_view name{i, length};
+			
+			auto param_iter = params.find(name);
+			if (param_iter == params.end()) {
+				auto errc = substitute_params_errc::missing_parameter;
+				throw substitute_params_error{errc, i, j};
+			}
+			
+			std::string_view val = (*param_iter).second;
+			output += val;
+			
+			i = j; ++i;
+		}
+	}
+	
+	inline std::string substitute_params(std::string_view input,
+								         TextParams const& params)
+	{
+		return substitute_params(input.begin(), input.end(), params);
+	}
 
 	// Error code for exceptions that can be thrown when calling `apply_tags`.
 	enum class apply_tags_errc {
@@ -240,14 +319,17 @@ namespace maf {
 	// onto a stack that can hold a maximum of 8 styles. The default style is
 	// `game`, so that the input string doesn't need to begin with "^g".
 	//
-	// @throws `apply_tags_error{apply_tags_errc::dangling_caret, ...}` if
-	// there's an unescaped "^" character at the end of the input string.
-	// @throws `apply_tags_error{apply_tags_errc::invalid_tag, ...}` if any
-	// tag "^x" is encountered that is not in the list above.
-	// @throws `apply_tags_error{apply_tags_errc::too_many_styles, ...}` if
-	// the maximum depth of the style stack is exceeded.
-	// @throws `apply_tags_error{apply_tags_errc::extra_closing_tag, ...}`
-	// if there's a "^/" tag without a corresponding block of text.
+	// @throws `apply_tags_error` with code `dangling_caret` if there's an
+	// unescaped '^' character at the end of the input string.
+	//
+	// @throws `apply_tags_error` with code `invalid_tag` if any tag "^x" is
+	// encountered that is not in the list above.
+	//
+	// @throws `apply_tags_error` with code `too_many_styles` if the maximum
+	// depth of the style stack is exceeded.
+	//
+	// @throws `apply_tags_error` with code `extra_closing_tag` if there's a
+	// "^/" tag without a corresponding block of text.
 	Styled_text apply_tags(std::string_view input);
 }
 
