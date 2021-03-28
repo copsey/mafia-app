@@ -3,7 +3,7 @@
 //  Mafia
 //
 //  Created by Jack Copsey on 02/05/2015.
-//  Copyright (c) 2015 Ponderous Programs. All rights reserved.
+//  Copyright (c) 2015-2021. All rights reserved.
 //
 
 #import "InterfaceGlue.h"
@@ -18,7 +18,7 @@
    std::string_view str = {self.input.stringValue.UTF8String};
 
    if (_console.input(str)) {
-      /* FIXME: make more reliable, i.e. "preset i" doesn't work with this method. */
+      /* FIXME: make more reliable, e.g., "preset i" doesn't get caught by this method */
       if (str == "begin" || str == "preset") {
          [_delegate playMusic:MafiaPlaylistItem_Beginning];
       } else if (str == "end") {
@@ -74,37 +74,45 @@
 
    self.output.textStorage.attributedString = attributedString;
 
-   // Play some music.
-   if (_console.has_game()) {
-      const maf::Event *event = &_console.game_log().current_event();
-
-      if (auto e = dynamic_cast<const maf::Time_changed *>(event)) {
-         if (e->time == maf::Time::day) {
-            [_delegate playMusic:MafiaPlaylistItem_Daytime];
-         } else {
-            switch (e->date % 2) {
-               case 0:
-                  [_delegate playMusic:MafiaPlaylistItem_Nighttime1];
-                  break;
-
-               case 1:
-                  [_delegate playMusic:MafiaPlaylistItem_Nighttime2];
-                  break;
-            }
-         }
-      }
-      else if (auto e = dynamic_cast<const maf::Lynch_result *>(event)) {
-         if (e->victim && e->victim_role->is_troll()) {
-            [_delegate playMusic:MafiaPlaylistItem_TrollLynch];
-         }
-      }
-      else if (auto e = dynamic_cast<const maf::Game_ended *>(event)) {
-         // Hide compiler warning that e is unused
-         e = nullptr;
-
-         [_delegate playMusic:MafiaPlaylistItem_GameEnded];
-      }
-   }
+	// Play some music.
+	if (_console.has_game()) {
+		const maf::Event *event = &_console.game_log().current_event();
+		
+		if (auto e = dynamic_cast<const maf::Time_changed *>(event); e) {
+			if (e->time == maf::Time::day) {
+				[_delegate playMusic:MafiaPlaylistItem_Daytime];
+			} else {
+				switch (arc4random_uniform(4)) {
+					case 0:
+						[_delegate playMusic:MafiaPlaylistItem_Nighttime1];
+						break;
+						
+					case 1:
+						[_delegate playMusic:MafiaPlaylistItem_Nighttime2];
+						break;
+						
+					case 2:
+						[_delegate playMusic:MafiaPlaylistItem_Nighttime3];
+						break;
+						
+					case 3:
+						[_delegate playMusic:MafiaPlaylistItem_Nighttime4];
+						break;
+				}
+			}
+		}
+		else if (auto e = dynamic_cast<const maf::Lynch_result *>(event); e) {
+			if (e->victim && e->victim_role->is_troll()) {
+				[_delegate playMusic:MafiaPlaylistItem_TrollLynch];
+			}
+		}
+		else if (auto e = dynamic_cast<const maf::Duel_result *>(event); e) {
+			[_delegate playMusic:MafiaPlaylistItem_Duel];
+		}
+		else if (auto e = dynamic_cast<const maf::Game_ended *>(event); e) {
+			[_delegate playMusic:MafiaPlaylistItem_GameEnded];
+		}
+	}
 }
 
 - (void)showErrorMessage {

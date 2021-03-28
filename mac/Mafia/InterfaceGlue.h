@@ -3,7 +3,7 @@
 //  Mafia
 //
 //  Created by Jack Copsey on 02/05/2015.
-//  Copyright (c) 2015 Ponderous Programs. All rights reserved.
+//  Copyright (c) 2015-2021. All rights reserved.
 //
 
 #include "console.hpp"

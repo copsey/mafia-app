@@ -1,17 +1,20 @@
 //
 //  MafiaPlaylist.h
-//  Mafiapp X
+//  Mafia
 //
 //  Created by Jack Copsey on 27/04/2013.
-//  Copyright (c) 2013 Esrever. All rights reserved.
+//  Copyright (c) 2013-2021. All rights reserved.
 //
 
 typedef enum {
-   MafiaPlaylistItem_None = -1,
-   MafiaPlaylistItem_Beginning,
-   MafiaPlaylistItem_Nighttime1,
-   MafiaPlaylistItem_Nighttime2,
-   MafiaPlaylistItem_Daytime,
-   MafiaPlaylistItem_GameEnded,
-   MafiaPlaylistItem_TrollLynch
+	MafiaPlaylistItem_None = -1,
+	MafiaPlaylistItem_Beginning,
+	MafiaPlaylistItem_Daytime,
+	MafiaPlaylistItem_Nighttime1,
+	MafiaPlaylistItem_Nighttime2,
+	MafiaPlaylistItem_Nighttime3,
+	MafiaPlaylistItem_Nighttime4,
+	MafiaPlaylistItem_GameEnded,
+	MafiaPlaylistItem_TrollLynch,
+	MafiaPlaylistItem_Duel
 } MafiaPlaylistItem;
