@@ -6,7 +6,7 @@
 
 #include "../riketi/ref.hpp"
 
-#include "styled_string.hpp"
+#include "format.hpp"
 #include "../logic/logic.hpp"
 
 namespace maf {

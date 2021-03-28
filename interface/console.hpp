@@ -12,7 +12,7 @@
 #include "help_screens.hpp"
 #include "questions.hpp"
 #include "setup_screen.hpp"
-#include "styled_string.hpp"
+#include "format.hpp"
 
 namespace maf {
 	// Signifies that no preset is defined with index i.
