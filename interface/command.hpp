@@ -53,8 +53,8 @@ namespace maf {
 	//
 	// @example `"do X   with Y"` maps to `{"do", "X", "with", "Y"}`.
 	//
-   // @pre `{begin,end}` is a valid range.
-   // @pre `ForwardIter` can be converted to `std::string_view::iterator`.
+	// @pre `{begin,end}` is a valid range.
+	// @pre `ForwardIter` can be converted to `std::string_view::iterator`.
 	template <typename ForwardIter>
 	inline auto parse_input(ForwardIter begin, ForwardIter end)
 	-> std::vector<std::string_view>
