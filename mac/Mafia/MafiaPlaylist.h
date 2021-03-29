@@ -13,7 +13,6 @@ typedef enum {
 	MafiaPlaylistItem_Nighttime1,
 	MafiaPlaylistItem_Nighttime2,
 	MafiaPlaylistItem_Nighttime3,
-	MafiaPlaylistItem_Nighttime4,
 	MafiaPlaylistItem_GameEnded,
 	MafiaPlaylistItem_TrollLynch,
 	MafiaPlaylistItem_Duel
