@@ -94,10 +94,6 @@
 					case 2:
 						[_delegate playMusic:MafiaPlaylistItem_Nighttime3];
 						break;
-						
-					case 3:
-						[_delegate playMusic:MafiaPlaylistItem_Nighttime4];
-						break;
 				}
 			}
 		}
