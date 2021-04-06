@@ -1,3 +1,4 @@
+#include <charconv>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -38,7 +39,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 
 	try {
 		if (commands.size() == 0) {
-			err << "^TMissing input!^hEntering a blank input has no effect.\n(enter ^chelp^h if you're unsure what to do.)";
+			err << "=Missing input!=\n\nEntering a blank input has no effect.\n(enter @help@ if you're unsure what to do.)";
 		}
 		else if (commands_match(commands, {"help"})) {
 			if (has_game()) {
@@ -71,7 +72,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 		else if (commands_match(commands, {"info", ""})) {
 			if (!has_game()) {
-				err << "^TNo game in progress!^hThere is no game in progress to display information about.";
+				err << "=No game in progress!=\n\nThere is no game in progress to display information about.";
 			} else {
 				auto& approx_name = commands[1];
 				auto& player = _game_log->find_player(approx_name);
@@ -83,7 +84,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 			if (commands_match(commands, {"ok"})) {
 				clear_help_screen();
 			} else {
-				err << "^TInvalid input!^hPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering ^cok^h)";
+				err << "=Invalid input!=\n\nPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering @ok@)";
 			}
 		}
 		else if (has_question()) {
@@ -93,7 +94,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 		else if (commands_match(commands, {"end"})) {
 			if (!has_game()) {
-				err << "^TNo game in progress!^hThere is no game in progress to end.";
+				err << "=No game in progress!=\n\nThere is no game in progress to end.";
 			} else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
 				end_game();
 			} else {
@@ -112,34 +113,17 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 		else if (commands_match(commands, {"preset", ""})) {
 			int i;
-			auto& i_str = commands[1];
+			auto& str = commands[1];
 
-			// FIXME: replace `std::stoi` with `std::from_chars` when implemented in libc++
-//         if (auto result = std::from_chars(std::begin(i_str), std::end(i_str), i);
-//             result.ec == std::errc{})
-//         {
-//            begin_preset(i);
-//         }
-//         else {
-//            err << "^TInvalid input!^hThe string ^c";
-//            err << i_str;
-//            err << "^h could not be converted into a preset index. (i.e. a relatively-small integer)";
-//         }
-
-			bool i_str_valid;
-
-			try {
-				i = std::stoi(string{i_str});
-				i_str_valid = true;
-			}
-			catch (std::logic_error) {
-				err_params["str"] = escaped(i_str);
+			if (auto result = std::from_chars(std::begin(str), std::end(str), i);
+				result.ec == std::errc{})
+			{
+				begin_preset(i);
+			} else {
+				err_params["str"] = escaped(str);
 				
-				err << "^TInvalid input!^hThe string ^c{str}^h could not be converted into a preset index. (i.e. a relatively-small integer)";
-				i_str_valid = false;
+				err << "=Invalid input!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
 			}
-
-			if (i_str_valid) begin_preset(i);
 		}
 		else {
 			_setup_screen.do_commands(commands);
@@ -158,19 +142,19 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		/* FIXME: enter "skip" to skip a player's ability use at night and the mafia's kill. This should result in a yes/no screen to be safe. */
 	}
 	catch (const Rulebook::Missing_role_alias &e) {
-		err_params["alias"] = e.alias;
+		err_params["alias"] = escaped(e.alias);
 		
-		err << "^TInvalid alias!^hNo role could be found whose alias is ^c{alias}^h.\nNote that aliases are case-sensitive.\n(enter ^clist r^h to see a list of each role and its alias.)";
+		err << "=Invalid alias!=\n\nNo role could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list r@ to see a list of each role and its alias.)";
 	}
 	catch (const Rulebook::Missing_wildcard_alias &e) {
-		err_params["alias"] = e.alias;
+		err_params["alias"] = escaped(e.alias);
 		
-		err << "^TInvalid alias!^hNo wildcard could be found whose alias is ^c{alias}^h.\nNote that aliases are case-sensitive.\n(enter ^clist w^h to see a list of each wildcard and its alias.)";
+		err << "=Invalid alias!=\n\nNo wildcard could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list w@ to see a list of each wildcard and its alias.)";
 	}
 	catch (const Game::Kick_failed &e) {
 		err_params["player"] = escaped(_game_log->get_name(*e.player));
 		
-		err << "^TKick failed!^h";
+		err << "=Kick failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Kick_failed::Reason::game_ended:
@@ -187,7 +171,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Lynch_failed &e) {
-		err << "^TLynch failed!^h";
+		err << "=Lynch failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Lynch_failed::Reason::game_ended:
@@ -203,7 +187,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["voter"] = escaped(_game_log->get_name(*e.voter));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
-		err << "^TLynch vote failed!^h";
+		err << "=Lynch vote failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Lynch_vote_failed::Reason::game_ended:
@@ -231,7 +215,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 
-		err << "^TDuel failed!^h";
+		err << "=Duel failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Duel_failed::Reason::game_ended:
@@ -260,25 +244,25 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Begin_night_failed &e) {
-		err << "^TCannot begin night!^h";
+		err << "=Cannot begin night!=\n\n";
 
 		switch (e.reason) {
 			case Game::Begin_night_failed::Reason::game_ended:
-				err << "The game has ended, and so cannot be continued.\n(enter ^cend^h to return to the game setup screen.)";
+				err << "The game has ended, and so cannot be continued.\n(enter @end@ to return to the game setup screen.)";
 				break;
 
 			case Game::Begin_night_failed::Reason::already_night:
 				err << "It is already nighttime.";
 
 			case Game::Begin_night_failed::Reason::lynch_can_occur:
-				err << "The next night cannot begin until a lynch has taken place.\n(enter ^clynch^h to submit the current lynch votes.)";
+				err << "The next night cannot begin until a lynch has taken place.\n(enter @lynch@ to submit the current lynch votes.)";
 				break;
 		}
 	}
 	catch (const Game::Choose_fake_role_failed &e) {
 		err_params["player"] = escaped(_game_log->get_name(*e.player));
 		
-		err << "^TChoose fake role failed!^h";
+		err << "=Choose fake role failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Choose_fake_role_failed::Reason::game_ended:
@@ -302,7 +286,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
-		err << "^TMafia kill failed!^h";
+		err << "=Mafia kill failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Mafia_kill_failed::Reason::game_ended:
@@ -332,7 +316,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
-		err << "^TKill failed!^h";
+		err << "=Kill failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Kill_failed::Reason::game_ended:
@@ -345,7 +329,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 				err << "{caster} cannot kill {target}, because {target} is no longer present in the game.";
 				break;
 			case Game::Kill_failed::Reason::caster_is_target:
-				err << "{caster} is not allowed to kill themself.\n(nice try.)^{s^}s";
+				err << "{caster} is not allowed to kill themself.\n(nice try.)";
 				break;
 		}
 	}
@@ -353,7 +337,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
-		err << "^THeal failed!^h";
+		err << "=Heal failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Heal_failed::Reason::game_ended:
@@ -377,7 +361,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
 		
-		err << "^TInvestigation failed!^h";
+		err << "=Investigation failed!=\n\n";
 
 		switch (e.reason) {
 			case Game::Investigate_failed::Reason::game_ended:
@@ -398,62 +382,62 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Skip_failed &e) {
-		err << "^TSkip failed!^hThe current ability, if one is showing, cannot be skipped.";
+		err << "=Skip failed!=\n\nThe current ability, if one is showing, cannot be skipped.";
 	}
 	catch (const Game_log::Players_to_cards_mismatch &e) {
-		err << "^TMismatch!^hA new game cannot begin with an unequal number of players and cards.";
+		err << "=Mismatch!=\n\nA new game cannot begin with an unequal number of players and cards.";
 	}
 	catch (const Game_log::Player_not_found &e) {
 		err_params["player"] = escaped(e.name);
 		
-		err << "^TPlayer not found!^hA player named ^c{player}^h could not be found.";
+		err << "=Player not found!=\n\nA player named @{player}@ could not be found.";
 	}
 	catch (const Event::Bad_commands &e) {
-		err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+		err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter @help@ if you're unsure what to do.)";
 	}
 	catch (const Setup_screen::Bad_player_name &e) {
-		err << "^TInvalid name!^hThe name of a player can only contain letters and numbers.";
+		err << "=Invalid name!=\n\nThe name of a player can only contain letters and numbers.";
 	}
 	catch (const Setup_screen::Player_already_exists &e) {
 		err_params["player"] = escaped(e.name);
 		
-		err << "^TPlayer already exists!^hA player named ^c{player}^h has already been selected to play in the next game.\nNote that names are case-insensitive.)";
+		err << "=Player already exists!=\n\nA player named @{player}@ has already been selected to play in the next game.\nNote that names are case-insensitive.)";
 	}
 	catch (const Setup_screen::Player_missing &e) {
 		err_params["player"] = escaped(e.name);
 		
-		err << "^TMissing player!^hA player named ^c{player}^h could not be found.";
+		err << "=Missing player!=\n\nA player named @{player}@ could not be found.";
 	}
 	catch (const Setup_screen::Rolecard_unselected &e) {
-		err_params["alias"] = e.role->alias();
+		err_params["alias"] = escaped(e.role->alias());
 		
-		err << "^TRolecard not selected!^hNo copies of the rolecard with alias ^c{alias}^h have been selected.";
+		err << "=Rolecard not selected!=\n\nNo copies of the rolecard with alias @{alias}@ have been selected.";
 	}
 	catch (const Setup_screen::Wildcard_unselected &e) {
-		err_params["alias"] = e.wildcard->alias();
+		err_params["alias"] = escaped(e.wildcard->alias());
 		
-		err << "^TWildcard not selected!^hNo copies of the wildcard with alias ^c{alias}^h have been selected.";
+		err << "=Wildcard not selected!=\n\nNo copies of the wildcard with alias @{alias}@ have been selected.";
 	}
 	catch (const Setup_screen::Bad_commands &e) {
-		err << "^TUnrecognised input!^hThe text that you entered couldn't be recognised.\n(enter ^chelp^h if you're unsure what to do.)";
+		err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter @help@ if you're unsure what to do.)";
 	}
 	catch (const Question::Bad_commands &e) {
-		err << "^TInvalid input!^hPlease answer the question being shown before trying to do anything else.";
+		err << "=Invalid input!=\n\nPlease answer the question being shown before trying to do anything else.";
 	}
 	catch (const No_game_in_progress &e) {
-		err << "^TNo game in progress!^hThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter ^cbegin^h to begin a new game, or ^chelp^h for a list of usable commands.)";
+		err << "=No game in progress!=\n\nThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter @begin@ to begin a new game, or @help@ for a list of usable commands.)";
 	}
 	catch (const Begin_game_failed &e) {
 		switch (e.reason) {
 			case Begin_game_failed::Reason::game_already_in_progress:
-				 err << "^TGame in progress!^hA new game cannot begin until the current game ends.\n(enter ^cend^h to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
+				 err << "=Game in progress!=\n\nA new game cannot begin until the current game ends.\n(enter @end@ to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
 				break;
 		}
 	}
 	catch (const Missing_preset &e) {
 		err_params["index"] = std::to_string(e.index);
 		
-		err << "^TMissing preset!^hThere is no preset defined for the index {index}.";
+		err << "=Missing preset!=There is no preset defined for the index {index}.";
 	}
 
 	if (err.tellp() == 0) {
@@ -472,17 +456,17 @@ bool maf::Console::input(string_view input) {
 	return do_commands(v);
 }
 
-const maf::Styled_text & maf::Console::output() const {
+maf::StyledText const& maf::Console::output() const {
 	return _output;
 }
 
-void maf::Console::read_output(string_view raw_output, TextParams const& params)
+void maf::Console::read_output(std::string_view raw_output, TextParams const& params)
 {
-	std::string tagged_output;
+	std::string preprocessed_output;
 	
 	try {
-		tagged_output = substitute_params(raw_output, params);
-		_output = apply_tags(tagged_output);
+		preprocessed_output = substitute_params(raw_output, params);
+		_output = format_text(preprocessed_output);
 	} catch (substitute_params_error const& error) {
 		std::string err_msg = "Error --- ";
 		auto iter1 = error.i;
@@ -522,34 +506,22 @@ void maf::Console::read_output(string_view raw_output, TextParams const& params)
 		err_msg += "\n\n";
 		
 		_output = {
-			{err_msg, Styled_string::Style::game},
-			{std::string{raw_output}, Styled_string::Style::command}};
-	} catch (apply_tags_error const& error) {
+			{err_msg, {}},
+			{std::string{raw_output}, StyledString::monospace_mask}};
+	} catch (format_text_error const& error) {
 		std::string err_msg = "Error --- ";
 		auto iter = error.i;
-		auto pos = iter - std::string_view{tagged_output}.begin();
+		auto pos = iter - std::string_view{preprocessed_output}.begin();
 		
 		switch (error.errc) {
-			case apply_tags_errc::dangling_caret:
-				err_msg += "There is a dangling '^' at the end of the following tagged string:";
+			case format_text_errc::dangling_backslash:
+				err_msg += "There is a dangling '\\' at the end of the following tagged string:";
 				break;
 				
-			case apply_tags_errc::extra_closing_tag:
-				err_msg += "Attempted to pop too many style tags from the stack, at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following tagged string:";
-				break;
-				
-			case apply_tags_errc::invalid_tag:
-				err_msg += "The tag \"";
+			case format_text_errc::invalid_escape_sequence:
+				err_msg += "The escape sequence \"";
 				err_msg += {*iter, *(iter + 1)};
 				err_msg += "\" is invalid, and appears at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following tagged string:";
-				break;
-				
-			case apply_tags_errc::too_many_styles:
-				err_msg += "Attempted to push too many style tags onto the stack, at position ";
 				err_msg += std::to_string(pos);
 				err_msg += " in the following tagged string:";
 				break;
@@ -558,8 +530,8 @@ void maf::Console::read_output(string_view raw_output, TextParams const& params)
 		err_msg += "\n\n";
 		
 		_output = {
-			{err_msg, Styled_string::Style::game},
-			{tagged_output, Styled_string::Style::command}};
+			{err_msg, {}},
+			{preprocessed_output, StyledString::monospace_mask}};
 	}
 }
 
@@ -583,20 +555,20 @@ void maf::Console::refresh_output() {
 	read_output(ss.str(), params);
 }
 
-const maf::Styled_text & maf::Console::error_message() const
+maf::StyledText const& maf::Console::error_message() const
 {
 	return _error_message;
 }
 
-void maf::Console::read_error_message(string_view raw_err_msg, TextParams const& params)
+void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams const& params)
 {
 	// TODO: Catch exceptions when substituting parameters
-	auto tagged_err_msg = substitute_params(raw_err_msg, params);
+	auto preprocessed_err_msg = substitute_params(raw_err_msg, params);
 	
 	// TODO: Catch exceptions when parsing the tagged string
 	// Might make sense to show another error message in this case, explaining
 	// why the original error message couldn't be parsed?
-	_error_message = apply_tags(tagged_err_msg);
+	_error_message = format_text(preprocessed_err_msg);
 }
 
 void maf::Console::clear_error_message()

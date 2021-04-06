@@ -53,7 +53,7 @@ namespace maf {
 		bool input(std::string_view input);
 
 		// The most recent output. Never empty.
-		const Styled_text & output() const;
+		const StyledText & output() const;
 		// Read the tagged string `str`, updating the output to display
 		// the styled text obtained.
 		void read_output(std::string_view str, TextParams const& params);
@@ -63,7 +63,7 @@ namespace maf {
 		// The most recent error message. Usually empty.
 		// The only styles that will ever appear here are help, help_title and
 		// command.
-		const Styled_text & error_message() const;
+		const StyledText & error_message() const;
 		// Reads the tagged string `str`, updating the error message to
 		// display the styled text obtained.
 		void read_error_message(std::string_view str, TextParams const& params = {});
@@ -118,8 +118,8 @@ namespace maf {
 		static constexpr std::size_t num_presets{2};
 		static const std::array<Game_parameters, num_presets> _presets;
 
-		Styled_text _output{};
-		Styled_text _error_message{};
+		StyledText _output{};
+		StyledText _error_message{};
 
 		std::unique_ptr<Game_log> _game_log{};
 		Setup_screen _setup_screen{};

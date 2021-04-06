@@ -2,6 +2,7 @@
 #define MAFIA_STYLED_STRING_H
 
 #include <algorithm>
+#include <bitset>
 #include <iterator>
 #include <map>
 #include <string>
@@ -9,49 +10,63 @@
 #include <vector>
 
 namespace maf {
-	// Create a new string based on the range of characters in {begin, end},
-	// but with the following substitutions:
-	//   - Each '^' character is replaced with "^^"
-	//   - Each '{' character is replaced with "^{"
-	//   - Each '}' character is replaced with "^}"
-	//
-	// @pre {begin, end} is a valid range.
-	template <typename ForwardIterator>
-	std::string escaped(ForwardIterator begin, ForwardIterator end)
-	{
-		auto needs_escaping = [](char ch) {
-			return ch == '^' || ch == '{' || ch == '}';
-		};
+	namespace _impl {
+		// Check if `ch` is a curly brace, '{' or '}'.
+		inline bool is_brace(char ch)
+		{
+			return ch == '{' || ch == '}';
+		}
+	
+		// Check if `ch` is treated as a special character by `format_text`.
+		// Note: Backslashes need to be checked separately.
+		inline bool is_formatting_char(char ch)
+		{
+			return ch == '=' || ch == '_' || ch == '%' || ch == '@';
+		}
 
-		std::string output;
-
-		for (auto i = begin; ; ) {
-			auto j = std::find_if(i, end, needs_escaping);
-			output.append(i, j);
-			if (j == end) return output;
-
-			output += {'^', *j};
-			i = j; ++i;
+		// Check if `ch` forms an escape sequence by prefixing it with a
+		// backslash '\'.
+		inline bool is_escapable_char(char ch)
+		{
+			return is_brace(ch) || is_formatting_char(ch) || ch == '\\';
 		}
 	}
 
-	// Create a new string, identical to `str` but with the following
-	// substitutions:
-	//   - Each '^' character is replaced with "^^"
-	//   - Each '{' character is replaced with "^{"
-	//   - Each '}' character is replaced with "^}"
+	// Create a new string based on the range of characters in `{begin,end}`,
+	// but with each escapable character prefixed by a backslash '\'.
+	//
+	// @pre `{begin,end}` is a valid range.
+	template <typename ForwardIter>
+	std::string escaped(ForwardIter begin, ForwardIter end)
+	{
+		std::string output;
+
+		for (auto i = begin; ; ) {
+			auto j = std::find_if(i, end, _impl::is_escapable_char);
+			output.append(i, j);
+			if (j == end) return output;
+			output += {'\\', *j};
+			i = std::next(j);
+		}
+	}
+
+	// Create a new string based on `str_view`, but with each escapable
+	// character prefixed by a backslash '\'.
+	//
+	// @example `escaped("My {string}") == "My \\{string\\}"`
+	// @example `escaped("under_score") == "under\\_score"`
 	inline std::string escaped(std::string_view str_view)
 	{
 		return escaped(str_view.begin(), str_view.end());
 	}
 	
-	// Check if the range of characters in {begin, end} gives an allowed name
+	// Check if the range of characters in `{begin,end}` gives an allowed name
 	// for a styled-text parameter. This is true if it matches the regex
 	// /^[a-zA-Z0-9_\.]+$/.
 	//
-	// @pre {begin, end} is a valid range.
-	template <typename InputIterator>
-	bool is_param_name(InputIterator begin, InputIterator end)
+	// @pre `{begin,end}` is a valid range.
+	template <typename InputIter>
+	bool is_param_name(InputIter begin, InputIter end)
 	{
 		for (auto i = begin; i != end; ++i) {
 			switch (*i) {
@@ -83,87 +98,13 @@ namespace maf {
 		return is_param_name(param.begin(), param.end());
 	}
 
-	// A string coupled with a suggested style.
-	// A style is intended to entail such formatting properties as typeface,
-	// font size, colour, etc.
-	struct Styled_string {
-		enum class Style {
-			game,    // Default style.
-			help,    // Game setup and general help.
-			italic,  // Italic modifier on current style. Used for descriptive
-			         // text.
-			command, // Commands that can be inputted into the console.
-			title    // Title of section. A maximum of one title should occur
-			         // per message, as the first item.
-		};
-
-		std::string string;
-		Style style{Style::game};
-
-		Styled_string() = default;
-
-		Styled_string(std::string string, Style style)
-		: string{string}, style{style}
-		{ }
-	};
-
-	// A vector of styled strings, used to form a block of text.
-	using Styled_text = std::vector<Styled_string>;
-	
 	// A map from strings (treated as parameter names) to strings (treated as
 	// substitutions).
 	//
 	// Note that the map only holds views into its keys, whereas the values
-	// are fully owned. Typically, the parameter name will be a compile-time
+	// are fully owned. Typically the parameter name will be a compile-time
 	// constant.
 	using TextParams = std::map<std::string_view, std::string>;
-
-	namespace _impl {
-		inline Styled_string::Style get_style(char ch)
-		{
-			switch (ch) {
-				case 'g':  return Styled_string::Style::game;
-				case 'h':  return Styled_string::Style::help;
-				case 'i':  return Styled_string::Style::italic;
-				case 'c':  return Styled_string::Style::command;
-				case 'T':  return Styled_string::Style::title;
-				default:   return Styled_string::Style::game;
-			}
-		}
-		
-		struct StyleStack {
-			Styled_string::Style top() const { return *iter; }
-			
-			bool push(Styled_string::Style new_style) {
-				if (std::next(iter) == std::end(stack)) return false;
-				
-				++iter;
-				*iter = new_style;
-				return true;
-			}
-			
-			bool pop() {
-				if (iter == std::begin(stack)) return false;
-				
-				--iter;
-				return true;
-			}
-			
-		private:
-			Styled_string::Style stack[9] = {Styled_string::Style::game};
-			Styled_string::Style * iter = std::begin(stack);
-		};
-
-		inline void move_block(Styled_text & text,
-							   std::string & block,
-							   Styled_string::Style style)
-		{
-			if (!block.empty()) {
-				text.emplace_back(block, style);
-				block.clear();
-			}
-		}
-	}
 
 	// Error code for exceptions that can be thrown when calling
 	// `substitute_params`.
@@ -204,13 +145,14 @@ namespace maf {
 	// Find all strings of the form "{substitute}" in the range `{begin,end}`,
 	// and replace them with the corresponding value from `params`.
 	//
-	// Braces preceded by carets "^" are considered escaped and are ignored.
+	// Braces preceded by backslashes '\' are considered escaped and are
+	// ignored.
 	//
 	// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`,
 	// then
-	//     "This is my {word1} {word2} with ^{braces^}."
+	//     "This is my {word1} {word2} with \{braces\}."
 	// will be transformed into
-	//     "This is my NEW STRING with ^{braces^}."
+	//     "This is my NEW STRING with \{braces\}."
 	//
 	// @pre `{begin,end}` is a valid range.
 	//
@@ -224,17 +166,15 @@ namespace maf {
 	// @throws `substitute_params_error` with code `too_many_opening_braces`
 	// or `too_many_closing_braces` if there are different numbers of
 	// (unescaped) opening braces '{' and closing braces '}'.
-	template <typename BidirectionalIterator>
-	std::string substitute_params(BidirectionalIterator begin,
-								  BidirectionalIterator end,
+	template <typename BidirectionalIter>
+	std::string substitute_params(BidirectionalIter begin,
+								  BidirectionalIter end,
 								  TextParams const& params)
 	{
-		auto is_brace = [](char ch) { return ch == '{' || ch == '}'; };
-		
 		std::string output;
 		
-		for (BidirectionalIterator i = begin, j; /**/; i = std::next(j)) {
-			j = std::find_if(i, end, is_brace);
+		for (BidirectionalIter i = begin, j; /**/; i = std::next(j)) {
+			j = std::find_if(i, end, _impl::is_brace);
 			output.append(i, j);
 			if (j == end) return output;
 			
@@ -246,9 +186,9 @@ namespace maf {
 			// e.g. 2
 			//          i   j
 			//          |   |
-			// "Nulla ^{sit^} amet"
+			// "Nulla \{sit\} amet"
 			
-			if (j != begin && *std::prev(j) == '^') {
+			if (j != begin && *std::prev(j) == '\\') {
 				output += *j;
 				continue;
 			}
@@ -296,141 +236,206 @@ namespace maf {
 		return substitute_params(input.begin(), input.end(), params);
 	}
 
-	// Error code for exceptions that can be thrown when calling `apply_tags`.
-	enum class apply_tags_errc {
-		dangling_caret,
-		invalid_tag,
-		too_many_styles,
-		extra_closing_tag
+	// A string coupled with a suggested style.
+	//
+	// A style is intended to entail such formatting properties as typeface,
+	// font size, colour, etc.
+	//
+	// The presence of styles can be queried by using bitwise operations,
+	// e.g. `(style & StyledString::italic_mask).any()`,
+	// `(style ^ StyledString::title_mask).none()`.
+	struct StyledString {
+		using Style = std::bitset<4>;
+		
+		static constexpr Style title_mask     = 0b1000;
+		static constexpr Style italic_mask    = 0b0100;
+		static constexpr Style help_text_mask = 0b0010;
+		static constexpr Style monospace_mask = 0b0001;
+
+		std::string string;
+		Style style;
+
+		StyledString() = default;
+
+		StyledString(std::string string, Style style)
+		: string{string}, style{style}
+		{ }
 	};
 
-	// Type for exceptions that can be thrown when calling `apply_tags`.
-	struct apply_tags_error {
+	// A vector of styled strings, used to form a block of text.
+	using StyledText = std::vector<StyledString>;
+
+	// Error code for exceptions that can be thrown when calling
+	// `format_text`.
+	enum class format_text_errc {
+		dangling_backslash,
+		invalid_escape_sequence
+	};
+
+	// Type for exceptions that can be thrown when calling `format_text`.
+	struct format_text_error {
 		// Error code for this exception.
-		apply_tags_errc errc;
+		format_text_errc errc;
 		
 		// Position in input string where error occurred.
 		std::string_view::iterator i;
 		
-		apply_tags_error(apply_tags_errc errc, std::string_view::iterator i)
+		format_text_error(format_text_errc errc, std::string_view::iterator i)
 		: errc{errc}, i{i}
 		{ }
 	};
 
-	// Often, styled text is created from what is called a _tagged string_:
-	// this is simply a `std::string` containing substrings of the form "^x",
-	// which are referred to as _tags_.
-	//
-	// This function parses the string contained in the range `{begin,end}` to
-	// find all of its tags and perform a sequence of actions as described
+	namespace _impl {
+		// Parse the escape sequence starting at `i` and terminating no later
+		// than `end`. The escape sequence is expected to begin with a
+		// backslash.
+		//
+		// @returns The character represented by the escape sequence,
+		// and the iterator one-past-the-end of the escape sequence.
+		//
+		// @throws `format_text_error` if the range `{i,end}` does not contain
+		// a subsequence `{i,j}` that represents an escape sequence.
+		//
+		// @pre `*i` is a backslash.
+		template <typename ForwardIter>
+		inline auto	read_escape_sequence(ForwardIter i, ForwardIter end)
+		-> std::pair<char, ForwardIter>
+		{
+			auto j = std::next(i);
+			if (j == end) {
+				auto errc = format_text_errc::dangling_backslash;
+				throw format_text_error{errc, i};
+			}
+			
+			char ch = *j;
+			if (!is_escapable_char(ch)) {
+				auto errc = format_text_errc::invalid_escape_sequence;
+				throw format_text_error{errc, i};
+			}
+			
+			return {ch, std::next(j)};
+		}
+		
+		inline void move_block(StyledText & text,
+							   std::string & block,
+							   StyledString::Style style)
+		{
+			if (!block.empty()) {
+				text.emplace_back(block, style);
+				block.clear();
+			}
+		}
+		
+		// Toggle one of the bits in `style` on or off based on the character
+		// passed in.
+		inline void update_style(StyledString::Style & style, char bit_name)
+		{
+			switch (bit_name) {
+				case '=':
+					style ^= StyledString::title_mask;
+					break;
+					
+				case '_':
+					style ^= StyledString::italic_mask;
+					break;
+					
+				case '%':
+					style ^= StyledString::help_text_mask;
+					break;
+					
+				case '@':
+					style ^= StyledString::monospace_mask;
+					break;
+				
+				default:
+					break;
+			}
+		}
+	}
+
+	// Parse the string contained in the range `{begin,end}` to find all of
+	// its special characters and perform a sequence of actions as described
 	// below.
 	//
-	// The following tags are possible:
-	//   ^g - Start a new block of text using the `game` style.
-	//   ^h - Start a new block of text using the `help` style.
-	//   ^i - Start a new block of text using the `italic` style.
-	//   ^c - Start a new block of text using the `command` style.
-	//   ^T - Start a new block of text using the `title` style.
-	//   ^/ - Close the current block of text, and start a new block of text
-	//        using the previous style.
-	//   ^^ - Print a single '^' character.
-	//   ^{ - Print a single '{' character.
-	//   ^} - Print a single '}' character.
+	// The general idea is that blocks of text will be extracted from
+	// `{begin,end}` and added to the output.
 	//
-	// Whenever a new block of text is created, the previous style is pushed
-	// onto a stack that can hold a maximum of 8 styles. The default style is
-	// `game`, so that the input string doesn't need to begin with "^g".
+	// A set of formatting codes can be used to change the value of
+	// `current_style`:
+	//   = -- Toggle the "title" bit.
+	//   _ -- Toggle the "italic" bit.
+	//   % -- Toggle the "help_text" bit.
+	//   @ -- Toggle the "monospace" bit.
+	//
+	// The default value of `current_style` is to have all bits turned off.
+	//
+	// Each time a formatting code is found, a new block of text is added to
+	// the output, using the value of `current_style` just before the
+	// formatting code was applied. Its content is taken to be the string
+	// between the previous formatting code and the new formatting code.
+	//
+	// Certain escape sequences are also recognised:
+	//   \\ -- Print a single '\' character.
+	//   \{ -- Print a single '{' character.
+	//   \} -- Print a single '}' character.
+	//   \= -- Print a single '=' character.
+	//   \_ -- Print a single '_' character.
+	//   \% -- Print a single '%' character.
+	//   \@ -- Print a single '@' character.
 	//
 	// @pre `{begin,end}` is a valid range.
 	//
-	// @throws `apply_tags_error` with code `dangling_caret` if there's an
-	// unescaped '^' character at the end of the input string.
+	// @throws `format_error` with code `dangling_backslash` if there's an
+	// unescaped '\' character at the end of the input string.
 	//
-	// @throws `apply_tags_error` with code `invalid_tag` if any tag "^x" is
-	// encountered that is not in the list above.
-	//
-	// @throws `apply_tags_error` with code `too_many_styles` if the maximum
-	// depth of the style stack is exceeded.
-	//
-	// @throws `apply_tags_error` with code `extra_closing_tag` if there's a
-	// "^/" tag without a corresponding block of text.
-	template <typename ForwardIterator>
-	Styled_text apply_tags(ForwardIterator begin, ForwardIterator end)
+	// @throws `format_error` with code `invalid_escape_sequence` if any
+	// escape sequence "\x" is encountered that is not in the list above.
+	template <typename ForwardIter>
+	StyledText format_text(ForwardIter begin, ForwardIter end,
+					       StyledString::Style current_style = {})
 	{
+		auto is_special_char = [](char ch) {
+			return _impl::is_formatting_char(ch) || ch == '\\';
+		};
+		
 		std::string block;
-		Styled_text output;
-		_impl::StyleStack style_stack;
+		StyledText output;
 
-		for (ForwardIterator i = begin, j; /**/; ++i) {
-			auto current_style = style_stack.top();
+		for (auto i = begin; /**/; ) {
+			auto j = std::find_if(i, end, is_special_char);
 			
-			j = std::find(i, end, '^');
+			// e.g.
+			//       i             j
+			//       |             |
+			// "... %You can enter @help@ if you need..."
+			
+			// e.g.
+			//          i            j
+			//          |            |
+			// "... @ok@ to continue."
+			
 			block.append(i, j);
 			if (j == end) {
 				_impl::move_block(output, block, current_style);
 				return output;
 			}
 			
-			// e.g.
-			//      i                  j
-			//      |                  |
-			// ...^^ some example text ^cand so on...
-			
-			i = std::next(j);
-			if (i == end) {
-				auto errc = apply_tags_errc::dangling_caret;
-				throw apply_tags_error{errc, j};
-			}
-			
-			// e.g.
-			//                         ji
-			//                         ||
-			// ...^^ some example text ^cand so on...
-
-			switch (char ch = *i) {
-				case 'g':
-				case 'h':
-				case 'i':
-				case 'c':
-				case 'T': {
-					auto new_style = _impl::get_style(ch);
-					
-					if (current_style != new_style) {
-						if (!style_stack.push(new_style)) {
-							auto errc = apply_tags_errc::too_many_styles;
-							throw apply_tags_error{errc, i};
-						}
-						
-						_impl::move_block(output, block, current_style);
-					}
-					
-					break;
-				}
-
-				case '/':
-					if (!style_stack.pop()) {
-						auto errc = apply_tags_errc::extra_closing_tag;
-						throw apply_tags_error{errc, i};
-					}
-					
-					_impl::move_block(output, block, current_style);
-					break;
-
-				case '^':
-				case '{':
-				case '}':
-					block += ch;
-					break;
-
-				default:
-					throw apply_tags_error{apply_tags_errc::invalid_tag, j};
+			if (char ch = *j; _impl::is_formatting_char(ch)) {
+				_impl::move_block(output, block, current_style);
+				_impl::update_style(current_style, ch);
+				i = std::next(j);
+			} else { // ch is a backslash
+				auto [esc, next] = _impl::read_escape_sequence(j, end);
+				block += esc;
+				i = next;
 			}
 		}
 	}
 
-	inline Styled_text apply_tags(std::string_view input)
+	inline StyledText format_text(std::string_view input,
+							      StyledString::Style current_style = {})
 	{
-		return apply_tags(input.begin(), input.end());
+		return format_text(input.begin(), input.end(), current_style);
 	}
 }
 

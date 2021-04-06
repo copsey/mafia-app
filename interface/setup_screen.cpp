@@ -229,7 +229,7 @@ void maf::Setup_screen::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Setup_screen::write(ostream &os) const {
-	os << "^h^TSetup^/^iMafia: a game of deduction and deceit...^/\n\nThis is where you can set up the next game to be played.\n\n";
+	os << "=Setup=\n\n_Mafia: a game of deduction and deceit..._\n\nThis is where you can set up the next game to be played.\n\n";
 
 	if (num_players() == 0) {
 		if (num_cards() == 0) {
@@ -270,7 +270,7 @@ void maf::Setup_screen::write(ostream &os) const {
 			os << ".";
 		}
 	}
-	os << "\n\nTo see the commands which can be used on this screen, enter ^chelp^/.";
+	os << "\n\nTo see the commands which can be used on this screen, enter @help@.";
 }
 
 void maf::Setup_screen::write_players_list(ostream &os) const {
@@ -294,7 +294,7 @@ void maf::Setup_screen::write_cards_list(ostream &os) const {
 
 		if (n > 0) {
 			if (write_nl) os << '\n';
-			os << "   " << n << " x " << full_name(id);
+			os << "   " << n << " x " << escaped(full_name(id));
 
 			write_nl = true;
 		}
@@ -307,7 +307,7 @@ void maf::Setup_screen::write_cards_list(ostream &os) const {
 
 		if (n > 0) {
 			if (write_nl) os << '\n';
-			os << "   " << n << " x ^c" << alias(id) << "^/ wildcard";
+			os << "   " << n << " x @" << escaped(alias(id)) << "@ wildcard";
 
 			write_nl = true;
 		}

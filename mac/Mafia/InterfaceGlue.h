@@ -28,9 +28,9 @@
 - (void)showOutput;
 - (void)showErrorMessage;
 
-+ (NSDictionary *)gameStyleAttributes;
-+ (NSDictionary *)gameItalicStyleAttributes;
-+ (NSDictionary *)helpStyleAttributes;
-+ (NSDictionary *)commandStyleAttributes;
++ (NSDictionary *)defaultAttributes;
++ (NSDictionary *)italicAttributes;
++ (NSDictionary *)helpTextAttributes;
++ (NSDictionary *)monospaceAttributes;
 
 @end
