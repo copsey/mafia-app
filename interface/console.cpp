@@ -381,6 +381,30 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 				break;
 		}
 	}
+	catch (Game::Peddle_failed const& e) {
+		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
+		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		
+		err << "=Peddle failed!=\n\n";
+
+		switch (e.reason) {
+			case Game::Peddle_failed::Reason::game_ended:
+				err << "The game has already ended.";
+				break;
+
+			case Game::Peddle_failed::Reason::caster_cannot_peddle:
+				err << "{caster} cannot use this ability right now.";
+				break;
+
+			case Game::Peddle_failed::Reason::target_is_not_present:
+				err << "{caster} cannot target {target}, because {target} is no longer present in the game.";
+				break;
+
+			case Game::Peddle_failed::Reason::caster_is_target:
+				err << "{caster} is not allowed to target themself.";
+				break;
+		}
+	}
 	catch (const Game::Skip_failed &e) {
 		err << "=Skip failed!=\n\nThe current ability, if one is showing, cannot be skipped.";
 	}
