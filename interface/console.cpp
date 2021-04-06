@@ -241,6 +241,10 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 			case Game::Duel_failed::Reason::caster_has_no_duel:
 				err << "{caster} has no duel ability to use.";
 				break;
+			
+			case Game::Duel_failed::Reason::bad_probability:
+				err << "An error occurred when calculating the probabilities needed to simulate the duel.";
+				break;
 		}
 	}
 	catch (const Game::Begin_night_failed &e) {
