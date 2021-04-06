@@ -11,14 +11,8 @@
 
 namespace maf {
 	namespace _impl {
-		// Check if `ch` is a curly brace, '{' or '}'.
-		inline bool is_brace(char ch)
-		{
-			return ch == '{' || ch == '}';
-		}
-	
-		// Check if `ch` is treated as a special character by `format_text`.
-		// Note: Backslashes need to be checked separately.
+		// Check if `ch` signifies a formatting code as defined by
+		// `format_text`.
 		inline bool is_formatting_char(char ch)
 		{
 			return ch == '=' || ch == '_' || ch == '%' || ch == '@';
@@ -28,7 +22,8 @@ namespace maf {
 		// backslash '\'.
 		inline bool is_escapable_char(char ch)
 		{
-			return is_brace(ch) || is_formatting_char(ch) || ch == '\\';
+			return (ch == '{' || ch == '}' || ch == '\\'
+					|| is_formatting_char(ch));
 		}
 	}
 
@@ -107,19 +102,18 @@ namespace maf {
 	using TextParams = std::map<std::string_view, std::string>;
 
 	// Error code for exceptions that can be thrown when calling
-	// `substitute_params`.
-	enum class substitute_params_errc {
+	// `preprocess_text`.
+	enum class preprocess_text_errc {
 		invalid_parameter_name,
 		missing_parameter,
 		too_many_opening_braces,
 		too_many_closing_braces
 	};
 
-	// Type for exceptions that can be thrown when calling
-	// `substitute_params`.
-	struct substitute_params_error {
+	// Type for exceptions that can be thrown when calling `preprocess_text`.
+	struct preprocess_text_error {
 		// Error code for this exception.
-		substitute_params_errc errc;
+		preprocess_text_errc errc;
 
 		// Position in input string where error occurred.
 		std::string_view::iterator i;
@@ -130,12 +124,12 @@ namespace maf {
 		// signify where in the input string the parameter name occurs.
 		std::string_view::iterator j{};
 
-		substitute_params_error(substitute_params_errc errc,
+		preprocess_text_error(preprocess_text_errc errc,
 								std::string_view::iterator i)
 		: errc{errc}, i{i}
 		{ }
 		
-		substitute_params_error(substitute_params_errc errc,
+		preprocess_text_error(preprocess_text_errc errc,
 								std::string_view::iterator i,
 								std::string_view::iterator j)
 		: errc{errc}, i{i}, j{j}
@@ -145,8 +139,9 @@ namespace maf {
 	// Find all strings of the form "{substitute}" in the range `{begin,end}`,
 	// and replace them with the corresponding value from `params`.
 	//
-	// Braces preceded by backslashes '\' are considered escaped and are
-	// ignored.
+	// Escape sequences of the form "\x" are left intact. In particular,
+	// braces preceded by backslashes '\' are not treated as parts of command
+	// names, unless the backslash itself is escaped, as in "\\".
 	//
 	// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`,
 	// then
@@ -156,53 +151,65 @@ namespace maf {
 	//
 	// @pre `{begin,end}` is a valid range.
 	//
-	// @throws `substitute_params_error` with code `invalid_parameter_name` if
+	// @throws `preprocess_text_error` with code `invalid_parameter_name` if
 	// an invalid parameter name is encountered. (See `is_param_name` for more
 	// information.)
 	//
-	// @throws `substitute_params_error` with code `missing_parameter` for any
+	// @throws `preprocess_text_error` with code `missing_parameter` for any
 	// parameter names that cannot be found in `params`.
 	//
-	// @throws `substitute_params_error` with code `too_many_opening_braces`
+	// @throws `preprocess_text_error` with code `too_many_opening_braces`
 	// or `too_many_closing_braces` if there are different numbers of
 	// (unescaped) opening braces '{' and closing braces '}'.
-	template <typename BidirectionalIter>
-	std::string substitute_params(BidirectionalIter begin,
-								  BidirectionalIter end,
-								  TextParams const& params)
+	template <typename ForwardIter>
+	std::string preprocess_text(ForwardIter begin, ForwardIter end,
+								TextParams const& params)
 	{
+		auto is_special_char = [](char ch) {
+			return ch == '{' || ch == '}' || ch == '\\';
+		};
+		
 		std::string output;
 		
-		for (BidirectionalIter i = begin, j; /**/; i = std::next(j)) {
-			j = std::find_if(i, end, _impl::is_brace);
-			output.append(i, j);
-			if (j == end) return output;
+		for (auto i = begin; /**/; ) {
+			{
+				auto j = std::find_if(i, end, is_special_char);
+				
+				// e.g.
+				//         i            j
+				//         |            |
+				// "{Lorem} ipsum dolor {sit} amet"
+				
+				// e.g.
+				//          i  j
+				//          |  |
+				// "Nulla \{sit\} amet"
+				
+				output.append(i, j);
+				if (j == end) return output;
+				i = j;
+			}
 			
-			// e.g. 1
-			//         i            j
-			//         |            |
-			// "{Lorem} ipsum dolor {sit} amet"
-			
-			// e.g. 2
-			//          i   j
-			//          |   |
-			// "Nulla \{sit\} amet"
-			
-			if (j != begin && *std::prev(j) == '\\') {
-				output += *j;
+			if (*i == '\\') {
+				output += *i;
+				++i;
+				if (i != end) {
+					output += *i;
+					++i;
+				}
 				continue;
 			}
 			
-			if (*j == '}') {
-				auto errc = substitute_params_errc::too_many_closing_braces;
-				throw substitute_params_error{errc, j};
+			if (*i == '}') {
+				auto errc = preprocess_text_errc::too_many_closing_braces;
+				throw preprocess_text_error{errc, i};
 			}
 			
-			i = std::next(j);
-			j = std::find(i, end, '}');
+			++i;
+			auto j = std::find(i, end, '}');
 			if (j == end) {
-				auto errc = substitute_params_errc::too_many_opening_braces;
-				throw substitute_params_error{errc, std::prev(i)};
+				auto errc = preprocess_text_errc::too_many_opening_braces;
+				throw preprocess_text_error{errc, std::prev(i)};
 			}
 			
 			// e.g.
@@ -211,8 +218,8 @@ namespace maf {
 			// "{Lorem} ipsum dolor {sit} amet"
 			
 			if (!is_param_name(i, j)) {
-				auto errc = substitute_params_errc::invalid_parameter_name;
-				throw substitute_params_error{errc, i, j};
+				auto errc = preprocess_text_errc::invalid_parameter_name;
+				throw preprocess_text_error{errc, i, j};
 			}
 			
 			auto distance = std::distance(i, j);
@@ -221,19 +228,20 @@ namespace maf {
 			
 			auto param_iter = params.find(name);
 			if (param_iter == params.end()) {
-				auto errc = substitute_params_errc::missing_parameter;
-				throw substitute_params_error{errc, i, j};
+				auto errc = preprocess_text_errc::missing_parameter;
+				throw preprocess_text_error{errc, i, j};
 			}
 			
 			std::string_view val = (*param_iter).second;
 			output += val;
+			i = std::next(j);
 		}
 	}
 	
-	inline std::string substitute_params(std::string_view input,
-								         TextParams const& params)
+	inline std::string preprocess_text(std::string_view input,
+									   TextParams const& params)
 	{
-		return substitute_params(input.begin(), input.end(), params);
+		return preprocess_text(input.begin(), input.end(), params);
 	}
 
 	// A string coupled with a suggested style.

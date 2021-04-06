@@ -493,16 +493,16 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 	std::string preprocessed_output;
 	
 	try {
-		preprocessed_output = substitute_params(raw_output, params);
+		preprocessed_output = preprocess_text(raw_output, params);
 		_output = format_text(preprocessed_output);
-	} catch (substitute_params_error const& error) {
+	} catch (preprocess_text_error const& error) {
 		std::string err_msg = "Error --- ";
 		auto iter1 = error.i;
 		auto iter2 = error.j;
 		auto pos = iter1 - raw_output.begin();
 		
 		switch (error.errc) {
-			case substitute_params_errc::invalid_parameter_name:
+			case preprocess_text_errc::invalid_parameter_name:
 				err_msg += "Invalid parameter name \"";
 				err_msg.append(iter1, iter2);
 				err_msg += "\" at position ";
@@ -510,7 +510,7 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 				err_msg += " in the following string:";
 				break;
 				
-			case substitute_params_errc::missing_parameter:
+			case preprocess_text_errc::missing_parameter:
 				err_msg += "Unrecognised parameter name \"";
 				err_msg.append(iter1, iter2);
 				err_msg += "\" at position ";
@@ -518,13 +518,13 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 				err_msg += " in the following string:";
 				break;
 			
-			case substitute_params_errc::too_many_closing_braces:
+			case preprocess_text_errc::too_many_closing_braces:
 				err_msg += "Unexpected '}' at position ";
 				err_msg += std::to_string(pos);
 				err_msg += " in the following string:";
 				break;
 				
-			case substitute_params_errc::too_many_opening_braces:
+			case preprocess_text_errc::too_many_opening_braces:
 				err_msg += "No closing brace found for '{' at position ";
 				err_msg += std::to_string(pos);
 				err_msg += " in the following string:";
@@ -590,10 +590,10 @@ maf::StyledText const& maf::Console::error_message() const
 
 void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams const& params)
 {
-	// TODO: Catch exceptions when substituting parameters
-	auto preprocessed_err_msg = substitute_params(raw_err_msg, params);
+	// TODO: Catch exceptions when preprocessing the text.
+	auto preprocessed_err_msg = preprocess_text(raw_err_msg, params);
 	
-	// TODO: Catch exceptions when parsing the tagged string
+	// TODO: Catch exceptions when formatting the text.
 	// Might make sense to show another error message in this case, explaining
 	// why the original error message couldn't be parsed?
 	_error_message = format_text(preprocessed_err_msg);
