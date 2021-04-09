@@ -18,7 +18,7 @@ bool maf::Confirm_end_game::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Confirm_end_game::write(ostream &os) const {
-	os << "^TEnd Game?^/You are about to end the current game.\nAre you sure that you want to do this? (^cyes^/ or ^cno^/)";
+	os << "=End Game?=\n\nYou are about to end the current game.\nAre you sure that you want to do this? (@yes@ or @no@)";
 }
 
 // bool maf::Confirm_mafia_kill_skip::do_commands(const vector<string_view> &commands, Console &console) {
@@ -35,5 +35,5 @@ void maf::Confirm_end_game::write(ostream &os) const {
 // }
 
 // void maf::Confirm_mafia_kill_skip::write(ostream &os) const {
-// 	os << "^TSkip?^/You are about to skip the mafia's nightly kill.\nAre you sure that you want to do this? (^cyes^/ or ^cno^/)";
+// 	os << "=Skip?=\n\nYou are about to skip the mafia's nightly kill.\nAre you sure that you want to do this? (@yes@ or @no@)";
 // }
