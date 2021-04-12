@@ -384,6 +384,7 @@ void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
 			try {
 				auto & fake_role = glog.look_up(fake_role_ref);
 				glog.choose_fake_role(_player->id(), fake_role.id());
+				_fake_role = _player->fake_role();
 			} catch (std::out_of_range) {
 				throw Rulebook::Missing_role_alias{string(commands[2])};
 			}
