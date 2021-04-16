@@ -30,30 +30,17 @@ void maf::Player_given_initial_role::do_commands(const vector<string_view> & com
 
 void maf::Player_given_initial_role::write_full(ostream &os, TextParams& params) const
 {
-	auto & glog = game_log();
-
-	params["player"] = escaped(glog.get_name(*_p));
-	params["role.name"] = escaped(full_name(*_r));
+	params["from_wildcard"] = (_w != nullptr);
+	params["player"] = escaped(game_log().get_name(*_p));
+	params["private"] = _is_private;
+	params["role"] = escaped(full_name(*_r));
 	params["role.alias"] = escaped(_r->alias());
 
 	if (_w != nullptr) {
 		params["wildcard.alias"] = escaped(_w->alias());
 	}
 
-	os << "={player}'s Role=\n\n";
-
-	if (_is_private) {
-		os << "{player}, your role is the {role.name}.\n\n";
-
-		if (_w != nullptr) {
-			/* FIXME */
-			os << "You were randomly given this role from the @{wildcard.alias}@ wildcard.\n\n";
-		}
-
-		os << "%To see a full description of your role, enter @help r {role.alias}@.";
-	} else {
-		os << "{player}, you are about to be shown your role.";
-	}
+	os << "={player}'s Role=\n\n{!if private}\n{player}, your role is the {role}.\n{!if from_wildcard}\n\nYou were randomly given this role from the @{wildcard.alias}@ wildcard.\n{!end}\n\n%To see a full description of your role, enter @help r {role.alias}@.\n{!else}\n{player}, you are about to be shown your role.\n{!end}";
 }
 
 void maf::Player_given_initial_role::write_summary(ostream &os) const {
@@ -72,16 +59,10 @@ void maf::Time_changed::do_commands(const vector<string_view> & commands) {
 void maf::Time_changed::write_full(ostream & os, TextParams& params) const
 {
 	params["date"] = std::to_string(date);
-
-	switch (time) {
-		case Time::day:
-			os << "=Day {date}=\n\n_Dawn breaks, and dim sunlight beams onto the weary townsfolk..._\n\nIt is now day {date}. Anybody still asleep can wake up.";
-			break;
-
-		case Time::night:
-			os << "=Night {date}=\n\n_As darkness sets in, the townsfolk return to the comforts of their shelters..._\n\nIt is now night {date}. Everybody still in the game should go to sleep.";
-			break;
-	}
+	params["daytime"] = (time == Time::day);
+	params["nighttime"] = (time == Time::night);
+	
+	os << "{!if daytime}\n=Day {date}=\n\n_Dawn breaks, and dim sunlight beams onto the weary townsfolk..._\n\nIt is now day {date}. Anybody still asleep can wake up.\n{!else}\n=Night {date}=\n\n_As darkness sets in, the townsfolk return to the comforts of their shelters..._\n\nIt is now night {date}. Everybody still in the game should go to sleep.\n{!end}";
 }
 
 void maf::Time_changed::write_summary(ostream &os) const {
@@ -109,28 +90,23 @@ void maf::Obituary::do_commands(const vector<string_view> & commands) {
 
 void maf::Obituary::write_full(ostream &os, TextParams& params) const
 {
+	params["anyone_died"] = !_deaths.empty();
 	params["num_deaths"] = std::to_string(_deaths.size());
-
-	os << "=Obituary=\n\n";
-
-	if (_deaths_index < 0) {
-		if (_deaths.size() == 0) {
-			os << "Nobody died during the night.";
-		} else {
-			/* FIXME: reword to remove use of "us". */
-			os << "It appears that {num_deaths} of us did not survive the night...";
-		}
-	} else {
+	params["show_death"] = (_deaths_index >= 0);
+	
+	if (_deaths_index >= 0) {
 		const Player& deceased = *_deaths[_deaths_index];
 		params["deceased"] = escaped(game_log().get_name(deceased));
-
-		os << "{deceased} died during the night!";
+		params["deceased.is_haunted"] = deceased.is_haunted();
+		
 		if (deceased.is_haunted()) {
-			params["ghost"] = escaped(game_log().get_name(*deceased.haunter()));
-			
-			os << "\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...";
+			const Player& ghost = *deceased.haunter();
+			params["ghost"] = escaped(game_log().get_name(ghost));
 		}
 	}
+
+//	os << "=Obituary=\n\n{!if show_death}\n{deceased} died during the night!\n{!if deceased.is_haunted}\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...\n{!end}\n{!else_if anyone_died}\n{--- FIXME: reword to remove use of \"us\".}\nIt appears that {num_deaths} of us did not survive the night...\n{!else}\nNobody died during the night.\n{!end}";
+	os << "=Obituary=\n\n{!if show_death}\n{deceased} died during the night!\n{!if deceased.is_haunted}\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...\n{!end}\n{!else_if anyone_died}\nIt appears that {num_deaths} of us did not survive the night...\n{!else}\nNobody died during the night.\n{!end}";
 }
 
 void maf::Obituary::write_summary(ostream &os) const {
@@ -210,10 +186,13 @@ void maf::Town_meeting::write_full(ostream &os, TextParams& params) const {
 	/* FIXME: add in proper content. */
 
 	params["date"] = std::to_string(_date);
+	params["lynch_can_occur"] = _lynch_can_occur;
 
 	os << "=Day {date}=\n\n";
 
 	if (_lynch_can_occur) {
+		params["lynch_target.exists"] = (_next_lynch_victim != nullptr);
+		
 		if (_next_lynch_victim) {
 			params["lynch_target"] = escaped(game_log().get_name(*_next_lynch_victim));
 		}
@@ -233,9 +212,7 @@ void maf::Town_meeting::write_full(ostream &os, TextParams& params) const {
 			os << "\n";
 		}
 
-		os << "\nAs it stands, ";
-		os << (_next_lynch_victim ? "{lynch_target}" : "nobody");
-		os << " will be lynched.\n\n%Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.";
+		os << "\nAs it stands, {!if lynch_target.exists}{lynch_target}{!else}nobody{!end} will be lynched.\n\n%Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.";
 	} else {
 		os << "_With little time left in the day, the townsfolk prepare themselves for another night of uncertainty..._\n\nGathered outside the town hall are:\n";
 
@@ -271,7 +248,7 @@ void maf::Player_kicked::do_commands(const vector<string_view> &commands) {
 void maf::Player_kicked::write_full(ostream &os, TextParams& params) const
 {
 	params["player"] = escaped(game_log().get_name(*player));
-	params["role"] = full_name(player->role());
+	params["role"] = escaped(full_name(player->role()));
 
 	os << "={player} kicked=\n\n{player} was kicked from the game!\nThey were the {role}.";
 }
@@ -290,26 +267,19 @@ void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
 }
 
 void maf::Lynch_result::write_full(ostream &os, TextParams& params) const {
-	os << "=Lynch Result=\n\n";
-
+	params["victim.exists"] = (victim != nullptr);
+	
 	if (victim) {
 		params["victim"] = escaped(game_log().get_name(*victim));
+		params["victim.role.hidden"] = (victim_role == nullptr);
 		
-		os << "{victim} was lynched!\n";
-
 		if (victim_role) {
-			params["victim.role"] = full_name(victim_role->id());
-			
-			os << "They were a {victim.role}.";
-			if (victim_role->is_troll()) {
-				os << "\n\n_A chill blows through the air. The townsfolk who voted to lynch {victim} look nervous..._";
-			}
-		} else {
-			os << "Their role could not be determined.";
+			params["victim.role"] = escaped(full_name(victim_role->id()));
+			params["victim.role.is_troll"] = victim_role->is_troll();
 		}
-	} else {
-		os << "Nobody was lynched today.";
 	}
+	
+	os << "=Lynch Result=\n\n{!if victim.exists}\n{victim} was lynched!\n\n{!if victim.role.hidden}\nTheir role could not be determined.\n{!else}\nThey were a {victim.role}.\n{!if victim.role.is_troll}\n\n_A chill blows through the air. The townsfolk who voted to lynch {victim} look nervous..._\n{!end}\n{!end}\n{!else}\nNobody was lynched today.\n{!end}";
 }
 
 void maf::Lynch_result::write_summary(ostream &os) const
@@ -333,20 +303,13 @@ void maf::Duel_result::do_commands(const vector<string_view> & commands)
 }
 
 void maf::Duel_result::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
+	params["caster"] = escaped(game_log().get_name(*caster));
+	params["target"] = escaped(game_log().get_name(*target));
+	params["winner"] = escaped(game_log().get_name(*winner));
+	params["loser"] = escaped(game_log().get_name(*loser));
+	params["winner.fled"] = !winner->is_present();
 
-	params["caster"] = escaped(glog.get_name(*caster));
-	params["target"] = escaped(glog.get_name(*target));
-	params["winner"] = escaped(glog.get_name(*winner));
-	params["loser"] = escaped(glog.get_name(*loser));
-
-	os << "=Duel=\n\n{caster} has challenged {target} to a duel!\n\n_The pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!_\n\nThe lifeless body of {loser} falls to the ground. {winner} lets out a sigh of relief.\n\n";
-
-	if (!winner->is_present()) {
-		os << "With that, {winner} throws their gun to the ground and flees from the village.\n\n";
-	}
-
-	os << "%When you have finished with this screen, enter @ok@.";
+	os << "=Duel=\n\n{caster} has challenged {target} to a duel!\n\n_The pistols are loaded, and the participants take ten paces in opposite directions...\n\n3... 2... 1... BANG!!_\n\nThe lifeless body of {loser} falls to the ground. {winner} lets out a sigh of relief.\n{!if winner.fled}\n\nWith that, {winner} throws their gun to the ground and flees from the village.\n{!end}\n\n%When you have finished with this screen, enter @ok@.";
 }
 
 void maf::Duel_result::write_summary(ostream &os) const {
@@ -396,24 +359,16 @@ void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
 
 void maf::Choose_fake_role::write_full(ostream &os, TextParams& params) const
 {
+	params["finished"] = _go_to_sleep;
 	params["player"] = escaped(game_log().get_name(*_player));
+	params["fake_role.chosen"] = (_fake_role != nullptr);
 
 	if (_fake_role) {
-		params["fakeRole.name"] = full_name(*_fake_role);
-		params["fakeRole.alias"] = _fake_role->alias();
+		params["fake_role"] = escaped(full_name(*_fake_role));
+		params["fake_role.alias"] = escaped(_fake_role->alias());
 	}
-
-	os << "=Choose Fake Role=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{player} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.";
-	}
-	else if (_fake_role) {
-		os << "{player}, you have been given the {fakeRole.name} as your fake role.\n\nYou must pretend that this is your real role for the remainder of the game. Breaking this rule will result in you being kicked from the game!\n\nNow would be a good time to study your fake role.\n\n%Enter @help r {fakeRole.alias}@ to see more information about your fake role.\nWhen you are ready, enter @ok@ to continue.";
-	}
-	else {
-		os << "%{player} needs to be given a fake role, which they must pretend is their true role for the rest of the game.\n\nIf they break the rules by contradicting their fake role, then they should be kicked from the game by entering @kick {player}@ during the day.\n\nTo choose the role with alias @A@, enter @choose A@.";
-	}
+	
+	os << "=Choose Fake Role=\n\n{!if finished}\n%{player} should now go back to sleep.\n\nWhen you are ready, enter @ok@ to continue.\n{!else_if fake_role.chosen}\n{player}, you have been given the {fake_role} as your fake role.\n\nYou must pretend that this is your real role for the remainder of the game. Breaking this rule will result in you being kicked from the game!\n\nNow would be a good time to study your fake role.\n\n%Enter @help role {fake_role.alias}@ to see more information about the role. When you are ready, enter @ok@ to continue.\n{!else}\n%{player} needs to be given a fake role, which they must pretend is their true role for the rest of the game.\n\nIf they break the rules by contradicting their fake role, then they should be kicked from the game by entering @kick {player}@ during the day.\n\nTo choose the role with alias @A@, enter @choose A@.\n{!end}";
 }
 
 void maf::Choose_fake_role::write_summary(ostream &os) const {
@@ -462,38 +417,42 @@ void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
 
 void maf::Mafia_meeting::write_full(std::ostream & out, TextParams& params) const
 {
-	/* FIXME */
-	out << "=Mafia Meeting=\n\n";
+	params["finished"] = _go_to_sleep;
+	params["first_meeting"] = _initial;
+	params["single_member"] = (_mafiosi.size() == 1);
+	
+	if (_mafiosi.size() == 1) {
+		Player const& player = *(_mafiosi.front());
+		params["player"] = escaped(game_log().get_name(player));
+		params["role"] = escaped(full_name(player.role()));
+	}
+	
+	out << "=Mafia Meeting=\n\n{!if finished}\n%The mafia have nothing more to discuss for now, and should go back to sleep.\n\nEnter @ok@ when you are ready to continue.\n{!else_if first_meeting}{!else_if single_member}\nSeated alone at a polished walnut table is {player}.\n\nThe mafia are ready to choose their next victim.\n\n%Entering @kill A@ will make {player} attempt to kill player @A@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.\n{!end}";
 
-	if (_go_to_sleep) {
-		out << "The mafia have nothing more to discuss for now, and should go back to sleep.\n\n%Enter @ok@ when you are ready to continue.";
-	} else if (_initial) {
-		out << "The mafia consists of:\n";
+	if (!_go_to_sleep) {
+		if (_initial) {
+			out << "The mafia consists of:\n";
 
-		for (auto p_ref : _mafiosi) {
-			auto player_name = escaped(game_log().get_name(*p_ref));
-			auto player_role = full_name(p_ref->role());
-			
-			out << "   " << player_name << ", the " << player_role << "\n";
+			for (auto p_ref : _mafiosi) {
+				auto player_name = escaped(game_log().get_name(*p_ref));
+				auto player_role = full_name(p_ref->role());
+				
+				out << "   " << player_name << ", the " << player_role << "\n";
+			}
+
+			out << "\nThere is not enough time left to organise a murder.";
+		} else if (_mafiosi.size() > 1) {
+			out << "Seated around a polished walnut table are:\n";
+
+			for (auto p_ref : _mafiosi) {
+				auto player_name = escaped(game_log().get_name(*p_ref));
+				auto player_role = full_name(p_ref->role());
+				
+				out << "   " << player_name << ", the " << player_role << "\n";
+			}
+
+			out << "\nThe mafia are ready to choose their next victim.\n\n%Entering @A kill B@ will make player @A@ attempt to kill player @B@. Player @A@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.";
 		}
-
-		out << "\nThere is not enough time left to organise a murder.";
-	} else if (_mafiosi.size() == 1) {
-		params["player"] = escaped(game_log().get_name(*(_mafiosi.front())));
-		params["role"] = full_name(_mafiosi.front()->role());
-
-		out << "Seated alone at a polished walnut table is {player}.\n\nThe mafia are ready to choose their next victim.\n\n%Entering @kill A@ will make {player} attempt to kill player @A@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.";
-	} else {
-		out << "Seated around a polished walnut table are:\n";
-
-		for (auto p_ref : _mafiosi) {
-			auto player_name = escaped(game_log().get_name(*p_ref));
-			auto player_role = full_name(p_ref->role());
-			
-			out << "   " << player_name << ", the " << player_role << "\n";
-		}
-
-		out << "\nThe mafia are ready to choose their next victim.\n\n%Entering @A kill B@ will make player @A@ attempt to kill player @B@. Player @A@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.";
 	}
 }
 
@@ -523,18 +482,10 @@ void maf::Kill_use::do_commands(const vector<string_view> &commands) {
 }
 
 void maf::Kill_use::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
+	params["caster"] = escaped(game_log().get_name(*_caster));
+	params["finished"] = _go_to_sleep;
 
-	params["caster"] = escaped(glog.get_name(*_caster));
-
-	os << "=Kill Use=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.";
-	}
-	else {
-		os << "{caster}, you can choose to kill somebody this night.\n\n%Enter @kill A@ to kill player @A@, or enter @skip@ if you don't wish to kill anybody.";
-	}
+	os << "=Kill Use=\n\n{!if finished}\n{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.\n{!else}\n{caster}, you can choose to kill somebody this night.\n\n%Enter @kill A@ to kill player @A@, or enter @skip@ if you don't wish to kill anybody.\n{!end}";
 }
 
 void maf::Heal_use::do_commands(const vector<string_view> & commands) {
@@ -563,17 +514,10 @@ void maf::Heal_use::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Heal_use::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
+	params["caster"] = escaped(game_log().get_name(*_caster));
+	params["finished"] = _go_to_sleep;
 
-	params["caster"] = escaped(glog.get_name(*_caster));
-
-	os << "=Heal Use=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.";
-	} else {
-		os << "{caster}, you can choose to heal somebody this night.\n\n%Enter @heal A@ to heal player @A@, or enter @skip@ if you don't wish to heal anybody.";
-	}
+	os << "=Heal Use=\n\n{!if finished}\n{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.\n{!else}\n{caster}, you can choose to heal somebody this night.\n\n%Enter @heal A@ to heal player @A@, or enter @skip@ if you don't wish to heal anybody.\n{!end}";
 }
 
 void maf::Investigate_use::do_commands(const vector<string_view> & commands) {
@@ -602,17 +546,10 @@ void maf::Investigate_use::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Investigate_use::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
+	params["caster"] = escaped(game_log().get_name(*_caster));
+	params["finished"] = _go_to_sleep;
 
-	params["caster"] = escaped(glog.get_name(*_caster));
-
-	os << "=Investigation=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.";
-	} else {
-		os << "{caster}, you can choose to investigate somebody this night.\n\n%Enter @check A@ to investigate player @A@, or enter @skip@ if you don't wish to investigate anybody.";
-	}
+	os << "=Investigation=\n\n{!if finished}\n{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.\n{!else}\n{caster}, you can choose to investigate somebody this night.\n\n%Enter @check A@ to investigate player @A@, or enter @skip@ if you don't wish to investigate anybody.\n{!end}";
 }
 
 void maf::Peddle_use::do_commands(const vector<string_view> & commands) {
@@ -641,18 +578,10 @@ void maf::Peddle_use::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Peddle_use::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
+	params["caster"] = escaped(game_log().get_name(*_caster));
+	params["finished"] = _go_to_sleep;
 
-	params["caster"] = escaped(glog.get_name(*_caster));
-
-	os << "=Peddle=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.";
-	}
-	else {
-		os << "{caster}, you can choose to peddle drugs to somebody this night.\n\n%Enter @target A@ to peddle drugs to player @A@, or enter @skip@ if you don't wish to peddle drugs to anybody.";
-	}
+	os << "=Peddle=\n\n{!if finished}\n{caster} should now go back to sleep.\n\n%When you are ready, enter @ok@ to continue.\n{!else}\n{caster}, you can choose to peddle drugs to somebody this night.\n\n%Enter @target A@ to peddle drugs to player @A@, or enter @skip@ if you don't wish to peddle drugs to anybody.\n{!end}";
 }
 
 void maf::Boring_night::do_commands(const vector<string_view> & commands) {
@@ -691,26 +620,12 @@ void maf::Investigation_result::do_commands(const vector<string_view> & commands
 }
 
 void maf::Investigation_result::write_full(ostream &os, TextParams& params) const {
-	auto & glog = game_log();
-
-	params["caster"] = escaped(glog.get_name(investigation.caster()));
-	params["target"] = escaped(glog.get_name(investigation.target()));
-
-	os << "=Investigation Result=\n\n";
-
-	if (_go_to_sleep) {
-		os << "{caster} should now go back to sleep.\n\nWhen you are ready, enter @ok@ to continue.";
-	} else {
-		os << "{caster}, you have completed your investigation of {target}.\n\n";
-
-		if (investigation.result()) {
-			os << "{target} was behaving very suspiciously this night!\n";
-		} else {
-			os << "The investigation was fruitless. {target} appears to be innocent.\n";
-		}
-
-		os << "\n%When you are ready, enter @ok@ to continue.";
-	}
+	params["caster"] = escaped(game_log().get_name(investigation.caster()));
+	params["finished"] = _go_to_sleep;
+	params["target"] = escaped(game_log().get_name(investigation.target()));
+	params["target.suspicious"] = investigation.result();
+	
+	os << "=Investigation Result=\n\n{!if finished}\n%{caster} should now go back to sleep.\n\nWhen you are ready, enter @ok@ to continue.\n{!else}\n{caster}, you have completed your investigation of {target}.\n\n{!if target.suspicious}\n{target} was behaving very suspiciously this night!\n{!else}\nThe investigation was fruitless. {target} appears to be innocent.\n{!end}\n\n%When you are ready, enter @ok@ to continue.\n{!end}";
 }
 
 void maf::Investigation_result::write_summary(ostream &os) const
