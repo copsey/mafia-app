@@ -115,7 +115,7 @@ namespace maf {
 			Rulebook rulebook;
 		};
 
-		static constexpr std::size_t num_presets{2};
+		static constexpr std::size_t num_presets{3};
 		static const std::array<Game_parameters, num_presets> _presets;
 
 		StyledText _output{};

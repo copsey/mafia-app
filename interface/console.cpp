@@ -26,6 +26,12 @@ const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::
 		{maf::Role::ID::peasant, maf::Role::ID::peasant,maf::Role::ID::doctor, maf::Role::ID::detective, maf::Role::ID::dealer, maf::Role::ID::musketeer},
 		{},
 		maf::Rulebook{}
+	},
+	maf::Console::Game_parameters{
+		{"Alice", "Bob", "Charlie", "Daisy", "Eduardo", "Fiona"},
+		{maf::Role::ID::godfather, maf::Role::ID::actor, maf::Role::ID::serial_killer, maf::Role::ID::village_idiot, maf::Role::ID::village_idiot, maf::Role::ID::village_idiot},
+		{},
+		maf::Rulebook{}
 	}
 };
 
