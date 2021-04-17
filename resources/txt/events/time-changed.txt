@@ -1,0 +1,13 @@
+{!if daytime}
+=Day {date}=
+
+_Dawn breaks, and dim sunlight beams onto the weary townsfolk..._
+
+It is now day {date}. Anybody still asleep can wake up.
+{!else}
+=Night {date}=
+
+_As darkness sets in, the townsfolk return to the comforts of their shelters..._
+
+It is now night {date}. Everybody still in the game should go to sleep.
+{!end}

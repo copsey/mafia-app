@@ -618,19 +618,18 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 }
 
 void maf::Console::refresh_output() {
-	std::stringstream ss{};
-	TextParams params = {};
+	std::stringstream ss;
+	TextParams params;
 
 	if (has_help_screen()) {
 		_help_screen->write(ss, params);
-	}
-	else if (has_question()) {
+	} else if (has_question()) {
 		_question->write(ss);
-	}
-	else if (has_game()) {
-		_game_log->current_event().write_full(ss, params);
-	}
-	else {
+	} else if (has_game()) {
+		auto& event = _game_log->current_event();
+		event.write_full(ss);
+		event.set_params(params);
+	} else {
 		_setup_screen.write(ss);
 	}
 

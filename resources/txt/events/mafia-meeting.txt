@@ -1,0 +1,35 @@
+=Mafia Meeting=
+
+{!if finished}
+%The mafia have nothing more to discuss for now, and should go back to sleep.
+
+Enter @ok@ when you are ready to continue.
+{!else_if first_meeting}
+{!if single_member}
+Seated alone at a polished walnut table is {player}.
+{!else}
+The mafia consists of:
+{!list mafia}
+ - {player}, the {role}
+{!end}
+{!end}
+
+There is not enough time left to organise a murder.
+{!else}
+{!if single_member}
+Seated alone at a polished walnut table is {player}.
+{!else}
+Seated around a polished walnut table are:
+{!list mafia}
+ - {player}, the {role}
+{!end}
+{!end}
+
+The mafia are ready to choose their next victim.
+
+{!if single_member}
+%Entering @kill A@ will make {player} attempt to kill player @A@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.
+{!else}
+%Entering @A kill B@ will make player @A@ attempt to kill player @B@. Player @A@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.
+{!end}
+{!end}

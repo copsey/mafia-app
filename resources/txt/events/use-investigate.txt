@@ -1,0 +1,11 @@
+={caster}'s Ability=
+
+{!if finished}
+{caster} should now go back to sleep.
+
+%When you are ready, enter @ok@ to continue.
+{!else}
+{caster}, you can choose to investigate somebody this night.
+
+%Enter @check A@ to investigate player @A@, or enter @skip@ if you don't wish to investigate anybody.
+{!end}
