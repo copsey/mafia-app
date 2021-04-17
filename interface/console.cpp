@@ -508,79 +508,81 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 		auto pos = iter1 - raw_output.begin();
 		
 		switch (error.errc) {
-			case preprocess_text_errc::empty_directive:
-				err_msg += "Empty set of braces \"{}\" at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::invalid_parameter_name:
-				err_msg += "Invalid parameter name \"";
-				err_msg.append(iter1, iter2);
-				err_msg += "\" at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::missing_command_name:
-				err_msg += "Expected a command at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
+		case preprocess_text_errc::invalid_command_name:
+			err_msg += "Invalid command name \"";
+			err_msg.append(iter1, iter2);
+			err_msg += "\" at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::invalid_parameter_name:
+			err_msg += "Invalid parameter name \"";
+			err_msg.append(iter1, iter2);
+			err_msg += "\" at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::missing_command_name:
+			err_msg += "Expected a command at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
 			
-			case preprocess_text_errc::missing_parameter_name:
-				err_msg += "Expected a parameter at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::parameter_not_found:
-				err_msg += "Unrecognised parameter name \"";
-				err_msg.append(iter1, iter2);
-				err_msg += "\" at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
+		case preprocess_text_errc::missing_parameter_name:
+			err_msg += "Expected a parameter at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::parameter_not_found:
+			err_msg += "Unrecognised parameter name \"";
+			err_msg.append(iter1, iter2);
+			err_msg += "\" at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
 			
-			case preprocess_text_errc::too_many_closing_braces:
-				err_msg += "Unexpected '}' at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::too_many_opening_braces:
-				err_msg += "No closing brace found for '{' at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::too_many_parameter_names:
-				err_msg += "Too many parameters appear in the directive at position";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::unclosed_expression:
-				err_msg += "No \"end\" directive found for the expression at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
-				
-			case preprocess_text_errc::unexpected_command:
-				err_msg += "The command \"";
-				err_msg.append(iter1, iter2);
-				err_msg += "\" cannot be used at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
+		case preprocess_text_errc::too_many_closing_braces:
+			err_msg += "Unexpected '}' at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::too_many_parameter_names:
+			err_msg += "Too many parameters appear in the directive at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::unclosed_directive:
+			err_msg += "No closing brace found for '{' at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::unclosed_expression:
+			err_msg += "No \"end\" directive found for the expression starting at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
+
+		case preprocess_text_errc::unexpected_command:
+			err_msg += "The command \"";
+			err_msg.append(iter1, iter2);
+			err_msg += "\" cannot be used at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
 			
-			case preprocess_text_errc::wrong_parameter_type:
-				err_msg += "The parameter \"";
-				err_msg.append(iter1, iter2);
-				err_msg += "\" has the wrong type at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following string:";
-				break;
+		case preprocess_text_errc::wrong_parameter_type:
+			err_msg += "The parameter \"";
+			err_msg.append(iter1, iter2);
+			err_msg += "\" has the wrong type at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following string:";
+			break;
 		}
 		
 		err_msg += "\n\n";
@@ -594,17 +596,17 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 		auto pos = iter - std::string_view{preprocessed_output}.begin();
 		
 		switch (error.errc) {
-			case format_text_errc::dangling_backslash:
-				err_msg += "There is a dangling '\\' at the end of the following tagged string:";
-				break;
-				
-			case format_text_errc::invalid_escape_sequence:
-				err_msg += "The escape sequence \"";
-				err_msg += {*iter, *(iter + 1)};
-				err_msg += "\" is invalid, and appears at position ";
-				err_msg += std::to_string(pos);
-				err_msg += " in the following tagged string:";
-				break;
+		case format_text_errc::dangling_backslash:
+			err_msg += "There is a dangling '\\' at the end of the following tagged string:";
+			break;
+
+		case format_text_errc::invalid_escape_sequence:
+			err_msg += "The escape sequence \"";
+			err_msg += {*iter, *(iter + 1)};
+			err_msg += "\" is invalid, and appears at position ";
+			err_msg += std::to_string(pos);
+			err_msg += " in the following tagged string:";
+			break;
 		}
 		
 		err_msg += "\n\n";
