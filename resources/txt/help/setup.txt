@@ -1,0 +1,19 @@
+=Help: Setup=
+
+%The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.
+
+To add a player called @name@ to the next game, enter @add player name@. The player can be removed by entering @take player name@. To remove all of the players that have been selected, enter @clear players@.
+
+A single copy of the role with alias @that@ can be added by entering @add role that@, and a single copy removed by entering @take role that@. You can remove all copies of the role by entering @clear role that@, and you can remove every role that has been selected by entering @clear roles@.
+
+Similar effects can be achieved for the wildcard with alias @that@ by using the commands @add w that@, @take w that@, @clear w that@, and @clear w@ respectively. In addition, every card that has been selected (both roles and wildcards) can be removed through the use of the command @clear cards@.
+
+To clear absolutely everything (both players and cards), enter @clear all@.
+
+Once you have finished choosing players and cards, you can enter @begin@ to start a new game. Alternatively, you can enter @preset i@ to start a particular preconfigured game, or just @preset@ to start a random preset. (Note: At the moment, presets exist primarily for debugging, and you are unlikely to ever use them.)
+
+You can get extra information on the role with alias @that@ by entering @help role that@, and you can see a list of every role in the rulebook by entering @list roles@. To see a list of only the village roles, you can enter @list roles village@. Similarly, the command @list roles mafia@ will list the mafia roles, and the command @list roles freelance@ will list the freelance roles.
+
+The commands @help w that@, @list w@, @list w village@, @list w mafia@, and @list w freelance@ have similar effects for wildcards.
+
+To leave this screen, enter @ok@.

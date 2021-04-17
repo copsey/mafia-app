@@ -1,0 +1,34 @@
+=Roles=
+
+%{!if show_village}
+The following is an alphabetical listing of all of the roles in the rulebook aligned to the village:
+{!else_if show_mafia}
+The following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:
+{!else_if show_freelance}
+The following is an alphabetical listing of all of the freelance roles in the rulebook:
+{!else}
+The following is an alphabetical listing of every role in the rulebook:
+{!end}
+{!if show_all}
+{!list roles}
+ - the {role}, alias @{role.alias}@, {!if role.aligned_to_village}aligned to the village{!else_if role.aligned_to_mafia}aligned to the mafia{!else}a freelance role{!end}
+{!end}
+{!else}
+{!list roles}
+ - the {role}, alias @{role.alias}@
+{!end}
+{!end}
+
+To see more information about the role with alias @that@, enter @help r that@.
+
+{!if show_village}
+To list the mafia roles, enter @list r m@, and to list the freelance roles, enter @list r f@.
+{!else_if show_mafia}
+To list the village roles, enter @list r v@, and to list the freelance roles, enter @list r f@.
+{!else_if show_freelance}
+To list the village roles, enter @list r v@, and to list the mafia roles, enter @list r m@.
+{!else}
+To list only the village roles, enter @list r v@. Similarly, @list r m@ will list the mafia roles, and @list r f@ will list the freelance roles.
+{!end}
+
+To leave this screen, enter @ok@.
