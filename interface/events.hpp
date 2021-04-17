@@ -53,7 +53,7 @@ namespace maf {
 		// Writes a summary of the event to `os`.
 		//
 		// By default, nothing is written at all.
-		virtual void write_summary(std::ostream & os) const;
+		virtual void summarise(std::ostream & os) const;
 
 		std::string escaped_name(Player const& player) const;
 
@@ -78,7 +78,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream & os) const override;
+		void summarise(std::ostream & os) const override;
 
 	private:
 		const Player *_p;
@@ -102,7 +102,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream & os) const override;
+		void summarise(std::ostream & os) const override;
 	};
 
 
@@ -117,7 +117,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream& os) const override;
+		void summarise(std::ostream& os) const override;
 
 	private:
 		std::vector<rkt::ref<const Player>> _deaths;
@@ -149,7 +149,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view>& commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 
 	private:
 		std::vector<rkt::ref<const Player>> _players;
@@ -172,7 +172,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 
 		rkt::ref<const Player> player;
 		rkt::ref<const Role> player_role;
@@ -196,7 +196,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 	};
 
 
@@ -211,7 +211,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 
 		rkt::ref<const Player> caster;
 		rkt::ref<const Player> target;
@@ -231,7 +231,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 
 	private:
 		const Player *_player;
@@ -360,7 +360,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 
 	private:
 		bool _go_to_sleep{false};
@@ -378,7 +378,7 @@ namespace maf {
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
-		void write_summary(std::ostream &os) const override;
+		void summarise(std::ostream &os) const override;
 	};
 }
 

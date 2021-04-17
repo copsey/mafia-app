@@ -6,7 +6,7 @@
 #include "names.hpp"
 #include "../common/stdlib.h"
 
-void maf::Event::write_summary(ostream &os) const {
+void maf::Event::summarise(ostream &os) const {
 	// By default, write nothing.
 }
 
@@ -59,7 +59,7 @@ void maf::Player_given_initial_role::set_params(TextParams& params) const {
 	}
 }
 
-void maf::Player_given_initial_role::write_summary(ostream &os) const {
+void maf::Player_given_initial_role::summarise(ostream &os) const {
 	os << game_log().get_name(*_p) << " played as the " << full_name(*_r) << ".";
 }
 
@@ -78,7 +78,7 @@ void maf::Time_changed::set_params(TextParams& params) const {
 	params["nighttime"] = (time == Time::night);
 }
 
-void maf::Time_changed::write_summary(ostream &os) const {
+void maf::Time_changed::summarise(ostream &os) const {
 	switch (time) {
 		case Time::day:
 			os << "Day " << date << " began.";
@@ -118,7 +118,7 @@ void maf::Obituary::set_params(TextParams& params) const {
 	}
 }
 
-void maf::Obituary::write_summary(ostream &os) const {
+void maf::Obituary::summarise(ostream &os) const {
 	bool write_nl = false;
 
 	for (auto& p_ref: _deaths) {
@@ -219,7 +219,7 @@ void maf::Town_meeting::set_params(TextParams & params) const {
 	params["townsfolk"] = std::move(townsfolk);
 }
 
-void maf::Town_meeting::write_summary(ostream &os) const {
+void maf::Town_meeting::summarise(ostream &os) const {
 	if (_recent_vote_caster) {
 		if (_recent_vote_target) {
 			os << game_log().get_name(*_recent_vote_caster) << " voted to lynch " << game_log().get_name(*_recent_vote_target) << ".";
@@ -243,7 +243,7 @@ void maf::Player_kicked::set_params(TextParams & params) const {
 	params["role"] = escaped(full_name(player->role()));
 }
 
-void maf::Player_kicked::write_summary(ostream &os) const {
+void maf::Player_kicked::summarise(ostream &os) const {
 	os << game_log().get_name(*player) << " was kicked.";
 }
 
@@ -270,7 +270,7 @@ void maf::Lynch_result::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Lynch_result::write_summary(ostream &os) const {
+void maf::Lynch_result::summarise(ostream &os) const {
 	if (victim) {
 		os << game_log().get_name(*victim) << " was lynched.";
 	}
@@ -296,7 +296,7 @@ void maf::Duel_result::set_params(TextParams & params) const {
 	params["winner.fled"] = !winner->is_present();
 }
 
-void maf::Duel_result::write_summary(ostream &os) const {
+void maf::Duel_result::summarise(ostream &os) const {
 	auto & glog = game_log();
 	
 	auto caster_name = glog.get_name(*caster);
@@ -352,7 +352,7 @@ void maf::Choose_fake_role::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Choose_fake_role::write_summary(ostream &os) const {
+void maf::Choose_fake_role::summarise(ostream &os) const {
 	if (_fake_role) {
 		os << game_log().get_name(*_player) << " was given the " << full_name(*_fake_role) << " as a fake role.";
 	}
@@ -576,7 +576,7 @@ void maf::Investigation_result::set_params(TextParams& params) const {
 	params["target.suspicious"] = investigation.result();
 }
 
-void maf::Investigation_result::write_summary(ostream &os) const {
+void maf::Investigation_result::summarise(ostream &os) const {
 	os << game_log().get_name(investigation.caster())
 	<< " decided that "
 	<< game_log().get_name(investigation.target())
@@ -612,7 +612,7 @@ void maf::Game_ended::set_params(TextParams& params) const {
 	if (!losers.empty()) params["losers"] = std::move(losers);
 }
 
-void maf::Game_ended::write_summary(ostream &os) const {
+void maf::Game_ended::summarise(ostream &os) const {
 	for (auto it = game_log().game().players().begin(); it != game_log().game().players().end(); ) {
 		const Player &player = *it;
 		os << game_log().get_name(player) << (player.has_won() ? " won." : " lost.");

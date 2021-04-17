@@ -81,7 +81,7 @@ void maf::Game_log::do_commands(const vector<string_view> & commands) {
 void maf::Game_log::write_transcript(std::ostream &os) const {
 	for (const auto &event: _log) {
 		auto pre_pos = os.tellp();
-		event->write_summary(os);
+		event->summarise(os);
 		auto post_pos = os.tellp();
 
 		if (pre_pos != post_pos) os << '\n';
