@@ -14,35 +14,53 @@ namespace maf {
 	struct Help_Screen {
 		virtual ~Help_Screen() = default;
 
-		// Write a tagged string detailing the help screen to os.
-		virtual void write(std::ostream &os, TextParams& params) const = 0;
+		// A string representing the help screen.
+		// Used when loading text from external files.
+		virtual std::string_view id() const = 0;
+
+		// Configure the text parameters for this help screen.
+		// These are used to generate text output.
+		//
+		// By default, do nothing.
+		virtual void set_params(TextParams & params) const { };
+
+		// Write the help screen to `output`.
+		// This text should then be preprocessed.
+		void write(std::ostream & output) const;
 	};
 
 
 	struct Event_Help_Screen: Help_Screen {
 		Event_Help_Screen(const Event &e)
-			: event{e}
+		: event{e}
 		{ }
 
 		rkt::ref<const Event> event;
 
-		void write(std::ostream &os, TextParams& params) const override;
+		std::string_view id() const override {
+			return event->id();
+		}
 	};
 
 
 	struct Role_Info_Screen: Help_Screen {
 		Role_Info_Screen(const Role &role)
-			: role{role}
+		: role{role}
 		{ }
 
 		rkt::ref<const Role> role;
 
-		void write(std::ostream &os, TextParams& params) const override;
+		std::string_view id() const override {
+			return alias(role->id());
+		}
+
+		void set_params(TextParams & params) const override;
 	};
 
 
 	struct List_Roles_Screen: Help_Screen {
-		// An optional filter, specifying the alignment of roles that should be displayed.
+		// An optional filter, specifying the alignment of roles that should be
+		// displayed.
 		enum class Filter_Alignment { all, village, mafia, freelance };
 
 		// Create a help screen listing all of the roles present in `rulebook`.
@@ -50,10 +68,12 @@ namespace maf {
 		// It is also possible to specify an optional alignment filter, in which case
 		// only roles of that alignment will be listed.
 		List_Roles_Screen(const Rulebook& rulebook, Filter_Alignment alignment = Filter_Alignment::all)
-			: _rulebook{rulebook}, _filter_alignment{alignment}
+		: _rulebook{rulebook}, _filter_alignment{alignment}
 		{ }
 
-		void write(std::ostream &os, TextParams& params) const override;
+		std::string_view id() const override { return "list-roles"; }
+
+		void set_params(TextParams & params) const override;
 
 	private:
 		rkt::ref<const Rulebook> _rulebook;
@@ -62,7 +82,7 @@ namespace maf {
 
 
 	struct Setup_Help_Screen: Help_Screen {
-		void write(std::ostream &os, TextParams& params) const override;
+		std::string_view id() const override { return "setup"; }
 	};
 
 
@@ -71,10 +91,12 @@ namespace maf {
 		/// Create an info screen for `player`, who should be a participant in the
 		/// game managed by `game_log`.
 		Player_Info_Screen(const Player & player, const Game_log & game_log)
-			: _player_ref{player}, _game_log_ref{game_log}
+		: _player_ref{player}, _game_log_ref{game_log}
 		{ }
 
-		void write(std::ostream& os, TextParams& params) const override;
+		std::string_view id() const override { return "player-info"; }
+
+		void set_params(TextParams & params) const override;
 
 	private:
 		rkt::ref<const Player> _player_ref;

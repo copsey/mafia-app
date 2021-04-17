@@ -55,12 +55,6 @@ namespace maf {
 		// By default, nothing is written at all.
 		virtual void write_summary(std::ostream & os) const;
 
-		// Writes some text to `os` containing help about the event.
-		// This text should then be preprocessed.
-		//
-		// By default, complains that no help has been written for the event.
-		virtual void write_help(std::ostream & os, TextParams& params) const;
-
 		std::string escaped_name(Player const& player) const;
 
 		std::string escaped_name(Role const& role) const;

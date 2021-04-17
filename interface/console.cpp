@@ -622,15 +622,19 @@ void maf::Console::refresh_output() {
 	TextParams params;
 
 	if (has_help_screen()) {
-		_help_screen->write(ss, params);
+		auto& screen = *_help_screen;
+		screen.write(ss);
+		screen.set_params(params);
 	} else if (has_question()) {
-		_question->write(ss);
+		auto& screen = *_question;
+		screen.write(ss);
 	} else if (has_game()) {
-		auto& event = _game_log->current_event();
-		event.write_full(ss);
-		event.set_params(params);
+		auto& screen = _game_log->current_event();
+		screen.write_full(ss);
+		screen.set_params(params);
 	} else {
-		_setup_screen.write(ss);
+		auto& screen = _setup_screen;
+		screen.write(ss);
 	}
 
 	read_output(ss.str(), params);

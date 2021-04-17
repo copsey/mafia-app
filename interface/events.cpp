@@ -10,10 +10,6 @@ void maf::Event::write_summary(ostream &os) const {
 	// By default, write nothing.
 }
 
-void maf::Event::write_help(ostream &os, TextParams& params) const {
-	os << "=Missing Help Screen=\n\n%No help has been written for the current game event.\n(this counts as a bug!)\n\nEnter @ok@ to leave this screen.";
-}
-
 void maf::Event::write_full(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
 	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/";
