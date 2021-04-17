@@ -2,12 +2,11 @@
 #define MAFIA_STYLED_STRING_H
 
 #include <algorithm>
+#include <any>
 #include <bitset>
-#include <iterator>
 #include <map>
 #include <string>
 #include <string_view>
-#include <variant>
 #include <vector>
 
 namespace maf {
@@ -19,16 +18,13 @@ namespace maf {
 	// - `escaped("under_score")` returns `"under\_score"`
 	inline std::string escaped(std::string_view str_view);
 
-	// A parameter used when preprocessing text.
-	using TextParam = std::variant<std::string, bool>;
-
 	// A map from strings (treated as parameter names) to text parameters
 	// (treated as substitutions).
 	//
 	// Note that the map only holds views into its keys, whereas the values
 	// are fully owned. Typically the parameter name will be a compile-time
 	// constant.
-	using TextParams = std::map<std::string_view, TextParam>;
+	using TextParams = std::map<std::string_view, std::any>;
 	
 	// Check if `str` is an allowed name for a text parameter.
 	// This is true if it matches the regex `/^[a-zA-Z0-9_\.]+$/`.
@@ -274,6 +270,7 @@ namespace maf::_preprocess_text_impl {
 			if_command,
 			else_if_command,
 			else_command,
+			list_command,
 			end_command
 		};
 
@@ -306,11 +303,37 @@ namespace maf::_preprocess_text_impl {
 				return type_t::else_if_command;
 			} else if (command_name == "else") {
 				return type_t::else_command;
+			} else if (command_name == "list") {
+				return type_t::list_command;
 			} else if (command_name == "end") {
 				return type_t::end_command;
 			} else {
 				auto errc = preprocess_text_errc::invalid_command_name;
 				throw preprocess_text_error{errc, command_name.begin(), command_name.end()};
+			}
+		}
+
+		// Throw `preprocess_text_error` if `this->type` is not `type`.
+		void verify(type_t type) {
+			if (type != this->type) {
+				switch (this->type) {
+				case type_t::substitution:
+					{
+						// FIXME: Throw a bespoke exception.
+						break;
+					}
+
+				case type_t::if_command:
+				case type_t::else_if_command:
+				case type_t::else_command:
+				case type_t::list_command:
+				case type_t::end_command:
+					{
+						auto errc = preprocess_text_errc::unexpected_command;
+						auto name = command_name;
+						throw preprocess_text_error{errc, name.begin(), name.end()};
+					}
+				}
 			}
 		}
 
@@ -476,7 +499,7 @@ namespace maf::_preprocess_text_impl {
 
 		auto & param = (*iter).second;
 
-		if (auto ptr = std::get_if<ParamType>(&param)) {
+		if (auto ptr = std::any_cast<ParamType>(&param)) {
 			return *ptr;
 		} else {
 			auto errc = preprocess_text_errc::wrong_parameter_type;
@@ -591,6 +614,34 @@ namespace maf::_preprocess_text_impl {
 	};
 
 
+	struct loop: expression {
+		std::string_view param_name;
+		sequence subexpr;
+
+		void write(std::string & output, TextParams const& params) const
+		override {
+			auto& v = get_param<std::vector<TextParams>>(param_name, params);
+
+			for (auto& subparams: v) {
+				subexpr.write(output, subparams);
+			}
+		}
+
+		// # Example
+		// Given the following input:
+		// ```
+		//       begin                      end
+		//       |                            |
+		// "easy {!list grace} ... {!end} of her attitude"
+		//                               |
+		//                              next
+		// ```
+		// set `this->param_name` to `"grace"`, set `this->subexpr` to the
+		// result of parsing `...` as a sequence, and return `next`.
+		iterator parse(iterator begin, iterator end) override;
+	};
+
+
 	/*
 	 * Definitions of "parse" functions
 	 */
@@ -621,7 +672,8 @@ namespace maf::_preprocess_text_impl {
 			type = to_type(command_name);
 
 			if (type == type_t::if_command
-				|| type == type_t::else_if_command)
+				|| type == type_t::else_if_command
+				|| type == type_t::list_command)
 			{
 				i = skip_whitespace(i, end);
 				i = parse_param_name(i, end, param_name);
@@ -687,6 +739,9 @@ namespace maf::_preprocess_text_impl {
 				case directive::type_t::if_command:
 					expr = std::make_unique<conditional>();
 					break;
+				case directive::type_t::list_command:
+					expr = std::make_unique<loop>();
+					break;
 				default:
 					return i; // stop when directive is not recognised
 				}
@@ -714,16 +769,12 @@ namespace maf::_preprocess_text_impl {
 			auto next = d.parse(i, end);
 
 			if (stage == 1) {
-				if (d.type == directive::type_t::if_command) {
-					sequence expr;
-					i = expr.parse(next, end);
-					conditional_subexprs.emplace_back(d.param_name, std::move(expr));
-					++stage;
-				} else {
-					auto errc = preprocess_text_errc::unexpected_command;
-					auto name = d.command_name;
-					throw preprocess_text_error{errc, name.begin(), name.end()};
-				}
+				d.verify(directive::type_t::if_command);
+
+				sequence expr;
+				i = expr.parse(next, end);
+				conditional_subexprs.emplace_back(d.param_name, std::move(expr));
+				++stage;
 			} else if (stage == 2) {
 				if (d.type == directive::type_t::else_if_command) {
 					sequence expr;
@@ -738,13 +789,9 @@ namespace maf::_preprocess_text_impl {
 					++stage;
 				}
 			} else /* stage == 3 */ {
-				if (d.type == directive::type_t::end_command) {
-					return next;
-				} else {
-					auto errc = preprocess_text_errc::unexpected_command;
-					auto name = d.command_name;
-					throw preprocess_text_error{errc, name.begin(), name.end()};
-				}
+				d.verify(directive::type_t::end_command);
+
+				return next;
 			}
 
 			if (i == end) {
@@ -752,6 +799,33 @@ namespace maf::_preprocess_text_impl {
 				throw preprocess_text_error{errc, begin};
 			}
 		}
+	}
+
+
+	inline iterator loop::parse(iterator begin, iterator end) {
+		auto i = begin;
+
+		{ // Stage 1: Parse the "list" command
+			directive d;
+			i = d.parse(i, end);
+			d.verify(directive::type_t::list_command);
+			param_name = d.param_name;
+		}
+
+		i = subexpr.parse(i, end);
+
+		if (i == end) {
+			auto errc = preprocess_text_errc::unclosed_expression;
+			throw preprocess_text_error{errc, begin};
+		}
+
+		{ // Stage 2: Parse the "end" command
+			directive d;
+			i = d.parse(i, end);
+			d.verify(directive::type_t::end_command);
+		}
+
+		return i;
 	}
 }
 

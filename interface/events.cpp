@@ -14,6 +14,14 @@ void maf::Event::write_help(ostream &os, TextParams& params) const
 	os << "=Missing Help Screen=\n\n%No help has been written for the current game event.\n(this counts as a bug!)\n\nEnter @ok@ to leave this screen.";
 }
 
+std::string maf::Event::escaped_name(Player const& player) const {
+	return escaped(game_log().get_name(player));
+}
+
+std::string maf::Event::escaped_name(Role const& role) const {
+	return escaped(full_name(role));
+}
+
 void maf::Player_given_initial_role::do_commands(const vector<string_view> & commands)
 {
 	if (commands_match(commands, {"ok"})) {
@@ -183,47 +191,33 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Town_meeting::write_full(ostream &os, TextParams& params) const {
-	/* FIXME: add in proper content. */
-
 	params["date"] = std::to_string(_date);
 	params["lynch_can_occur"] = _lynch_can_occur;
 
-	os << "=Day {date}=\n\n";
-
 	if (_lynch_can_occur) {
 		params["lynch_target.exists"] = (_next_lynch_victim != nullptr);
-		
 		if (_next_lynch_victim) {
 			params["lynch_target"] = escaped(game_log().get_name(*_next_lynch_victim));
 		}
-		
-		os << "Gathered outside the town hall are:\n";
-
-		for (auto p_ref : _players) {
-			auto const& player = *p_ref;
-			auto player_name = escaped(game_log().get_name(player));
-			
-			os << "   " << player_name;
-			if (p_ref->lynch_vote() != nullptr) {
-				auto vote_name = escaped(game_log().get_name(*(player.lynch_vote())));
-				
-				os << ", voting to lynch " << vote_name;
-			}
-			os << "\n";
-		}
-
-		os << "\nAs it stands, {!if lynch_target.exists}{lynch_target}{!else}nobody{!end} will be lynched.\n\n%Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.";
-	} else {
-		os << "_With little time left in the day, the townsfolk prepare themselves for another night of uncertainty..._\n\nGathered outside the town hall are:\n";
-
-		for (auto p_ref : _players) {
-			auto const& player_name = escaped(game_log().get_name(*p_ref));
-			
-			os << "   " << player_name << "\n";
-		}
-
-		os << "\n%Anybody who wishes to use a daytime ability may do so now. Otherwise, enter @night@ to continue.";
 	}
+
+	auto townsfolk = std::vector<TextParams>();
+
+	for (auto p_ref: _players) {
+		auto& subparams = townsfolk.emplace_back();
+
+		subparams["player"] = escaped_name(*p_ref);
+		if (_lynch_can_occur) {
+			subparams["player.has_voted"] = (p_ref->lynch_vote() != nullptr);
+			if (p_ref->lynch_vote() != nullptr) {
+				subparams["player.vote"] = escaped_name(*(p_ref->lynch_vote()));
+			}
+		}
+	}
+
+	params["townsfolk"] = std::move(townsfolk);
+
+	os << "=Day {date}=\n\n{!if lynch_can_occur}\nGathered outside the town hall are:\n{!list townsfolk}\n   {player}{!if player.has_voted}, voting to lynch {player.vote}{!end}\n{!end}\n\nAs it stands, {!if lynch_target.exists}{lynch_target}{!else}nobody{!end} will be lynched.\n\n%Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.\n{!else}\n_With little time left in the day, the townsfolk prepare themselves for another night of uncertainty..._\n\nGathered outside the town hall are:\n{!list townsfolk}   {player}\n{!end}\n\n%Anybody who wishes to use a daytime ability may do so now. Otherwise, enter @night@ to continue.\n{!end}";
 }
 
 void maf::Town_meeting::write_summary(ostream &os) const {
@@ -364,7 +358,7 @@ void maf::Choose_fake_role::write_full(ostream &os, TextParams& params) const
 	params["fake_role.chosen"] = (_fake_role != nullptr);
 
 	if (_fake_role) {
-		params["fake_role"] = escaped(full_name(*_fake_role));
+		params["fake_role"] = escaped_name(*_fake_role);
 		params["fake_role.alias"] = escaped(_fake_role->alias());
 	}
 	
@@ -420,40 +414,23 @@ void maf::Mafia_meeting::write_full(std::ostream & out, TextParams& params) cons
 	params["finished"] = _go_to_sleep;
 	params["first_meeting"] = _initial;
 	params["single_member"] = (_mafiosi.size() == 1);
-	
+
 	if (_mafiosi.size() == 1) {
-		Player const& player = *(_mafiosi.front());
-		params["player"] = escaped(game_log().get_name(player));
-		params["role"] = escaped(full_name(player.role()));
+		auto& player = *_mafiosi.front();
+		params["player"] = escaped_name(player);
+		params["role"] = escaped_name(player.role());
+	} else {
+		std::vector<TextParams> mafia;
+		for (auto p_ref: _mafiosi) {
+			auto& player = *p_ref;
+			auto& subparams = mafia.emplace_back();
+			subparams["player"] = escaped_name(player);
+			subparams["role"] = escaped_name(player.role());
+		}
+		params["mafia"] = std::move(mafia);
 	}
 	
-	out << "=Mafia Meeting=\n\n{!if finished}\n%The mafia have nothing more to discuss for now, and should go back to sleep.\n\nEnter @ok@ when you are ready to continue.\n{!else_if first_meeting}{!else_if single_member}\nSeated alone at a polished walnut table is {player}.\n\nThe mafia are ready to choose their next victim.\n\n%Entering @kill A@ will make {player} attempt to kill player @A@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.\n{!end}";
-
-	if (!_go_to_sleep) {
-		if (_initial) {
-			out << "The mafia consists of:\n";
-
-			for (auto p_ref : _mafiosi) {
-				auto player_name = escaped(game_log().get_name(*p_ref));
-				auto player_role = full_name(p_ref->role());
-				
-				out << "   " << player_name << ", the " << player_role << "\n";
-			}
-
-			out << "\nThere is not enough time left to organise a murder.";
-		} else if (_mafiosi.size() > 1) {
-			out << "Seated around a polished walnut table are:\n";
-
-			for (auto p_ref : _mafiosi) {
-				auto player_name = escaped(game_log().get_name(*p_ref));
-				auto player_role = full_name(p_ref->role());
-				
-				out << "   " << player_name << ", the " << player_role << "\n";
-			}
-
-			out << "\nThe mafia are ready to choose their next victim.\n\n%Entering @A kill B@ will make player @A@ attempt to kill player @B@. Player @A@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.";
-		}
-	}
+	out << "=Mafia Meeting=\n\n{!if finished}\n%The mafia have nothing more to discuss for now, and should go back to sleep.\n\nEnter @ok@ when you are ready to continue.\n{!else_if first_meeting}\n{!if single_member}\nSeated alone at a polished walnut table is {player}.\n{!else}\nThe mafia consists of:\n{!list mafia}\n - {player}, the {role}\n{!end}\n{!end}\n\nThere is not enough time left to organise a murder.\n{!else}\n{!if single_member}\nSeated alone at a polished walnut table is {player}.\n{!else}\nSeated around a polished walnut table are:\n{!list mafia}\n - {player}, the {role}\n{!end}\n{!end}\n\nThe mafia are ready to choose their next victim.\n\n{!if single_member}\n%Entering @kill A@ will make {player} attempt to kill player @A@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.\n{!else}\n%Entering @A kill B@ will make player @A@ attempt to kill player @B@. Player @A@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.\n{!end}\n{!end}";
 }
 
 void maf::Kill_use::do_commands(const vector<string_view> &commands) {
@@ -645,51 +622,28 @@ void maf::Game_ended::do_commands(const vector<string_view> & commands)
 
 void maf::Game_ended::write_full(ostream &os, TextParams& params) const
 {
-	vector<const Player *> winners{};
-	vector<const Player *> losers{};
-	for (const Player &player: game_log().game().players()) {
+	std::vector<TextParams> winners;
+	std::vector<TextParams> losers;
+
+	for (auto& player: game_log().game().players()) {
+		TextParams subparams;
+		subparams["player"] = escaped_name(player);
+		subparams["role"] = escaped_name(player.role());
+
 		if (player.has_won()) {
-			winners.push_back(&player);
+			winners.push_back(std::move(subparams));
 		} else {
-			losers.push_back(&player);
+			losers.push_back(std::move(subparams));
 		}
 	}
 
-	os << "=Game Over=\n\nThe game has ended!\n\n";
+	params["any_winners"] = !winners.empty();
+	params["any_losers"] = !losers.empty();
 
-	if (winners.size() > 0) {
-		os << "The following players won:\n";
+	if (!winners.empty()) params["winners"] = std::move(winners);
+	if (!losers.empty()) params["losers"] = std::move(losers);
 
-		for (auto p_ref : winners) {
-			const Player &player = *p_ref;
-			
-			auto player_name = escaped(game_log().get_name(player));
-			auto player_role = full_name(player.role());
-			
-			os << "   " << player_name << ", the " << player_role << "\n";
-		}
-	} else {
-		os << "Nobody won.\n";
-	}
-	
-	os << "\n";
-
-	if (losers.size() > 0) {
-		os << "Commiserations go out to:\n";
-
-		for (auto p_ref : losers) {
-			const Player &player = *p_ref;
-			
-			auto player_name = escaped(game_log().get_name(player));
-			auto player_role = full_name(player.role());
-			
-			os << "   " << player_name << ", the " << player_role << "\n";
-		}
-	} else {
-		os << "Nobody lost.\n";
-	}
-
-	os << "\n%To return to the setup screen, enter @end@.";
+	os << "=Game Over=\n\nThe game has ended!\n\n{!if any_winners}\nThe following players won:\n{!list winners}\n - {player}, the {role}\n{!end}\n{!else}\nNobody won.\n{!end}\n\n{!if any_losers}\nCommiserations go out to:\n{!list losers}\n - {player}, the {role}\n{!end}\n{!else}\nNobody lost.\n{!end}\n\n%To return to the setup screen, enter @end@.";
 }
 
 void maf::Game_ended::write_summary(ostream &os) const

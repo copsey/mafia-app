@@ -46,6 +46,10 @@ namespace maf {
 		// By default, complains that no help has been written for the event.
 		virtual void write_help(std::ostream & os, TextParams& params) const;
 
+		std::string escaped_name(Player const& player) const;
+		
+		std::string escaped_name(Role const& role) const;
+
 	private:
 		rkt::ref<Game_log> _game_log_ref;
 	};
