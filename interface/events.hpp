@@ -48,7 +48,7 @@ namespace maf {
 
 		// Write details of the event to `output`.
 		// This text should then be preprocessed.
-		void write_full(std::ostream & output) const;
+		void write(std::ostream & output) const;
 
 		// Writes a summary of the event to `os`.
 		//

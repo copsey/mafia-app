@@ -10,7 +10,7 @@ void maf::Event::write_summary(ostream &os) const {
 	// By default, write nothing.
 }
 
-void maf::Event::write_full(std::ostream & output) const {
+void maf::Event::write(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
 	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/";
 	fname += this->id();
