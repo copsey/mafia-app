@@ -628,6 +628,7 @@ void maf::Console::refresh_output() {
 	} else if (has_question()) {
 		auto& screen = *_question;
 		screen.write(ss);
+		screen.set_params(params);
 	} else if (has_game()) {
 		auto& screen = _game_log->current_event();
 		screen.write_full(ss);

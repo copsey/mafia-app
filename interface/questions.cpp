@@ -1,39 +1,33 @@
-#include "../common/stdlib.h"
+#include <fstream>
+#include <string>
+
 #include "command.hpp"
 #include "console.hpp"
 #include "questions.hpp"
 
+void maf::Question::write(std::ostream & output) const {
+	// FIXME: This is horrendously fragile.
+	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/questions/";
+	fname += this->id();
+	fname += ".txt";
 
-bool maf::Confirm_end_game::do_commands(const vector<string_view> & commands) {
+	auto input = std::ifstream{fname};
+	if (input) {
+		output << input.rdbuf();
+	} else {
+		output << "=Missing Screen=\n\nERROR: No text found for the \"";
+		output << this->id();
+		output << "\" question screen.\n\n%Enter @ok@ to return to the previous screen.";
+	}
+}
+
+bool maf::Confirm_end_game::do_commands(std::vector<std::string_view> const& commands) {
 	if (commands_match(commands, {"yes"})) {
 		_console_ref->end_game();
 		return true;
-	}
-	else if (commands_match(commands, {"no"})) {
+	} else if (commands_match(commands, {"no"})) {
 		return true;
-	}
-	else {
+	} else {
 		throw Bad_commands();
 	}
 }
-
-void maf::Confirm_end_game::write(ostream &os) const {
-	os << "=End Game?=\n\nYou are about to end the current game.\nAre you sure that you want to do this? (@yes@ or @no@)";
-}
-
-// bool maf::Confirm_mafia_kill_skip::do_commands(const vector<string_view> &commands, Console &console) {
-// 	if (commands_match(commands, {"yes"})) {
-// 		console.g
-// 		return true;
-// 	}
-// 	else if (commands_match(commands, {"no"})) {
-// 		return true;
-// 	}
-// 	else {
-// 		throw Bad_commands();
-// 	}
-// }
-
-// void maf::Confirm_mafia_kill_skip::write(ostream &os) const {
-// 	os << "=Skip?=\n\nYou are about to skip the mafia's nightly kill.\nAre you sure that you want to do this? (@yes@ or @no@)";
-// }

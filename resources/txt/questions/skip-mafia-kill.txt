@@ -1,0 +1,4 @@
+=Skip Ability?=
+
+You are about to skip the mafia's nightly kill.
+Are you sure that you want to do this? (@yes@ or @no@)

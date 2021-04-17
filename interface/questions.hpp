@@ -18,6 +18,10 @@ namespace maf {
 
 		virtual ~Question() = default;
 
+		// A string representing the screen.
+		// Used when loading text from external files.
+		virtual std::string_view id() const = 0;
+
 		// Handles the given commands, taking action as appropriate.
 		//
 		// Returns true if the question has been fully answered, and false otherwise.
@@ -26,37 +30,33 @@ namespace maf {
 		// Throws an exception if the commands couldn't be handled.
 		virtual bool do_commands(const std::vector<std::string_view> & commands) = 0;
 
-		// Writes a tagged string containing the question to os.
-		virtual void write(std::ostream &os) const = 0;
+		// Write the screen to `output`.
+		// This text should then be preprocessed.
+		void write(std::ostream & output) const;
+
+		// Configure the text parameters for this screen.
+		// These are used to generate text output.
+		//
+		// By default, do nothing.
+		virtual void set_params(TextParams & params) const { };
 	};
-
-
-// struct Confirm_no_lynch_votes: Question {
-// 	bool do_commands(const std::vector<std::string> &commands) override;
-//
-// 	void write(std::ostream &os) const override;
-// };
-
-
-// struct Confirm_mafia_kill_skip: Question {
-// 	bool do_commands(const std::vector<std::string> &commands) override;
-//
-// 	void write(std::ostream &os) const override;
-// };
-
 
 	struct Confirm_end_game: Question {
 		Confirm_end_game(Console & console)
-			: _console_ref(console)
+		: _console_ref(console)
 		{ }
 
+		std::string_view id() const override { return "end-game"; }
+
 		bool do_commands(const std::vector<std::string_view> & commands) override;
-		
-		void write(std::ostream &os) const override;
 
 	private:
 		rkt::ref<Console> _console_ref;
 	};
+
+	// TODO: Add screen for confirming if the daily lynch should be skipped.
+
+	// TODO: Add screen for confirming if the mafia kill should be skipped.
 }
 
 #endif
