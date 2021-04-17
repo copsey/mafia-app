@@ -113,8 +113,7 @@ void maf::Obituary::write_full(ostream &os, TextParams& params) const
 		}
 	}
 
-//	os << "=Obituary=\n\n{!if show_death}\n{deceased} died during the night!\n{!if deceased.is_haunted}\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...\n{!end}\n{!else_if anyone_died}\n{--- FIXME: reword to remove use of \"us\".}\nIt appears that {num_deaths} of us did not survive the night...\n{!else}\nNobody died during the night.\n{!end}";
-	os << "=Obituary=\n\n{!if show_death}\n{deceased} died during the night!\n{!if deceased.is_haunted}\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...\n{!end}\n{!else_if anyone_died}\nIt appears that {num_deaths} of us did not survive the night...\n{!else}\nNobody died during the night.\n{!end}";
+	os << "=Obituary=\n\n{!if show_death}\n{deceased} died during the night!\n{!if deceased.is_haunted}\n\nA slip of paper was found by their bed. On it has been written the name \"{ghost}\" over and over...\n{!end}\n{!else_if anyone_died}\n{--- FIXME: reword to remove use of \"us\".}\nIt appears that {num_deaths} of us did not survive the night...\n{!else}\nNobody died during the night.\n{!end}";
 }
 
 void maf::Obituary::write_summary(ostream &os) const {

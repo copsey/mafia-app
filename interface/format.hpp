@@ -266,6 +266,7 @@ namespace maf::_preprocess_text_impl {
 
 	struct directive {
 		enum class type_t {
+			comment,
 			substitution,
 			if_command,
 			else_if_command,
@@ -317,6 +318,12 @@ namespace maf::_preprocess_text_impl {
 		void verify(type_t type) {
 			if (type != this->type) {
 				switch (this->type) {
+				case type_t::comment:
+					{
+						// FIXME: Throw a bespoke exception.
+						break;
+					}
+
 				case type_t::substitution:
 					{
 						// FIXME: Throw a bespoke exception.
@@ -678,6 +685,9 @@ namespace maf::_preprocess_text_impl {
 				i = skip_whitespace(i, end);
 				i = parse_param_name(i, end, param_name);
 			}
+		} else if (ch == '-') {
+			type = type_t::comment;
+			return j + "}"sv.size();
 		} else {
 			type = type_t::substitution;
 
@@ -730,9 +740,12 @@ namespace maf::_preprocess_text_impl {
 
 			if (char ch = *i; is_brace(ch)) {
 				directive d;
-				d.parse(i, end);
+				auto next = d.parse(i, end);
 
 				switch (d.type) {
+				case directive::type_t::comment:
+					i = next;
+					continue;
 				case directive::type_t::substitution:
 					expr = std::make_unique<substitution>();
 					break;
