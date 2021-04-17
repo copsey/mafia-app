@@ -23,6 +23,10 @@ void maf::Event::write_full(std::ostream & output) const {
 	auto input = std::ifstream{fname};
 	if (input) {
 		output << input.rdbuf();
+	} else {
+		output << "=Error=\n\nERROR: No text found for the \"";
+		output << this->id();
+		output << "\" event.";
 	}
 }
 
