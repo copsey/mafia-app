@@ -12,7 +12,7 @@
 
 namespace maf {
 	struct Help_Screen {
-		virtual ~Help_Screen() { }
+		virtual ~Help_Screen() = default;
 
 		// Write a tagged string detailing the help screen to os.
 		virtual void write(std::ostream &os, TextParams& params) const = 0;

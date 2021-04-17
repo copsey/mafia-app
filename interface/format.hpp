@@ -450,7 +450,7 @@ namespace maf::_preprocess_text_impl {
 
 
 	struct expression {
-		virtual ~expression() { };
+		virtual ~expression() = default;
 		virtual void write(std::string & output, TextParams const& params) const = 0;
 		virtual iterator parse(iterator begin, iterator end) = 0;
 	};

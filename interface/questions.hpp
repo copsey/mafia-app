@@ -16,7 +16,7 @@ namespace maf {
 		// Signifies that a question failed to process a set of commands.
 		struct Bad_commands { };
 
-		virtual ~Question() { }
+		virtual ~Question() = default;
 
 		// Handles the given commands, taking action as appropriate.
 		//
