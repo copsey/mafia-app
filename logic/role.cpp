@@ -7,15 +7,15 @@ std::string_view maf::Role::alias() const {
 std::string_view maf::alias(Role::ID id) {
 	switch (id) {
 		case Role::ID::peasant:
-			return "peas";
+			return "peasant";
 		case Role::ID::doctor:
-			return "doc";
+			return "doctor";
 		case Role::ID::detective:
-			return "det";
+			return "detective";
 		case Role::ID::racketeer:
-			return "rack";
+			return "racketeer";
 		case Role::ID::godfather:
-			return "gf";
+			return "godfather";
 		case Role::ID::dealer:
 			return "dealer";
 		case Role::ID::coward:
@@ -23,10 +23,10 @@ std::string_view maf::alias(Role::ID id) {
 		case Role::ID::actor:
 			return "actor";
 		case Role::ID::serial_killer:
-			return "sk";
+			return "serial-killer";
 		case Role::ID::village_idiot:
-			return "vi";
+			return "village-idiot";
 		case Role::ID::musketeer:
-			return "musk";
+			return "musketeer";
 	}
 }
