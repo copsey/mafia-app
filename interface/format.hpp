@@ -75,16 +75,23 @@ namespace maf {
 		// Error code for this exception.
 		preprocess_text_errc errc;
 
-		// Position in input string where the error occurred.
+		// The input string that couldn't be processed.
+		std::string_view input;
+
+		// An iterator pointing to where the error occurred.
 		std::string_view::iterator i;
 		
-		// (Optional) iterator that forms a range `{i, j}` when paired with
+		// An (optional) iterator that forms a range `{i, j}` when paired with
 		// `i`.
 		//
-		// Only used by the error codes `invalid_parameter_name` and
-		// `missing_parameter` to signify where in the input string the
-		// parameter name occurs.
+		// Only used by certain error codes to signify where in the input string
+		// an invalid substring occurs.
 		std::string_view::iterator j;
+
+		// Position in input string where the error occurred.
+		std::string_view::size_type pos() const {
+			return i - input.begin();
+		}
 
 		preprocess_text_error(preprocess_text_errc errc,
 							  std::string_view::iterator i)
@@ -92,10 +99,12 @@ namespace maf {
 		{ }
 		
 		preprocess_text_error(preprocess_text_errc errc,
-							  std::string_view::iterator i,
-							  std::string_view::iterator j)
-		: errc{errc}, i{i}, j{j}
+							  std::string_view substr)
+		: errc{errc}, i{substr.begin()}, j{substr.end()}
 		{ }
+
+		// Write a description of this error to `output`.
+		void write(std::string & output) const;
 	};
 
 	// TODO: Finish writing this description.
@@ -160,7 +169,6 @@ namespace maf {
 	// Error code for exceptions that can be thrown when calling
 	// `format_text`.
 	enum class format_text_errc {
-		dangling_backslash,
 		invalid_escape_sequence
 	};
 
@@ -168,13 +176,36 @@ namespace maf {
 	struct format_text_error {
 		// Error code for this exception.
 		format_text_errc errc;
-		
-		// Position in input string where error occurred.
+
+		// The input string that couldn't be processed.
+		std::string_view input;
+
+		// An iterator pointing to where the error occurred.
 		std::string_view::iterator i;
+
+		// An (optional) iterator that forms a range `{i, j}` when paired with
+		// `i`.
+		//
+		// Only used by certain error codes to signify where in the input string
+		// an invalid substring occurs.
+		std::string_view::iterator j;
+
+		// Position in input string where the error occurred.
+		std::string_view::size_type pos() const {
+			return i - input.begin();
+		}
 		
 		format_text_error(format_text_errc errc, std::string_view::iterator i)
-		: errc{errc}, i{i}
+		: errc{errc}, i{i}, j{}
 		{ }
+
+		format_text_error(format_text_errc errc, std::string_view::iterator i,
+						  std::string_view::iterator j)
+		: errc{errc}, i{i}, j{j}
+		{ }
+
+		// Write a description of this error to `output`.
+		void write(std::string & output) const;
 	};
 
 	// Parse the string contained in the range `{begin,end}` to find all of
@@ -311,7 +342,7 @@ namespace maf::_preprocess_text_impl {
 			return std::find_if(begin, end, is_delimiter);
 		}
 
-		static type_t to_type(std::string_view command_name) {
+		type_t to_type(std::string_view command_name) {
 			if (command_name == "if") {
 				return type_t::if_command;
 			} else if (command_name == "else_if") {
@@ -324,7 +355,7 @@ namespace maf::_preprocess_text_impl {
 				return type_t::end_command;
 			} else {
 				auto errc = preprocess_text_errc::invalid_command_name;
-				throw preprocess_text_error{errc, command_name.begin(), command_name.end()};
+				throw preprocess_text_error{errc, command_name};
 			}
 		}
 
@@ -351,8 +382,7 @@ namespace maf::_preprocess_text_impl {
 				case type_t::end_command:
 					{
 						auto errc = preprocess_text_errc::unexpected_command;
-						auto name = command_name;
-						throw preprocess_text_error{errc, name.begin(), name.end()};
+						throw preprocess_text_error{errc, command_name};
 					}
 				}
 			}
@@ -392,9 +422,9 @@ namespace maf::_preprocess_text_impl {
 		iterator parse(iterator begin, iterator end, std::string_view input);
 
 	private:
-		iterator _parse_as_comment(iterator begin, iterator closing_brace);
-		iterator _parse_as_substitution(iterator begin, iterator closing_brace);
-		iterator _parse_as_command(iterator begin, iterator closing_brace);
+		iterator _parse_as_comment(iterator begin, iterator directive_end);
+		iterator _parse_as_substitution(iterator begin, iterator directive_end);
+		iterator _parse_as_command(iterator begin, iterator directive_end);
 	};
 
 
@@ -429,7 +459,7 @@ namespace maf::_preprocess_text_impl {
 
 		if (!is_param_name(str)) {
 			auto errc = preprocess_text_errc::invalid_parameter_name;
-			throw preprocess_text_error{errc, begin, next};
+			throw preprocess_text_error{errc, str};
 		}
 
 		name = str;
@@ -510,7 +540,7 @@ namespace maf::_preprocess_text_impl {
 
 		if (iter == params.end()) {
 			auto errc = preprocess_text_errc::parameter_not_found;
-			throw preprocess_text_error{errc, name.begin(), name.end()};
+			throw preprocess_text_error{errc, name};
 		}
 
 		return (*iter).second;
@@ -534,7 +564,7 @@ namespace maf::_preprocess_text_impl {
 			return *ptr;
 		} else {
 			auto errc = preprocess_text_errc::wrong_parameter_type;
-			throw preprocess_text_error{errc, name.begin(), name.end()};
+			throw preprocess_text_error{errc, name};
 		}
 	}
 
@@ -600,7 +630,7 @@ namespace maf::_preprocess_text_impl {
 					output += arg;
 				} else {
 					auto errc = preprocess_text_errc::wrong_parameter_type;
-					throw preprocess_text_error{errc, param_name.begin(), param_name.end()};
+					throw preprocess_text_error{errc, param_name};
 				}
 			};
 
@@ -930,21 +960,97 @@ inline std::string maf::preprocess_text(std::string_view input,
 
 	std::string output;
 
-	sequence expr;
-	auto next = expr.parse(input.begin(), input.end(), input);
+	try {
+		sequence expr;
+		auto next = expr.parse(input.begin(), input.end(), input);
 
-	if (next != input.end()) {
-		directive d;
-		d.parse(next, input.end(), input);
+		if (next != input.end()) {
+			directive d;
+			d.parse(next, input.end(), input);
 
-		auto errc = preprocess_text_errc::unexpected_command;
-		auto name = d.command_name;
-		throw preprocess_text_error{errc, name.begin(), name.end()};
+			auto errc = preprocess_text_errc::unexpected_command;
+			throw preprocess_text_error{errc, d.command_name};
+		}
+
+		expr.write(output, params);
+	} catch (preprocess_text_error & err) {
+		err.input = input;
+		throw;
 	}
 
-	expr.write(output, params);
-
 	return output;
+}
+
+
+inline void maf::preprocess_text_error::write(std::string & output) const {
+	auto pos = std::to_string(this->pos());
+
+	switch (errc) {
+	case preprocess_text_errc::invalid_command_name:
+		output += "Invalid command name \"";
+		output.append(i, j);
+		output += "\" at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::invalid_parameter_name:
+		output += "Invalid parameter name \"";
+		output.append(i, j);
+		output += "\" at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_command_name:
+		output += "Expected a command at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_parameter_name:
+		output += "Expected a parameter at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::parameter_not_found:
+		output += "Unrecognised parameter name \"";
+		output.append(i, j);
+		output += "\" at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::too_many_closing_braces:
+		output += "Unexpected '}' at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::too_many_parameter_names:
+		output += "Too many parameters appear in the directive at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::unclosed_directive:
+		output += "No closing brace found for '{' at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::unclosed_expression:
+		output += "No \"end\" directive found for the expression starting at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::unexpected_command:
+		output += "The command \"";
+		output.append(i, j);
+		output += "\" cannot be used at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::wrong_parameter_type:
+		output += "The parameter \"";
+		output.append(i, j);
+		output += "\" has the wrong type at position ";
+		output += pos;
+		break;
+	}
 }
 
 
@@ -1008,15 +1114,15 @@ namespace maf::_format_text_impl {
 		auto i = begin + 1;
 
 		if (i == end) {
-			auto errc = format_text_errc::dangling_backslash;
-			throw format_text_error{errc, begin};
+			auto errc = format_text_errc::invalid_escape_sequence;
+			throw format_text_error{errc, begin, i};
 		}
 
 		if (char ch = *i; is_escapable(ch)) {
 			str += ch;
 		} else {
 			auto errc = format_text_errc::invalid_escape_sequence;
-			throw format_text_error{errc, begin};
+			throw format_text_error{errc, begin, i + 1};
 		}
 
 		return i + 1;
@@ -1101,7 +1207,27 @@ inline maf::StyledText maf::format_text(std::string_view input,
 							            StyledString::Style current_style)
 {
 	using namespace _format_text_impl;
-	return _format_text_impl::format_text(input.begin(), input.end(), current_style);
+
+	try {
+		return _format_text_impl::format_text(input.begin(), input.end(), current_style);
+	} catch (format_text_error & error) {
+		error.input = input;
+		throw;
+	}
+}
+
+
+inline void maf::format_text_error::write(std::string & output) const {
+	auto pos = std::to_string(this->pos());
+
+	switch (errc) {
+	case format_text_errc::invalid_escape_sequence:
+		output += "The escape sequence \"";
+		output.append(i, j);
+		output += "\" is invalid, and appears at position ";
+		output += pos;
+		break;
+	}
 }
 
 
