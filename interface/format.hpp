@@ -2,11 +2,12 @@
 #define MAFIA_STYLED_STRING_H
 
 #include <algorithm>
-#include <any>
 #include <bitset>
 #include <map>
 #include <string>
 #include <string_view>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 namespace maf {
@@ -18,13 +19,14 @@ namespace maf {
 	// - `escaped("under_score")` returns `"under\_score"`
 	inline std::string escaped(std::string_view str_view);
 
-	// A map from strings (treated as parameter names) to text parameters
-	// (treated as substitutions).
+	// A single parameter used when preprocessing text.
+	struct TextParam;
+
+	// A map from strings to text parameters.
 	//
 	// Note that the map only holds views into its keys, whereas the values
-	// are fully owned. Typically the parameter name will be a compile-time
-	// constant.
-	using TextParams = std::map<std::string_view, std::any>;
+	// are fully owned. Typically each key will be a compile-time constant.
+	struct TextParams;
 	
 	// Check if `str` is an allowed name for a text parameter.
 	// This is true if it matches the regex `/^[a-zA-Z0-9_\.]+$/`.
@@ -219,6 +221,28 @@ namespace maf {
 /*
  * Implementation details
  */
+
+namespace maf::_textparam_impl {
+	using Base = std::variant<
+		bool,
+		int,
+		std::string,
+		std::vector<TextParams>>;
+}
+
+struct maf::TextParam: _textparam_impl::Base {
+	using _textparam_impl::Base::variant;
+};
+
+
+namespace maf::_textparams_impl {
+	using Base = std::map<std::string_view, TextParam>;
+}
+
+struct maf::TextParams: _textparams_impl::Base {
+	using _textparams_impl::Base::map;
+};
+
 
 namespace maf::_preprocess_text_impl {
 	using iterator = std::string_view::iterator;
@@ -475,6 +499,24 @@ namespace maf::_preprocess_text_impl {
 	};
 
 
+	// Get the parameter from `params` whose key is equal to `name`.
+	//
+	// # Exceptions
+	// - Throws `preprocess_text_error` with code `parameter_not_found` if
+	// there is no parameter in `params` whose key is equal to `name`.
+	inline auto get_param(std::string_view name, TextParams const& params)
+	-> TextParam const& {
+		auto iter = params.find(name);
+
+		if (iter == params.end()) {
+			auto errc = preprocess_text_errc::parameter_not_found;
+			throw preprocess_text_error{errc, name.begin(), name.end()};
+		}
+
+		return (*iter).second;
+	}
+
+
 	// Get the parameter from `params` whose key is equal to `name`, and
 	// ensure that its type is `ParamType`.
 	//
@@ -484,23 +526,30 @@ namespace maf::_preprocess_text_impl {
 	// - Throws `preprocess_text_error` with code `wrong_parameter_type` if a
 	// parameter was found, but its type is not `ParamType`.
 	template <typename ParamType>
-	auto get_param(std::string_view name, TextParams const& params)
+	auto get_param_as(std::string_view name, TextParams const& params)
 	-> ParamType const& {
-		auto iter = params.find(name);
+		auto& param = get_param(name, params);
 
-		if (iter == params.end()) {
-			auto errc = preprocess_text_errc::parameter_not_found;
-			throw preprocess_text_error{errc, name.begin(), name.end()};
-		}
-
-		auto & param = (*iter).second;
-
-		if (auto ptr = std::any_cast<ParamType>(&param)) {
+		if (auto ptr = std::get_if<ParamType>(&param)) {
 			return *ptr;
 		} else {
 			auto errc = preprocess_text_errc::wrong_parameter_type;
 			throw preprocess_text_error{errc, name.begin(), name.end()};
 		}
+	}
+
+
+	// Visit the parameter from `params` whose key is equal to `name` using the
+	// provided function.
+	//
+	// # Exceptions
+	// - Throws `preprocess_text_error` with code `parameter_not_found` if
+	// there is no parameter in `params` whose key is equal to `name`.
+	template <typename Visitor>
+	auto visit_param(Visitor && f, std::string_view name, TextParams const& params)
+	-> decltype(std::visit(f, TextParam{})) {
+		auto& param = get_param(name, params);
+		return std::visit(f, param);
 	}
 
 	
@@ -543,8 +592,19 @@ namespace maf::_preprocess_text_impl {
 		
 		void write(std::string & output, TextParams const& params) const
 		override {
-			auto & param = get_param<std::string>(param_name, params);
-			output += param;
+			auto print = [&](auto && arg) {
+				using T = std::decay_t<decltype(arg)>;
+				if constexpr (std::is_same_v<T, int>) {
+					output += std::to_string(arg);
+				} else if constexpr (std::is_same_v<T, std::string>) {
+					output += arg;
+				} else {
+					auto errc = preprocess_text_errc::wrong_parameter_type;
+					throw preprocess_text_error{errc, param_name.begin(), param_name.end()};
+				}
+			};
+
+			visit_param(print, param_name, params);
 		}
 		
 		// # Example
@@ -580,7 +640,7 @@ namespace maf::_preprocess_text_impl {
 		void write(std::string & output, TextParams const& params) const
 		override {
 			for (auto& [name, expr]: conditional_subexprs) {
-				auto& param = get_param<bool>(name, params);
+				auto& param = get_param_as<bool>(name, params);
 				
 				if (param) {
 					expr.write(output, params);
@@ -610,7 +670,7 @@ namespace maf::_preprocess_text_impl {
 
 		void write(std::string & output, TextParams const& params) const
 		override {
-			auto& v = get_param<std::vector<TextParams>>(param_name, params);
+			auto& v = get_param_as<std::vector<TextParams>>(param_name, params);
 
 			for (auto& subparams: v) {
 				subexpr.write(output, subparams);
