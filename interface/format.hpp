@@ -58,6 +58,7 @@ namespace maf {
 	// `preprocess_text`.
 	enum class preprocess_text_errc {
 		invalid_command_name,
+		invalid_escape_sequence,
 		invalid_parameter_name,
 		missing_command_name,
 		missing_parameter_name,
@@ -506,19 +507,29 @@ namespace maf::_preprocess_text_impl {
 	//              next
 	// ```
 	// append "\{" to `str` and return `next`.
-	inline iterator parse_escape_sequence(iterator begin, iterator end,
+	inline iterator	parse_escape_sequence(iterator begin, iterator end,
 										  std::string & str)
 	{
-		// FIXME: Throw an exception if `begin` does not point to a backslash.
+		if (begin == end) {
+			auto errc = preprocess_text_errc::invalid_escape_sequence;
+			throw preprocess_text_error{errc, std::string_view{begin, 0}};
+		}
 
 		auto i = begin + 1;
 
 		if (i == end) {
-			// FIXME: Throw an exception due to partial escape sequence.
+			auto errc = preprocess_text_errc::invalid_escape_sequence;
+			throw preprocess_text_error{errc, std::string_view{begin, 1}};
 		}
 
-		str += {'\\', *i};
-		++i; return i;
+		if (char ch = *i; *begin == '\\') {
+			str += {'\\', ch};
+		} else {
+			auto errc = preprocess_text_errc::invalid_escape_sequence;
+			throw preprocess_text_error{errc, std::string_view{begin, 2}};
+		}
+
+		return i + 1;
 	}
 
 
@@ -993,6 +1004,13 @@ inline void maf::preprocess_text_error::write(std::string & output) const {
 		output += pos;
 		break;
 
+	case preprocess_text_errc::invalid_escape_sequence:
+		output += "Invalid escape sequence \"";
+		output.append(i, j);
+		output += "\" at position ";
+		output += pos;
+		break;
+
 	case preprocess_text_errc::invalid_parameter_name:
 		output += "Invalid parameter name \"";
 		output.append(i, j);
@@ -1109,7 +1127,10 @@ namespace maf::_format_text_impl {
 	inline iterator	parse_escape_sequence(iterator begin, iterator end,
 										  std::string & str)
 	{
-		// FIXME: Throw exception if `begin` does not point at a backslash.
+		if (begin == end) {
+			auto errc = format_text_errc::invalid_escape_sequence;
+			throw format_text_error{errc, begin, end};
+		}
 
 		auto i = begin + 1;
 
@@ -1118,7 +1139,7 @@ namespace maf::_format_text_impl {
 			throw format_text_error{errc, begin, i};
 		}
 
-		if (char ch = *i; is_escapable(ch)) {
+		if (char ch = *i; *begin == '\\' && is_escapable(ch)) {
 			str += ch;
 		} else {
 			auto errc = format_text_errc::invalid_escape_sequence;
@@ -1222,9 +1243,9 @@ inline void maf::format_text_error::write(std::string & output) const {
 
 	switch (errc) {
 	case format_text_errc::invalid_escape_sequence:
-		output += "The escape sequence \"";
+		output += "Invalid escape sequence \"";
 		output.append(i, j);
-		output += "\" is invalid, and appears at position ";
+		output += "\" at position ";
 		output += pos;
 		break;
 	}
