@@ -94,13 +94,16 @@ void maf::Game_log::write_transcript(std::ostream &os) const {
 				auto raw_text = str_stream.str();
 				auto summary = preprocess_text(raw_text, params);
 				os << summary;
+
+				if (!summary.empty()) {
+					char last_char = summary.back();
+					if (last_char != '\n') os << '\n';
+				}
 			} catch (preprocess_text_error & err) {
 				os << "ERROR: Unable to summarise \"";
 				os << event->id();
-				os << "\".";
+				os << "\".\n";
 			}
-
-			os << '\n';
 		}
 	}
 }

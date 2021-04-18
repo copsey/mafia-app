@@ -223,40 +223,32 @@ namespace maf {
 namespace maf::_preprocess_text_impl {
 	using iterator = std::string_view::iterator;
 
-
 	inline bool is_brace(char ch) {
 		return ch == '{' || ch == '}';
 	}
 
-
 	// # Example
 	// Given the following input:
 	// ```
-	//          begin                    end
-	//          |                          |
+	//        begin  next                end
+	//          |    |                     |
 	// "easy {grace  } of her attitude, ..."
-	//               |
-	//              next
 	// ```
 	// return `next`.
 	inline iterator find_brace(iterator begin, iterator end) {
 		return std::find_if(begin, end, is_brace);
 	}
 
-
 	inline bool is_whitespace(char ch) {
 		return ch == ' ';
 	}
 
-
 	// # Example
 	// Given the following input:
 	// ```
-	//         begin                end
-	//         |                      |
+	//      begin  next             end
+	//         |   |                  |
 	// "Wemmick    explained to me ..."
-	//             |
-	//            next
 	// ```
 	// return `next`.
 	inline iterator skip_whitespace(iterator begin, iterator end) {
@@ -286,11 +278,9 @@ namespace maf::_preprocess_text_impl {
 		// # Example
 		// Given the following input:
 		// ```
-		//       begin                  end
-		//       |                        |
+		//    begin  next               end
+		//       |   |                    |
 		// "The {flag} had been struck ..."
-		//           |
-		//          next
 		// ```
 		// return `next`.
 		static iterator find_delimiter(iterator begin, iterator end) {
@@ -348,47 +338,48 @@ namespace maf::_preprocess_text_impl {
 		//
 		// 1. Given the following input:
 		// ```
-		//  begin               end
-		//  |                     |
-		// "{You} stock and stone!"
-		//       |
-		//      next
+		//      begin  next     end
+		//      |      |          |
+		// "You {stock} and stone!"
 		// ```
-		// set `type` to `substitution`, set `param_name` to "You", and
+		// set `type` to `substitution`, set `param_name` to "stock", and
 		// return `next`.
 		//
 		// 2. Given the following input:
 		// ```
-		//  begin                        end
-		//  |                              |
+		//  begin       next             end
+		//  |            |                 |
 		// "{!if Estella} looked at her ..."
-		//               |
-		//              next
 		// ```
 		// set `type` to `if_command`, set `param_name` to "Estella", and
 		// return `next`.
 		//
 		// 3. Given the following input:
 		// ```
-		//  begin                           end
-		//  |                                 |
-		// "{!else} so hard and thankless, ..."
-		//         |
-		//        next
+		//  begin                   end
+		//  |                         |
+		// "{!else}                   |
+		//  so hard and thankless, ..."
+		//  |
+		//  next
 		// ```
-		// set `type` to `else_command` and return `next`.
-		iterator parse(iterator begin, iterator end);
+		// set `type` to `else_command` and return `next`, skipping the single
+		// newline after `"{!else}"`.
+		iterator parse(iterator begin, iterator end, std::string_view input);
+
+	private:
+		iterator _parse_as_comment(iterator begin, iterator closing_brace);
+		iterator _parse_as_substitution(iterator begin, iterator closing_brace);
+		iterator _parse_as_command(iterator begin, iterator closing_brace);
 	};
 
 
 	// # Example
 	// Given the following input:
 	// ```
-	//           begin                      end
-	//           |                          |
+	//        begin  next                 end
+	//           |    |                     |
 	// "After a {short} pause of repose, ..."
-	//                |
-	//                next
 	// ```
 	// set `name` to `"short"` and return `next`.
 	//
@@ -425,11 +416,9 @@ namespace maf::_preprocess_text_impl {
 	// # Example
 	// Given the following input:
 	// ```
-	//          begin             end
-	//          |                 |
+	//          begin  next     end
+	//          |      |          |
 	// "Lorem {!else_if ipsum} ..."
-	//                 |
-	//                 next
 	// ```
 	// set `name` to `"else_if"` and return `next`.
 	//
@@ -482,7 +471,7 @@ namespace maf::_preprocess_text_impl {
 	struct expression {
 		virtual ~expression() = default;
 		virtual void write(std::string & output, TextParams const& params) const = 0;
-		virtual iterator parse(iterator begin, iterator end) = 0;
+		virtual iterator parse(iterator begin, iterator end, std::string_view input) = 0;
 	};
 
 
@@ -540,14 +529,12 @@ namespace maf::_preprocess_text_impl {
 		// # Example
 		// Given the following input:
 		// ```
-		//  begin                  end
-		//  |                        |
+		//  begin       next       end
+		//  |            |           |
 		// "Donec \{quam {felis}, ..."
-		//               |
-		//              next
 		// ```
 		// append `"Donec \{quam "` to `this->str` and return `next`.
-		iterator parse(iterator begin, iterator end) override;
+		iterator parse(iterator begin, iterator end, std::string_view input) override;
 	};
 	
 	
@@ -563,14 +550,12 @@ namespace maf::_preprocess_text_impl {
 		// # Example
 		// Given the following input:
 		// ```
-		//          begin             end
-		//          |                   |
+		//          begin  next       end
+		//          |      |            |
 		// "If that {staid} old house..."
-		//                 |
-		//                next
 		// ```
 		// set `this->param_name` to `"staid"` and return `next`.
-		iterator parse(iterator begin, iterator end) override;
+		iterator parse(iterator begin, iterator end, std::string_view input) override;
 	};
 	
 	
@@ -584,7 +569,7 @@ namespace maf::_preprocess_text_impl {
 			}
 		}
 
-		iterator parse(iterator begin, iterator end) override;
+		iterator parse(iterator begin, iterator end, std::string_view input) override;
 	};
 	
 	
@@ -609,15 +594,13 @@ namespace maf::_preprocess_text_impl {
 		// # Example
 		// Given the following input:
 		// ```
-		//        begin                    end
-		//        |                          |
+		//        begin              next  end
+		//        |                     |    |
 		// "Lorem {!if ipsum} ... {!end} amet"
-		//                              |
-		//                             next
 		// ```
 		// append `{"ipsum", /* sequence parsed from "..." */}` to
 		// `this->conditional_subexprs`, and return `next`.
-		iterator parse(iterator begin, iterator end) override;
+		iterator parse(iterator begin, iterator end, std::string_view input) override;
 	};
 
 
@@ -637,15 +620,13 @@ namespace maf::_preprocess_text_impl {
 		// # Example
 		// Given the following input:
 		// ```
-		//       begin                      end
-		//       |                            |
+		//       begin                  next           end
+		//       |                       |               |
 		// "easy {!list grace} ... {!end} of her attitude"
-		//                               |
-		//                              next
 		// ```
 		// set `this->param_name` to `"grace"`, set `this->subexpr` to the
 		// result of parsing `...` as a sequence, and return `next`.
-		iterator parse(iterator begin, iterator end) override;
+		iterator parse(iterator begin, iterator end, std::string_view input) override;
 	};
 
 
@@ -653,7 +634,7 @@ namespace maf::_preprocess_text_impl {
 	 * Definitions of "parse" functions
 	 */
 
-	inline iterator directive::parse(iterator begin, iterator end) {
+	inline iterator directive::parse(iterator begin, iterator end, std::string_view input) {
 		using std::literals::operator""sv;
 
 		if (char ch = *begin; ch == '}') {
@@ -664,49 +645,88 @@ namespace maf::_preprocess_text_impl {
 		}
 
 		auto i = begin + "{"sv.size();
-		auto j = find_brace(i, end);
+		auto directive_end = find_brace(i, end);
 
-		if (j == end || *j != '}') {
+		if (directive_end == end || *directive_end != '}') {
 			auto errc = preprocess_text_errc::unclosed_directive;
 			throw preprocess_text_error{errc, begin};
 		}
 
 		if (char ch = *i; ch == '!') {
-			i += "!"sv.size();
-			i = skip_whitespace(i, end);
-
-			i = parse_command_name(i, end, command_name);
-			type = to_type(command_name);
-
-			if (type == type_t::if_command
-				|| type == type_t::else_if_command
-				|| type == type_t::list_command)
-			{
-				i = skip_whitespace(i, end);
-				i = parse_param_name(i, end, param_name);
-			}
+			i = _parse_as_command(begin, directive_end);
 		} else if (ch == '-') {
-			type = type_t::comment;
-			return j + "}"sv.size();
+			i = _parse_as_comment(begin, directive_end);
 		} else {
-			type = type_t::substitution;
-
-			i = skip_whitespace(i, end);
-			i = parse_param_name(i, end, param_name);
+			i = _parse_as_substitution(begin, directive_end);
 		}
 
-		i = skip_whitespace(i, end);
+		bool no_text_before = (begin == input.begin() || *(begin - 1) == '\n');
+		bool no_text_after = (i == input.end() || *i == '\n');
 
-		if (i != j) {
-			auto errc = preprocess_text_errc::too_many_parameter_names;
-			throw preprocess_text_error{errc, i};
-		} else {
-			return i + "}"sv.size();
+		if (no_text_before && no_text_after && type != type_t::substitution) {
+			if (i != end) i += "\n"sv.size();
 		}
+
+		return i;
 	}
 
 
-	inline iterator plain_text::parse(iterator begin, iterator end) {
+	inline iterator directive::_parse_as_comment(iterator begin, iterator directive_end) {
+		using std::literals::operator""sv;
+
+		type = type_t::comment;
+		return directive_end + "}"sv.size();
+	}
+
+
+	inline iterator directive::_parse_as_substitution(iterator begin, iterator directive_end) {
+		using std::literals::operator""sv;
+
+		type = type_t::substitution;
+
+		auto i = begin + "{"sv.size();
+		i = skip_whitespace(i, directive_end);
+		i = parse_param_name(i, directive_end, param_name);
+		i = skip_whitespace(i, directive_end);
+
+		if (i != directive_end) {
+			auto errc = preprocess_text_errc::too_many_parameter_names;
+			throw preprocess_text_error{errc, i};
+		}
+
+		return i + "}"sv.size();
+	}
+
+
+	inline iterator directive::_parse_as_command(iterator begin, iterator directive_end) {
+		using std::literals::operator""sv;
+
+		auto i = begin + "{!"sv.size();
+		i = skip_whitespace(i, directive_end);
+
+		i = parse_command_name(i, directive_end, command_name);
+		type = to_type(command_name);
+
+		if (type == type_t::if_command
+			|| type == type_t::else_if_command
+			|| type == type_t::list_command)
+		{
+			i = skip_whitespace(i, directive_end);
+			i = parse_param_name(i, directive_end, param_name);
+		}
+
+		i = skip_whitespace(i, directive_end);
+
+		if (i != directive_end) {
+			auto errc = preprocess_text_errc::too_many_parameter_names;
+			throw preprocess_text_error{errc, i};
+		}
+
+		return i + "}"sv.size();
+	}
+
+
+	inline iterator plain_text::parse(iterator begin, iterator end, std::string_view input) {
 		for (iterator i = begin; ; ) {
 			auto next = find_delimiter(begin, end);
 			str.append(i, next);
@@ -721,11 +741,11 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator substitution::parse(iterator begin, iterator end) {
+	inline iterator substitution::parse(iterator begin, iterator end, std::string_view input) {
 		using std::literals::string_view_literals::operator""sv;
 
 		directive d;
-		auto next = d.parse(begin, end);
+		auto next = d.parse(begin, end, input);
 
 		// FIXME: Throw an exception if `d.type` is not `substitution`.
 
@@ -734,13 +754,13 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator sequence::parse(iterator begin, iterator end) {
+	inline iterator sequence::parse(iterator begin, iterator end, std::string_view input) {
 		for (auto i = begin; i != end; ) {
 			std::unique_ptr<expression> expr;
 
 			if (char ch = *i; is_brace(ch)) {
 				directive d;
-				auto next = d.parse(i, end);
+				auto next = d.parse(i, end, input);
 
 				switch (d.type) {
 				case directive::type_t::comment:
@@ -762,7 +782,7 @@ namespace maf::_preprocess_text_impl {
 				expr = std::make_unique<plain_text>();
 			}
 
-			i = expr->parse(i, end);
+			i = expr->parse(i, end, input);
 			subexprs.push_back(std::move(expr));
 		}
 
@@ -770,7 +790,7 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator conditional::parse(iterator begin, iterator end) {
+	inline iterator conditional::parse(iterator begin, iterator end, std::string_view input) {
 		iterator i = begin;
 
 		// # Key
@@ -779,23 +799,23 @@ namespace maf::_preprocess_text_impl {
 		// - Stage 3: Parse the "end" command
 		for (int stage = 1; ; ) {
 			directive d;
-			auto next = d.parse(i, end);
+			auto next = d.parse(i, end, input);
 
 			if (stage == 1) {
 				d.verify(directive::type_t::if_command);
 
 				sequence expr;
-				i = expr.parse(next, end);
+				i = expr.parse(next, end, input);
 				conditional_subexprs.emplace_back(d.param_name, std::move(expr));
 				++stage;
 			} else if (stage == 2) {
 				if (d.type == directive::type_t::else_if_command) {
 					sequence expr;
-					i = expr.parse(next, end);
+					i = expr.parse(next, end, input);
 					conditional_subexprs.emplace_back(d.param_name, std::move(expr));
 				} else if (d.type == directive::type_t::else_command) {
 					sequence expr;
-					i = expr.parse(next, end);
+					i = expr.parse(next, end, input);
 					default_subexpr = std::move(expr);
 					++stage;
 				} else {
@@ -815,17 +835,17 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator loop::parse(iterator begin, iterator end) {
+	inline iterator loop::parse(iterator begin, iterator end, std::string_view input) {
 		auto i = begin;
 
 		{ // Stage 1: Parse the "list" command
 			directive d;
-			i = d.parse(i, end);
+			i = d.parse(i, end, input);
 			d.verify(directive::type_t::list_command);
 			param_name = d.param_name;
 		}
 
-		i = subexpr.parse(i, end);
+		i = subexpr.parse(i, end, input);
 
 		if (i == end) {
 			auto errc = preprocess_text_errc::unclosed_expression;
@@ -834,7 +854,7 @@ namespace maf::_preprocess_text_impl {
 
 		{ // Stage 2: Parse the "end" command
 			directive d;
-			i = d.parse(i, end);
+			i = d.parse(i, end, input);
 			d.verify(directive::type_t::end_command);
 		}
 
@@ -851,11 +871,11 @@ inline std::string maf::preprocess_text(std::string_view input,
 	std::string output;
 
 	sequence expr;
-	auto next = expr.parse(input.begin(), input.end());
+	auto next = expr.parse(input.begin(), input.end(), input);
 
 	if (next != input.end()) {
 		directive d;
-		d.parse(next, input.end());
+		d.parse(next, input.end(), input);
 
 		auto errc = preprocess_text_errc::unexpected_command;
 		auto name = d.command_name;
