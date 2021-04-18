@@ -7,5 +7,5 @@
 {!else}
 {caster}, you can choose to kill somebody this night.
 
-%Enter @kill A@ to kill player @A@, or enter @skip@ if you don't wish to kill anybody.
+%Enter @kill <A>@ to kill player @<A>@, or enter @skip@ if you don't wish to kill anybody.
 {!end}

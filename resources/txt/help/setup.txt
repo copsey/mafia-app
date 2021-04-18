@@ -1,6 +1,8 @@
 =Help: Setup=
 
-%The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.
+%When you're finished with this screen, you can enter @ok@ to dismiss it.%
+
+The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.
 
 To add a player called @name@ to the next game, enter @add player name@. The player can be removed by entering @take player name@. To remove all of the players that have been selected, enter @clear players@.
 
@@ -15,5 +17,3 @@ Once you have finished choosing players and cards, you can enter @begin@ to star
 You can get extra information on the role with alias @that@ by entering @help role that@, and you can see a list of every role in the rulebook by entering @list roles@. To see a list of only the village roles, you can enter @list roles village@. Similarly, the command @list roles mafia@ will list the mafia roles, and the command @list roles freelance@ will list the freelance roles.
 
 The commands @help w that@, @list w@, @list w village@, @list w mafia@, and @list w freelance@ have similar effects for wildcards.
-
-To leave this screen, enter @ok@.

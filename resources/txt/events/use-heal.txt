@@ -7,5 +7,5 @@
 {!else}
 {caster}, you can choose to heal somebody this night.
 
-%Enter @heal A@ to heal player @A@, or enter @skip@ if you don't wish to heal anybody.
+%Enter @heal <A>@ to heal player @<A>@, or enter @skip@ if you don't wish to heal anybody.
 {!end}

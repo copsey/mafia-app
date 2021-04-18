@@ -17,5 +17,5 @@ Now would be a good time to study your fake role.
 
 If they break the rules by contradicting their fake role, then they should be kicked from the game by entering @kick {player}@ during the day.
 
-To choose the role with alias @A@, enter @choose A@.
+To choose the role with alias @<X>@, enter @choose <X>@.
 {!end}

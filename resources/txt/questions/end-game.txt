@@ -1,4 +1,4 @@
 =End Game?=
 
-%You are about to end the current game.
+You are about to end the current game.
 Are you sure that you want to do this? (@yes@ or @no@)

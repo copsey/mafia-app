@@ -1,6 +1,6 @@
 =Info: {player}=
 
-Your role is the {role}.
+*Role:* {role}.
 {!if has_wildcard}
 
 {--- FIXME: Replace wildcard alias with something else}
@@ -8,11 +8,7 @@ You were randomly given this role from the @{wildcard.alias}@ wildcard.
 {!end}
 
 {!if daytime}
-{!if has_lynch_vote}
-You are voting to lynch {lynch_vote}.
-{!else}
-You are not voting to lynch anyone.
-{!end}
+*Voting to lynch:* {!if has_lynch_vote}{lynch_vote}.{!else}No one.{!end}
 {!end}
 
 {!list investigations}

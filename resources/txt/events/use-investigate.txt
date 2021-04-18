@@ -7,5 +7,5 @@
 {!else}
 {caster}, you can choose to investigate somebody this night.
 
-%Enter @check A@ to investigate player @A@, or enter @skip@ if you don't wish to investigate anybody.
+%Enter @check <A>@ to investigate player @<A>@, or enter @skip@ if you don't wish to investigate anybody.
 {!end}
