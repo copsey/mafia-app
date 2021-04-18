@@ -1,3 +1,5 @@
+{--- Print an extra newline}
+
 {!list winners}
 {player} won.
 {!end}
