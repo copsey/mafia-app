@@ -14,6 +14,7 @@ Preprocessing:
 Text formatting:
   =Main Menu=    -- title
   _really_       -- italics
+  *important*    -- bold
   %How to play%  -- help text
   %Help message  -- ... it doesn't need to end with a '%' sign
   @ok@           -- monospace typeface
@@ -24,5 +25,6 @@ Escape sequences:
   \}  -- close curly brace
   \=  -- equals sign
   \_  -- underscore
+  \*  -- asterisk
   \%  -- percent sign
   \@  -- at sign
