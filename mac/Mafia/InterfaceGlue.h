@@ -30,6 +30,7 @@
 
 + (NSDictionary *)defaultAttributes;
 + (NSDictionary *)italicAttributes;
++ (NSDictionary *)boldAttributes;
 + (NSDictionary *)helpTextAttributes;
 + (NSDictionary *)monospaceAttributes;
 

@@ -147,12 +147,13 @@ namespace maf {
 	// e.g. `(style & StyledString::italic_mask).any()`,
 	// `(style ^ StyledString::title_mask).none()`.
 	struct StyledString {
-		using Style = std::bitset<4>;
+		using Style = std::bitset<5>;
 		
-		static constexpr Style title_mask     = 0b1000;
-		static constexpr Style italic_mask    = 0b0100;
-		static constexpr Style help_text_mask = 0b0010;
-		static constexpr Style monospace_mask = 0b0001;
+		static constexpr Style title_mask     = 0b10000;
+		static constexpr Style italic_mask    = 0b01000;
+		static constexpr Style bold_mask      = 0b00100;
+		static constexpr Style help_text_mask = 0b00010;
+		static constexpr Style monospace_mask = 0b00001;
 
 		std::string string;
 		Style style;
@@ -209,43 +210,21 @@ namespace maf {
 		void write(std::string & output) const;
 	};
 
-	// Parse the string contained in the range `{begin,end}` to find all of
-	// its special characters and perform a sequence of actions as described
-	// below.
+	// Parse `input` to find all of its special characters and perform a
+	// sequence of actions as described below.
 	//
 	// The general idea is that blocks of text will be extracted from
-	// `{begin,end}` and added to the output.
-	//
-	// A set of formatting codes can be used to change the value of
-	// `current_style`:
-	//   = -- Toggle the "title" bit.
-	//   _ -- Toggle the "italic" bit.
-	//   % -- Toggle the "help_text" bit.
-	//   @ -- Toggle the "monospace" bit.
-	//
-	// The default value of `current_style` is to have all bits turned off.
+	// `{begin, end}` and added to the output. A set of formatting codes can be
+	// used to change the value of `current_style` for a given block. Certain
+	// escape sequences are also recognised.
 	//
 	// Each time a formatting code is found, a new block of text is added to
 	// the output, using the value of `current_style` just before the
 	// formatting code was applied. Its content is taken to be the string
 	// between the previous formatting code and the new formatting code.
 	//
-	// Certain escape sequences are also recognised:
-	//   \\ -- Print a single '\' character.
-	//   \{ -- Print a single '{' character.
-	//   \} -- Print a single '}' character.
-	//   \= -- Print a single '=' character.
-	//   \_ -- Print a single '_' character.
-	//   \% -- Print a single '%' character.
-	//   \@ -- Print a single '@' character.
-	//
-	// @pre `{begin,end}` is a valid range.
-	//
-	// @throws `format_error` with code `dangling_backslash` if there's an
-	// unescaped '\' character at the end of the input string.
-	//
-	// @throws `format_error` with code `invalid_escape_sequence` if any
-	// escape sequence "\x" is encountered that is not in the list above.
+	// See the file "/resources/txt/cheatsheet.txt" included with this source
+	// code for more information.
 	inline StyledText format_text(std::string_view input, StyledString::Style current_style = {});
 }
 
@@ -1076,7 +1055,7 @@ namespace maf::_format_text_impl {
 	using iterator = std::string_view::iterator;
 
 	inline bool is_format_code(char ch) {
-		return ch == '=' || ch == '_' || ch == '%' || ch == '@';
+		return ch == '=' || ch == '_' || ch == '*' || ch == '%' || ch == '@';
 	}
 
 	inline bool is_delimiter(char ch) {
@@ -1167,6 +1146,9 @@ namespace maf::_format_text_impl {
 			break;
 		case '_':
 			style ^= StyledString::italic_mask;
+			break;
+		case '*':
+			style ^= StyledString::bold_mask;
 			break;
 		case '%':
 			style ^= StyledString::help_text_mask;

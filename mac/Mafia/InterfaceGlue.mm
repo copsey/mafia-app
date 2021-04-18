@@ -66,6 +66,10 @@
 		if ((style & maf::StyledString::italic_mask).any()) {
 			[attributes addEntriesFromDictionary:[InterfaceGlue italicAttributes]];
 		}
+
+		if ((style & maf::StyledString::bold_mask).any()) {
+			[attributes addEntriesFromDictionary:[InterfaceGlue boldAttributes]];
+		}
 		
 		if ((style & maf::StyledString::help_text_mask).any()) {
 			[attributes addEntriesFromDictionary:[InterfaceGlue helpTextAttributes]];
@@ -164,6 +168,10 @@
 	paragraphStyle.alignment = NSTextAlignmentCenter;
 	return @{NSFontAttributeName: [NSFont fontWithName:@"Times New Roman Italic" size:14],
 			 NSParagraphStyleAttributeName: paragraphStyle};
+}
+
++ (NSDictionary *)boldAttributes {
+	return @{NSFontAttributeName: [NSFont fontWithName:@"Helvetica Bold" size:14]};
 }
 
 + (NSDictionary *)helpTextAttributes {
