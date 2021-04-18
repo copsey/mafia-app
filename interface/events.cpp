@@ -6,10 +6,6 @@
 #include "names.hpp"
 #include "../common/stdlib.h"
 
-void maf::Event::summarise(ostream &os) const {
-	// By default, write nothing.
-}
-
 void maf::Event::write(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
 	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/";
@@ -23,6 +19,18 @@ void maf::Event::write(std::ostream & output) const {
 		output << "=Error=\n\nERROR: No text found for the \"";
 		output << this->id();
 		output << "\" event.";
+	}
+}
+
+void maf::Event::summarise(ostream & output) const {
+	// FIXME: This is horrendously fragile.
+	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/summaries/";
+	fname += this->id();
+	fname += ".txt";
+
+	auto input = std::ifstream{fname};
+	if (input) {
+		output << input.rdbuf();
 	}
 }
 
@@ -49,18 +57,14 @@ void maf::Player_given_initial_role::do_commands(const vector<string_view> & com
 
 void maf::Player_given_initial_role::set_params(TextParams& params) const {
 	params["from_wildcard"] = (_w != nullptr);
-	params["player"] = escaped(game_log().get_name(*_p));
+	params["player"] = escaped_name(*_p);
 	params["private"] = _is_private;
-	params["role"] = escaped(full_name(*_r));
+	params["role"] = escaped_name(*_r);
 	params["role.alias"] = escaped(_r->alias());
 
 	if (_w != nullptr) {
 		params["wildcard.alias"] = escaped(_w->alias());
 	}
-}
-
-void maf::Player_given_initial_role::summarise(ostream &os) const {
-	os << game_log().get_name(*_p) << " played as the " << full_name(*_r) << ".";
 }
 
 void maf::Time_changed::do_commands(const vector<string_view> & commands) {
@@ -76,17 +80,6 @@ void maf::Time_changed::set_params(TextParams& params) const {
 	params["date"] = std::to_string(date);
 	params["daytime"] = (time == Time::day);
 	params["nighttime"] = (time == Time::night);
-}
-
-void maf::Time_changed::summarise(ostream &os) const {
-	switch (time) {
-		case Time::day:
-			os << "Day " << date << " began.";
-			break;
-		case Time::night:
-			os << "Night " << date << " began.";
-			break;
-	}
 }
 
 void maf::Obituary::do_commands(const vector<string_view> & commands) {
@@ -108,24 +101,22 @@ void maf::Obituary::set_params(TextParams& params) const {
 	
 	if (_deaths_index >= 0) {
 		const Player& deceased = *_deaths[_deaths_index];
-		params["deceased"] = escaped(game_log().get_name(deceased));
+		params["deceased"] = escaped_name(deceased);
 		params["deceased.is_haunted"] = deceased.is_haunted();
 		
 		if (deceased.is_haunted()) {
 			const Player& ghost = *deceased.haunter();
-			params["ghost"] = escaped(game_log().get_name(ghost));
+			params["ghost"] = escaped_name(ghost);
 		}
 	}
-}
 
-void maf::Obituary::summarise(ostream &os) const {
-	bool write_nl = false;
-
+	std::vector<TextParams> deaths;
 	for (auto& p_ref: _deaths) {
-		if (write_nl) os << '\n';
-		os << game_log().get_name(*p_ref) << " died during the night.";
-		write_nl = true;
+		auto& subparams = deaths.emplace_back();
+		auto& player = *p_ref;
+		subparams["deceased"] = escaped_name(player);
 	}
+	params["deaths"] = std::move(deaths);
 }
 
 void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
@@ -194,12 +185,24 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 void maf::Town_meeting::set_params(TextParams & params) const {
 	params["date"] = std::to_string(_date);
 	params["lynch_can_occur"] = _lynch_can_occur;
+	params["recent_vote"] = (_recent_vote_caster && _recent_vote_target);
+	params["recent_abstain"] = (_recent_vote_caster && !_recent_vote_target);
 
 	if (_lynch_can_occur) {
 		params["lynch_target.exists"] = (_next_lynch_victim != nullptr);
 		if (_next_lynch_victim) {
-			params["lynch_target"] = escaped(game_log().get_name(*_next_lynch_victim));
+			params["lynch_target"] = escaped_name(*_next_lynch_victim);
 		}
+	}
+
+	if (_recent_vote_caster) {
+		if (_recent_vote_target) {
+			params["recent_vote.caster"] = escaped_name(*_recent_vote_caster);
+			params["recent_vote.target"] = escaped_name(*_recent_vote_target);
+		} else {
+			params["recent_abstain.caster"] = escaped_name(*_recent_vote_caster);
+		}
+
 	}
 
 	auto townsfolk = std::vector<TextParams>();
@@ -219,16 +222,6 @@ void maf::Town_meeting::set_params(TextParams & params) const {
 	params["townsfolk"] = std::move(townsfolk);
 }
 
-void maf::Town_meeting::summarise(ostream &os) const {
-	if (_recent_vote_caster) {
-		if (_recent_vote_target) {
-			os << game_log().get_name(*_recent_vote_caster) << " voted to lynch " << game_log().get_name(*_recent_vote_target) << ".";
-		} else {
-			os << game_log().get_name(*_recent_vote_caster) << " chose not to vote.";
-		}
-	}
-}
-
 void maf::Player_kicked::do_commands(const vector<string_view> &commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
@@ -241,10 +234,6 @@ void maf::Player_kicked::do_commands(const vector<string_view> &commands) {
 void maf::Player_kicked::set_params(TextParams & params) const {
 	params["player"] = escaped(game_log().get_name(*player));
 	params["role"] = escaped(full_name(player->role()));
-}
-
-void maf::Player_kicked::summarise(ostream &os) const {
-	os << game_log().get_name(*player) << " was kicked.";
 }
 
 void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
@@ -270,15 +259,6 @@ void maf::Lynch_result::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Lynch_result::summarise(ostream &os) const {
-	if (victim) {
-		os << game_log().get_name(*victim) << " was lynched.";
-	}
-	else {
-		os << "Nobody was lynched.";
-	}
-}
-
 void maf::Duel_result::do_commands(const vector<string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
@@ -290,23 +270,11 @@ void maf::Duel_result::do_commands(const vector<string_view> & commands) {
 
 void maf::Duel_result::set_params(TextParams & params) const {
 	params["caster"] = escaped(game_log().get_name(*caster));
+	params["caster.won_duel"] = (caster == target);
 	params["target"] = escaped(game_log().get_name(*target));
 	params["winner"] = escaped(game_log().get_name(*winner));
 	params["loser"] = escaped(game_log().get_name(*loser));
 	params["winner.fled"] = !winner->is_present();
-}
-
-void maf::Duel_result::summarise(ostream &os) const {
-	auto & glog = game_log();
-	
-	auto caster_name = glog.get_name(*caster);
-	auto target_name = glog.get_name(*target);
-
-	if (winner == caster) {
-		os << caster_name << " won a duel against " << target_name << ".";
-	} else {
-		os << caster_name << " lost a duel against " << target_name << ".";
-	}
 }
 
 void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
@@ -349,12 +317,6 @@ void maf::Choose_fake_role::set_params(TextParams & params) const {
 	if (_fake_role) {
 		params["fake_role"] = escaped_name(*_fake_role);
 		params["fake_role.alias"] = escaped(_fake_role->alias());
-	}
-}
-
-void maf::Choose_fake_role::summarise(ostream &os) const {
-	if (_fake_role) {
-		os << game_log().get_name(*_player) << " was given the " << full_name(*_fake_role) << " as a fake role.";
 	}
 }
 
@@ -576,15 +538,6 @@ void maf::Investigation_result::set_params(TextParams& params) const {
 	params["target.suspicious"] = investigation.result();
 }
 
-void maf::Investigation_result::summarise(ostream &os) const {
-	os << game_log().get_name(investigation.caster())
-	<< " decided that "
-	<< game_log().get_name(investigation.target())
-	<< " was "
-	<< (investigation.result() ? "suspicious" : "innocent")
-	<< ".";
-}
-
 void maf::Game_ended::do_commands(const vector<string_view> & commands) {
 	throw Bad_commands{};
 }
@@ -610,14 +563,4 @@ void maf::Game_ended::set_params(TextParams& params) const {
 
 	if (!winners.empty()) params["winners"] = std::move(winners);
 	if (!losers.empty()) params["losers"] = std::move(losers);
-}
-
-void maf::Game_ended::summarise(ostream &os) const {
-	for (auto it = game_log().game().players().begin(); it != game_log().game().players().end(); ) {
-		const Player &player = *it;
-		os << game_log().get_name(player) << (player.has_won() ? " won." : " lost.");
-		if (++it != game_log().game().players().end()) {
-			os << "\n";
-		}
-	}
 }

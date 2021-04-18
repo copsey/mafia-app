@@ -1,0 +1,5 @@
+{!if victim.exists}
+{victim} was lynched.
+{!else}
+Nobody was lynched.
+{!end}

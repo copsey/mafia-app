@@ -1,0 +1,6 @@
+{!list winners}
+{player} won.
+{!end}
+{!list losers}
+{player} lost.
+{!end}

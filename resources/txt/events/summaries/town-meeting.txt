@@ -1,0 +1,5 @@
+{!if recent_vote}
+{recent_vote.caster} voted to lynch {recent_vote.target}.
+{!else_if recent_abstain}
+{recent_abstain.caster} chose not to vote.
+{!end}
