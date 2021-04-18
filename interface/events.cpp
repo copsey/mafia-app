@@ -543,8 +543,8 @@ void maf::Game_ended::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Game_ended::set_params(TextParams& params) const {
-	std::vector<TextParams> winners;
-	std::vector<TextParams> losers;
+	std::vector<TextParams> winners_params;
+	std::vector<TextParams> losers_params;
 
 	for (auto& player: game_log().game().players()) {
 		TextParams subparams;
@@ -552,15 +552,14 @@ void maf::Game_ended::set_params(TextParams& params) const {
 		subparams["role"] = escaped_name(player.role());
 
 		if (player.has_won()) {
-			winners.push_back(std::move(subparams));
+			winners_params.push_back(std::move(subparams));
 		} else {
-			losers.push_back(std::move(subparams));
+			losers_params.push_back(std::move(subparams));
 		}
 	}
 
-	params["any_winners"] = !winners.empty();
-	params["any_losers"] = !losers.empty();
-
-	if (!winners.empty()) params["winners"] = std::move(winners);
-	if (!losers.empty()) params["losers"] = std::move(losers);
+	params["any_winners"] = !winners_params.empty();
+	params["any_losers"] = !losers_params.empty();
+	params["winners"] = std::move(winners_params);
+	params["losers"] = std::move(losers_params);
 }
