@@ -818,7 +818,7 @@ namespace maf::_preprocess_text_impl {
 
 	inline iterator plain_text::parse(iterator begin, iterator end, std::string_view input) {
 		for (iterator i = begin; ; ) {
-			auto next = find_delimiter(begin, end);
+			auto next = find_delimiter(i, end);
 			str.append(i, next);
 			i = next;
 
