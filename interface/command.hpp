@@ -4,7 +4,7 @@
 #include <string_view>
 #include <vector>
 
-#include "../riketi/algorithm.hpp"
+#include "../util/algorithm.hpp"
 
 namespace maf {
 	// Decide whether or not the sequence `seq` of string-like objects matches
@@ -18,7 +18,7 @@ namespace maf {
 			return std::empty(s2) || s1 == s2;
 		};
 
-		return rkt::matches(seq, arr, eq);
+		return util::matches(seq, arr, eq);
 	}
 
 	template <typename Str, std::size_t N>
@@ -42,7 +42,7 @@ namespace maf {
 		} else if constexpr(N == 5) {
 			return std::size(v) == 5 && eq(v[0], arr[0]) && eq(v[1], arr[1]) && eq(v[2], arr[2]) && eq(v[3], arr[3]) && eq(v[4], arr[4]);
 		} else {
-			return rkt::matches(v, arr, eq);
+			return util::matches(v, arr, eq);
 		}
 	}
 

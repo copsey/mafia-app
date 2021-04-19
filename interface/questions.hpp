@@ -1,7 +1,7 @@
 #ifndef MAFIA_INTERFACE_QUESTIONS
 #define MAFIA_INTERFACE_QUESTIONS
 
-#include "../riketi/ref.hpp"
+#include "../util/ref.hpp"
 
 #include <ostream>
 
@@ -51,7 +51,7 @@ namespace maf {
 		bool do_commands(const std::vector<std::string_view> & commands) override;
 
 	private:
-		rkt::ref<Console> _console_ref;
+		util::ref<Console> _console_ref;
 	};
 
 	// TODO: Add screen for confirming if the daily lynch should be skipped.

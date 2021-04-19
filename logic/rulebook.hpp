@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../riketi/ref.hpp"
+#include "../util/ref.hpp"
 
 #include "role.hpp"
 #include "wildcard.hpp"
@@ -94,16 +94,16 @@ namespace maf {
 		}
 
 		/// A vector containing every role defined in the rulebook.
-		std::vector<rkt::ref<const Role>> all_roles() const;
+		std::vector<util::ref<const Role>> all_roles() const;
 
 		/// A vector containing every village role defined in the rulebook.
-		std::vector<rkt::ref<const Role>> village_roles() const;
+		std::vector<util::ref<const Role>> village_roles() const;
 
 		/// A vector containing every mafia role defined in the rulebook.
-		std::vector<rkt::ref<const Role>> mafia_roles() const;
+		std::vector<util::ref<const Role>> mafia_roles() const;
 
 		/// A vector containing every freelance role defined in the rulebook.
-		std::vector<rkt::ref<const Role>> freelance_roles() const;
+		std::vector<util::ref<const Role>> freelance_roles() const;
 
 		/// Evaluate the function `f` on each role present in this rulebook.
 		template <typename F>
@@ -118,14 +118,14 @@ namespace maf {
 
 		/// A vector containing every village-only wildcard defined in the
 		/// rulebook.
-		std::vector<rkt::ref<const Wildcard>> village_wildcards() const;
+		std::vector<util::ref<const Wildcard>> village_wildcards() const;
 
 		/// A vector containing every mafia-only wildcard defined in the rulebook.
-		std::vector<rkt::ref<const Wildcard>> mafia_wildcards() const;
+		std::vector<util::ref<const Wildcard>> mafia_wildcards() const;
 
 		/// A vector containing every freelance-only wildcard defined in the
 		/// rulebook.
-		std::vector<rkt::ref<const Wildcard>> freelance_wildcards() const;
+		std::vector<util::ref<const Wildcard>> freelance_wildcards() const;
 
 		/// Whether the rulebook contains a given role.
 		bool contains(RoleRef r_ref) const;

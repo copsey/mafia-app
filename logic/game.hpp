@@ -1,7 +1,7 @@
 #ifndef MAFIA_LOGIC_GAME
 #define MAFIA_LOGIC_GAME
 
-#include "../riketi/ref.hpp"
+#include "../util/ref.hpp"
 
 #include "player.hpp"
 #include "role_ref.hpp"
@@ -48,8 +48,8 @@ namespace maf
 		}
 
 	private:
-		rkt::ref<const Player> _caster_ref;
-		rkt::ref<const Player> _target_ref;
+		util::ref<const Player> _caster_ref;
+		util::ref<const Player> _target_ref;
 		Date _date;
 		bool _result;
 	};
@@ -76,7 +76,7 @@ namespace maf
 			Kick_failed(const Player &player, Reason reason)
 			: player{player}, reason{reason} { }
 
-			rkt::ref<const Player> player;
+			util::ref<const Player> player;
 			Reason reason;
 		};
 
@@ -109,7 +109,7 @@ namespace maf
 									Reason reason)
 			: voter{voter}, target{target}, reason{reason} { }
 
-			rkt::ref<const Player> voter;
+			util::ref<const Player> voter;
 			const Player *target;
 			Reason reason;
 		};
@@ -133,8 +133,8 @@ namespace maf
 							Reason reason)
 			: caster{caster}, target{target}, reason{reason} { }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -165,8 +165,8 @@ namespace maf
 											Reason reason)
 			: player{player}, fake_role{fake_role}, reason{reason} { }
 
-			rkt::ref<const Player> player;
-			rkt::ref<const Role> fake_role;
+			util::ref<const Player> player;
+			util::ref<const Role> fake_role;
 			Reason reason;
 		};
 
@@ -190,8 +190,8 @@ namespace maf
 				: caster{caster}, target{target}, reason{reason}
 			{ }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -209,8 +209,8 @@ namespace maf
 				: caster{caster}, target{target}, reason{reason}
 			{ }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -229,8 +229,8 @@ namespace maf
 				: caster{caster}, target{target}, reason{reason}
 			{ }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -249,8 +249,8 @@ namespace maf
 				: caster{caster}, target{target}, reason{reason}
 			{ }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -269,8 +269,8 @@ namespace maf
 				: caster{caster}, target{target}, reason{reason}
 			{ }
 
-			rkt::ref<const Player> caster;
-			rkt::ref<const Player> target;
+			util::ref<const Player> caster;
+			util::ref<const Player> target;
 			Reason reason;
 		};
 
@@ -297,9 +297,9 @@ namespace maf
 		// The participating players, both present and not present.
 		const std::vector<Player> & players() const;
 		// A vector containing every player remaining.
-		std::vector<rkt::ref<const Player>> remaining_players() const;
+		std::vector<util::ref<const Player>> remaining_players() const;
 		// A vector containing every player remaining with the given alignment.
-		std::vector<rkt::ref<const Player>> remaining_players(Alignment alignment) const;
+		std::vector<util::ref<const Player>> remaining_players(Alignment alignment) const;
 		// The number of players remaining.
 		std::size_t num_players_left() const;
 		// The number of players remaining with the given alignment.

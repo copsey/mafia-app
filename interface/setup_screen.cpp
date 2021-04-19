@@ -1,5 +1,5 @@
-#include "../riketi/algorithm.hpp"
-#include "../riketi/string.hpp"
+#include "../util/algorithm.hpp"
+#include "../util/string.hpp"
 
 #include "../common/stdlib.h"
 #include "command.hpp"
@@ -34,7 +34,7 @@ vector<maf::Wildcard::ID> maf::Setup_screen::wildcard_ids() const {
 
 bool maf::Setup_screen::has_player(string_view name) const {
 	for (string_view s: _player_names) {
-		if (rkt::equal_up_to_case(s, name)) {
+		if (util::equal_up_to_case(s, name)) {
 			return true;
 		}
 	}
@@ -80,7 +80,7 @@ size maf::Setup_screen::num_cards() const {
 }
 
 void maf::Setup_screen::add_player(string_view name) {
-	if (rkt::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
+	if (util::any_of(name, [](char ch) { return !std::isalnum(ch); })) {
 		throw Bad_player_name{string{name}};
 	} else if (has_player(name)) {
 		throw Player_already_exists{string{name}};
@@ -106,8 +106,8 @@ void maf::Setup_screen::add_wildcard(string_view alias) {
 }
 
 void maf::Setup_screen::remove_player(string_view name) {
-	auto it = rkt::find_if(_player_names, [&name](string_view s) {
-		return rkt::equal_up_to_case(s, name);
+	auto it = util::find_if(_player_names, [&name](string_view s) {
+		return util::equal_up_to_case(s, name);
 	});
 
 	if (it == _player_names.end()) {

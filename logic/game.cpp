@@ -1,12 +1,11 @@
-#include "../riketi/algorithm.hpp"
-#include "../riketi/random.hpp"
-#include "../riketi/ref.hpp"
+#include "../util/algorithm.hpp"
+#include "../util/random.hpp"
 
 #include "../common/stdlib.h"
 #include "game.hpp"
 
-using rkt::any_of;
-using rkt::none_of;
+using maf::util::any_of;
+using maf::util::none_of;
 
 using WC = maf::Win_condition;
 
@@ -16,7 +15,7 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
                 const Rulebook & rulebook)
 	: _rulebook{rulebook}
 {
-	using Card = pair<rkt::ref<const Role>, const Wildcard*>;
+	using Card = pair<util::ref<const Role>, const Wildcard*>;
 
 	vector<Card> cards{};
 
@@ -29,7 +28,7 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
 		cards.emplace_back(wildcard.pick_role(_rulebook), &wildcard);
 	}
 
-	rkt::shuffle(cards);
+	util::shuffle(cards);
 
 	for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
 		_players.emplace_back(i);
@@ -64,18 +63,18 @@ const vector<maf::Player> & maf::Game::players() const
 	return _players;
 }
 
-vector<rkt::ref<const maf::Player>> maf::Game::remaining_players() const
+vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
 {
-	vector<rkt::ref<const Player>> vec{};
+	vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present()) vec.emplace_back(pl);
 	}
 	return vec;
 }
 
-vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
+vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
 {
-	vector<rkt::ref<const Player>> vec{};
+	vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present() && pl.alignment() == alignment) {
 			vec.emplace_back(pl);
@@ -86,7 +85,7 @@ vector<rkt::ref<const maf::Player>> maf::Game::remaining_players(Alignment align
 
 size maf::Game::num_players_left() const
 {
-	return rkt::count_if(_players, std::mem_fn(&Player::is_present));
+	return util::count_if(_players, std::mem_fn(&Player::is_present));
 }
 
 size maf::Game::num_players_left(Alignment alignment) const
@@ -95,7 +94,7 @@ size maf::Game::num_players_left(Alignment alignment) const
 		return pl.is_present() && pl.alignment() == alignment;
 	};
 
-	return rkt::count_if(_players, pred);
+	return util::count_if(_players, pred);
 }
 
 maf::Date maf::Game::date() const
@@ -149,7 +148,7 @@ const maf::Player* maf::Game::next_lynch_victim() const
 		return p1.second < p2.second;
 	};
 
-	auto it = rkt::max_element(votes_per_player, less_votes);
+	auto it = util::max_element(votes_per_player, less_votes);
 
 	if (it != votes_per_player.end() && (2 * it->second > total_votes)) {
 		return it->first;
@@ -251,7 +250,7 @@ void maf::Game::stage_duel(Player::ID caster_id, Player::ID target_id)
 
 	Player *winner, *loser;
 
-	if (bd(rkt::random_engine)) {
+	if (bd(util::random_engine)) {
 		winner = &caster;
 		loser = &target;
 	}
@@ -616,7 +615,7 @@ bool maf::Game::try_to_end_night()
 		}
 
 		if (possible_victims.size() > 0) {
-			Player& victim = **rkt::pick(possible_victims);
+			Player& victim = **util::pick(possible_victims);
 			victim.kill(_date, _time);
 			victim.haunt(*haunter);
 		}

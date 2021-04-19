@@ -1,12 +1,12 @@
-#ifndef RIKETI_REF
-#define RIKETI_REF
+#ifndef MAF_UTIL_REF
+#define MAF_UTIL_REF
 
 #include <functional>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
-namespace rkt {
+namespace maf::util {
 	// A struct encapsulating a reference to a value of type `T`.
 	// 
 	// Unlike normal references, the address stored by a `ref` can freely be 
@@ -98,8 +98,8 @@ namespace rkt {
 namespace std {
 	// Function object for computing the hash of a `ref`.
 	template <typename T>
-	struct hash<rkt::ref<T>> {
-		size_t operator() (const rkt::ref<T> & r) const {
+	struct hash<maf::util::ref<T>> {
+		size_t operator() (const maf::util::ref<T> & r) const {
 			return hash<T*>()(r.ptr);
 		}
 	};

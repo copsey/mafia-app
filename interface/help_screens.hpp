@@ -35,7 +35,7 @@ namespace maf {
 		: event{e}
 		{ }
 
-		rkt::ref<const Event> event;
+		util::ref<const Event> event;
 
 		std::string_view id() const override {
 			return event->id();
@@ -48,7 +48,7 @@ namespace maf {
 		: role{role}
 		{ }
 
-		rkt::ref<const Role> role;
+		util::ref<const Role> role;
 
 		std::string_view id() const override {
 			return alias(role->id());
@@ -76,7 +76,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		rkt::ref<const Rulebook> _rulebook;
+		util::ref<const Rulebook> _rulebook;
 		Filter_Alignment _filter_alignment;
 	};
 
@@ -99,8 +99,8 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		rkt::ref<const Player> _player_ref;
-		rkt::ref<const Game_log> _game_log_ref;
+		util::ref<const Player> _player_ref;
+		util::ref<const Game_log> _game_log_ref;
 	};
 }
 

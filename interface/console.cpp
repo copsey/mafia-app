@@ -5,9 +5,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "../riketi/algorithm.hpp"
-#include "../riketi/random.hpp"
-#include "../riketi/string.hpp"
+#include "../util/algorithm.hpp"
+#include "../util/random.hpp"
+#include "../util/string.hpp"
 
 #include "command.hpp"
 #include "console.hpp"
@@ -115,7 +115,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 		else if (commands_match(commands, {"preset"})) {
 			std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
-			begin_preset(uid(rkt::random_engine));
+			begin_preset(uid(util::random_engine));
 		}
 		else if (commands_match(commands, {"preset", ""})) {
 			int i;

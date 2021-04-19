@@ -1,10 +1,8 @@
-#ifndef RIKETI_MAP
-#define RIKETI_MAP
+#ifndef MAFIA_UTIL_MAP
+#define MAFIA_UTIL_MAP
 
+#include <iterator>
 #include <memory>
-
-#include "iterator.hpp"
-#include "container.hpp"
 
 // A map is defined to be an associative container `M` with a key type
 // `M::key_type` and an item type `M::mapped_type`. It is also assumed that
@@ -14,10 +12,8 @@
 // assumed that any type reasonably similar in functionality to `std::map`
 // qualifies as a map.
 
-namespace rkt {
+namespace maf::util {
 	namespace map {
-		using namespace rkt::container; // a map is a container
-		
 		// The key type associated with `Map`.
 		template <typename Map>
 		using key_type = typename Map::key_type;
@@ -34,24 +30,20 @@ namespace rkt {
 	template <typename Map>
 	struct key_iterator {
 		using map_type = Map;
-		using map_iterator = map::iterator_type<map_type>;
-		using map_const_iterator = map::const_iterator_type<map_type>;
+		using map_iterator = typename map_type::iterator;
+		using map_const_iterator = typename map_type::const_iterator;
 		
 		using value_type = map::key_type<map_type>;
-		using difference_type = iterator::difference_type<map_const_iterator>;
+		using difference_type = typename std::iterator_traits<map_iterator>::difference_type;
 		using pointer = const value_type *;
 		using reference = const value_type &;
-		using iterator_category = iterator::category<map_const_iterator>;
+		using iterator_category = typename std::iterator_traits<map_iterator>::iterator_category;
 		
 		key_iterator() = default;
 		
-		key_iterator(const map_iterator & p):
-			_p{p}
-		{ }
+		key_iterator(const map_iterator & p): _p{p} { }
 		
-		key_iterator(const map_const_iterator & p):
-			_p{p}
-		{ }
+		key_iterator(const map_const_iterator & p): _p{p} { }
 		
 		// A `map_const_iterator` pointing to the same entry in the
 		// underlying map as `this`.
@@ -113,13 +105,13 @@ namespace rkt {
 	template <typename Map>
 	struct item_iterator {
 		using map_type = Map;
-		using map_iterator = map::iterator_type<map_type>;
+		using map_iterator = typename map_type::iterator;
 		
 		using value_type = map::item_type<map_type>;
-		using difference_type = iterator::difference_type<map_iterator>;
+		using difference_type = typename std::iterator_traits<map_iterator>::difference_type;
 		using pointer = value_type *;
 		using reference = value_type &;
-		using iterator_category = iterator::category<map_iterator>;
+		using iterator_category = typename std::iterator_traits<map_iterator>::iterator_category;
 		
 		item_iterator() = default;
 		
@@ -176,14 +168,14 @@ namespace rkt {
 	template <typename Map>
 	struct const_item_iterator {
 		using map_type = Map;
-		using map_iterator = map::iterator_type<map_type>;
-		using map_const_iterator = map::const_iterator_type<map_type>;
+		using map_iterator = typename map_type::iterator;
+		using map_const_iterator = typename map_type::const_iterator;
 		
 		using value_type = map::item_type<map_type>;
-		using difference_type = iterator::difference_type<map_const_iterator>;
+		using difference_type = typename std::iterator_traits<map_const_iterator>::difference_type;
 		using pointer = const value_type *;
 		using reference = const value_type &;
-		using iterator_category = iterator::category<map_const_iterator>;
+		using iterator_category = typename std::iterator_traits<map_const_iterator>::iterator_category;
 		
 		const_item_iterator() = default;
 		

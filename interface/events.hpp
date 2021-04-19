@@ -4,7 +4,7 @@
 #include <ostream>
 #include <string>
 
-#include "../riketi/ref.hpp"
+#include "../util/ref.hpp"
 
 #include "format.hpp"
 #include "../logic/logic.hpp"
@@ -61,7 +61,7 @@ namespace maf {
 		std::string escaped_name(Role const& role) const;
 
 	private:
-		rkt::ref<Game_log> _game_log_ref;
+		util::ref<Game_log> _game_log_ref;
 	};
 
 
@@ -106,7 +106,7 @@ namespace maf {
 
 
 	struct Obituary: Event {
-		Obituary(Game_log & game_log, std::vector<rkt::ref<const Player>> deaths)
+		Obituary(Game_log & game_log, std::vector<util::ref<const Player>> deaths)
 			: Event{game_log}, _deaths{deaths}
 		{ }
 
@@ -118,14 +118,14 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		std::vector<rkt::ref<const Player>> _deaths;
+		std::vector<util::ref<const Player>> _deaths;
 		std::ptrdiff_t _deaths_index{-1};
 	};
 
 
 	struct Town_meeting: Event {
 		Town_meeting(Game_log & game_log,
-		             std::vector<rkt::ref<const Player>> players,
+		             std::vector<util::ref<const Player>> players,
 		             Date date,
 		             bool lynch_can_occur,
 		             const Player * next_lynch_victim,
@@ -149,7 +149,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		std::vector<rkt::ref<const Player>> _players;
+		std::vector<util::ref<const Player>> _players;
 		Date _date;
 		bool _lynch_can_occur;
 		const Player *_next_lynch_victim;
@@ -170,8 +170,8 @@ namespace maf {
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
 
-		rkt::ref<const Player> player;
-		rkt::ref<const Role> player_role;
+		util::ref<const Player> player;
+		util::ref<const Role> player_role;
 	};
 
 
@@ -207,10 +207,10 @@ namespace maf {
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
 
-		rkt::ref<const Player> caster;
-		rkt::ref<const Player> target;
-		rkt::ref<const Player> winner;
-		rkt::ref<const Player> loser;
+		util::ref<const Player> caster;
+		util::ref<const Player> target;
+		util::ref<const Player> winner;
+		util::ref<const Player> loser;
 	};
 
 
@@ -235,7 +235,7 @@ namespace maf {
 
 	struct Mafia_meeting: Event {
 		Mafia_meeting(Game_log & game_log,
-		              std::vector<rkt::ref<const Player>> mafiosi,
+		              std::vector<util::ref<const Player>> mafiosi,
 		              bool is_initial_meeting)
 			: Event{game_log}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
 		{ }
@@ -248,7 +248,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		std::vector<rkt::ref<const Player>> _mafiosi;
+		std::vector<util::ref<const Player>> _mafiosi;
 		bool _initial;
 		bool _go_to_sleep{false};
 	};

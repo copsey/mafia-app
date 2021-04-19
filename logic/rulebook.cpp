@@ -74,54 +74,54 @@ maf::Rulebook::Rulebook(Edition edition) : _edition{edition}
 	});
 }
 
-vector<rkt::ref<const maf::Role>> maf::Rulebook::all_roles() const {
-	vector<rkt::ref<const Role>> v{};
+vector<maf::util::ref<const maf::Role>> maf::Rulebook::all_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) v.emplace_back(r);
 	return v;
 }
 
-vector<rkt::ref<const maf::Role>> maf::Rulebook::village_roles() const {
-	vector<rkt::ref<const Role>> v{};
+vector<maf::util::ref<const maf::Role>> maf::Rulebook::village_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::village) v.emplace_back(r);
 	}
 	return v;
 }
 
-vector<rkt::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
-	vector<rkt::ref<const Role>> v{};
+vector<maf::util::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::mafia) v.emplace_back(r);
 	}
 	return v;
 }
 
-vector<rkt::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
-	vector<rkt::ref<const Role>> v{};
+vector<maf::util::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::freelance) v.emplace_back(r);
 	}
 	return v;
 }
 
-vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
-	vector<rkt::ref<const Wildcard>> v{};
+vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::village, *this)) v.emplace_back(w);
 	}
 	return v;
 }
 
-vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
-	vector<rkt::ref<const Wildcard>> v{};
+vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::mafia, *this)) v.emplace_back(w);
 	}
 	return v;
 }
 
-vector<rkt::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
-	vector<rkt::ref<const Wildcard>> v{};
+vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::freelance, *this)) v.emplace_back(w);
 	}

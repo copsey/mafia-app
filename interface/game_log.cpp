@@ -1,7 +1,7 @@
 #include <sstream>
 
-#include "../riketi/random.hpp"
-#include "../riketi/string.hpp"
+#include "../util/algorithm.hpp"
+#include "../util/string.hpp"
 
 #include "game_log.hpp"
 #include "../common/stdlib.h"
@@ -42,7 +42,7 @@ maf::Game_log::Game_log(const vector<string> &player_names,
 		}
 	}
 
-	rkt::shuffle(new_events);
+	util::shuffle(new_events);
 	if (new_events.size() == 0) {
 		log_boring_night();
 	} else {
@@ -119,7 +119,7 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
 
 const maf::Player & maf::Game_log::find_player(string_view name) const {
 	for (Player::ID i = 0; i < _player_names.size(); ++i) {
-		if (rkt::equal_up_to_case(name, _player_names[i])) {
+		if (util::equal_up_to_case(name, _player_names[i])) {
 			return _game.players()[i];
 		}
 	}
@@ -223,7 +223,7 @@ void maf::Game_log::begin_night() {
 		}
 	}
 
-	rkt::shuffle(new_events);
+	util::shuffle(new_events);
 
 	if (new_events.size() == 0) {
 		log_boring_night();
@@ -298,7 +298,7 @@ void maf::Game_log::log_time_changed() {
 }
 
 void maf::Game_log::log_obituary(Date date) {
-	vector<rkt::ref<const Player>> deaths{};
+	vector<util::ref<const Player>> deaths{};
 	for (const Player &p: _game.players()) {
 		if (p.is_dead() && p.time_of_death() == Time::night && p.date_of_death() == date) {
 			deaths.emplace_back(p);

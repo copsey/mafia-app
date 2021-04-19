@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "../riketi/algorithm.hpp"
+#include "../util/algorithm.hpp"
 
 #include "../common/stdlib.h"
 #include "help_screens.hpp"
@@ -33,7 +33,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 	params["show_mafia"] = (_filter_alignment == Filter_Alignment::mafia);
 	params["show_freelance"] = (_filter_alignment == Filter_Alignment::freelance);
 
-	vector<rkt::ref<const Role>> filtered_roles;
+	vector<util::ref<const Role>> filtered_roles;
 
 	switch (_filter_alignment) {
 	case Filter_Alignment::all:
@@ -53,11 +53,11 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 		break;
 	}
 
-	auto order_by_full_name = [](const rkt::ref<const Role> & r1, const rkt::ref<const Role> & r2) {
+	auto order_by_full_name = [](const util::ref<const Role> & r1, const util::ref<const Role> & r2) {
 		return full_name(*r1) < full_name(*r2);
 	};
 
-	rkt::sort(filtered_roles, order_by_full_name);
+	util::sort(filtered_roles, order_by_full_name);
 
 	std::vector<TextParams> roles;
 	for (auto role_ref: filtered_roles) {

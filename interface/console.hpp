@@ -6,7 +6,7 @@
 #include <string_view>
 #include <utility>
 
-#include "../riketi/algorithm.hpp"
+#include "../util/algorithm.hpp"
 
 #include "game_log.hpp"
 #include "help_screens.hpp"

@@ -16,8 +16,6 @@ src = \
 	logic/role.cpp \
 	logic/rulebook.cpp \
 	logic/wildcard.cpp \
-	riketi/random.cpp \
-	riketi/string.cpp \
 
 objs = $(addprefix build/,$(src:.cpp=.o))
 

@@ -1,12 +1,12 @@
-#ifndef RIKETI_ALGORITHM
-#define RIKETI_ALGORITHM
+#ifndef MAFIA_UTIL_ALGORITHM
+#define MAFIA_UTIL_ALGORITHM
 
 #include <algorithm>
+#include <iterator>
 
-#include "iterator.hpp"
-#include "container.hpp"
+#include "random.hpp"
 
-namespace rkt {
+namespace maf::util {
 	// Check if `p(t)` is true for all `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool all_of(Cont const& c, Pred p) {
@@ -87,8 +87,8 @@ namespace rkt {
 	// different lengths.
 	template <typename Iter1, typename Iter2>
 	bool equivalent(Iter1 i1, Iter1 j1, Iter2 i2, Iter2 j2) {
-		using T1 = iterator::value_type<Iter1>;
-		using T2 = iterator::value_type<Iter2>;
+		using T1 = decltype(*i1);
+		using T2 = decltype(*i2);
 		
 		auto eq = [](const T1 & t1, const T2 & t2) { return t1 == t2; };
 		return matches(i1, j1, i2, j2, eq);
@@ -106,11 +106,7 @@ namespace rkt {
 	//
 	// If no such position exists, `std::end(c)` is returned instead.
 	template <typename Cont, typename T>
-	container::iterator_type<Cont> find(Cont & c, const T & t) {
-		return std::find(std::begin(c), std::end(c), t);
-	}
-	template <typename Cont, typename T>
-	container::const_iterator_type<Cont> find(const Cont & c, const T & t) {
+	auto find(Cont & c, const T & t) -> decltype(std::begin(c)) {
 		return std::find(std::begin(c), std::end(c), t);
 	}
 	
@@ -118,31 +114,27 @@ namespace rkt {
 	//
 	// If no such position exists, `std::end(c)` is returned instead.
 	template <typename Cont, typename Pred>
-	container::iterator_type<Cont> find_if(Cont & c, Pred p) {
+	auto find_if(Cont & c, Pred p) -> decltype(std::begin(c)) {
 		return std::find_if(std::begin(c), std::end(c), p);
 	}
-	template <typename Cont, typename Pred>
-	container::const_iterator_type<Cont> find_if(const Cont & c, Pred p) {
-		return std::find_if(std::begin(c), std::end(c), p);
-	}
-	
+
 	// Count the number of elements `x` in `c` such that `p(x)` is true.
 	template <typename Cont, typename Pred>
-	container::size_type<Cont> count_if(const Cont & c, Pred p) {
-		container::size_type<Cont> n{0};
-		
+	auto count_if(const Cont & c, Pred p) -> decltype(std::size(c)) {
+		decltype(std::size(c)) n{0};
+
 		auto end = std::end(c);
 		for (auto i = std::begin(c); i != end; ++i) {
 			if (p(*i)) ++n;
 		}
-		
+
 		return n;
 	}
-	
+
 	// Count the number of elements in `c` equal to `t`.
 	template <typename Cont, typename T>
-	container::size_type<Cont> count(const Cont & c, const T & t) {
-		using V = container::value_type<Cont>;
+	auto count(const Cont & c, const T & t) -> decltype(std::size(c)) {
+		using V = decltype(*std::begin(c));
 		auto eq_t = [&t](const V & v) { return v == t; };
 		return count_if(c, eq_t);
 	}
@@ -151,11 +143,7 @@ namespace rkt {
 	//
 	// If `c` is empty, `std::end(c)` is returned instead.
 	template <typename Cont>
-	container::iterator_type<Cont> max_element(Cont & c) {
-		return std::max_element(std::begin(c), std::end(c));
-	}
-	template <typename Cont>
-	container::const_iterator_type<Cont> max_element(const Cont & c) {
+	auto max_element(Cont & c) -> decltype(std::begin(c)) {
 		return std::max_element(std::begin(c), std::end(c));
 	}
 	
@@ -163,11 +151,7 @@ namespace rkt {
 	//
 	// If `c` is empty, `std::end(c)` is returned instead.
 	template <typename Cont, typename Comp>
-	container::iterator_type<Cont> max_element(Cont & c, Comp lt) {
-		return std::max_element(std::begin(c), std::end(c), lt);
-	}
-	template <typename Cont, typename Comp>
-	container::const_iterator_type<Cont> max_element(const Cont & c, Comp lt) {
+	auto max_element(Cont & c, Comp lt) -> decltype(std::begin(c)) {
 		return std::max_element(std::begin(c), std::end(c), lt);
 	}
 	
@@ -206,27 +190,23 @@ namespace rkt {
 	void reverse(Cont & c) {
 		std::reverse(std::begin(c), std::end(c));
 	}
-	
-	// Generate the next permutation of `c`, using lexicographical ordering
-	// with respect to `<`.
-	//
-	// Returns `true` if the new permutation is lexicographically greater than
-	// the old permutation, and `false` if `c` has wrapped back to its initial
-	// permutation.
-	template <typename Cont>
-	bool next_permutation(Cont & c) {
-		return std::next_permutation(std::begin(c), std::end(c));
+
+	// Randomise the order of elements in `c` using `g`.
+	template <typename Cont, typename RNG>
+	void shuffle_with(Cont & c, RNG && g) {
+		std::shuffle(std::begin(c), std::end(c), g);
 	}
-	
-	// Generate the next permutation of `c`, using lexicographical ordering
-	// with respect to `lt`.
-	//
-	// Returns `true` if the new permutation is lexicographically greater than
-	// the old permutation, and `false` if `c` has wrapped back to its initial
-	// permutation.
-	template <typename Cont, typename Comp>
-	bool next_permutation(Cont & c, Comp lt) {
-		return std::next_permutation(std::begin(c), std::end(c), lt);
+
+	// Randomise the order of elements in `[b,e)` using `util::random_engine`.
+	template <typename Iter>
+	void shuffle(Iter b, Iter e) {
+		std::shuffle(b, e, random_engine);
+	}
+
+	// Randomise the order of elements in `c` using `util::random_engine`.
+	template <typename Cont>
+	void shuffle(Cont & c) {
+		std::shuffle(std::begin(c), std::end(c), random_engine);
 	}
 }
 

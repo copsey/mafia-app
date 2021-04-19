@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../riketi/map.hpp"
-#include "../riketi/random.hpp"
-#include "../riketi/ref.hpp"
+#include "../util/map.hpp"
+#include "../util/random.hpp"
+#include "../util/ref.hpp"
 
 #include "../common/stdlib.h"
 #include "wildcard.hpp"
@@ -13,20 +13,20 @@
 
 maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 	_id{id},
-	_role_ids{rkt::key_begin(weights), rkt::key_end(weights)},
-	_dist{rkt::item_begin(weights), rkt::item_end(weights)}
+	_role_ids{util::key_begin(weights), util::key_end(weights)},
+	_dist{util::item_begin(weights), util::item_end(weights)}
 {
 	auto is_negative = [](double w) { return w < 0; };
 	auto is_zero = [](double w) { return w == 0; };
 
-	if (std::any_of(rkt::item_begin(weights), rkt::item_end(weights), is_negative)) {
+	if (std::any_of(util::item_begin(weights), util::item_end(weights), is_negative)) {
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with a negative role weight.";
 
 		throw invalid_argument{err.str()};
 	}
 
-	if (std::all_of(rkt::item_begin(weights), rkt::item_end(weights), is_zero)) {
+	if (std::all_of(util::item_begin(weights), util::item_end(weights), is_zero)) {
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with every role weight set to zero.";
 
@@ -62,7 +62,7 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 	if (uses_evaluator()) {
-		vector<rkt::ref<const Role>> role_refs{};
+		vector<util::ref<const Role>> role_refs{};
 		vector<double> weights{};
 
 		auto evaluate_role = [&](const Role & role) {
@@ -97,9 +97,9 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 		}
 
 		std::discrete_distribution<size> dist{weights.begin(), weights.end()};
-		return *role_refs[dist(rkt::random_engine)];
+		return *role_refs[dist(util::random_engine)];
 	} else {
-		return rulebook.look_up(_role_ids[_dist(rkt::random_engine)]);
+		return rulebook.look_up(_role_ids[_dist(util::random_engine)]);
 	}
 }
 
