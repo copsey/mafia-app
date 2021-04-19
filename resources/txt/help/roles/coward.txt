@@ -1,0 +1,7 @@
+=Help: Coward=
+
+*Alignment:* Freelance.
+*Abilities:* None.
+*To win:* Survive.
+
+*Description:* The Coward is a freelance role, whose goal is simply to survive to the end of the game. However, the Coward has the disadvantage of appearing suspicious when investigated.

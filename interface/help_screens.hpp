@@ -2,6 +2,7 @@
 #define MAFIA_HELP_SCREENS_H
 
 #include <functional>
+#include <optional>
 #include <ostream>
 
 #include "../logic/logic.hpp"
@@ -18,10 +19,14 @@ namespace maf {
 		// Used when loading text from external files.
 		virtual std::string_view id() const = 0;
 
-		// Configure the text parameters for this help screen.
+		// A string indicating where in the file system the screen's contents
+		// can be found. Defaults to "txt/help/".
+		virtual std::string_view txt_loc() const { return "txt/help/"; }
+
+		// Fill `params` with the text parameters for this help screen.
 		// These are used to generate text output.
 		//
-		// By default, do nothing.
+		// By default, does nothing.
 		virtual void set_params(TextParams & params) const { };
 
 		// Write the help screen to `output`.
@@ -31,9 +36,7 @@ namespace maf {
 
 
 	struct Event_Help_Screen: Help_Screen {
-		Event_Help_Screen(const Event &e)
-		: event{e}
-		{ }
+		Event_Help_Screen(const Event &e): event{e} { }
 
 		util::ref<const Event> event;
 
@@ -44,9 +47,7 @@ namespace maf {
 
 
 	struct Role_Info_Screen: Help_Screen {
-		Role_Info_Screen(const Role &role)
-		: role{role}
-		{ }
+		Role_Info_Screen(const Role &role): role{role} { }
 
 		util::ref<const Role> role;
 
@@ -54,20 +55,19 @@ namespace maf {
 			return alias(role->id());
 		}
 
+		// Override the text location to "txt/help/roles/".
+		std::string_view txt_loc() const override { return "txt/help/roles/"; }
+
 		void set_params(TextParams & params) const override;
 	};
 
 
 	struct List_Roles_Screen: Help_Screen {
-		// An optional filter, specifying the alignment of roles that should be
-		// displayed.
-		enum class Filter_Alignment { all, village, mafia, freelance };
-
-		// Create a help screen listing all of the roles present in `rulebook`.
+		// Create a help screen listing the roles present in `rulebook`.
 		//
-		// It is also possible to specify an optional alignment filter, in which case
-		// only roles of that alignment will be listed.
-		List_Roles_Screen(const Rulebook& rulebook, Filter_Alignment alignment = Filter_Alignment::all)
+		// It's possible to provide an optional alignment, in which case only
+		// roles of that alignment will be listed.
+		List_Roles_Screen(const Rulebook& rulebook, std::optional<Alignment> alignment = std::nullopt)
 		: _rulebook{rulebook}, _filter_alignment{alignment}
 		{ }
 
@@ -77,7 +77,7 @@ namespace maf {
 
 	private:
 		util::ref<const Rulebook> _rulebook;
-		Filter_Alignment _filter_alignment;
+		std::optional<Alignment> _filter_alignment;
 	};
 
 
@@ -86,10 +86,7 @@ namespace maf {
 	};
 
 
-	/// A screen presenting information on a given player.
 	struct Player_Info_Screen: Help_Screen {
-		/// Create an info screen for `player`, who should be a participant in the
-		/// game managed by `game_log`.
 		Player_Info_Screen(const Player & player, const Game_log & game_log)
 		: _player_ref{player}, _game_log_ref{game_log}
 		{ }

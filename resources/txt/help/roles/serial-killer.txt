@@ -1,0 +1,11 @@
+=Help: Serial Killer=
+
+*Alignment:* Freelance.
+*Ability:* Kill.
+*To win:* Be the last survivor.
+
+*Description:* The Serial Killer is a freelance role, whose goal is to be the last player left alive. Once each night, the Serial Killer can target another player to kill. The Serial Killer appears as suspicious when investigated.
+
+*Notes:*
+- The game cannot end until either the Serial Killer has been eliminated, or all of the other players have been eliminated.
+- The Serial Killer has a kill strength of 1000, making them the strongest killer in the game.

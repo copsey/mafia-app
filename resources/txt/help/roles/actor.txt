@@ -1,0 +1,14 @@
+=Help: Actor=
+
+*Alignment:* Freelance.
+*Abilities:* None.
+*To win:* Survive.
+
+*Description:* The Actor is a freelance role, whose goal is simply to survive to the end of the game. However, there's an awkward catch. At the beginning of the game, the Actor will be shown an additional "pretend" role - they must pretend that this is their actual role for the remainder of the game. This covers every aspect of the role, including alignment, abilities, whether or not it appears as suspicious, etc. Any form of cheating should result in the game host removing the Actor from the game at the next possible opportunity.
+
+*Notes:*
+- It would be a good idea for the Actor to read the rulebook entry for their pretend role once they know what it is.
+- It is difficult to say exactly what constitutes as cheating, other than that the Actor should claim details of their pretend role to the best of their knowledge. Ultimately, it is up to the game host to decide whether or not the Actor is cheating.
+- The Actor doesn't need to immediately claim that they have a particular role, but when asked what their role is, they must claim that they have the pretend role. 
+- The Actor does not gain any additional abilities or traits from their pretend role. In particular, they appear as innocent when investigated.
+- Once a player's role changes from the Actor to something else, they are no longer obliged to claim that they have any particular role.

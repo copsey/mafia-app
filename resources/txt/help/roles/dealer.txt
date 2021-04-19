@@ -1,0 +1,11 @@
+=Help: Dealer=
+
+*Alignment:* Mafia.
+*Ability:* Peddle drugs.
+*To win:* Survive.
+
+*Description:* The Dealer is part of the mafia. Once each night, the Dealer can target another player, making that player appear as suspicious if investigated during the night.
+
+*Notes:*
+- The Dealer's ability has no effect on roles that already appear as suspicious.
+- The effect of the Dealer's ability wears off at the end of the night.

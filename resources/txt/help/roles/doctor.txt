@@ -1,0 +1,13 @@
+=Help: Doctor=
+
+*Alignment:* Village.
+*Ability:* Heal.
+*To win:* Survive.
+
+*Description:* The Doctor is aligned to the village. Once each night, the Doctor can heal any other player. In most cases, a player who has been healed cannot be killed during the night.{--- Additionally, the diseases that currently afflict the player are cured.}
+
+*Notes:*
+- The Doctor cannot heal himself or herself.
+- Healing a player does not fully guarantee that he or she will survive the night. (For instance, the player could still die {-from the Mercenary's ability or }by committing suicide.)
+{--- - The Doctor's heal is automatically blocked if it is used on a player who has successfully used a kill ability on the Doctor during the night.}
+{--- - The Doctor cannot become infected by using his or her heal ability on another player, although the Doctor can still be infected by other players visiting him or her, even if the player who visits the Doctor is the player who he or she is healing.}

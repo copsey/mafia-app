@@ -1,0 +1,7 @@
+=Help: Peasant=
+
+*Alignment:* Village.
+*Abilities:* None.
+*To win:* Survive.
+
+*Description:* The Peasant is the most basic of the village roles. The Peasant has no traits of particular interest, nor any abilities to use. On the plus side, this does tend to make the Peasant a low-priority target for the Mafia and other hostile roles.

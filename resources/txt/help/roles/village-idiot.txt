@@ -1,0 +1,15 @@
+=Help: Village Idiot=
+
+*Alignment:* Freelance.
+*Abilities:* None.
+*To win:* Be lynched.
+
+*Description:* The Village Idiot is a freelance role, whose goal is to be lynched by the other townsfolk. As such, the Village Idiot has an opposite agenda to many roles, in that they want to appear as suspicious as possible to the other players.
+
+The fact that a daily lynch has been wasted is not the only reason to avoid voting against the Village Idiot. At the end of the night following the Village Idiot's lynching, one of the players who voted against the Village Idiot will commit suicide. This player is chosen at random.
+
+*Notes:*
+- The Village Idiot appears as innocent when investigated.
+- The game can end at any point whilst the Village Idiot is alive.
+- A player who has committed suicide cannot be saved in any way. (For instance, their death is not prevented through the effects of healing.)
+- If none of the players that voted against the Village Idiot survive to the end of the night, then no suicide takes place.

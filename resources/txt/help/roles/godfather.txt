@@ -1,0 +1,7 @@
+=Help: Godfather=
+
+*Alignment:* Mafia.
+*Ability:* None.
+*To win:* Survive.
+
+*Description:* The Godfather is aligned to the mafia. Unlike the other roles in the mafia, the Godfather appears as innocent when investigated. The Godfather has no other abilities.

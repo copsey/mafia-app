@@ -1,0 +1,11 @@
+=Help: Detective=
+
+*Alignment:* Village.
+*Ability:* Investigate.
+*To win:* Survive.
+
+*Description:* The Detective is aligned to the village. Once each night, the Detective can investigate a player. At the end of the night, the Detective is told whether or not that player was behaving suspiciously during the night. In general, a player behaving suspiciously is likely to be harmful to the village.
+
+*Notes:*
+- Although useful, the Detective's ability is not perfect. Some roles are harmless to the village and appear suspicious, whilst others are dangerous and appear innocent.
+- Furthermore, the Dealer is able to make one other player of his or her choice appear suspicious each night.

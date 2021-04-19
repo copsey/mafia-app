@@ -1,13 +1,13 @@
-=Roles=
+=Help: Roles=
 
 {!if show_village}
-The following is an alphabetical listing of all of the roles in the rulebook aligned to the village:
+These are all of the roles in the game aligned to the village:
 {!else_if show_mafia}
-The following is an alphabetical listing of all of the roles in the rulebook aligned to the mafia:
+These are all of the roles in the game aligned to the mafia:
 {!else_if show_freelance}
-The following is an alphabetical listing of all of the freelance roles in the rulebook:
+These are all of the freelance roles in the game:
 {!else}
-The following is an alphabetical listing of every role in the rulebook:
+These are all of the roles in the game:
 {!end}
 {!if show_all}
 {!list roles}

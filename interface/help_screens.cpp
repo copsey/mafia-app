@@ -8,7 +8,8 @@
 
 void maf::Help_Screen::write(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
-	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/help/";
+	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
+	fname += this->txt_loc();
 	fname += this->id();
 	fname += ".txt";
 
@@ -27,32 +28,32 @@ void maf::Role_Info_Screen::set_params(TextParams& params) const {
 }
 
 void maf::List_Roles_Screen::set_params(TextParams& params) const {
-	params["show_all"] = (_filter_alignment == Filter_Alignment::all);
-	params["show_village"] = (_filter_alignment == Filter_Alignment::village);
-	params["show_mafia"] = (_filter_alignment == Filter_Alignment::mafia);
-	params["show_freelance"] = (_filter_alignment == Filter_Alignment::freelance);
+	params["show_all"] = (!_filter_alignment);
+	params["show_village"] = (_filter_alignment == Alignment::village);
+	params["show_mafia"] = (_filter_alignment == Alignment::mafia);
+	params["show_freelance"] = (_filter_alignment == Alignment::freelance);
 
 	std::vector<util::ref<const Role>> filtered_roles;
 
-	switch (_filter_alignment) {
-	case Filter_Alignment::all:
+	if (_filter_alignment) {
+		switch (*_filter_alignment) {
+		case Alignment::village:
+			filtered_roles = _rulebook->village_roles();
+			break;
+
+		case Alignment::mafia:
+			filtered_roles = _rulebook->mafia_roles();
+			break;
+
+		case Alignment::freelance:
+			filtered_roles = _rulebook->freelance_roles();
+			break;
+		}
+	} else {
 		filtered_roles = _rulebook->all_roles();
-		break;
-
-	case Filter_Alignment::village:
-		filtered_roles = _rulebook->village_roles();
-		break;
-
-	case Filter_Alignment::mafia:
-		filtered_roles = _rulebook->mafia_roles();
-		break;
-
-	case Filter_Alignment::freelance:
-		filtered_roles = _rulebook->freelance_roles();
-		break;
 	}
 
-	auto order_by_full_name = [](const util::ref<const Role> & r1, const util::ref<const Role> & r2) {
+	auto order_by_full_name = [](auto&& r1, auto&& r2) {
 		return full_name(*r1) < full_name(*r2);
 	};
 

@@ -1,0 +1,10 @@
+=Help: Racketeer=
+
+*Alignment:* Mafia.
+*Abilities:* None.
+*To win:* Survive.
+
+*Description:* The Racketeer is part of the mafia. The Racketeer has a kill strength of 15, which is slightly stronger than most of the other roles aligned to the mafia. Apart from this, the Racketeer has no traits of particular interest, nor any abilities to use.
+
+*Notes:*
+- A kill strength of 15 puts the Racketeer behind all other killing roles, but above the default kill strength.
