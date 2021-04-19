@@ -24,10 +24,10 @@ std::string maf::Screen::load_txt() const {
 		std::istreambuf_iterator<char> input_iter{input}, eos{};
 		contents.append(input_iter, eos);
 	} else {
-		contents += "=Missing Screen=\n\nERROR: No text found for the @";
-		contents += this->id();
-		contents += "@ screen.\n\nIt should be located here: @";
-		contents += path;
+		contents += "=Error!=\n\nERROR: No text found for the @";
+		contents += escaped(this->id());
+		contents += "@ screen.\n\nIt should be located at @";
+		contents += escaped(path);
 		contents += "@\n\n%Enter @ok@ to return to the previous screen.";
 	}
 
@@ -43,9 +43,9 @@ void maf::Screen::write(std::string & output) const {
 	try {
 		output += preprocess_text(raw_txt, params);
 	} catch (preprocess_text_error const& error) {
-		output += "ERROR: ";
+		output += "=Error!=\n\nERROR: ";
 		error.write(output);
 		output += " in the following string:\n\n@";
-		output += error.input;
+		output += escaped(error.input);
 	}
 }
