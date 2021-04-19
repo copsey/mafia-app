@@ -4,7 +4,7 @@
 
 The pistols are loaded, and the participants take ten paces in opposite directions.
 
-_3... 2... 1... *BANG!!*_
+~3... 2... 1... *BANG!!*~
 
 The lifeless body of {loser} falls to the ground. {winner} lets out a sigh of relief.
 {!if winner.fled}

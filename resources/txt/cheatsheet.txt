@@ -2,7 +2,7 @@ Cheatsheet
 ----------
 
 Preprocessing:
-  {example}      -- substitute a parameter named 'example'
+  {example}      -- substitute a string or number named 'example'
   {!if p}        -- begin "if" block for boolean "p"
   {!else_if q}   -- continue "if" block with another condition on boolean "q"
   {!else}        -- continue "if" block with default path
@@ -12,19 +12,21 @@ Preprocessing:
   {--- Note 2}   -- ... anything that begins with '{-' is a comment
 
 Text formatting:
-  =Main Menu=    -- title
-  _really_       -- italics
+  _Proper noun_  -- italics
   *important*    -- bold
+  @ok@           -- monospace typeface
+  =Main Menu=    -- title
   %How to play%  -- help text
   %Help message  -- ... it doesn't need to end with a '%' sign
-  @ok@           -- monospace typeface
+  ~fancy~        -- flavour text
 
 Escape sequences:
   \\  -- backslash
-  \{  -- open curly brace
-  \}  -- close curly brace
-  \=  -- equals sign
   \_  -- underscore
   \*  -- asterisk
-  \%  -- percent sign
   \@  -- at sign
+  \=  -- equals sign
+  \%  -- percent sign
+  \~  -- tilde
+  \{  -- left curly brace
+  \}  -- right curly brace

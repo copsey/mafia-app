@@ -9,7 +9,7 @@ Their role could not be determined.
 They were a {victim.role}.
 {!if victim.role.is_troll}
 
-_A chill blows through the air. The townsfolk who voted to lynch {victim} look nervous..._
+~A chill blows through the air. The townsfolk who voted to lynch {victim} look nervous...~
 {!end}
 {!end}
 {!else}

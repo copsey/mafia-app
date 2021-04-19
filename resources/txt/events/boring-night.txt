@@ -1,7 +1,7 @@
 {--- FIXME: Show current date in title (e.g. "Night 1")}
 =Night=
 
-_It is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze..._
+~It is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...~
 
 %Nothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.
 

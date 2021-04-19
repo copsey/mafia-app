@@ -228,7 +228,7 @@ void maf::Setup_screen::do_commands(const std::vector<std::string_view> & comman
 }
 
 void maf::Setup_screen::write(std::ostream &os) const {
-	os << "=Setup=\n\n_Mafia: a game of deduction and deceit..._\n\nThis is where you can set up the next game to be played.\n\n";
+	os << "=Setup=\n\n~Mafia: a game of deduction and deceit...~\n\nThis is where you can set up the next game to be played.\n\n";
 
 	if (num_players() == 0) {
 		if (num_cards() == 0) {

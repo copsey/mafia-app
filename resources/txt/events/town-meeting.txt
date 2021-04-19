@@ -10,7 +10,7 @@ As it stands, {!if lynch_target.exists}{lynch_target}{!else}nobody{!end} will be
 
 %Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.
 {!else}
-_With little time left in the day, the townsfolk prepare themselves for another night of uncertainty..._
+~With little time left in the day, the townsfolk prepare themselves for another night of uncertainty...~
 
 Gathered outside the town hall are:
 {!list townsfolk}

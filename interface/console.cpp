@@ -502,8 +502,8 @@ void maf::Console::read_output(std::string_view contents) {
 		msg += " in the following string:\n\n";
 
 		_output.clear();
-		_output.emplace_back(msg, StyledString::Style{});
-		_output.emplace_back(std::string{error.input}, StyledString::monospace_mask);
+		_output.emplace_back(msg, StyledString::default_attributes);
+		_output.emplace_back(std::string{error.input}, StyledString::monospace_attributes);
 	}
 }
 

@@ -138,31 +138,66 @@ namespace maf {
 	inline std::string preprocess_text(std::string_view input, TextParams const& params);
 
 
-	// A string coupled with a suggested style.
-	//
-	// A style is intended to entail such formatting properties as typeface,
-	// font size, colour, etc.
-	//
-	// The presence of styles can be queried by using bitwise operations,
-	// e.g. `(style & StyledString::italic_mask).any()`,
-	// `(style ^ StyledString::title_mask).none()`.
+	// A string coupled with a set of suggested attributes. Each attribute is
+	// intended to entail such properties as typeface, font size, colour, etc.
 	struct StyledString {
-		using Style = std::bitset<5>;
-		
-		static constexpr Style title_mask     = 0b10000;
-		static constexpr Style italic_mask    = 0b01000;
-		static constexpr Style bold_mask      = 0b00100;
-		static constexpr Style help_text_mask = 0b00010;
-		static constexpr Style monospace_mask = 0b00001;
+		struct attributes_t {
+			enum class style_option {
+				normal,
+				italic
+			};
 
-		std::string string;
-		Style style;
+			enum class weight_option {
+				normal,
+				bold
+			};
+
+			enum class typeface_option {
+				sans_serif,
+				serif,
+				monospace
+			};
+
+			enum class semantics_option {
+				normal,
+				title,
+				help_text,
+				flavour_text
+			};
+
+			style_option style;
+			weight_option weight;
+			typeface_option typeface;
+			semantics_option semantics;
+		};
+
+		static constexpr attributes_t default_attributes = {};
+
+		static constexpr attributes_t monospace_attributes = {
+			attributes_t::style_option::normal,
+			attributes_t::weight_option::normal,
+			attributes_t::typeface_option::monospace,
+			attributes_t::semantics_option::normal};
+
+		static constexpr attributes_t title_attributes = {
+			attributes_t::style_option::normal,
+			attributes_t::weight_option::normal,
+			attributes_t::typeface_option::serif,
+			attributes_t::semantics_option::title};
+
+		static constexpr attributes_t help_text_attributes = {
+			attributes_t::style_option::normal,
+			attributes_t::weight_option::normal,
+			attributes_t::typeface_option::serif,
+			attributes_t::semantics_option::help_text};
 
 		StyledString() = default;
 
-		StyledString(std::string string, Style style)
-		: string{string}, style{style}
-		{ }
+		StyledString(std::string string, attributes_t attributes)
+		: string{string}, attributes{attributes} { }
+
+		std::string string;
+		attributes_t attributes;
 	};
 
 	// A vector of styled strings, used to form a block of text.
@@ -215,17 +250,17 @@ namespace maf {
 	//
 	// The general idea is that blocks of text will be extracted from
 	// `{begin, end}` and added to the output. A set of formatting codes can be
-	// used to change the value of `current_style` for a given block. Certain
-	// escape sequences are also recognised.
+	// used to change the attributes for a given block. Certain escape sequences
+	// are also recognised.
 	//
 	// Each time a formatting code is found, a new block of text is added to
-	// the output, using the value of `current_style` just before the
-	// formatting code was applied. Its content is taken to be the string
-	// between the previous formatting code and the new formatting code.
+	// the output, using the attributes from just before the formatting code was
+	// applied. Its content is taken to be the string between the previous
+	// formatting code and the new formatting code.
 	//
 	// See the file "/resources/txt/cheatsheet.txt" included with this source
 	// code for more information.
-	inline StyledText format_text(std::string_view input, StyledString::Style current_style = {});
+	inline StyledText format_text(std::string_view input, StyledString::attributes_t attributes = StyledString::default_attributes);
 }
 
 
@@ -1055,7 +1090,12 @@ namespace maf::_format_text_impl {
 	using iterator = std::string_view::iterator;
 
 	inline bool is_format_code(char ch) {
-		return ch == '=' || ch == '_' || ch == '*' || ch == '%' || ch == '@';
+		switch (ch) {
+		case '_': case '*': case '@': case '=': case '%': case '~':
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	inline bool is_delimiter(char ch) {
@@ -1130,31 +1170,120 @@ namespace maf::_format_text_impl {
 
 
 	inline void move_block(StyledText & text, std::string & block,
-						   StyledString::Style style)
+						   StyledString::attributes_t attributes)
 	{
 		if (!block.empty()) {
-			text.emplace_back(block, style);
+			text.emplace_back(block, attributes);
 			block.clear();
 		}
 	}
 
 
-	inline void update_style(StyledString::Style & style, char bit_name) {
-		switch (bit_name) {
-		case '=':
-			style ^= StyledString::title_mask;
+	inline void toggle_italic_style(StyledString::attributes_t & attributes) {
+		switch (attributes.style) {
+		case StyledString::attributes_t::style_option::normal:
+			attributes.style = StyledString::attributes_t::style_option::italic;
 			break;
+		case StyledString::attributes_t::style_option::italic:
+			attributes.style = StyledString::attributes_t::style_option::normal;
+			break;
+		}
+	}
+
+
+	inline void toggle_bold_weight(StyledString::attributes_t & attributes) {
+		switch (attributes.weight) {
+		case StyledString::attributes_t::weight_option::normal:
+			attributes.weight = StyledString::attributes_t::weight_option::bold;
+			break;
+		case StyledString::attributes_t::weight_option::bold:
+			attributes.weight = StyledString::attributes_t::weight_option::normal;
+			break;
+		}
+	}
+
+
+	inline void toggle_serif_typeface(StyledString::attributes_t & attributes) {
+		switch (attributes.typeface) {
+		case StyledString::attributes_t::typeface_option::sans_serif:
+		case StyledString::attributes_t::typeface_option::monospace:
+			attributes.typeface = StyledString::attributes_t::typeface_option::serif;
+			break;
+		case StyledString::attributes_t::typeface_option::serif:
+			attributes.typeface = StyledString::attributes_t::typeface_option::sans_serif;
+			break;
+		}
+	}
+
+
+	inline void toggle_monospace_typeface(StyledString::attributes_t & attributes) {
+		switch (attributes.typeface) {
+		case StyledString::attributes_t::typeface_option::sans_serif:
+		case StyledString::attributes_t::typeface_option::serif:
+			attributes.typeface = StyledString::attributes_t::typeface_option::monospace;
+			break;
+		case StyledString::attributes_t::typeface_option::monospace:
+			attributes.typeface = StyledString::attributes_t::typeface_option::sans_serif;
+			break;
+		}
+	}
+
+
+	inline void toggle_title_semantics(StyledString::attributes_t & attributes) {
+		switch (attributes.semantics) {
+		case StyledString::attributes_t::semantics_option::title:
+			attributes.semantics = StyledString::attributes_t::semantics_option::normal;
+			break;
+		default:
+			attributes.semantics = StyledString::attributes_t::semantics_option::title;
+			break;
+		}
+	}
+
+
+	inline void toggle_help_text_semantics(StyledString::attributes_t & attributes) {
+		switch (attributes.semantics) {
+		case StyledString::attributes_t::semantics_option::help_text:
+			attributes.semantics = StyledString::attributes_t::semantics_option::normal;
+			break;
+		default:
+			attributes.semantics = StyledString::attributes_t::semantics_option::help_text;
+			break;
+		}
+	}
+
+
+	inline void toggle_flavour_text_semantics(StyledString::attributes_t & attributes) {
+		switch (attributes.semantics) {
+		case StyledString::attributes_t::semantics_option::flavour_text:
+			attributes.semantics = StyledString::attributes_t::semantics_option::normal;
+			break;
+		default:
+			attributes.semantics = StyledString::attributes_t::semantics_option::flavour_text;
+			break;
+		}
+	}
+
+
+	inline void update_style(StyledString::attributes_t & attributes, char format_code) {
+		switch (format_code) {
 		case '_':
-			style ^= StyledString::italic_mask;
+			toggle_italic_style(attributes);
 			break;
 		case '*':
-			style ^= StyledString::bold_mask;
-			break;
-		case '%':
-			style ^= StyledString::help_text_mask;
+			toggle_bold_weight(attributes);
 			break;
 		case '@':
-			style ^= StyledString::monospace_mask;
+			toggle_monospace_typeface(attributes);
+			break;
+		case '=':
+			toggle_title_semantics(attributes);
+			break;
+		case '%':
+			toggle_help_text_semantics(attributes);
+			break;
+		case '~':
+			toggle_flavour_text_semantics(attributes);
 			break;
 		default:
 			break;
@@ -1163,7 +1292,7 @@ namespace maf::_format_text_impl {
 
 
 	inline StyledText format_text(iterator begin, iterator end,
-								  StyledString::Style current_style)
+								  StyledString::attributes_t attributes)
 	{
 		std::string block;
 		StyledText output;
@@ -1184,13 +1313,13 @@ namespace maf::_format_text_impl {
 			block.append(i, j);
 
 			if (j == end) {
-				move_block(output, block, current_style);
+				move_block(output, block, attributes);
 				return output;
 			}
 
 			if (char ch = *j; is_format_code(ch)) {
-				move_block(output, block, current_style);
-				update_style(current_style, ch);
+				move_block(output, block, attributes);
+				update_style(attributes, ch);
 				i = j + 1;
 			} else { // ch is a backslash
 				i = parse_escape_sequence(j, end, block);
@@ -1207,12 +1336,12 @@ inline std::string maf::escaped(std::string_view str) {
 
 
 inline maf::StyledText maf::format_text(std::string_view input,
-							            StyledString::Style current_style)
+							            StyledString::attributes_t attributes)
 {
 	using namespace _format_text_impl;
 
 	try {
-		return _format_text_impl::format_text(input.begin(), input.end(), current_style);
+		return _format_text_impl::format_text(input.begin(), input.end(), attributes);
 	} catch (format_text_error & error) {
 		error.input = input;
 		throw;

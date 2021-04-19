@@ -8,6 +8,11 @@
 
 #import "InterfaceGlue.h"
 
+using style_option = maf::StyledString::attributes_t::style_option;
+using weight_option = maf::StyledString::attributes_t::weight_option;
+using typeface_option = maf::StyledString::attributes_t::typeface_option;
+using semantics_option = maf::StyledString::attributes_t::semantics_option;
+
 @implementation InterfaceGlue
 
 - (void)awakeFromNib {
@@ -40,7 +45,6 @@
 	bool clearWhitespaceFromFront = false;
 	
 	for (auto & styled_str : _console.output()) {
-		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithDictionary:[InterfaceGlue defaultAttributes]];
 		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 		
 		// Strip whitespace from front if last style was "title".
@@ -55,32 +59,14 @@
 			clearWhitespaceFromFront = false;
 		}
 		
-		auto style = styled_str.style;
-		
-		if ((style & maf::StyledString::title_mask).any()) {
+		if (styled_str.attributes.semantics == maf::StyledString::attributes_t::semantics_option::title) {
 			_output.window.title = string;
 			clearWhitespaceFromFront = true;
-			continue;
+		} else {
+			NSDictionary *attributes = [InterfaceGlue attributesFor:styled_str.attributes];
+			NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
+			[attributedString appendAttributedString:newString];
 		}
-		
-		if ((style & maf::StyledString::italic_mask).any()) {
-			[attributes addEntriesFromDictionary:[InterfaceGlue italicAttributes]];
-		}
-
-		if ((style & maf::StyledString::bold_mask).any()) {
-			[attributes addEntriesFromDictionary:[InterfaceGlue boldAttributes]];
-		}
-		
-		if ((style & maf::StyledString::help_text_mask).any()) {
-			[attributes addEntriesFromDictionary:[InterfaceGlue helpTextAttributes]];
-		}
-		
-		if ((style & maf::StyledString::monospace_mask).any()) {
-			[attributes addEntriesFromDictionary:[InterfaceGlue monospaceAttributes]];
-		}
-		
-		NSAttributedString *newString = [[NSAttributedString alloc] initWithString:string attributes:attributes];
-		[attributedString appendAttributedString:newString];
 	}
 	
 	self.output.textStorage.attributedString = attributedString;
@@ -129,7 +115,7 @@
 	
 	for (auto & styled_str : _console.error_message()) {
 		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
-		auto style = styled_str.style;
+		auto attributes = styled_str.attributes;
 		
 		// Strip whitespace from front if last style was "title".
 		if (clearWhitespaceFromFront) {
@@ -143,10 +129,10 @@
 			clearWhitespaceFromFront = false;
 		}
 		
-		if ((style & maf::StyledString::title_mask).any()) {
+		if (attributes.semantics == maf::StyledString::attributes_t::semantics_option::title) {
 			alert.messageText = string;
 			clearWhitespaceFromFront = true;
-		} else if ((style & maf::StyledString::monospace_mask).any()) {
+		} else if (attributes.typeface == maf::StyledString::attributes_t::typeface_option::monospace) {
 			[informativeText appendString:@"\""];
 			[informativeText appendString:string];
 			[informativeText appendString:@"\""];
@@ -159,29 +145,87 @@
 	[alert runModal];
 }
 
-+ (NSDictionary *)defaultAttributes {
-	return @{NSFontAttributeName: [NSFont fontWithName:@"Helvetica" size:14]};
++ (NSFont *)fontFor:(maf::StyledString::attributes_t)attributes {
+	if (attributes.semantics == semantics_option::flavour_text) {
+		attributes.style = style_option::italic;
+		attributes.typeface = typeface_option::serif;
+	}
+
+	NSString *fontName;
+
+	switch (attributes.typeface) {
+	case typeface_option::sans_serif:
+		if (attributes.style == style_option::normal
+			&& attributes.weight == weight_option::normal)
+		{
+			fontName = @"Helvetica";
+		}
+		else if (attributes.style == style_option::italic
+				 && attributes.weight == weight_option::normal)
+		{
+			fontName = @"Helvetica Oblique";
+		}
+		else if (attributes.style == style_option::normal
+				 && attributes.weight == weight_option::bold)
+		{
+			fontName = @"Helvetica Bold";
+		}
+		else /* if (attributes.style == style_option::italic
+				 && attributes.weight == weight_option::bold) */
+		{
+			fontName = @"Helvetica Bold Oblique";
+		}
+		break;
+
+	case typeface_option::serif:
+		if (attributes.style == style_option::normal
+			&& attributes.weight == weight_option::normal)
+		{
+			fontName = @"Times New Roman";
+		}
+		else if (attributes.style == style_option::italic
+				 && attributes.weight == weight_option::normal)
+		{
+			fontName = @"Times New Roman Italic";
+		}
+		else if (attributes.style == style_option::normal
+				 && attributes.weight == weight_option::bold)
+		{
+			fontName = @"Times New Roman Bold";
+		}
+		else /* if (attributes.style == style_option::italic
+				 && attributes.weight == weight_option::bold) */
+		{
+			fontName = @"Times New Roman Bold Italic";
+		}
+		break;
+
+	case typeface_option::monospace:
+		fontName = @"Andale Mono";
+		break;
+	}
+
+	return [NSFont fontWithName:fontName size:14];
 }
 
-+ (NSDictionary *)italicAttributes {
-	NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-	paragraphStyle.alignment = NSTextAlignmentCenter;
-	return @{NSFontAttributeName: [NSFont fontWithName:@"Times New Roman Italic" size:14],
-			 NSParagraphStyleAttributeName: paragraphStyle};
-}
++ (NSDictionary *)attributesFor:(maf::StyledString::attributes_t)attributes {
+	NSFont *font = [InterfaceGlue fontFor:attributes];
 
-+ (NSDictionary *)boldAttributes {
-	return @{NSFontAttributeName: [NSFont fontWithName:@"Helvetica Bold" size:14]};
-}
-
-+ (NSDictionary *)helpTextAttributes {
-	return @{NSForegroundColorAttributeName: [NSColor colorWithRed:0 green:0.42 blue:0.65 alpha:1]};
-}
-
-+ (NSDictionary *)monospaceAttributes {
-	return @{NSFontAttributeName: [NSFont fontWithName:@"Andale Mono" size:14],
-			 NSForegroundColorAttributeName: [NSColor colorWithWhite:0.2 alpha:1],
-			 NSBackgroundColorAttributeName: [NSColor colorWithWhite:0.93 alpha:1]};
+	if (attributes.typeface == maf::StyledString::attributes_t::typeface_option::monospace) {
+		return @{NSFontAttributeName: font,
+				 NSForegroundColorAttributeName: [NSColor colorWithWhite:0.2 alpha:1],
+				 NSBackgroundColorAttributeName: [NSColor colorWithWhite:0.93 alpha:1]};
+	} else if (attributes.semantics == maf::StyledString::attributes_t::semantics_option::help_text) {
+		return @{NSFontAttributeName: font,
+				 NSForegroundColorAttributeName: [NSColor colorWithRed:0 green:0.42 blue:0.65 alpha:1]};
+	} else if (attributes.semantics == maf::StyledString::attributes_t::semantics_option::flavour_text) {
+		NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+		paragraphStyle.alignment = NSTextAlignmentCenter;
+		return @{NSFontAttributeName: font,
+				 NSParagraphStyleAttributeName: paragraphStyle};
+	} else {
+		return @{NSFontAttributeName: font};
+	}
 }
 
 @end
