@@ -4,9 +4,9 @@
 *Ability:* Duel.
 *To win:* Defeat someone in a duel.
 
-*Description:* The Musketeer is a freelance role, whose goal is to win a duel. At any point during a town meeting, the Musketeer can challenge another player to a duel. Note that *the Musketeer can only participate in a single duel,* so use this ability wisely. The loser of the duel is killed. If the Musketeer wins the duel, then he or she immediately leaves the game.
+*Description:* The Musketeer is a freelance role, whose goal is to win a duel. At any point during a town meeting, the Musketeer can challenge another player to a duel. Note that _the Musketeer can only participate in a single duel,_ so use this ability wisely. The loser of the duel is killed. If the Musketeer wins the duel, then he or she immediately leaves the game.
 
-The winner of the duel is chosen at random; however, *the other player's role has a significant impact on how likely the Musketeer is to win.* In general, the Musketeer is more likely to win against "safe" roles such as the Doctor and the Coward, and less likely to win against "dangerous" roles such as the Serial Killer and the Vigilante.
+The winner of the duel is chosen at random; however, _the other player's role has a significant impact on how likely the Musketeer is to win._ In general, the Musketeer is more likely to win against "safe" roles such as the Doctor and the Coward, and less likely to win against "dangerous" roles such as the Serial Killer and the Vigilante.
 
 *Notes:*
 - The game can end before the Musketeer has been involved in a duel, in which case the Musketeer loses. Make sure not to wait too long before using your ability!
