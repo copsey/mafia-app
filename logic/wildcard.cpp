@@ -5,7 +5,6 @@
 #include "../util/random.hpp"
 #include "../util/ref.hpp"
 
-#include "../common/stdlib.h"
 #include "wildcard.hpp"
 #include "role_ref.hpp"
 #include "rulebook.hpp"
@@ -23,14 +22,14 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with a negative role weight.";
 
-		throw invalid_argument{err.str()};
+		throw std::invalid_argument{err.str()};
 	}
 
 	if (std::all_of(util::item_begin(weights), util::item_end(weights), is_zero)) {
 		std::ostringstream err{};
 		err << "A wildcard with alias " << alias() << " was created with every role weight set to zero.";
 
-		throw invalid_argument{err.str()};
+		throw std::invalid_argument{err.str()};
 	}
 }
 
@@ -46,9 +45,9 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 		return std::none_of(rulebook.roles_begin(), rulebook.roles_end(), wrong_alignment);
 	} else {
-		vector<double> probabilities = _dist.probabilities();
+		std::vector<double> probabilities = _dist.probabilities();
 
-		for (size i{0}; i < _role_ids.size(); ++i) {
+		for (std::size_t i{0}; i < _role_ids.size(); ++i) {
 			auto& r = rulebook.look_up(_role_ids[i]);
 			if (r.alignment() != alignment) {
 				double p = probabilities[i];
@@ -62,8 +61,8 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 	if (uses_evaluator()) {
-		vector<util::ref<const Role>> role_refs{};
-		vector<double> weights{};
+		std::vector<util::ref<const Role>> role_refs{};
+		std::vector<double> weights{};
 
 		auto evaluate_role = [&](const Role & role) {
 			double w = _evaluator(role);
@@ -96,7 +95,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 			throw std::logic_error{err.str()};
 		}
 
-		std::discrete_distribution<size> dist{weights.begin(), weights.end()};
+		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
 		return *role_refs[dist(util::random_engine)];
 	} else {
 		return rulebook.look_up(_role_ids[_dist(util::random_engine)]);

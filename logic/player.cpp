@@ -1,4 +1,3 @@
-#include "../common/stdlib.h"
 #include "player.hpp"
 
 
@@ -49,7 +48,7 @@ void maf::Player::refresh() {
 	_on_drugs = false;
 }
 
-const vector<maf::Ability> & maf::Player::compulsory_abilities() const {
+const std::vector<maf::Ability> & maf::Player::compulsory_abilities() const {
 	return _compulsory_abilities;
 }
 

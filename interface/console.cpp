@@ -12,7 +12,6 @@
 #include "command.hpp"
 #include "console.hpp"
 #include "names.hpp"
-#include "../common/stdlib.h"
 
 const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
 	maf::Console::Game_parameters{
@@ -39,7 +38,7 @@ maf::Console::Console() {
 	refresh_output();
 }
 
-bool maf::Console::do_commands(const vector<string_view> & commands) {
+bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	std::stringstream err{}; // Write an error here if something goes wrong.
 	TextParams err_params = {}; // (include parameters for error message here)
 
@@ -61,7 +60,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 				auto& role = active_rulebook().look_up(r_ref);
 				store_help_screen(new Role_Info_Screen(role));
 			} catch (std::out_of_range) {
-				throw Rulebook::Missing_role_alias{string(commands[2])};
+				throw Rulebook::Missing_role_alias{std::string(commands[2])};
 			}
 		}
 		else if (commands_match(commands, {"list", "r"})) {
@@ -485,7 +484,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 	}
 }
 
-bool maf::Console::input(string_view input) {
+bool maf::Console::input(std::string_view input) {
 	auto v = parse_input(input);
 	return do_commands(v);
 }
@@ -635,9 +634,9 @@ const maf::Rulebook & maf::Console::active_rulebook() const {
 	}
 }
 
-void maf::Console::begin_game(const vector<string> &pl_names,
-                              const vector<Role::ID> &r_ids,
-                              const vector<Wildcard::ID> &w_ids,
+void maf::Console::begin_game(const std::vector<std::string> &pl_names,
+                              const std::vector<Role::ID> &r_ids,
+                              const std::vector<Wildcard::ID> &w_ids,
                               const Rulebook &rulebook)
 {
 	if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};

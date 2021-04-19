@@ -2,7 +2,6 @@
 
 #include "../util/algorithm.hpp"
 
-#include "../common/stdlib.h"
 #include "help_screens.hpp"
 #include "names.hpp"
 
@@ -33,7 +32,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 	params["show_mafia"] = (_filter_alignment == Filter_Alignment::mafia);
 	params["show_freelance"] = (_filter_alignment == Filter_Alignment::freelance);
 
-	vector<util::ref<const Role>> filtered_roles;
+	std::vector<util::ref<const Role>> filtered_roles;
 
 	switch (_filter_alignment) {
 	case Filter_Alignment::all:

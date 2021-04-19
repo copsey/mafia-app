@@ -4,7 +4,6 @@
 #include "console.hpp"
 #include "events.hpp"
 #include "names.hpp"
-#include "../common/stdlib.h"
 
 void maf::Event::write(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
@@ -22,7 +21,7 @@ void maf::Event::write(std::ostream & output) const {
 	}
 }
 
-void maf::Event::summarise(ostream & output) const {
+void maf::Event::summarise(std::ostream & output) const {
 	// FIXME: This is horrendously fragile.
 	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/summaries/";
 	fname += this->id();
@@ -42,7 +41,7 @@ std::string maf::Event::escaped_name(Role const& role) const {
 	return escaped(full_name(role));
 }
 
-void maf::Player_given_initial_role::do_commands(const vector<string_view> & commands) {
+void maf::Player_given_initial_role::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		if (_is_private) {
 			game_log().advance();
@@ -67,7 +66,7 @@ void maf::Player_given_initial_role::set_params(TextParams& params) const {
 	}
 }
 
-void maf::Time_changed::do_commands(const vector<string_view> & commands) {
+void maf::Time_changed::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	}
@@ -82,7 +81,7 @@ void maf::Time_changed::set_params(TextParams& params) const {
 	params["nighttime"] = (time == Time::night);
 }
 
-void maf::Obituary::do_commands(const vector<string_view> & commands) {
+void maf::Obituary::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		if (_deaths_index + 1 < _deaths.size()) {
 			++_deaths_index;
@@ -119,7 +118,7 @@ void maf::Obituary::set_params(TextParams& params) const {
 	params["deaths"] = std::move(deaths);
 }
 
-void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
+void maf::Town_meeting::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 
@@ -222,7 +221,7 @@ void maf::Town_meeting::set_params(TextParams & params) const {
 	params["townsfolk"] = std::move(townsfolk);
 }
 
-void maf::Player_kicked::do_commands(const vector<string_view> &commands) {
+void maf::Player_kicked::do_commands(const std::vector<std::string_view> &commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	}
@@ -236,7 +235,7 @@ void maf::Player_kicked::set_params(TextParams & params) const {
 	params["role"] = escaped(full_name(player->role()));
 }
 
-void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
+void maf::Lynch_result::do_commands(const std::vector<std::string_view> &commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	}
@@ -259,7 +258,7 @@ void maf::Lynch_result::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Duel_result::do_commands(const vector<string_view> & commands) {
+void maf::Duel_result::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	}
@@ -277,7 +276,7 @@ void maf::Duel_result::set_params(TextParams & params) const {
 	params["winner.fled"] = !winner->is_present();
 }
 
-void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
+void maf::Choose_fake_role::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -301,7 +300,7 @@ void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
 				glog.choose_fake_role(_player->id(), fake_role.id());
 				_fake_role = _player->fake_role();
 			} catch (std::out_of_range) {
-				throw Rulebook::Missing_role_alias{string(commands[2])};
+				throw Rulebook::Missing_role_alias{std::string(commands[2])};
 			}
 		} else {
 			throw Bad_commands{};
@@ -320,7 +319,7 @@ void maf::Choose_fake_role::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
+void maf::Mafia_meeting::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -379,7 +378,7 @@ void maf::Mafia_meeting::set_params(TextParams& params) const {
 	}
 }
 
-void maf::Kill_use::do_commands(const vector<string_view> &commands) {
+void maf::Kill_use::do_commands(const std::vector<std::string_view> &commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -409,7 +408,7 @@ void maf::Kill_use::set_params(TextParams& params) const {
 	params["finished"] = _go_to_sleep;
 }
 
-void maf::Heal_use::do_commands(const vector<string_view> & commands) {
+void maf::Heal_use::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -439,7 +438,7 @@ void maf::Heal_use::set_params(TextParams& params) const {
 	params["finished"] = _go_to_sleep;
 }
 
-void maf::Investigate_use::do_commands(const vector<string_view> & commands) {
+void maf::Investigate_use::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -469,7 +468,7 @@ void maf::Investigate_use::set_params(TextParams& params) const {
 	params["finished"] = _go_to_sleep;
 }
 
-void maf::Peddle_use::do_commands(const vector<string_view> & commands) {
+void maf::Peddle_use::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -499,7 +498,7 @@ void maf::Peddle_use::set_params(TextParams& params) const {
 	params["finished"] = _go_to_sleep;
 }
 
-void maf::Boring_night::do_commands(const vector<string_view> & commands) {
+void maf::Boring_night::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	}
@@ -511,7 +510,7 @@ void maf::Boring_night::do_commands(const vector<string_view> & commands) {
 void maf::Boring_night::set_params(TextParams& params) const
 { }
 
-void maf::Investigation_result::do_commands(const vector<string_view> & commands) {
+void maf::Investigation_result::do_commands(const std::vector<std::string_view> & commands) {
 	auto & glog = game_log();
 
 	if (_go_to_sleep) {
@@ -538,7 +537,7 @@ void maf::Investigation_result::set_params(TextParams& params) const {
 	params["target.suspicious"] = investigation.result();
 }
 
-void maf::Game_ended::do_commands(const vector<string_view> & commands) {
+void maf::Game_ended::do_commands(const std::vector<std::string_view> & commands) {
 	throw Bad_commands{};
 }
 

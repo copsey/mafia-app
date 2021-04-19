@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "../common/stdlib.h"
 #include "game.hpp"
 #include "rulebook.hpp"
 
@@ -35,14 +34,14 @@ maf::Role const& maf::RoleRef::resolve(Rulebook const& rulebook)
 			auto p = std::find_if(rulebook.roles_begin(), rulebook.roles_end(),
 			                      [&](auto& role){ return role.id() == x; });
 			if (p == rulebook.roles_end()) {
-				throw out_of_range("role ref could not be resolved, when searching by ID");
+				throw std::out_of_range("role ref could not be resolved, when searching by ID");
 			}
 			return p;
 		} else if constexpr(std::is_same_v<T, std::string_view>) {
 			auto p = std::find_if(rulebook.roles_begin(), rulebook.roles_end(),
 			                      [&](auto& role){ return role.alias() == x; });
 			if (p == rulebook.roles_end()) {
-				throw out_of_range("role ref could not be resolved, when searching by alias");
+				throw std::out_of_range("role ref could not be resolved, when searching by alias");
 			}
 			return p;
 		}

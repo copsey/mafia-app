@@ -1,7 +1,6 @@
 #include "../util/algorithm.hpp"
 #include "../util/random.hpp"
 
-#include "../common/stdlib.h"
 #include "game.hpp"
 
 using maf::util::any_of;
@@ -10,14 +9,14 @@ using maf::util::none_of;
 using WC = maf::Win_condition;
 
 
-maf::Game::Game(const vector<Role::ID> & role_ids,
-                const vector<Wildcard::ID> & wildcard_ids,
+maf::Game::Game(const std::vector<Role::ID> & role_ids,
+                const std::vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
 	: _rulebook{rulebook}
 {
-	using Card = pair<util::ref<const Role>, const Wildcard*>;
+	using Card = std::pair<util::ref<const Role>, const Wildcard*>;
 
-	vector<Card> cards{};
+	std::vector<Card> cards{};
 
 	for (Role::ID r_id : role_ids) {
 		cards.emplace_back(_rulebook.look_up(r_id), nullptr);
@@ -58,23 +57,23 @@ maf::Role const& maf::Game::look_up(RoleRef r_ref) const
 	return rulebook().look_up(r_ref);
 }
 
-const vector<maf::Player> & maf::Game::players() const
+const std::vector<maf::Player> & maf::Game::players() const
 {
 	return _players;
 }
 
-vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
+std::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
 {
-	vector<util::ref<const Player>> vec{};
+	std::vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present()) vec.emplace_back(pl);
 	}
 	return vec;
 }
 
-vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
+std::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
 {
-	vector<util::ref<const Player>> vec{};
+	std::vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present() && pl.alignment() == alignment) {
 			vec.emplace_back(pl);
@@ -83,12 +82,12 @@ vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment
 	return vec;
 }
 
-size maf::Game::num_players_left() const
+std::size_t maf::Game::num_players_left() const
 {
 	return util::count_if(_players, std::mem_fn(&Player::is_present));
 }
 
-size maf::Game::num_players_left(Alignment alignment) const
+std::size_t maf::Game::num_players_left(Alignment alignment) const
 {
 	auto pred = [alignment](Player const& pl) {
 		return pl.is_present() && pl.alignment() == alignment;
@@ -134,8 +133,8 @@ void maf::Game::kick_player(Player::ID id)
 
 const maf::Player* maf::Game::next_lynch_victim() const
 {
-	map<const Player*, size> votes_per_player{};
-	size total_votes = 0;
+	std::map<const Player*, std::size_t> votes_per_player{};
+	std::size_t total_votes = 0;
 
 	for (const Player& voter : _players) {
 		if (voter.is_present() && voter.has_lynch_vote()) {
@@ -144,7 +143,7 @@ const maf::Player* maf::Game::next_lynch_victim() const
 		}
 	}
 
-	auto less_votes = [](const pair<const Player*, size>& p1, const pair<const Player*, size>& p2) {
+	auto less_votes = [](auto&& p1, auto&& p2) {
 		return p1.second < p2.second;
 	};
 
@@ -607,7 +606,7 @@ bool maf::Game::try_to_end_night()
 	}
 
 	for (Player* haunter: _pending_haunters) {
-		vector<Player*> possible_victims{};
+		std::vector<Player*> possible_victims{};
 		for (Player& player: _players) {
 			if (player.is_present() && player.lynch_vote() == haunter)   {
 				possible_victims.push_back(&player);
@@ -647,9 +646,9 @@ bool maf::Game::try_to_end()
 {
 	if (_has_ended) return true;
 
-	size num_players_left = 0;
-	size num_village_left = 0;
-	size num_mafia_left = 0;
+	std::size_t num_players_left = 0;
+	std::size_t num_village_left = 0;
+	std::size_t num_mafia_left = 0;
 
 	bool check_for_village_eliminated = false;
 	bool check_for_mafia_eliminated = false;

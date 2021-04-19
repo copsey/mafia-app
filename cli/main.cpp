@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 
-#include "../common/stdlib.h"
 #include "../interface/console.hpp"
 
 
@@ -48,7 +47,7 @@ int main() {
    for (bool quit = false; !quit; ) {
       std::cout << ">> ";
 
-      string input;
+      std::string input;
       std::getline(std::cin, input);
 
       std::cout << '\n';
