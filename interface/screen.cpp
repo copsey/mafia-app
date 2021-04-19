@@ -28,7 +28,7 @@ std::string maf::Screen::load_txt() const {
 		contents += escaped(this->id());
 		contents += "@ screen.\n\nIt should be located at @";
 		contents += escaped(path);
-		contents += "@\n\n%Enter @ok@ to return to the previous screen.";
+		contents += "@.\n\n%Enter @ok@ to return to the previous screen.";
 	}
 
 	return contents;

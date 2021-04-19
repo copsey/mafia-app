@@ -1,8 +1,7 @@
-CXXFLAGS=-std=c++1z
+CXXFLAGS=-std=c++17
 
 src = \
 	cli/main.cpp \
-	interface/command.cpp \
 	interface/console.cpp \
 	interface/events.cpp \
 	interface/game_log.cpp \
@@ -11,10 +10,10 @@ src = \
 	interface/questions.cpp \
 	interface/screen.cpp \
 	interface/setup_screen.cpp \
-	interface/styled_string.cpp \
 	logic/game.cpp \
 	logic/player.cpp \
 	logic/role.cpp \
+	logic/role_ref.cpp \
 	logic/rulebook.cpp \
 	logic/wildcard.cpp \
 
