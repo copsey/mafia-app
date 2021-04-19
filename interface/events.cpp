@@ -5,31 +5,20 @@
 #include "events.hpp"
 #include "names.hpp"
 
-void maf::Event::write(std::ostream & output) const {
+void maf::Event::summarise(std::string & output) const {
 	// FIXME: This is horrendously fragile.
-	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/";
+	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
+
+	fname += this->txt_subdir();
+	fname += "summaries/";
 	fname += this->id();
 	fname += ".txt";
 
 	auto input = std::ifstream{fname};
-	if (input) {
-		output << input.rdbuf();
-	} else {
-		output << "=Error=\n\nERROR: No text found for the \"";
-		output << this->id();
-		output << "\" event.";
-	}
-}
 
-void maf::Event::summarise(std::ostream & output) const {
-	// FIXME: This is horrendously fragile.
-	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/txt/events/summaries/";
-	fname += this->id();
-	fname += ".txt";
-
-	auto input = std::ifstream{fname};
 	if (input) {
-		output << input.rdbuf();
+		std::istreambuf_iterator<char> input_iter{input}, eos{};
+		output.append(input_iter, eos);
 	}
 }
 

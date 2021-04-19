@@ -6,23 +6,6 @@
 #include "names.hpp"
 
 
-void maf::Help_Screen::write(std::ostream & output) const {
-	// FIXME: This is horrendously fragile.
-	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
-	fname += this->txt_loc();
-	fname += this->id();
-	fname += ".txt";
-
-	auto input = std::ifstream{fname};
-	if (input) {
-		output << input.rdbuf();
-	} else {
-		output << "=Missing Screen=\n\nERROR: No text found for the \"";
-		output << this->id();
-		output << "\" help screen.\n\n%Enter @ok@ to return to the previous screen.";
-	}
-}
-
 void maf::Role_Info_Screen::set_params(TextParams& params) const {
 	params["role"] = escaped(full_name(*role));
 }

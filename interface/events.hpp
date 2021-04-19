@@ -1,18 +1,17 @@
 #ifndef MAFIA_EVENT_H
 #define MAFIA_EVENT_H
 
-#include <ostream>
-#include <string>
-
 #include "../util/ref.hpp"
 
-#include "format.hpp"
 #include "../logic/logic.hpp"
+
+#include "format.hpp"
+#include "screen.hpp"
 
 namespace maf {
 	struct Game_log;
 
-	struct Event {
+	struct Event: Screen {
 		// Signifies that an event failed to process a set of commands.
 		struct Bad_commands { };
 
@@ -24,17 +23,11 @@ namespace maf {
 		: _game_log_ref{game_log}
 		{ }
 
-		virtual ~Event() = default;
-
-		// A string representing the event.
-		// Used when loading text from external files.
-		virtual std::string_view id() const = 0;
-
 		/// Get this event's stored game log.
-		Game_log & game_log() const 
-		{
-			return *_game_log_ref;
-		}
+		Game_log & game_log() const { return *_game_log_ref; }
+
+		std::string_view txt_subdir() const override
+		{ return "txt/events/"; }
 
 		// Handles the given commands, acting on this event's game log as
 		// required.
@@ -42,19 +35,9 @@ namespace maf {
 		// Throws an exception if the commands couldn't be handled.
 		virtual void do_commands(const std::vector<std::string_view> & commands) = 0;
 
-		// Configure the text parameters for this event.
-		// These are used to generate text output.
-		virtual void set_params(TextParams & params) const = 0;
-
-		// Write details of the event to `output`.
-		// This text should then be preprocessed.
-		void write(std::ostream & output) const;
-
-		// Writes a summary of the event to `output`.
-		// This text should then be preprocessed.
-		//
-		// By default, nothing is written at all.
-		void summarise(std::ostream & output) const;
+		// Write a summary of the event to `output`. This should be followed
+		// by calling `preprocess_text` with the screen's parameters.
+		void summarise(std::string & output) const;
 
 		std::string escaped_name(Player const& player) const;
 
@@ -73,9 +56,8 @@ namespace maf {
 			: Event{game_log}, _p{&player}, _r{&role}, _w{wildcard}
 		{ }
 
-		std::string_view id() const override {
-			return "player-given-role";
-		}
+		std::string_view id() const final
+		{ return "player-given-role"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -93,9 +75,8 @@ namespace maf {
 			: Event{game_log}, date{d}, time{t}
 		{ }
 
-		std::string_view id() const override {
-			return "time-changed";
-		}
+		std::string_view id() const final
+		{ return "time-changed"; }
 
 		Date date;
 		Time time;
@@ -110,9 +91,8 @@ namespace maf {
 			: Event{game_log}, _deaths{deaths}
 		{ }
 
-		std::string_view id() const override {
-			return "obituary";
-		}
+		std::string_view id() const final
+		{ return "obituary"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -141,9 +121,8 @@ namespace maf {
 			_recent_vote_target{recent_lynch_vote_target}
 		{ }
 
-		std::string_view id() const override {
-			return "town-meeting";
-		}
+		std::string_view id() const final
+		{ return "town-meeting"; }
 
 		void do_commands(const std::vector<std::string_view>& commands) override;
 		void set_params(TextParams & params) const override;
@@ -163,9 +142,8 @@ namespace maf {
 			: Event{game_log}, player{player}, player_role{player_role}
 		{ }
 
-		std::string_view id() const override {
-			return "player-kicked";
-		}
+		std::string_view id() const final
+		{ return "player-kicked"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -180,9 +158,8 @@ namespace maf {
 			: Event{game_log}, victim{victim}, victim_role{victim_role}
 		{ }
 
-		std::string_view id() const override {
-			return "lynch-result";
-		}
+		std::string_view id() const final
+		{ return "lynch-result"; }
 
 		// The player who was lynched, or nullptr if nobody was lynched.
 		const Player *victim;
@@ -200,9 +177,8 @@ namespace maf {
 		: Event{game_log}, caster{caster}, target{target}, winner{winner}, loser{loser}
 		{ }
 
-		std::string_view id() const override {
-			return "duel-result";
-		}
+		std::string_view id() const final
+		{ return "duel-result"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -219,11 +195,11 @@ namespace maf {
 			: Event{game_log}, _player{&player}
 		{ }
 
-		std::string_view id() const override {
-			return "choose-fake-role";
-		}
+		std::string_view id() const final
+		{ return "choose-fake-role"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
+
 		void set_params(TextParams & params) const override;
 
 	private:
@@ -240,9 +216,8 @@ namespace maf {
 			: Event{game_log}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
 		{ }
 
-		std::string_view id() const override {
-			return "mafia-meeting";
-		}
+		std::string_view id() const final
+		{ return "mafia-meeting"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -259,9 +234,8 @@ namespace maf {
 			: Event{game_log}, _caster{&caster}
 		{ }
 
-		std::string_view id() const override {
-			return "use-kill";
-		}
+		std::string_view id() const final
+		{ return "use-kill"; }
 
 		void do_commands(const std::vector<std::string_view>& commands) override;
 		void set_params(TextParams & params) const override;
@@ -277,9 +251,8 @@ namespace maf {
 			: Event{game_log}, _caster{&caster}
 		{ }
 
-		std::string_view id() const override {
-			return "use-heal";
-		}
+		std::string_view id() const final
+		{ return "use-heal"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -295,9 +268,8 @@ namespace maf {
 			: Event{game_log}, _caster{&caster}
 		{ }
 
-		std::string_view id() const override {
-			return "use-investigate";
-		}
+		std::string_view id() const final
+		{ return "use-investigate"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -313,9 +285,8 @@ namespace maf {
 			: Event{game_log}, _caster{&caster}
 		{ }
 
-		std::string_view id() const override {
-			return "use-peddle";
-		}
+		std::string_view id() const final
+		{ return "use-peddle"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -331,9 +302,8 @@ namespace maf {
 			: Event{game_log}
 		{ }
 
-		std::string_view id() const override {
-			return "boring-night";
-		}
+		std::string_view id() const final
+		{ return "boring-night"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -345,9 +315,8 @@ namespace maf {
 			: Event{game_log}, investigation{investigation}
 		{ }
 
-		std::string_view id() const override {
-			return "investigation-result";
-		}
+		std::string_view id() const final
+		{ return "investigation-result"; }
 
 		Investigation investigation;
 
@@ -364,9 +333,8 @@ namespace maf {
 			: Event{game_log}
 		{ }
 
-		std::string_view id() const override {
-			return "game-ended";
-		}
+		std::string_view id() const final
+		{ return "game-ended"; }
 
 		void do_commands(const std::vector<std::string_view> & commands) override;
 		void set_params(TextParams & params) const override;

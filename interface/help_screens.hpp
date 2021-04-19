@@ -10,28 +10,12 @@
 
 #include "events.hpp"
 #include "game_log.hpp"
+#include "screen.hpp"
 
 namespace maf {
-	struct Help_Screen {
-		virtual ~Help_Screen() = default;
-
-		// A string representing the help screen.
-		// Used when loading text from external files.
-		virtual std::string_view id() const = 0;
-
-		// A string indicating where in the file system the screen's contents
-		// can be found. Defaults to "txt/help/".
-		virtual std::string_view txt_loc() const { return "txt/help/"; }
-
-		// Fill `params` with the text parameters for this help screen.
-		// These are used to generate text output.
-		//
-		// By default, does nothing.
-		virtual void set_params(TextParams & params) const { };
-
-		// Write the help screen to `output`.
-		// This text should then be preprocessed.
-		void write(std::ostream & output) const;
+	struct Help_Screen: Screen {
+		std::string_view txt_subdir() const override
+		{ return "txt/help/"; }
 	};
 
 
@@ -40,9 +24,8 @@ namespace maf {
 
 		util::ref<const Event> event;
 
-		std::string_view id() const override {
-			return event->id();
-		}
+		std::string_view id() const final
+		{ return event->id(); }
 	};
 
 
@@ -51,12 +34,11 @@ namespace maf {
 
 		util::ref<const Role> role;
 
-		std::string_view id() const override {
-			return alias(role->id());
-		}
+		std::string_view id() const final
+		{ return alias(role->id()); }
 
-		// Override the text location to "txt/help/roles/".
-		std::string_view txt_loc() const override { return "txt/help/roles/"; }
+		std::string_view txt_subdir() const override
+		{ return "txt/help/roles/"; }
 
 		void set_params(TextParams & params) const override;
 	};
@@ -71,7 +53,8 @@ namespace maf {
 		: _rulebook{rulebook}, _filter_alignment{alignment}
 		{ }
 
-		std::string_view id() const override { return "list-roles"; }
+		std::string_view id() const final
+		{ return "list-roles"; }
 
 		void set_params(TextParams & params) const override;
 
@@ -82,7 +65,8 @@ namespace maf {
 
 
 	struct Setup_Help_Screen: Help_Screen {
-		std::string_view id() const override { return "setup"; }
+		std::string_view id() const final
+		{ return "setup"; }
 	};
 
 
@@ -91,7 +75,8 @@ namespace maf {
 		: _player_ref{player}, _game_log_ref{game_log}
 		{ }
 
-		std::string_view id() const override { return "player-info"; }
+		std::string_view id() const final
+		{ return "player-info"; }
 
 		void set_params(TextParams & params) const override;
 

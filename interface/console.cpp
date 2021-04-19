@@ -493,21 +493,9 @@ maf::StyledText const& maf::Console::output() const {
 	return _output;
 }
 
-void maf::Console::read_output(std::string_view raw_output, TextParams const& params)
-{
-	std::string preprocessed_output;
-	
+void maf::Console::read_output(std::string_view contents) {
 	try {
-		preprocessed_output = preprocess_text(raw_output, params);
-		_output = format_text(preprocessed_output);
-	} catch (preprocess_text_error const& error) {
-		std::string msg = "ERROR: ";
-		error.write(msg);
-		msg += " in the following string:\n\n";
-		
-		_output.clear();
-		_output.emplace_back(msg, StyledString::Style{});
-		_output.emplace_back(std::string{error.input}, StyledString::monospace_mask);
+		_output = format_text(contents);
 	} catch (format_text_error const& error) {
 		std::string msg = "ERROR: ";
 		error.write(msg);
@@ -520,27 +508,26 @@ void maf::Console::read_output(std::string_view raw_output, TextParams const& pa
 }
 
 void maf::Console::refresh_output() {
-	std::stringstream ss;
-	TextParams params;
+	const Screen *current_screen = nullptr;
+	std::string str;
 
 	if (has_help_screen()) {
-		auto& screen = *_help_screen;
-		screen.write(ss);
-		screen.set_params(params);
+		current_screen = _help_screen.get();
 	} else if (has_question()) {
-		auto& screen = *_question;
-		screen.write(ss);
-		screen.set_params(params);
+		current_screen = _question.get();
 	} else if (has_game()) {
-		auto& screen = _game_log->current_event();
-		screen.write(ss);
-		screen.set_params(params);
-	} else {
-		auto& screen = _setup_screen;
-		screen.write(ss);
+		current_screen = &(_game_log->current_event());
 	}
 
-	read_output(ss.str(), params);
+	if (current_screen) {
+		current_screen->write(str);
+	} else {
+		std::stringstream ss;
+		_setup_screen.write(ss);
+		str = ss.str();
+	}
+
+	read_output(str);
 }
 
 maf::StyledText const& maf::Console::error_message() const

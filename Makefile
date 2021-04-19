@@ -9,6 +9,7 @@ src = \
 	interface/help_screens.cpp \
 	interface/names.cpp \
 	interface/questions.cpp \
+	interface/screen.cpp \
 	interface/setup_screen.cpp \
 	interface/styled_string.cpp \
 	logic/game.cpp \

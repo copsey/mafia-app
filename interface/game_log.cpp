@@ -79,18 +79,14 @@ void maf::Game_log::do_commands(const std::vector<std::string_view> & commands) 
 
 void maf::Game_log::write_transcript(std::ostream &os) const {
 	for (auto& event: _log) {
-		std::ostringstream str_stream;
+		std::string raw_text;
+		event->summarise(raw_text);
 
-		auto pre_pos = str_stream.tellp();
-		event->summarise(str_stream);
-		auto post_pos = str_stream.tellp();
-
-		if (pre_pos != post_pos) {
+		if (!raw_text.empty()) {
 			TextParams params;
 			event->set_params(params);
 
 			try {
-				auto raw_text = str_stream.str();
 				auto summary = preprocess_text(raw_text, params);
 				os << summary;
 
@@ -98,7 +94,7 @@ void maf::Game_log::write_transcript(std::ostream &os) const {
 					char last_char = summary.back();
 					if (last_char != '\n') os << '\n';
 				}
-			} catch (preprocess_text_error & err) {
+			} catch (preprocess_text_error & error) {
 				os << "ERROR: Unable to summarise \"";
 				os << event->id();
 				os << "\".\n";

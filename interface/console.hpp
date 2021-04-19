@@ -54,9 +54,9 @@ namespace maf {
 
 		// The most recent output. Never empty.
 		const StyledText & output() const;
-		// Read the tagged string `str`, updating the output to display
-		// the styled text obtained.
-		void read_output(std::string_view str, TextParams const& params);
+		// Format the given contents, updating the output to display the styled
+		// text obtained.
+		void read_output(std::string_view contents);
 		// Updates the output to display the appropriate screen.
 		void refresh_output();
 

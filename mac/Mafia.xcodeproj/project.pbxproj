@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0400AC8A262D7B9200FE59AB /* screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0400AC88262D770800FE59AB /* screen.cpp */; };
 		F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0621AF3B9DF00BF4992 /* AppDelegate.m */; };
 		F84FE0651AF3B9DF00BF4992 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0641AF3B9DF00BF4992 /* main.m */; };
 		F84FE0671AF3B9DF00BF4992 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F84FE0661AF3B9DF00BF4992 /* Images.xcassets */; };
@@ -28,6 +29,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0400AC87262D763800FE59AB /* screen.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = screen.hpp; sourceTree = "<group>"; };
+		0400AC88262D770800FE59AB /* screen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = screen.cpp; sourceTree = "<group>"; };
 		F809EE2C1FC1975B003348BC /* command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
 		F810404B1D49D9F9004E31CF /* time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = time.hpp; sourceTree = "<group>"; };
 		F811CB881B6AB07C002EF3E1 /* string.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
@@ -152,6 +155,8 @@
 				F880CA091B8A606300144257 /* questions.cpp */,
 				F88A4DF01B8C9D1D0033A040 /* setup_screen.hpp */,
 				F88A4DEF1B8C9D1D0033A040 /* setup_screen.cpp */,
+				0400AC87262D763800FE59AB /* screen.hpp */,
+				0400AC88262D770800FE59AB /* screen.cpp */,
 			);
 			name = interface;
 			path = ../interface;
@@ -269,6 +274,7 @@
 				F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */,
 				F8882E5B1B8CE4E6009166BB /* wildcard.cpp in Sources */,
 				F8BC030E234621A20009732C /* role_ref.cpp in Sources */,
+				0400AC8A262D7B9200FE59AB /* screen.cpp in Sources */,
 				F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */,
 				F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */,
 				F880CA051B89BEC600144257 /* help_screens.cpp in Sources */,
