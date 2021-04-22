@@ -43,8 +43,11 @@ void maf::Screen::write(std::string & output) const {
 	try {
 		output += preprocess_text(raw_txt, params);
 	} catch (preprocess_text_error const& error) {
+		std::string msg;
+		error.write(msg);
+
 		output += "=Error!=\n\nERROR: ";
-		error.write(output);
+		output += escaped(msg);
 		output += " in the following string:\n\n@";
 		output += escaped(error.input);
 	}
