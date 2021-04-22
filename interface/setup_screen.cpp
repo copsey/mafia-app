@@ -185,130 +185,60 @@ std::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
 void maf::Setup_screen::do_commands(const std::vector<std::string_view> & commands) {
 	if (commands_match(commands, {"add", "p", ""})) {
 		add_player(commands[2]);
-	}
-	else if (commands_match(commands, {"take", "p", ""})) {
+	} else if (commands_match(commands, {"take", "p", ""})) {
 		remove_player(commands[2]);
-	}
-	else if (commands_match(commands, {"clear", "p"})) {
+	} else if (commands_match(commands, {"clear", "p"})) {
 		clear_all_players();
-	}
-	else if (commands_match(commands, {"add", "r", ""})) {
+	} else if (commands_match(commands, {"add", "r", ""})) {
 		add_rolecard(commands[2]);
-	}
-	else if (commands_match(commands, {"take", "r", ""})) {
+	} else if (commands_match(commands, {"take", "r", ""})) {
 		remove_rolecard(commands[2]);
-	}
-	else if (commands_match(commands, {"clear", "r", ""})) {
+	} else if (commands_match(commands, {"clear", "r", ""})) {
 		clear_rolecards(commands[2]);
-	}
-	else if (commands_match(commands, {"clear", "r"})) {
+	} else if (commands_match(commands, {"clear", "r"})) {
 		clear_all_rolecards();
-	}
-	else if (commands_match(commands, {"add", "w", ""})) {
+	} else if (commands_match(commands, {"add", "w", ""})) {
 		add_wildcard(commands[2]);
-	}
-	else if (commands_match(commands, {"take", "w", ""})) {
+	} else if (commands_match(commands, {"take", "w", ""})) {
 		remove_wildcard(commands[2]);
-	}
-	else if (commands_match(commands, {"clear", "w", ""})) {
+	} else if (commands_match(commands, {"clear", "w", ""})) {
 		clear_wildcards(commands[2]);
-	}
-	else if (commands_match(commands, {"clear", "w"})) {
+	} else if (commands_match(commands, {"clear", "w"})) {
 		clear_all_wildcards();
-	}
-	else if (commands_match(commands, {"clear", "c"})) {
+	} else if (commands_match(commands, {"clear", "c"})) {
 		clear_all_cards();
-	}
-	else if (commands_match(commands, {"clear"})) {
+	} else if (commands_match(commands, {"clear"})) {
 		clear_all();
-	}
-	else {
+	} else {
 		throw Bad_commands{};
 	}
 }
 
-void maf::Setup_screen::write(std::ostream &os) const {
-	os << "=Setup=\n\n~Mafia: a game of deduction and deceit...~\n\nThis is where you can set up the next game to be played.\n\n";
+void maf::Setup_screen::set_params(TextParams & params) const {
+	std::vector<TextParams> players;
+	std::vector<TextParams> cards;
 
-	if (num_players() == 0) {
-		if (num_cards() == 0) {
-			os << "You haven't chosen any players or cards yet.";
-		} else {
-			os << "You haven't added any players yet.\n\nThe following cards will be used:\n";
-			write_cards_list(os);
-			if (num_cards() >= 3) {
-				os << "\n\nSo far, you have selected ";
-				os << num_cards();
-				os << " cards.";
-			}
-		}
-	} else {
-		if (num_cards() == 0) {
-			os << "The following players will participate:\n";
-			write_players_list(os);
-			os << "\n\n";
-			if (num_players() >= 3) {
-				os << "So far, you have selected ";
-				os << num_players();
-				os << " players. ";
-			}
-			os << "You haven't chosen any cards yet.";
-		} else {
-			os << "The following players will participate:\n";
-			write_players_list(os);
-
-			os << "\n\nThey will be assigned the following cards:\n";
-			write_cards_list(os);
-
-			os << "\n\nSo far, you have selected ";
-			os << num_players();
-			os << " player" << ((num_players() != 1) ? "s" : "");
-			os << " and ";
-			os << num_cards();
-			os << " card" << ((num_cards() != 1) ? "s" : "");
-			os << ".";
-		}
-	}
-	os << "\n\nTo see the commands which can be used on this screen, enter @help@.";
-}
-
-void maf::Setup_screen::write_players_list(std::ostream &os) const {
-	for (auto it = _player_names.begin(), end = _player_names.end(); ; ) {
-		os << "   " << *it;
-
-		if (++it == end) {
-			break;
-		} else {
-			os << '\n';
-		}
-	}
-}
-
-void maf::Setup_screen::write_cards_list(std::ostream &os) const {
-	bool write_nl{false};
-
-	for (const auto &p: _role_ids) {
-		Role::ID id{p.first};
-		std::size_t n{p.second};
-
-		if (n > 0) {
-			if (write_nl) os << '\n';
-			os << "   " << n << " x " << escaped(full_name(id));
-
-			write_nl = true;
-		}
+	for (auto&& player_name: _player_names) {
+		auto& subparams = players.emplace_back();
+		subparams["player"] = player_name;
 	}
 
-	/* FIXME: sort wildcards in some definite order (maybe natural Wildcard::ID order is fine?) */
-	for (const auto &p: _wildcard_ids) {
-		Wildcard::ID id{p.first};
-		std::size_t n{p.second};
-
-		if (n > 0) {
-			if (write_nl) os << '\n';
-			os << "   " << n << " x @" << escaped(alias(id)) << "@ wildcard";
-
-			write_nl = true;
-		}
+	for (auto&& [role_id, count]: _role_ids) {
+		auto& subparams = cards.emplace_back();
+		subparams["card"] = escaped(full_name(role_id));
+		subparams["count"] = static_cast<int>(count);
+		subparams["type"] = 1;
 	}
+
+	for (auto&& [wildcard_id, count]: _wildcard_ids) {
+		auto& subparams = cards.emplace_back();
+		subparams["card"] = escaped(alias(wildcard_id));
+		subparams["count"] = static_cast<int>(count);
+		subparams["type"] = 2;
+	}
+
+	params["players.size"] = static_cast<int>(players.size());
+	params["players"] = std::move(players);
+	params["cards.size"] = static_cast<int>(cards.size());
+	params["cards"] = std::move(cards);
 }

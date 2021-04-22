@@ -1,0 +1,41 @@
+=Setup=
+
+~Mafia: a game of deduction and deceit...~
+
+This is where you can set up the next game to be played.
+
+{!if players.size > 0}
+{!if cards.size > 0}
+The following players will participate:
+{!list players}
+ - {player}
+{!end}
+
+They will be assigned the following cards:
+{!list cards}
+ - {count} x {!if type = 1}{card}{!else}@{card}@ wildcard{!end}
+{!end}
+
+So far, you have chosen {players.size} {!if players.size = 1}player{!else}players{!end} and {cards.size} {!if cards.size = 1}card{!else}cards{!end}.
+{!else}
+The following players will participate:
+{!list players}
+ - {player}
+{!end}
+
+{!if players.size > 2}So far, you have chosen {players.size} players. {!end}You haven't chosen any cards yet.
+{!end}
+{!else}
+{!if cards.size > 0}
+The following cards will be used:
+{!list cards}
+ - {count} x {!if type = 1}{card}{!else}@{card}@ wildcard{!end}
+{!end}
+
+You haven't chosen any players yet.{!if cards.size > 2} So far, you have chosen {cards.size} cards.{!end}
+{!else}
+You haven't chosen any players or cards yet.
+{!end}
+{!end}
+
+%Enter @help@ to see the commands that can be used on this screen.

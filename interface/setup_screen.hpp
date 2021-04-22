@@ -9,12 +9,10 @@
 
 #include "game_log.hpp"
 #include "names.hpp"
+#include "screen.hpp"
 
 namespace maf {
-	// FIXME: Place Setup_screen into separate 'screen' child namespace
-	// of 'maf'.
-
-	struct Setup_screen {
+	struct Setup_screen: Screen {
 		// Signifies that the given name is invalid for a player.
 		struct Bad_player_name {
 			std::string name;
@@ -46,6 +44,8 @@ namespace maf {
 
 		// Signifies that a set of commands couldn't be interpreted.
 		struct Bad_commands { };
+
+		std::string_view id() const override { return "setup"; }
 
 		// The rulebook to be used in the pending game.
 		const Rulebook & rulebook() const;
@@ -109,12 +109,7 @@ namespace maf {
 		// Throws an exception if the commands couldn't be interpreted.
 		void do_commands(const std::vector<std::string_view> &commands);
 
-		// Writes the setup screen to os.
-		void write(std::ostream &os) const;
-		// Writes a list of the selected players to os.
-		void write_players_list(std::ostream &os) const;
-		// Writes a list of the selected cards to os.
-		void write_cards_list(std::ostream &os) const;
+		void set_params(TextParams & params) const override;
 
 	private:
 		Rulebook _rulebook{};

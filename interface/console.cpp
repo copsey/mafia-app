@@ -518,26 +518,19 @@ void maf::Console::refresh_output() {
 		current_screen = _question.get();
 	} else if (has_game()) {
 		current_screen = &(_game_log->current_event());
-	}
-
-	if (current_screen) {
-		current_screen->write(str);
 	} else {
-		std::stringstream ss;
-		_setup_screen.write(ss);
-		str = ss.str();
+		current_screen = &_setup_screen;
 	}
 
+	current_screen->write(str);
 	read_output(str);
 }
 
-maf::StyledText const& maf::Console::error_message() const
-{
+maf::StyledText const& maf::Console::error_message() const {
 	return _error_message;
 }
 
-void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams const& params)
-{
+void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams const& params) {
 	// TODO: Catch exceptions when preprocessing the text.
 	auto preprocessed_err_msg = preprocess_text(raw_err_msg, params);
 	
@@ -547,8 +540,7 @@ void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams c
 	_error_message = format_text(preprocessed_err_msg);
 }
 
-void maf::Console::clear_error_message()
-{
+void maf::Console::clear_error_message() {
 	_error_message.clear();
 }
 
