@@ -1,10 +1,14 @@
-Cheatsheet
-----------
+ Cheatsheet
+============
 
 Preprocessing:
-  {example}      -- substitute a string or number named 'example'
-  {!if p}        -- begin "if" block for boolean "p"
-  {!else_if q}   -- continue "if" block with another condition on boolean "q"
+  {example}      -- substitute a parameter named 'example'
+                 -- ... it must be either a string or a number
+  {!if p}        -- begin "if" block
+  {!if x < 5}    -- use a comparison instead of a boolean
+  {!if 5 > x}    -- ... each side can be either a parameter or a constant
+  {!if x = y}    -- ... it's also possible to check for equality
+  {!else_if q}   -- continue "if" block with another condition
   {!else}        -- continue "if" block with default path
   {!list stuff}  -- repeat the text in this block for all members of "stuff"
   {!end}         -- end previous block

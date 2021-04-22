@@ -2,7 +2,7 @@
 
 The game has ended!
 
-{!if any_winners}
+{!if winners.size > 0}
 The following players won:
 {!list winners}
  - {player}, the {role}
@@ -11,7 +11,7 @@ The following players won:
 Nobody won.
 {!end}
 
-{!if any_losers}
+{!if losers.size > 0}
 Commiserations go out to:
 {!list losers}
  - {player}, the {role}

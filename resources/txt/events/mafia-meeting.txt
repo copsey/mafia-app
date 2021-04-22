@@ -5,7 +5,7 @@
 
 Enter @ok@ when you are ready to continue.
 {!else_if first_meeting}
-{!if single_member}
+{!if mafia.size = 1}
 Seated alone at a polished walnut table is {player}.
 {!else}
 The mafia consists of:
@@ -16,7 +16,7 @@ The mafia consists of:
 
 There is not enough time left to organise a murder.
 {!else}
-{!if single_member}
+{!if mafia.size = 1}
 Seated alone at a polished walnut table is {player}.
 {!else}
 Seated around a polished walnut table are:
@@ -27,7 +27,7 @@ Seated around a polished walnut table are:
 
 The mafia are ready to choose their next victim.
 
-{!if single_member}
+{!if mafia.size = 1}
 %Entering @kill <A>@ will make {player} attempt to kill player @<A>@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.
 {!else}
 %Entering @<A> kill <B>@ will make player @<A>@ attempt to kill player @<B>@. Player @<A>@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.

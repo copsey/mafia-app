@@ -349,12 +349,12 @@ void maf::Mafia_meeting::do_commands(const std::vector<std::string_view> & comma
 void maf::Mafia_meeting::set_params(TextParams& params) const {
 	params["finished"] = _go_to_sleep;
 	params["first_meeting"] = _initial;
-	params["single_member"] = (_mafiosi.size() == 1);
 
 	if (_mafiosi.size() == 1) {
 		auto& player = *_mafiosi.front();
 		params["player"] = escaped_name(player);
 		params["role"] = escaped_name(player.role());
+		params["mafia.size"] = 1;
 	} else {
 		std::vector<TextParams> mafia;
 		for (auto p_ref: _mafiosi) {
@@ -363,6 +363,7 @@ void maf::Mafia_meeting::set_params(TextParams& params) const {
 			subparams["player"] = escaped_name(player);
 			subparams["role"] = escaped_name(player.role());
 		}
+		params["mafia.size"] = static_cast<int>(mafia.size());
 		params["mafia"] = std::move(mafia);
 	}
 }
@@ -546,8 +547,8 @@ void maf::Game_ended::set_params(TextParams& params) const {
 		}
 	}
 
-	params["any_winners"] = !winners_params.empty();
-	params["any_losers"] = !losers_params.empty();
+	params["winners.size"] = static_cast<int>(winners_params.size());
 	params["winners"] = std::move(winners_params);
+	params["losers.size"] = static_cast<int>(losers_params.size());
 	params["losers"] = std::move(losers_params);
 }

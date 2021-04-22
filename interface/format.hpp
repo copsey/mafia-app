@@ -1,8 +1,6 @@
-#ifndef MAFIA_STYLED_STRING_H
-#define MAFIA_STYLED_STRING_H
+#ifndef MAFIA_FORMAT
+#define MAFIA_FORMAT
 
-#include <algorithm>
-#include <bitset>
 #include <map>
 #include <string>
 #include <string_view>
@@ -10,14 +8,19 @@
 #include <variant>
 #include <vector>
 
+#include "../util/algorithm.hpp"
+#include "../util/char.hpp"
+#include "../util/parse.hpp"
+#include "../util/string.hpp"
+
 namespace maf {
-	// Create a new string based on `str`, but with each escapable
+	// Create a new string based on `str_view`, but with each escapable
 	// character prefixed by a backslash `\`.
 	//
 	// # Examples
 	// - `escaped("My {string}")` returns `"My \{string\}"`
 	// - `escaped("under_score")` returns `"under\_score"`
-	inline std::string escaped(std::string_view str_view);
+	std::string escaped(std::string_view str_view);
 
 	// A single parameter used when preprocessing text.
 	struct TextParam;
@@ -27,47 +30,37 @@ namespace maf {
 	// Note that the map only holds views into its keys, whereas the values
 	// are fully owned. Typically each key will be a compile-time constant.
 	struct TextParams;
-	
-	// Check if `str` is an allowed name for a text parameter.
-	// This is true if it matches the regex `/^[a-zA-Z0-9_\.]+$/`.
-	inline bool is_param_name(std::string_view str) {
-		for (char ch: str) {
-			switch (ch) {
-				case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-				case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
-				case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':
-				case 's': case 't': case 'u': case 'v': case 'w': case 'x':
-				case 'y': case 'z': case 'A': case 'B': case 'C': case 'D':
-				case 'E': case 'F': case 'G': case 'H': case 'I': case 'J':
-				case 'K': case 'L': case 'M': case 'N': case 'O': case 'P':
-				case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
-				case 'W': case 'X': case 'Y': case 'Z': case '_': case '.':
-				case '0': case '1': case '2': case '3': case '4': case '5':
-				case '6': case '7': case '8': case '9':
-					break;
-
-				default:
-					return false;
-			}
-		}
-
-		return !str.empty();
-	}
 
 	// Error code for exceptions that can be thrown when calling
 	// `preprocess_text`.
 	enum class preprocess_text_errc {
-		invalid_command_name,
-		invalid_escape_sequence,
-		invalid_parameter_name,
-		missing_command_name,
-		missing_parameter_name,
-		parameter_not_found,
-		too_many_closing_braces,
-		too_many_parameter_names,
+		missing_integer,
+		token_not_integer,
+		integer_out_of_range,
+
+		missing_parameter,
+		token_not_param_name,
+
+		missing_command,
+		token_not_command,
+
+		missing_comp_operand,
+		token_not_comp_operand,
+
+		missing_relation,
+		token_not_relation,
+
+		missing_escape_sequence,
+		token_not_escape_sequence,
+
 		unclosed_directive,
-		unclosed_expression,
+		too_many_closing_braces,
 		unexpected_command,
+		too_many_tokens,
+
+		unclosed_expression,
+
+		parameter_not_available,
 		wrong_parameter_type
 	};
 
@@ -79,63 +72,54 @@ namespace maf {
 		// The input string that couldn't be processed.
 		std::string_view input;
 
-		// An iterator pointing to where the error occurred.
-		std::string_view::iterator i;
-		
-		// An (optional) iterator that forms a range `{i, j}` when paired with
-		// `i`.
-		//
-		// Only used by certain error codes to signify where in the input string
-		// an invalid substring occurs.
-		std::string_view::iterator j;
+		// Further info about the error. This will be one of the following:
+		// - An iterator pointing to where the error occurred.
+		// - The substring that caused the error.
+		std::variant<std::string_view::iterator, std::string_view> param;
 
 		// Position in input string where the error occurred.
-		std::string_view::size_type pos() const {
-			return i - input.begin();
-		}
+		std::string_view::size_type pos() const;
 
 		preprocess_text_error(preprocess_text_errc errc,
-							  std::string_view::iterator i)
-		: errc{errc}, i{i}, j{}
-		{ }
-		
+							  std::string_view::iterator iter)
+		: errc{errc}, param{iter} { }
+
 		preprocess_text_error(preprocess_text_errc errc,
 							  std::string_view substr)
-		: errc{errc}, i{substr.begin()}, j{substr.end()}
-		{ }
+		: errc{errc}, param{substr} { }
 
 		// Write a description of this error to `output`.
 		void write(std::string & output) const;
 	};
 
-	// TODO: Finish writing this description.
+	// Find all directives of the form `"{...}"` in `input` and perform a
+	// corresponding set of actions.
 	//
-	// Find all strings of the form "{substitute}" in the range `{begin,end}`,
-	// and replace them with the corresponding value from `params`.
+	// Escape sequences of the form `"\x"` are left intact. In particular,
+	// braces preceded by backslashes `"\"` are not treated as parts of command
+	// names, unless the backslash itself is escaped, as in `"\\"`.
 	//
-	// Escape sequences of the form "\x" are left intact. In particular,
-	// braces preceded by backslashes '\' are not treated as parts of command
-	// names, unless the backslash itself is escaped, as in "\\".
+	// # Returns
+	// An output string after applying the directives in `input`.
 	//
-	// @example If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`,
+	// # Exceptions
+	// Throws `preprocess_text_error` with an appropriate code if something goes
+	// wrong while parsing. Use `write()` on the error to see more information.
+	//
+	// # Example
+	// If `params` is `{ {"word1", "NEW"}, {"word2", "STRING"} }`,
 	// then
-	//     "This is my {word1} {word2} with \{braces\}."
+	// ```
+	// "This is my {word1} {word2} with \{braces\}."
+	// ```
 	// will be transformed into
-	//     "This is my NEW STRING with \{braces\}."
-	//
-	// @pre `{begin,end}` is a valid range.
-	//
-	// @throws `preprocess_text_error` with code `invalid_parameter_name` if
-	// an invalid parameter name is encountered. (See `is_param_name` for more
-	// information.)
-	//
-	// @throws `preprocess_text_error` with code `missing_parameter` for any
-	// parameter names that cannot be found in `params`.
-	//
-	// @throws `preprocess_text_error` with code `unclosed_directive`
-	// or `too_many_closing_braces` if there are different numbers of
-	// (unescaped) opening braces '{' and closing braces '}'.
-	inline std::string preprocess_text(std::string_view input, TextParams const& params);
+	// ```
+	// "This is my NEW STRING with \{braces\}."
+	// ```
+	// There are many more directives possible than this example demonstrates.
+	// See the file `resources/txt/cheatsheet.txt` included with the source code
+	// for further information.
+	std::string preprocess_text(std::string_view input, TextParams const& params);
 
 
 	// A string coupled with a set of suggested attributes. Each attribute is
@@ -231,7 +215,7 @@ namespace maf {
 		std::string_view::size_type pos() const {
 			return i - input.begin();
 		}
-		
+
 		format_text_error(format_text_errc errc, std::string_view::iterator i)
 		: errc{errc}, i{i}, j{}
 		{ }
@@ -258,9 +242,10 @@ namespace maf {
 	// applied. Its content is taken to be the string between the previous
 	// formatting code and the new formatting code.
 	//
-	// See the file "/resources/txt/cheatsheet.txt" included with this source
+	// See the file `resources/txt/cheatsheet.txt` included with this source
 	// code for more information.
-	inline StyledText format_text(std::string_view input, StyledString::attributes_t attributes = StyledString::default_attributes);
+	inline StyledText format_text(std::string_view input,
+	                              StyledString::attributes_t attributes = StyledString::default_attributes);
 }
 
 
@@ -291,7 +276,17 @@ struct maf::TextParams: _textparams_impl::Base {
 
 
 namespace maf::_preprocess_text_impl {
+	using std::move;
+	using std::make_unique;
+	using std::literals::operator""sv;
+
+	using string = std::string;
+	using string_view = std::string_view;
 	using iterator = std::string_view::iterator;
+	template <typename T> using vector = std::vector<T>;
+	template <typename T> using optional = std::optional<T>;
+	template <typename T> using unique_ptr = std::unique_ptr<T>;
+	template <typename... Ts> using variant = std::variant<Ts...>;
 
 	inline bool is_brace(char ch) {
 		return ch == '{' || ch == '}';
@@ -310,7 +305,7 @@ namespace maf::_preprocess_text_impl {
 	}
 
 	inline bool is_whitespace(char ch) {
-		return ch == ' ';
+		return ch == ' ' || ch == '\t';
 	}
 
 	// # Example
@@ -326,20 +321,225 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
+	// Get the parameter from `params` whose key is equal to `name`.
+	//
+	// # Exceptions
+	// - Throws `preprocess_text_error` with code `parameter_not_available` if
+	//   there is no parameter in `params` whose key is equal to `name`.
+	inline auto get_param(string_view name, TextParams const& params)
+	-> TextParam const& {
+		auto iter = params.find(name);
+
+		if (iter == params.end()) {
+			auto errc = preprocess_text_errc::parameter_not_available;
+			throw preprocess_text_error{errc, name};
+		}
+
+		return (*iter).second;
+	}
+
+
+	// Get the parameter from `params` whose key is equal to `name`, and
+	// ensure that its type is `ParamType`.
+	//
+	// # Exceptions
+	// - Throws `preprocess_text_error` with code `parameter_not_available` if
+	//   there is no parameter in `params` whose key is equal to `name`.
+	// - Throws `preprocess_text_error` with code `wrong_parameter_type` if a
+	//   parameter was found, but its type is not `ParamType`.
+	template <typename ParamType>
+	auto get_param_as(string_view name, TextParams const& params)
+	-> ParamType const& {
+		auto& param = get_param(name, params);
+
+		if (auto ptr = std::get_if<ParamType>(&param)) {
+			return *ptr;
+		} else {
+			auto errc = preprocess_text_errc::wrong_parameter_type;
+			throw preprocess_text_error{errc, name};
+		}
+	}
+
+
+	// Visit the parameter from `params` whose key is equal to `name` using the
+	// provided function.
+	//
+	// # Exceptions
+	// - Throws `preprocess_text_error` with code `parameter_not_available` if
+	//   there is no parameter in `params` whose key is equal to `name`.
+	template <typename Visitor>
+	auto visit_param(Visitor && f, string_view name, TextParams const& params)
+	-> decltype(visit(f, TextParam{})) {
+		auto& param = get_param(name, params);
+		return visit(f, param);
+	}
+
+
+	// Check if `token` is a textual representation of an integer.
+	// This is true if it matches the regex `/^\d+$/`.
+	inline bool is_integer(string_view token) {
+		return !token.empty() && util::all_of(token, util::is_digit);
+	}
+
+	void read_into(int & integer, string_view token);
+
+	// # Example
+	// Given the following input:
+	// ```
+	//           begin  next                   end
+	//           |       |                       |
+	// "{!if x < 12345678}Miss Havisham{!end} ..."
+	// ```
+	// set `integer` to `12345678` and return `next`.
+	iterator parse_into(int & integer, iterator begin, iterator end);
+
+
+	enum class relation {
+		equals,
+		less_than,
+		greater_than
+	};
+
+	void read_into(relation & rel, string_view token);
+
+	// # Example
+	// Given the following input:
+	// ```
+	//         begin                     end
+	//         |                           |
+	// "{!if x = 3} Mother by adoption, ..."
+	//          |
+	//          next
+	// ```
+	// set `rel` to `equal_to` and return `next`.
+	iterator parse_into(relation & rel, iterator begin, iterator end);
+
+
+	struct comparison {
+		struct operand: variant<int, string_view> {
+			using variant<int, string_view>::variant;
+
+			// Determine if the next token in `{begin, end}` is an integer or
+			// the name of a parameter, and then parse it into `operand`.
+			iterator parse(iterator begin, iterator end);
+		};
+
+		operand arg_1;
+		operand arg_2;
+		relation rel;
+
+		// # Example
+		// Given the following input:
+		// ```
+		//       begin      next                   end
+		//       |           |                       |
+		// "{!if x < 12345678}Miss Havisham{!end} ..."
+		// ```
+		// set `this->arg_1` to `"x"`, set `this->arg_2` to `12345678`, set
+		// `this->rel` to `less_than`, and return `next`.
+		iterator parse(iterator begin, iterator end);
+
+		// Perform the comparison on `this->arg_1` and `this->arg_2`.
+		//
+		// Each operand is first converted to an integer value, by either:
+		// - looking for a parameter in `params` by name, or
+		// - returning the operand directly (for `int`s).
+		bool resolve(TextParams const& params) const {
+			auto x = _get_value(arg_1, params);
+			auto y = _get_value(arg_2, params);
+			return this->_compare(x, y);
+		}
+
+	private:
+		static int _get_value(int val, TextParams const& params) {
+			return val;
+		}
+
+		static int _get_value(string_view name, TextParams const& params) {
+			return get_param_as<int>(name, params);
+		}
+
+		static int _get_value(operand const& arg, TextParams const& params) {
+			auto get_value = [&](auto&& x) -> int {
+				return _get_value(x, params);
+			};
+
+			return visit(get_value, arg);
+		}
+
+		bool _compare(int x, int y) const {
+			switch (rel) {
+			case relation::equals: return x == y;
+			case relation::less_than: return x < y;
+			case relation::greater_than: return x > y;
+			}
+		}
+	};
+
+
+	struct logical_test {
+		struct predicate: variant<bool, string_view, comparison> {
+			using variant<bool, string_view, comparison>::variant;
+		};
+
+		predicate pred;
+
+		iterator parse(iterator begin, iterator end);
+
+		bool resolve(TextParams const& params) const {
+			return _get_value(pred, params);
+		}
+
+	private:
+		static bool _get_value(bool val, TextParams const& params) {
+			return val;
+		}
+
+		static bool _get_value(string_view name, TextParams const& params) {
+			return get_param_as<bool>(name, params);
+		}
+
+		static bool _get_value(comparison const& comp, TextParams const& params) {
+			return comp.resolve(params);
+		}
+
+		static bool _get_value(predicate const& pred, TextParams const& params) {
+			auto get_value = [&](auto&& x) -> bool {
+				return _get_value(x, params);
+			};
+
+			return visit(get_value, pred);
+		}
+	};
+
+
+	enum class command {
+		if_,
+		else_if,
+		else_,
+		list,
+		end
+	};
+
+	void read_into(command & cmd, string_view token);
+
+	// # Example
+	// Given the following input:
+	// ```
+	//         begin  next      end
+	//          |      |          |
+	// "Lorem {!else_if ipsum} ..."
+	// ```
+	// set `cmd` to `else_if` and return `next`.
+	iterator parse_into(command & cmd, iterator begin, iterator end);
+
+
 	struct directive {
 		enum class type_t {
 			comment,
 			substitution,
-			if_command,
-			else_if_command,
-			else_command,
-			list_command,
-			end_command
+			command
 		};
-
-		type_t type;
-		std::string_view command_name;
-		std::string_view param_name;
 
 		static bool is_delimiter(char ch) {
 			return is_brace(ch) || is_whitespace(ch);
@@ -357,62 +557,90 @@ namespace maf::_preprocess_text_impl {
 			return std::find_if(begin, end, is_delimiter);
 		}
 
-		type_t to_type(std::string_view command_name) {
-			if (command_name == "if") {
-				return type_t::if_command;
-			} else if (command_name == "else_if") {
-				return type_t::else_if_command;
-			} else if (command_name == "else") {
-				return type_t::else_command;
-			} else if (command_name == "list") {
-				return type_t::list_command;
-			} else if (command_name == "end") {
-				return type_t::end_command;
-			} else {
-				auto errc = preprocess_text_errc::invalid_command_name;
-				throw preprocess_text_error{errc, command_name};
+		// # Example
+		// Given the following input:
+		// ```
+		//             begin           end
+		//             |                 |
+		// "It was the best of times, ..."
+		// ```
+		// return `"best"`.
+		static string_view get_token(iterator begin, iterator end) {
+			auto token_end = find_delimiter(begin, end);
+			return util::make_string_view(begin, token_end);
+		}
+
+		// # Example
+		// Given the following input:
+		// ```
+		//       begin          end
+		//       |                |
+		// "{!if house_number = 13}Watch out!{!end}"
+		// ```
+		// return `3`.
+		static int count_tokens(iterator begin, iterator end) {
+			int count = 0;
+
+			for (auto i = skip_whitespace(begin, end);
+				 i != end && !is_brace(*i); )
+			{
+				++count;
+
+				i = find_delimiter(i, end);
+				i = skip_whitespace(i, end);
+			}
+
+			return count;
+		}
+
+		type_t type;
+		string_view content;
+		optional<command> cmd;
+		optional<string_view> param_name;
+		optional<logical_test> test;
+
+		bool is_instance_of(type_t type) const {
+			return this->type == type;
+		}
+
+		bool is_instance_of(command cmd) const {
+			return this->type == type_t::command && *(this->cmd) == cmd;
+		}
+
+		void verify_instance_of(type_t type) {
+			if (!this->is_instance_of(type)) _throw_unexpected_type();
+		}
+
+		void verify_instance_of(command cmd) {
+			if (!this->is_instance_of(cmd)) _throw_unexpected_type();
+		}
+
+		// Indicates whether the directive will be replaced by a (non-empty)
+		// string in the output. Used to decide what to do with whitespace
+		// surrounding the directive.
+		bool vanishes() const {
+			switch (type) {
+			case type_t::comment:
+			case type_t::command:
+				return true;
+			case type_t::substitution:
+				return false;
 			}
 		}
 
-		// Throw `preprocess_text_error` if `this->type` is not `type`.
-		void verify(type_t type) {
-			if (type != this->type) {
-				switch (this->type) {
-				case type_t::comment:
-					{
-						// FIXME: Throw a bespoke exception.
-						break;
-					}
-
-				case type_t::substitution:
-					{
-						// FIXME: Throw a bespoke exception.
-						break;
-					}
-
-				case type_t::if_command:
-				case type_t::else_if_command:
-				case type_t::else_command:
-				case type_t::list_command:
-				case type_t::end_command:
-					{
-						auto errc = preprocess_text_errc::unexpected_command;
-						throw preprocess_text_error{errc, command_name};
-					}
-				}
-			}
-		}
+		string_view extract_command_name() const;
 
 		// # Examples
+		// In all of the examples below, the function returns `next`.
 		//
 		// 1. Given the following input:
 		// ```
-		//      begin  next     end
+		//     begin  next      end
 		//      |      |          |
 		// "You {stock} and stone!"
 		// ```
-		// set `type` to `substitution`, set `param_name` to "stock", and
-		// return `next`.
+		// set `this->type` to `substitution` and set `this->param_name` to
+		// `"stock"`.
 		//
 		// 2. Given the following input:
 		// ```
@@ -420,8 +648,8 @@ namespace maf::_preprocess_text_impl {
 		//  |            |                 |
 		// "{!if Estella} looked at her ..."
 		// ```
-		// set `type` to `if_command`, set `param_name` to "Estella", and
-		// return `next`.
+		// set `this->type` to `command`, set `this->cmd` to `if_` and set
+		// `this->test` to `"Estella"`.
 		//
 		// 3. Given the following input:
 		// ```
@@ -432,15 +660,63 @@ namespace maf::_preprocess_text_impl {
 		//  |
 		//  next
 		// ```
-		// set `type` to `else_command` and return `next`, skipping the single
-		// newline after `"{!else}"`.
-		iterator parse(iterator begin, iterator end, std::string_view input);
+		// set `this->type` to `command` and set `this->cmd` to `"else_"`. Note
+		// that the newline after `"{!else}"` is skipped.
+		iterator parse(iterator begin, iterator end, string_view input);
 
 	private:
+		void _throw_unexpected_type() const {
+			switch (this->type) {
+			case type_t::comment:
+				{
+					// FIXME: Throw a bespoke exception.
+					break;
+				}
+
+			case type_t::substitution:
+				{
+					// FIXME: Throw a bespoke exception.
+					break;
+				}
+
+			case type_t::command:
+				{
+					auto errc = preprocess_text_errc::unexpected_command;
+					auto cmd_name = this->extract_command_name();
+					throw preprocess_text_error{errc, cmd_name};
+				}
+			}
+		}
+
 		iterator _parse_as_comment(iterator begin, iterator directive_end);
 		iterator _parse_as_substitution(iterator begin, iterator directive_end);
 		iterator _parse_as_command(iterator begin, iterator directive_end);
 	};
+
+
+	// Check if `token` is an allowed name for a text parameter.
+	// This is true if it matches the regex `/^[a-zA-Z_\.]+$/`.
+	inline bool is_param_name(string_view token) {
+		auto is_valid_char = [](char ch) -> bool {
+			switch (ch) {
+			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+			case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
+			case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':
+			case 's': case 't': case 'u': case 'v': case 'w': case 'x':
+			case 'y': case 'z': case 'A': case 'B': case 'C': case 'D':
+			case 'E': case 'F': case 'G': case 'H': case 'I': case 'J':
+			case 'K': case 'L': case 'M': case 'N': case 'O': case 'P':
+			case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
+			case 'W': case 'X': case 'Y': case 'Z': case '_': case '.':
+				return true;
+
+			default:
+				return false;
+			}
+		};
+
+		return !token.empty() && util::all_of(token, is_valid_char);
+	}
 
 
 	// # Example
@@ -451,63 +727,24 @@ namespace maf::_preprocess_text_impl {
 	// "After a {short} pause of repose, ..."
 	// ```
 	// set `name` to `"short"` and return `next`.
-	//
-	// # Exceptions
-	// - Throws `preprocess_text_error` with error code
-	// `missing_parameter_name` if there is no parameter name starting from
-	// `begin`.
-	// - Throws `preprocess_text_error` with error code
-	// `invalid_parameter_name` if a string was found, but it's not a valid
-	// parameter name.
 	inline iterator parse_param_name(iterator begin, iterator end,
-									 std::string_view & name)
+									 string_view & name)
 	{
-		auto next = directive::find_delimiter(begin, end);
+		auto token = directive::get_token(begin, end);
 
-		if (next == begin) {
-			auto errc = preprocess_text_errc::missing_parameter_name;
+		if (token.empty()) {
+			auto errc = preprocess_text_errc::missing_parameter;
 			throw preprocess_text_error{errc, begin};
 		}
 
-		auto length = static_cast<std::string_view::size_type>(next - begin);
-		std::string_view str{begin, length};
-
-		if (!is_param_name(str)) {
-			auto errc = preprocess_text_errc::invalid_parameter_name;
-			throw preprocess_text_error{errc, str};
+		if (!is_param_name(token)) {
+			auto errc = preprocess_text_errc::token_not_param_name;
+			throw preprocess_text_error{errc, token};
 		}
 
-		name = str;
-		return next;
-	}
+		name = token;
 
-
-	// # Example
-	// Given the following input:
-	// ```
-	//          begin  next     end
-	//          |      |          |
-	// "Lorem {!else_if ipsum} ..."
-	// ```
-	// set `name` to `"else_if"` and return `next`.
-	//
-	// # Exceptions
-	// - Throws `preprocess_text_error` with error code `missing_command_name`
-	// if there is no command name starting from `begin`.
-	inline iterator parse_command_name(iterator begin, iterator end,
-									   std::string_view & name)
-	{
-		auto next = directive::find_delimiter(begin, end);
-
-		if (next == begin) {
-			auto errc = preprocess_text_errc::missing_command_name;
-			throw preprocess_text_error{errc, begin};
-		}
-
-		auto length = static_cast<std::string_view::size_type>(next - begin);
-		name = std::string_view{begin, length};
-
-		return next;
+		return token.end();
 	}
 
 
@@ -520,110 +757,49 @@ namespace maf::_preprocess_text_impl {
 	//              |
 	//              next
 	// ```
-	// append "\{" to `str` and return `next`.
+	// set `str` to `"\{"` and return `next`.
 	inline iterator	parse_escape_sequence(iterator begin, iterator end,
-										  std::string & str)
+										  string_view & esc_seq)
 	{
-		if (begin == end) {
-			auto errc = preprocess_text_errc::invalid_escape_sequence;
-			throw preprocess_text_error{errc, std::string_view{begin, 0}};
+		if (begin == end || *begin != '\\') {
+			auto errc = preprocess_text_errc::missing_escape_sequence;
+			throw preprocess_text_error{errc, begin};
 		}
 
-		auto i = begin + 1;
-
-		if (i == end) {
-			auto errc = preprocess_text_errc::invalid_escape_sequence;
-			throw preprocess_text_error{errc, std::string_view{begin, 1}};
+		if (begin + 1 == end) {
+			auto errc = preprocess_text_errc::token_not_escape_sequence;
+			auto token = string_view{begin, 1};
+			throw preprocess_text_error{errc, token};
 		}
 
-		if (char ch = *i; *begin == '\\') {
-			str += {'\\', ch};
-		} else {
-			auto errc = preprocess_text_errc::invalid_escape_sequence;
-			throw preprocess_text_error{errc, std::string_view{begin, 2}};
-		}
+		esc_seq = string_view{begin, 2};
 
-		return i + 1;
+		return esc_seq.end();
 	}
 
 
 	struct expression {
 		virtual ~expression() = default;
-		virtual void write(std::string & output, TextParams const& params) const = 0;
-		virtual iterator parse(iterator begin, iterator end, std::string_view input) = 0;
+		virtual void write(string & output, TextParams const& params) const = 0;
+		virtual iterator parse(iterator begin, iterator end, string_view input) = 0;
 	};
 
 
-	// Get the parameter from `params` whose key is equal to `name`.
-	//
-	// # Exceptions
-	// - Throws `preprocess_text_error` with code `parameter_not_found` if
-	// there is no parameter in `params` whose key is equal to `name`.
-	inline auto get_param(std::string_view name, TextParams const& params)
-	-> TextParam const& {
-		auto iter = params.find(name);
-
-		if (iter == params.end()) {
-			auto errc = preprocess_text_errc::parameter_not_found;
-			throw preprocess_text_error{errc, name};
-		}
-
-		return (*iter).second;
-	}
-
-
-	// Get the parameter from `params` whose key is equal to `name`, and
-	// ensure that its type is `ParamType`.
-	//
-	// # Exceptions
-	// - Throws `preprocess_text_error` with code `parameter_not_found` if
-	// there is no parameter in `params` whose key is equal to `name`.
-	// - Throws `preprocess_text_error` with code `wrong_parameter_type` if a
-	// parameter was found, but its type is not `ParamType`.
-	template <typename ParamType>
-	auto get_param_as(std::string_view name, TextParams const& params)
-	-> ParamType const& {
-		auto& param = get_param(name, params);
-
-		if (auto ptr = std::get_if<ParamType>(&param)) {
-			return *ptr;
-		} else {
-			auto errc = preprocess_text_errc::wrong_parameter_type;
-			throw preprocess_text_error{errc, name};
-		}
-	}
-
-
-	// Visit the parameter from `params` whose key is equal to `name` using the
-	// provided function.
-	//
-	// # Exceptions
-	// - Throws `preprocess_text_error` with code `parameter_not_found` if
-	// there is no parameter in `params` whose key is equal to `name`.
-	template <typename Visitor>
-	auto visit_param(Visitor && f, std::string_view name, TextParams const& params)
-	-> decltype(std::visit(f, TextParam{})) {
-		auto& param = get_param(name, params);
-		return std::visit(f, param);
-	}
-
-	
 	struct plain_text: expression {
-		std::string str;
-		
+		string str;
+
 		static bool is_delimiter(char ch) {
 			return ch == '\\' || ch == '{' || ch == '}';
 		}
-		
+
 		static iterator find_delimiter(iterator begin, iterator end) {
 			return std::find_if(begin, end, is_delimiter);
 		}
-		
-		void write(std::string & output, TextParams const& params) const
-		override {
+
+		void write(string & output, TextParams const& params) const override {
 			output += str;
 		}
-		
+
 		// Form the largest possible subrange of `{begin, end}` starting from
 		// `begin` where none of the characters are braces. Append the
 		// subrange to `this->str`.
@@ -638,30 +814,15 @@ namespace maf::_preprocess_text_impl {
 		// "Donec \{quam {felis}, ..."
 		// ```
 		// append `"Donec \{quam "` to `this->str` and return `next`.
-		iterator parse(iterator begin, iterator end, std::string_view input) override;
+		iterator parse(iterator begin, iterator end, string_view input) override;
 	};
-	
-	
-	struct substitution: expression {
-		std::string_view param_name;
-		
-		void write(std::string & output, TextParams const& params) const
-		override {
-			auto print = [&](auto && arg) {
-				using T = std::decay_t<decltype(arg)>;
-				if constexpr (std::is_same_v<T, int>) {
-					output += std::to_string(arg);
-				} else if constexpr (std::is_same_v<T, std::string>) {
-					output += arg;
-				} else {
-					auto errc = preprocess_text_errc::wrong_parameter_type;
-					throw preprocess_text_error{errc, param_name};
-				}
-			};
 
-			visit_param(print, param_name, params);
-		}
-		
+
+	struct substitution: expression {
+		string_view param_name;
+
+		void write(string & output, TextParams const& params) const override;
+
 		// # Example
 		// Given the following input:
 		// ```
@@ -670,41 +831,26 @@ namespace maf::_preprocess_text_impl {
 		// "If that {staid} old house..."
 		// ```
 		// set `this->param_name` to `"staid"` and return `next`.
-		iterator parse(iterator begin, iterator end, std::string_view input) override;
+		iterator parse(iterator begin, iterator end, string_view input) override;
 	};
-	
-	
-	struct sequence: expression {
-		std::vector<std::unique_ptr<expression>> subexprs;
-		
-		void write(std::string & output, TextParams const& params) const
-		override {
-			for (auto & expr : subexprs) {
-				expr->write(output, params);
-			}
-		}
 
-		iterator parse(iterator begin, iterator end, std::string_view input) override;
+
+	struct sequence: expression {
+		vector<unique_ptr<expression>> subexprs;
+
+		void write(string & output, TextParams const& params) const override;
+
+		iterator parse(iterator begin, iterator end, string_view input) override;
 	};
-	
-	
+
+
 	struct conditional: expression {
-		std::vector<std::pair<std::string_view, sequence>> conditional_subexprs;
-		std::optional<sequence> default_subexpr;
-		
-		void write(std::string & output, TextParams const& params) const
-		override {
-			for (auto& [name, expr]: conditional_subexprs) {
-				auto& param = get_param_as<bool>(name, params);
-				
-				if (param) {
-					expr.write(output, params);
-					return;
-				}
-			}
-			
-			if (default_subexpr) default_subexpr->write(output, params);
-		}
+		using conditional_sequence = std::pair<logical_test, sequence>;
+
+		vector<conditional_sequence> conditional_subexprs;
+		optional<sequence> default_subexpr;
+
+		void write(string & output, TextParams const& params) const override;
 
 		// # Example
 		// Given the following input:
@@ -714,23 +860,16 @@ namespace maf::_preprocess_text_impl {
 		// "Lorem {!if ipsum} ... {!end} amet"
 		// ```
 		// append `{"ipsum", /* sequence parsed from "..." */}` to
-		// `this->conditional_subexprs`, and return `next`.
-		iterator parse(iterator begin, iterator end, std::string_view input) override;
+		// `this->conditional_subexprs` and return `next`.
+		iterator parse(iterator begin, iterator end, string_view input) override;
 	};
 
 
 	struct loop: expression {
-		std::string_view param_name;
+		string_view param_name;
 		sequence subexpr;
 
-		void write(std::string & output, TextParams const& params) const
-		override {
-			auto& v = get_param_as<std::vector<TextParams>>(param_name, params);
-
-			for (auto& subparams: v) {
-				subexpr.write(output, subparams);
-			}
-		}
+		void write(string & output, TextParams const& params) const override;
 
 		// # Example
 		// Given the following input:
@@ -741,17 +880,233 @@ namespace maf::_preprocess_text_impl {
 		// ```
 		// set `this->param_name` to `"grace"`, set `this->subexpr` to the
 		// result of parsing `...` as a sequence, and return `next`.
-		iterator parse(iterator begin, iterator end, std::string_view input) override;
+		iterator parse(iterator begin, iterator end, string_view input) override;
 	};
+
+
+	/*
+	 * Definitions of "write" functions
+	 */
+
+
+	inline void substitution::write(string & output, TextParams const& params) const {
+		auto print = [&](auto && arg) {
+			using T = std::decay_t<decltype(arg)>;
+
+			if constexpr (std::is_same_v<T, int>) {
+				output += std::to_string(arg);
+			} else if constexpr (std::is_same_v<T, string>) {
+				output += arg;
+			} else {
+				auto errc = preprocess_text_errc::wrong_parameter_type;
+				throw preprocess_text_error{errc, param_name};
+			}
+		};
+
+		visit_param(print, param_name, params);
+	}
+
+
+	inline void sequence::write(string & output, TextParams const& params) const {
+		for (auto & expr: this->subexprs) {
+			expr->write(output, params);
+		}
+	}
+
+
+	inline void conditional::write(string & output, TextParams const& params) const {
+		for (auto& [test, expr]: this->conditional_subexprs) {
+			bool use_this_subexpr = test.resolve(params);
+
+			if (use_this_subexpr) {
+				expr.write(output, params);
+				return;
+			}
+		}
+
+		if (default_subexpr) default_subexpr->write(output, params);
+	}
+
+
+	inline void loop::write(string & output, TextParams const& params) const {
+		auto& vec = get_param_as<vector<TextParams>>(param_name, params);
+
+		for (auto&& subparams: vec) subexpr.write(output, subparams);
+	}
 
 
 	/*
 	 * Definitions of "parse" functions
 	 */
 
-	inline iterator directive::parse(iterator begin, iterator end, std::string_view input) {
-		using std::literals::operator""sv;
 
+	inline void read_into(int & integer, string_view token) {
+		if (!is_integer(token)) {
+			auto errc = preprocess_text_errc::token_not_integer;
+			throw preprocess_text_error{errc, token};
+		}
+
+		if (auto result = util::from_chars(token, integer);
+			result.ec == std::errc::invalid_argument)
+		{
+			auto errc = preprocess_text_errc::token_not_integer;
+			throw preprocess_text_error{errc, token};
+		} else if (result.ec == std::errc::result_out_of_range) {
+			auto errc = preprocess_text_errc::integer_out_of_range;
+			throw preprocess_text_error{errc, token};
+		}
+	}
+
+
+	inline iterator parse_into(int & integer, iterator begin, iterator end) {
+		auto token = directive::get_token(begin, end);
+
+		if (token.empty()) {
+			auto errc = preprocess_text_errc::missing_integer;
+			throw preprocess_text_error{errc, begin};
+		}
+
+		read_into(integer, token);
+
+		return token.end();
+	}
+
+
+	inline void read_into(relation & rel, string_view token) {
+		if (token == "<") {
+			rel = relation::less_than;
+		} else if (token == "=") {
+			rel = relation::equals;
+		} else if (token == ">") {
+			rel = relation::greater_than;
+		} else {
+			auto errc = preprocess_text_errc::token_not_relation;
+			throw preprocess_text_error{errc, token};
+		}
+	}
+
+
+	inline iterator parse_into(relation & rel, iterator begin, iterator end) {
+		auto token = directive::get_token(begin, end);
+
+		if (token.empty()) {
+			auto errc = preprocess_text_errc::missing_relation;
+			throw preprocess_text_error{errc, begin};
+		}
+
+		read_into(rel, token);
+
+		return token.end();
+	}
+
+
+	inline iterator comparison::operand::parse(iterator begin, iterator end) {
+		auto token = directive::get_token(begin, end);
+
+		if (token.empty()) {
+			auto errc = preprocess_text_errc::missing_comp_operand;
+			throw preprocess_text_error{errc, begin};
+		}
+
+		if (is_integer(token)) {
+			int integer;
+
+			if (auto result = util::from_chars(token, integer);
+				result.ec == std::errc::invalid_argument)
+			{
+				auto errc = preprocess_text_errc::token_not_integer;
+				throw preprocess_text_error{errc, token};
+			} else if (result.ec == std::errc::result_out_of_range) {
+				auto errc = preprocess_text_errc::integer_out_of_range;
+				throw preprocess_text_error{errc, token};
+			}
+
+			(*this) = integer;
+		} else if (is_param_name(token)) {
+			(*this) = token;
+		} else {
+			auto errc = preprocess_text_errc::token_not_comp_operand;
+			throw preprocess_text_error{errc, token};
+		}
+
+		return token.end();
+	}
+
+
+	inline iterator comparison::parse(iterator begin, iterator end) {
+		auto i = begin;
+		i = this->arg_1.parse(i, end);
+		i = skip_whitespace(i, end);
+		i = parse_into(this->rel, i, end);
+		i = skip_whitespace(i, end);
+		i = this->arg_2.parse(i, end);
+		return i;
+	}
+
+
+	inline void read_into(command & cmd, string_view token) {
+		if (token == "if") {
+			cmd = command::if_;
+		} else if (token == "else_if") {
+			cmd = command::else_if;
+		} else if (token == "else") {
+			cmd = command::else_;
+		} else if (token == "list") {
+			cmd = command::list;
+		} else if (token == "end") {
+			cmd = command::end;
+		} else {
+			auto errc = preprocess_text_errc::token_not_command;
+			throw preprocess_text_error{errc, token};
+		}
+	}
+
+
+	inline iterator parse_into(command & cmd, iterator begin, iterator end) {
+		auto token = directive::get_token(begin, end);
+
+		if (token.empty()) {
+			auto errc = preprocess_text_errc::missing_command;
+			throw preprocess_text_error{errc, begin};
+		}
+
+		read_into(cmd, token);
+
+		return token.end();
+	}
+
+
+	inline iterator logical_test::parse(iterator begin, iterator end) {
+		auto i = begin;
+		auto num_tokens = directive::count_tokens(begin, end);
+
+		if (num_tokens >= 3) {
+			comparison comp;
+			i = comp.parse(i, end);
+			this->pred = comp;
+		} else {
+			string_view param_name;
+			i = parse_param_name(i, end, param_name);
+			this->pred = param_name;
+		}
+
+		return i;
+	}
+
+
+	inline string_view directive::extract_command_name() const {
+		if (!this->is_instance_of(type_t::command)) {
+			// FIXME: Throw an exception.
+		}
+
+		auto begin = this->content.begin(), end = this->content.end();
+		auto i = begin + "!"sv.size();
+		i = skip_whitespace(i, end);
+		return get_token(i, end);
+	}
+
+
+	inline iterator directive::parse(iterator begin, iterator end, string_view input) {
 		if (char ch = *begin; ch == '}') {
 			auto errc = preprocess_text_errc::too_many_closing_braces;
 			throw preprocess_text_error{errc, begin};
@@ -760,95 +1115,103 @@ namespace maf::_preprocess_text_impl {
 		}
 
 		auto i = begin + "{"sv.size();
-		auto directive_end = find_brace(i, end);
+		auto dir_end = find_brace(i, end);
 
-		if (directive_end == end || *directive_end != '}') {
+		if (dir_end == end || *dir_end != '}') {
 			auto errc = preprocess_text_errc::unclosed_directive;
 			throw preprocess_text_error{errc, begin};
 		}
 
-		if (char ch = *i; ch == '!') {
-			i = _parse_as_command(begin, directive_end);
-		} else if (ch == '-') {
-			i = _parse_as_comment(begin, directive_end);
+		this->content = util::make_string_view(i, dir_end);
+
+		if (char prefix = *i; prefix == '!') {
+			this->type = type_t::command;
+			i = _parse_as_command(begin, dir_end);
+		} else if (prefix == '-') {
+			this->type = type_t::comment;
+			i = _parse_as_comment(begin, dir_end);
 		} else {
-			i = _parse_as_substitution(begin, directive_end);
+			this->type = type_t::substitution;
+			i = _parse_as_substitution(begin, dir_end);
 		}
 
-		bool no_text_before = (begin == input.begin() || *(begin - 1) == '\n');
-		bool no_text_after = (i == input.end() || *i == '\n');
-
-		if (no_text_before && no_text_after && type != type_t::substitution) {
-			if (i != end) i += "\n"sv.size();
+		if (this->vanishes()) {
+			bool no_text_before = (begin == input.begin() || *(begin - 1) == '\n');
+			bool no_text_after = (i == input.end() || *i == '\n');
+			if (no_text_before && no_text_after && i != end) i += "\n"sv.size();
 		}
 
 		return i;
 	}
 
 
-	inline iterator directive::_parse_as_comment(iterator begin, iterator directive_end) {
-		using std::literals::operator""sv;
-
-		type = type_t::comment;
-		return directive_end + "}"sv.size();
+	inline iterator directive::_parse_as_comment(iterator begin, iterator dir_end) {
+		return dir_end + "}"sv.size();
 	}
 
 
-	inline iterator directive::_parse_as_substitution(iterator begin, iterator directive_end) {
-		using std::literals::operator""sv;
-
-		type = type_t::substitution;
-
+	inline iterator directive::_parse_as_substitution(iterator begin, iterator dir_end) {
 		auto i = begin + "{"sv.size();
-		i = skip_whitespace(i, directive_end);
-		i = parse_param_name(i, directive_end, param_name);
-		i = skip_whitespace(i, directive_end);
+		i = skip_whitespace(i, dir_end);
 
-		if (i != directive_end) {
-			auto errc = preprocess_text_errc::too_many_parameter_names;
-			throw preprocess_text_error{errc, i};
+		string_view param_name;
+		i = parse_param_name(i, dir_end, param_name);
+		this->param_name = param_name;
+
+		i = skip_whitespace(i, dir_end);
+
+		if (i != dir_end) {
+			auto errc = preprocess_text_errc::too_many_tokens;
+			auto token = directive::get_token(i, dir_end);
+			throw preprocess_text_error{errc, token};
 		}
 
 		return i + "}"sv.size();
 	}
 
 
-	inline iterator directive::_parse_as_command(iterator begin, iterator directive_end) {
-		using std::literals::operator""sv;
-
+	inline iterator directive::_parse_as_command(iterator begin, iterator dir_end) {
 		auto i = begin + "{!"sv.size();
-		i = skip_whitespace(i, directive_end);
+		i = skip_whitespace(i, dir_end);
 
-		i = parse_command_name(i, directive_end, command_name);
-		type = to_type(command_name);
+		command cmd;
+		i = parse_into(cmd, i, dir_end);
+		this->cmd = cmd;
 
-		if (type == type_t::if_command
-			|| type == type_t::else_if_command
-			|| type == type_t::list_command)
-		{
-			i = skip_whitespace(i, directive_end);
-			i = parse_param_name(i, directive_end, param_name);
+		i = skip_whitespace(i, dir_end);
+
+		if (cmd == command::if_ || cmd == command::else_if) {
+			logical_test test;
+			i = test.parse(i, dir_end);
+			this->test = test;
+		} else if (cmd == command::list) {
+			string_view param_name;
+			i = parse_param_name(i, dir_end, param_name);
+			this->param_name = param_name;
 		}
 
-		i = skip_whitespace(i, directive_end);
+		i = skip_whitespace(i, dir_end);
 
-		if (i != directive_end) {
-			auto errc = preprocess_text_errc::too_many_parameter_names;
-			throw preprocess_text_error{errc, i};
+		if (i != dir_end) {
+			auto errc = preprocess_text_errc::too_many_tokens;
+			auto token = directive::get_token(i, dir_end);
+			throw preprocess_text_error{errc, token};
 		}
 
 		return i + "}"sv.size();
 	}
 
 
-	inline iterator plain_text::parse(iterator begin, iterator end, std::string_view input) {
+	inline iterator plain_text::parse(iterator begin, iterator end, string_view input) {
 		for (iterator i = begin; ; ) {
 			auto next = find_delimiter(i, end);
 			str.append(i, next);
 			i = next;
 
 			if (i != end && *i == '\\') {
-				i = parse_escape_sequence(i, end, str);
+				string_view esc_seq;
+				i = parse_escape_sequence(i, end, esc_seq);
+				str += esc_seq;
 			} else {
 				return i;
 			}
@@ -856,88 +1219,86 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator substitution::parse(iterator begin, iterator end, std::string_view input) {
-		using std::literals::string_view_literals::operator""sv;
+	inline iterator substitution::parse(iterator begin, iterator end, string_view input) {
+		directive dir;
+		auto next = dir.parse(begin, end, input);
 
-		directive d;
-		auto next = d.parse(begin, end, input);
+		// FIXME: Throw an exception if `dir.type` is not `substitution`.
 
-		// FIXME: Throw an exception if `d.type` is not `substitution`.
-
-		param_name = d.param_name;
+		param_name = *dir.param_name;
 		return next;
 	}
 
 
-	inline iterator sequence::parse(iterator begin, iterator end, std::string_view input) {
+	inline iterator sequence::parse(iterator begin, iterator end, string_view input) {
 		for (auto i = begin; i != end; ) {
-			std::unique_ptr<expression> expr;
+			unique_ptr<expression> expr;
 
 			if (char ch = *i; is_brace(ch)) {
-				directive d;
-				auto next = d.parse(i, end, input);
+				directive dir;
+				auto next = dir.parse(i, end, input);
 
-				switch (d.type) {
-				case directive::type_t::comment:
+				using type = directive::type_t;
+				if (dir.is_instance_of(type::comment)) {
 					i = next;
-					continue;
-				case directive::type_t::substitution:
-					expr = std::make_unique<substitution>();
-					break;
-				case directive::type_t::if_command:
-					expr = std::make_unique<conditional>();
-					break;
-				case directive::type_t::list_command:
-					expr = std::make_unique<loop>();
-					break;
-				default:
-					return i; // stop when directive is not recognised
+					continue; // comments are not expressions.
+				} else if (dir.is_instance_of(type::substitution)) {
+					expr = make_unique<substitution>();
+				} else if (dir.is_instance_of(command::if_)) {
+					expr = make_unique<conditional>();
+				} else if (dir.is_instance_of(command::list)) {
+					expr = make_unique<loop>();
+				} else {
+					return i; // stop when directive is not recognised.
 				}
 			} else {
-				expr = std::make_unique<plain_text>();
+				expr = make_unique<plain_text>();
 			}
 
 			i = expr->parse(i, end, input);
-			subexprs.push_back(std::move(expr));
+			subexprs.push_back(move(expr));
 		}
 
 		return end;
 	}
 
 
-	inline iterator conditional::parse(iterator begin, iterator end, std::string_view input) {
+	inline iterator conditional::parse(iterator begin, iterator end, string_view input) {
 		iterator i = begin;
 
-		// # Key
-		// - Stage 1: Parse the "if" command
-		// - Stage 2: Parse the (optional) "else_if" and "else" commands
-		// - Stage 3: Parse the "end" command
+		// Perform the procedure in three stages:
+		//  1. Parse the "if" command
+		//  2. Parse the (optional) "else_if" and "else" commands
+		//  3. Parse the "end" command
 		for (int stage = 1; ; ) {
-			directive d;
-			auto next = d.parse(i, end, input);
+			directive dir;
+			auto next = dir.parse(i, end, input);
 
+			using type = directive::type_t;
 			if (stage == 1) {
-				d.verify(directive::type_t::if_command);
+				dir.verify_instance_of(command::if_);
 
 				sequence expr;
 				i = expr.parse(next, end, input);
-				conditional_subexprs.emplace_back(d.param_name, std::move(expr));
+				conditional_subexprs.push_back({move(*dir.test), move(expr)});
+
 				++stage;
 			} else if (stage == 2) {
-				if (d.type == directive::type_t::else_if_command) {
+				if (dir.is_instance_of(command::else_if)) {
 					sequence expr;
 					i = expr.parse(next, end, input);
-					conditional_subexprs.emplace_back(d.param_name, std::move(expr));
-				} else if (d.type == directive::type_t::else_command) {
+					conditional_subexprs.push_back({move(*dir.test), move(expr)});
+				} else if (dir.is_instance_of(command::else_)) {
 					sequence expr;
 					i = expr.parse(next, end, input);
-					default_subexpr = std::move(expr);
+					default_subexpr = move(expr);
+
 					++stage;
 				} else {
 					++stage;
 				}
 			} else /* stage == 3 */ {
-				d.verify(directive::type_t::end_command);
+				dir.verify_instance_of(command::end);
 
 				return next;
 			}
@@ -950,14 +1311,15 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator loop::parse(iterator begin, iterator end, std::string_view input) {
+	inline iterator loop::parse(iterator begin, iterator end, string_view input) {
 		auto i = begin;
 
 		{ // Stage 1: Parse the "list" command
-			directive d;
-			i = d.parse(i, end, input);
-			d.verify(directive::type_t::list_command);
-			param_name = d.param_name;
+			directive dir;
+			i = dir.parse(i, end, input);
+			dir.verify_instance_of(command::list);
+
+			this->param_name = *(dir.param_name);
 		}
 
 		i = subexpr.parse(i, end, input);
@@ -968,9 +1330,9 @@ namespace maf::_preprocess_text_impl {
 		}
 
 		{ // Stage 2: Parse the "end" command
-			directive d;
-			i = d.parse(i, end, input);
-			d.verify(directive::type_t::end_command);
+			directive dir;
+			i = dir.parse(i, end, input);
+			dir.verify_instance_of(command::end);
 		}
 
 		return i;
@@ -983,18 +1345,19 @@ inline std::string maf::preprocess_text(std::string_view input,
 {
 	using namespace _preprocess_text_impl;
 
-	std::string output;
+	string output;
 
 	try {
 		sequence expr;
 		auto next = expr.parse(input.begin(), input.end(), input);
 
 		if (next != input.end()) {
-			directive d;
-			d.parse(next, input.end(), input);
+			directive dir;
+			dir.parse(next, input.end(), input);
 
 			auto errc = preprocess_text_errc::unexpected_command;
-			throw preprocess_text_error{errc, d.command_name};
+			auto cmd_name = dir.extract_command_name();
+			throw preprocess_text_error{errc, cmd_name};
 		}
 
 		expr.write(output, params);
@@ -1007,44 +1370,99 @@ inline std::string maf::preprocess_text(std::string_view input,
 }
 
 
+inline std::string_view::size_type maf::preprocess_text_error::pos() const {
+	using namespace _preprocess_text_impl;
+
+	auto get_iter = [&](auto&& arg) {
+		using T = std::decay_t<decltype(arg)>;
+
+		static_assert(std::is_same_v<T, iterator>
+					  || std::is_same_v<T, string_view>,
+		"Unexpected type for 'info' parameter in 'preprocess_text_error'");
+
+		if constexpr (std::is_same_v<T, iterator>) {
+			return arg;
+		} else if constexpr (std::is_same_v<T, string_view>) {
+			return arg.begin();
+		}
+	};
+
+	auto iter = visit(get_iter, param);
+	return iter - input.begin();
+}
+
+
 inline void maf::preprocess_text_error::write(std::string & output) const {
+	using namespace _preprocess_text_impl;
+
 	auto pos = std::to_string(this->pos());
 
 	switch (errc) {
-	case preprocess_text_errc::invalid_command_name:
-		output += "Invalid command name \"";
-		output.append(i, j);
+	case preprocess_text_errc::token_not_command:
+		output += "Invalid command \"";
+		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::invalid_escape_sequence:
+	case preprocess_text_errc::token_not_comp_operand:
+		output += "Expected either an integer or a parameter, instead got \"";
+		output += std::get<string_view>(param);
+		output += "\", at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::token_not_escape_sequence:
 		output += "Invalid escape sequence \"";
-		output.append(i, j);
+		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::invalid_parameter_name:
-		output += "Invalid parameter name \"";
-		output.append(i, j);
-		output += "\" at position ";
+	case preprocess_text_errc::token_not_integer:
+		output += "Expected an integer, instead got \"";
+		output += std::get<string_view>(param);
+		output += "\", at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_command_name:
+	case preprocess_text_errc::token_not_param_name:
+		output += "Expected a parameter, instead got \"";
+		output += std::get<string_view>(param);
+		output += "\", at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::token_not_relation:
+		output += "Expected a relation (e.g. '<'), instead got \"";
+		output += std::get<string_view>(param);
+		output += "\", at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_command:
 		output += "Expected a command at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_parameter_name:
+	case preprocess_text_errc::missing_comp_operand:
+		output += "Expected an integer or parameter at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_parameter:
 		output += "Expected a parameter at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::parameter_not_found:
+	case preprocess_text_errc::missing_relation:
+		output += "Expected a relation at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::parameter_not_available:
 		output += "Unrecognised parameter name \"";
-		output.append(i, j);
+		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
@@ -1054,8 +1472,10 @@ inline void maf::preprocess_text_error::write(std::string & output) const {
 		output += pos;
 		break;
 
-	case preprocess_text_errc::too_many_parameter_names:
-		output += "Too many parameters appear in the directive at position ";
+	case preprocess_text_errc::too_many_tokens:
+		output += "An extra token \"";
+		output += std::get<string_view>(param);
+		output += "\" appears at position ";
 		output += pos;
 		break;
 
@@ -1071,15 +1491,32 @@ inline void maf::preprocess_text_error::write(std::string & output) const {
 
 	case preprocess_text_errc::unexpected_command:
 		output += "The command \"";
-		output.append(i, j);
+		output += std::get<string_view>(param);
 		output += "\" cannot be used at position ";
 		output += pos;
 		break;
 
 	case preprocess_text_errc::wrong_parameter_type:
 		output += "The parameter \"";
-		output.append(i, j);
+		output += std::get<string_view>(param);
 		output += "\" has the wrong type at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_integer:
+		output += "Expected an integer at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::integer_out_of_range:
+		output += "The integer \"";
+		output += std::get<string_view>(param);
+		output += "\" is too large, located at position ";
+		output += pos;
+		break;
+
+	case preprocess_text_errc::missing_escape_sequence:
+		output += "Expected an escape sequence at position ";
 		output += pos;
 		break;
 	}

@@ -17,6 +17,13 @@ namespace maf::util {
 
 		return true;
 	}
+
+	inline auto make_string_view(std::string_view::iterator begin,
+	                             std::string_view::iterator end)
+	-> std::string_view {
+		auto length = static_cast<std::string_view::size_type>(end - begin);
+		return std::string_view{begin, length};
+	}
 }
 
 #endif
