@@ -9,14 +9,14 @@ using maf::util::none_of;
 using WC = maf::Win_condition;
 
 
-maf::Game::Game(const std::vector<Role::ID> & role_ids,
-                const std::vector<Wildcard::ID> & wildcard_ids,
+maf::Game::Game(const vector<Role::ID> & role_ids,
+                const vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
 	: _rulebook{rulebook}
 {
-	using Card = std::pair<util::ref<const Role>, const Wildcard*>;
+	using Card = pair<util::ref<const Role>, const Wildcard*>;
 
-	std::vector<Card> cards{};
+	vector<Card> cards{};
 
 	for (Role::ID r_id : role_ids) {
 		cards.emplace_back(_rulebook.look_up(r_id), nullptr);
@@ -57,23 +57,23 @@ maf::Role const& maf::Game::look_up(RoleRef r_ref) const
 	return rulebook().look_up(r_ref);
 }
 
-const std::vector<maf::Player> & maf::Game::players() const
+const maf::vector<maf::Player> & maf::Game::players() const
 {
 	return _players;
 }
 
-std::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
+maf::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
 {
-	std::vector<util::ref<const Player>> vec{};
+	vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present()) vec.emplace_back(pl);
 	}
 	return vec;
 }
 
-std::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
+maf::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
 {
-	std::vector<util::ref<const Player>> vec{};
+	vector<util::ref<const Player>> vec{};
 	for (const Player& pl: _players) {
 		if (pl.is_present() && pl.alignment() == alignment) {
 			vec.emplace_back(pl);
@@ -606,7 +606,7 @@ bool maf::Game::try_to_end_night()
 	}
 
 	for (Player* haunter: _pending_haunters) {
-		std::vector<Player*> possible_victims{};
+		vector<Player*> possible_victims{};
 		for (Player& player: _players) {
 			if (player.is_present() && player.lynch_vote() == haunter)   {
 				possible_victims.push_back(&player);

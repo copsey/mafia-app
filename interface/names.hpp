@@ -1,12 +1,13 @@
 #ifndef MAFIA_NAMES_H
 #define MAFIA_NAMES_H
 
+#include "../util/stdlib.hpp"
 #include "../logic/logic.hpp"
 
 namespace maf {
 	// The full name of the given role.
-	std::string full_name(const Role &role);
-	std::string full_name(Role::ID id);
+	string_view full_name(const Role &role);
+	string_view full_name(Role::ID id);
 
 	// Function object comparing the full names of two roles with the given IDs.
 	struct Role_ID_full_name_compare {
@@ -17,8 +18,8 @@ namespace maf {
 
 	/* FIXME */
 	// The category of the given wildcard.
-	std::string category(const Wildcard &wildcard);
-	std::string category(Wildcard::ID id);
+	string_view category(const Wildcard &wildcard);
+	string_view category(Wildcard::ID id);
 }
 
 #endif

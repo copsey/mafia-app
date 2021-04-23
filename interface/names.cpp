@@ -1,11 +1,11 @@
 #include "names.hpp"
 
 
-std::string maf::full_name(const Role &r) {
+maf::string_view maf::full_name(const Role &r) {
 	return full_name(r.id());
 }
 
-std::string maf::full_name(Role::ID id) {
+maf::string_view maf::full_name(Role::ID id) {
 	switch (id) {
 		case Role::ID::peasant:
 			return "Peasant";
@@ -32,11 +32,11 @@ std::string maf::full_name(Role::ID id) {
 	}
 }
 
-std::string maf::category(const Wildcard &w) {
+maf::string_view maf::category(const Wildcard &w) {
 	return category(w.id());
 }
 
-std::string maf::category(Wildcard::ID id) {
+maf::string_view maf::category(Wildcard::ID id) {
 	switch (id) {
 		case Wildcard::ID::any:
 			return "totally random";

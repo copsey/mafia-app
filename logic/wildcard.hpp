@@ -4,8 +4,8 @@
 #include <functional>
 #include <map>
 #include <random>
-#include <vector>
 
+#include "../util/stdlib.hpp"
 #include "role.hpp"
 
 namespace maf {
@@ -43,7 +43,7 @@ namespace maf {
 		/// The alias of the wildcard.
 		///
 		/// Note that this is fully determined by its ID.
-		const char * alias() const;
+		string_view alias() const;
 
 		/// Check whether the wildcard will only return roles of the given
 		/// alignment from `rulebook`.
@@ -62,7 +62,7 @@ namespace maf {
 	private:
 		ID _id;
 		Role_evaluator _evaluator{};
-		std::vector<Role::ID> _role_ids{};
+		vector<Role::ID> _role_ids{};
 		std::discrete_distribution<decltype(_role_ids)::size_type> _dist{};
 
 		/// Whether the wildcard uses a role evaluator when picking a role.
@@ -74,7 +74,7 @@ namespace maf {
 	};
 
 	/// The alias corresponding to the given wildcard ID.
-	const char * alias(Wildcard::ID id);
+	string_view alias(Wildcard::ID id);
 }
 
 #endif

@@ -7,22 +7,20 @@
 #include "rulebook.hpp"
 
 
-bool maf::RoleRef::member_of(Rulebook const& rulebook)
-{
+bool maf::RoleRef::member_of(Rulebook const& rulebook) {
 	return std::visit([&](auto&& x) {
 		using T = std::decay_t<decltype(x)>;
 		if constexpr(std::is_same_v<T, Role::ID>) {
 			return std::any_of(rulebook.roles_begin(), rulebook.roles_end(),
 			                   [&](auto& role){ return role.id() == x; });
-		} else if constexpr(std::is_same_v<T, std::string_view>) {
+		} else if constexpr(std::is_same_v<T, string_view>) {
 			return std::any_of(rulebook.roles_begin(), rulebook.roles_end(),
 			                   [&](auto& role){ return role.alias() == x; });
 		}
-	}, param_);
+	}, _param);
 }
 
-bool maf::RoleRef::member_of(Game const& game)
-{
+bool maf::RoleRef::member_of(Game const& game) {
 	return this->member_of(game.rulebook());
 }
 
@@ -37,7 +35,7 @@ maf::Role const& maf::RoleRef::resolve(Rulebook const& rulebook)
 				throw std::out_of_range("role ref could not be resolved, when searching by ID");
 			}
 			return p;
-		} else if constexpr(std::is_same_v<T, std::string_view>) {
+		} else if constexpr(std::is_same_v<T, string_view>) {
 			auto p = std::find_if(rulebook.roles_begin(), rulebook.roles_end(),
 			                      [&](auto& role){ return role.alias() == x; });
 			if (p == rulebook.roles_end()) {
@@ -45,12 +43,11 @@ maf::Role const& maf::RoleRef::resolve(Rulebook const& rulebook)
 			}
 			return p;
 		}
-	}, param_);
+	}, _param);
 
 	return *p;
 }
 
-maf::Role const& maf::RoleRef::resolve(Game const& game)
-{
+maf::Role const& maf::RoleRef::resolve(Game const& game) {
 	return this->resolve(game.rulebook());
 }

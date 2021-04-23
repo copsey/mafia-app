@@ -1,10 +1,10 @@
 #include "role.hpp"
 
-std::string_view maf::Role::alias() const {
+maf::string_view maf::Role::alias() const {
 	return maf::alias(_id);
 }
 
-std::string_view maf::alias(Role::ID id) {
+maf::string_view maf::alias(Role::ID id) {
 	switch (id) {
 		case Role::ID::peasant:
 			return "peasant";

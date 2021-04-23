@@ -5,6 +5,7 @@
 #include <ostream>
 #include <set>
 
+#include "../util/stdlib.hpp"
 #include "../logic/logic.hpp"
 
 #include "game_log.hpp"
@@ -15,17 +16,17 @@ namespace maf {
 	struct Setup_screen: Screen {
 		// Signifies that the given name is invalid for a player.
 		struct Bad_player_name {
-			std::string name;
+			string name;
 		};
 
 		// Signifies that a player with the given name already exists.
 		struct Player_already_exists {
-			std::string name;
+			string name;
 		};
 
 		// Signifies that no player with the given name exists.
 		struct Player_missing {
-			std::string name;
+			string name;
 		};
 
 		// Signifies that no copies of the given rolecard have been chosen.
@@ -45,23 +46,23 @@ namespace maf {
 		// Signifies that a set of commands couldn't be interpreted.
 		struct Bad_commands { };
 
-		std::string_view id() const override { return "setup"; }
+		string_view id() const final { return "setup"; }
 
 		// The rulebook to be used in the pending game.
 		const Rulebook & rulebook() const;
 		// The names of the currently selected players.
-		std::vector<std::string> player_names() const;
+		vector<string> player_names() const;
 		// The IDs of the currently selected rolecards.
-		std::vector<Role::ID> rolecard_ids() const;
+		vector<Role::ID> rolecard_ids() const;
 		// The IDs of the currently selected wildcards.
-		std::vector<Wildcard::ID> wildcard_ids() const;
+		vector<Wildcard::ID> wildcard_ids() const;
 
 		// Checks if a player with the given name already exists.
-		bool has_player(std::string_view name) const;
+		bool has_player(string_view name) const;
 		// Checks if at least one rolecard with the given alias has been chosen.
-		bool has_rolecard(std::string_view alias) const;
+		bool has_rolecard(string_view alias) const;
 		// Checks if at least one wildcard with the given alias has been chosen.
-		bool has_wildcard(std::string_view alias) const;
+		bool has_wildcard(string_view alias) const;
 
 		// The total number of players that have been chosen.
 		std::size_t num_players() const;
@@ -73,27 +74,27 @@ namespace maf {
 		std::size_t num_cards() const;
 
 		// Adds a new player with the given name.
-		void add_player(std::string_view name);
+		void add_player(string_view name);
 		// Adds a single copy of the rolecard with the given alias.
-		void add_rolecard(std::string_view alias);
+		void add_rolecard(string_view alias);
 		// Adds a single copy of the wildcard with the given alias.
-		void add_wildcard(std::string_view alias);
+		void add_wildcard(string_view alias);
 
 		// Removes the player with the given name.
-		void remove_player(std::string_view name);
+		void remove_player(string_view name);
 		// Removes a single copy of the rolecard with the given alias.
-		void remove_rolecard(std::string_view alias);
+		void remove_rolecard(string_view alias);
 		// Removes a single copy of the wildcard with the given alias.
-		void remove_wildcard(std::string_view alias);
+		void remove_wildcard(string_view alias);
 
 		// Removes all of the players that have been chosen.
 		void clear_all_players();
 		// Removes all copies of the rolecard with the given alias.
-		void clear_rolecards(std::string_view alias);
+		void clear_rolecards(string_view alias);
 		// Removes all of the rolecards that have been chosen.
 		void clear_all_rolecards();
 		// Removes all copies of the wildcard with the given alias.
-		void clear_wildcards(std::string_view alias);
+		void clear_wildcards(string_view alias);
 		// Removes all of the wildcards that have been chosen.
 		void clear_all_wildcards();
 		// Removes all of the cards that have been chosen.
@@ -102,18 +103,18 @@ namespace maf {
 		void clear_all();
 
 		// Begins a new game using the current parameters, stored in a game log.
-		std::unique_ptr<Game_log> new_game_log() const;
+		unique_ptr<Game_log> new_game_log() const;
 
 		// Handles the given commands, making alterations to the setup screen as
 		// appropriate.
 		// Throws an exception if the commands couldn't be interpreted.
-		void do_commands(const std::vector<std::string_view> &commands);
+		void do_commands(const vector<string_view> &commands);
 
 		void set_params(TextParams & params) const override;
 
 	private:
 		Rulebook _rulebook{};
-		std::set<std::string> _player_names{};
+		std::set<string> _player_names{};
 		std::map<Role::ID, std::size_t, Role_ID_full_name_compare> _role_ids{};
 		std::map<Wildcard::ID, std::size_t> _wildcard_ids{};
 	};

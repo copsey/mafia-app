@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 
+#include "../util/stdlib.hpp"
 #include "format.hpp"
 
 namespace maf {
@@ -14,19 +15,16 @@ namespace maf {
 
 		// A string to identify the screen by. Used for example when loading
 		// resources from the file system.
-		virtual std::string_view id() const = 0;
+		virtual string_view id() const = 0;
 
 		// A string indicating which subdirectory of "resources/" contains the
 		// ".txt" file for this screen. Defaults to "txt/".
-		virtual std::string_view txt_subdir() const { return "txt/"; }
-
-		// A string consisting of the complete path of the ".txt" file for this
-		// screen.
-		std::string txt_path() const;
-
-		// Open the file at `this->txt_paths()` and return its contents as a
+		virtual string_view txt_subdir() const { return "txt/"; }
+		// A string with the complete path of the ".txt" file for this screen.
+		string txt_path() const;
+		// Open the ".txt" file for this screen and read its contents into a
 		// string.
-		std::string load_txt() const;
+		string load_txt() const;
 
 		// Fill `params` with this screen's text parameters. Does nothing by
 		// default.
@@ -34,7 +32,7 @@ namespace maf {
 
 		// Apply `preprocess_text` to the contents of the ".txt" file for this
 		// screen, and write the result to `output`.
-		void write(std::string & output) const;
+		void write(string & output) const;
 	};
 }
 

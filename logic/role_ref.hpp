@@ -1,9 +1,7 @@
 #ifndef MAFIA_LOGIC_ROLE_REF
 #define MAFIA_LOGIC_ROLE_REF
 
-#include <string_view>
-#include <variant>
-
+#include "../util/stdlib.hpp"
 #include "role.hpp"
 
 namespace maf
@@ -11,13 +9,9 @@ namespace maf
 	class Rulebook;
 	class Game;
 	
-	class RoleRef {
-	public:
+	struct RoleRef {
 		// Create a reference to roles with the given ID.
-		RoleRef(Role::ID r_id)
-		:
-			param_{r_id}
-		{ }
+		RoleRef(Role::ID r_id): _param{r_id} { }
 		
 		// Create a reference to roles with the given alias.
 		// 
@@ -25,10 +19,7 @@ namespace maf
 		// viewed. Be careful about managing the scope of the `RoleRef` when
 		// using this constructor: the `RoleRef` must not outlive the lifetime
 		// of the string.
-		RoleRef(std::string_view str_v)
-		:
-			param_{str_v}
-		{ }
+		RoleRef(string_view str_v): _param{str_v} { }
 	
 		// Check if the role can be found in a rulebook.
 		bool member_of(Rulebook const& rulebook);
@@ -47,10 +38,10 @@ namespace maf
 		Role const& resolve(Game const& game);
 	
 	private:
-		using param_t = std::variant<Role::ID,          // ID in a rulebook
-		                             std::string_view>; // role alias
+		using param_t = variant<Role::ID,     // ID in a rulebook
+								string_view>; // role alias
 	
-		param_t param_;
+		param_t _param;
 	};
 }
 

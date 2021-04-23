@@ -38,7 +38,7 @@ maf::Console::Console() {
 	refresh_output();
 }
 
-bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
+bool maf::Console::do_commands(const vector<string_view> & commands) {
 	std::stringstream err{}; // Write an error here if something goes wrong.
 	TextParams err_params = {}; // (include parameters for error message here)
 
@@ -126,7 +126,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 				begin_preset(i);
 			} else {
 				err_params["str"] = escaped(str);
-				
+
 				err << "=Invalid input!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
 			}
 		}
@@ -148,17 +148,17 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	}
 	catch (const Rulebook::Missing_role_alias &e) {
 		err_params["alias"] = escaped(e.alias);
-		
+
 		err << "=Invalid alias!=\n\nNo role could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list r@ to see a list of each role and its alias.)";
 	}
 	catch (const Rulebook::Missing_wildcard_alias &e) {
 		err_params["alias"] = escaped(e.alias);
-		
+
 		err << "=Invalid alias!=\n\nNo wildcard could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list w@ to see a list of each wildcard and its alias.)";
 	}
 	catch (const Game::Kick_failed &e) {
 		err_params["player"] = escaped(_game_log->get_name(*e.player));
-		
+
 		err << "=Kick failed!=\n\n";
 
 		switch (e.reason) {
@@ -191,7 +191,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (const Game::Lynch_vote_failed &e) {
 		err_params["voter"] = escaped(_game_log->get_name(*e.voter));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Lynch vote failed!=\n\n";
 
 		switch (e.reason) {
@@ -246,7 +246,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 			case Game::Duel_failed::Reason::caster_has_no_duel:
 				err << "{caster} has no duel ability to use.";
 				break;
-			
+
 			case Game::Duel_failed::Reason::bad_probability:
 				err << "An error occurred when calculating the probabilities needed to simulate the duel.";
 				break;
@@ -270,7 +270,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	}
 	catch (const Game::Choose_fake_role_failed &e) {
 		err_params["player"] = escaped(_game_log->get_name(*e.player));
-		
+
 		err << "=Choose fake role failed!=\n\n";
 
 		switch (e.reason) {
@@ -294,7 +294,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (const Game::Mafia_kill_failed &e) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Mafia kill failed!=\n\n";
 
 		switch (e.reason) {
@@ -324,7 +324,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (const Game::Kill_failed &e) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Kill failed!=\n\n";
 
 		switch (e.reason) {
@@ -345,7 +345,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (const Game::Heal_failed &e) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Heal failed!=\n\n";
 
 		switch (e.reason) {
@@ -369,7 +369,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (const Game::Investigate_failed &e) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Investigation failed!=\n\n";
 
 		switch (e.reason) {
@@ -393,7 +393,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	catch (Game::Peddle_failed const& e) {
 		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
 		err_params["target"] = escaped(_game_log->get_name(*e.target));
-		
+
 		err << "=Peddle failed!=\n\n";
 
 		switch (e.reason) {
@@ -422,7 +422,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	}
 	catch (const Game_log::Player_not_found &e) {
 		err_params["player"] = escaped(e.name);
-		
+
 		err << "=Player not found!=\n\nA player named @{player}@ could not be found.";
 	}
 	catch (const Event::Bad_commands &e) {
@@ -433,22 +433,22 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	}
 	catch (const Setup_screen::Player_already_exists &e) {
 		err_params["player"] = escaped(e.name);
-		
+
 		err << "=Player already exists!=\n\nA player named @{player}@ has already been selected to play in the next game.\nNote that names are case-insensitive.)";
 	}
 	catch (const Setup_screen::Player_missing &e) {
 		err_params["player"] = escaped(e.name);
-		
+
 		err << "=Missing player!=\n\nA player named @{player}@ could not be found.";
 	}
 	catch (const Setup_screen::Rolecard_unselected &e) {
 		err_params["alias"] = escaped(e.role->alias());
-		
+
 		err << "=Rolecard not selected!=\n\nNo copies of the rolecard with alias @{alias}@ have been selected.";
 	}
 	catch (const Setup_screen::Wildcard_unselected &e) {
 		err_params["alias"] = escaped(e.wildcard->alias());
-		
+
 		err << "=Wildcard not selected!=\n\nNo copies of the wildcard with alias @{alias}@ have been selected.";
 	}
 	catch (const Setup_screen::Bad_commands &e) {
@@ -468,8 +468,8 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 		}
 	}
 	catch (const Missing_preset &e) {
-		err_params["index"] = std::to_string(e.index);
-		
+		err_params["index"] = e.index;
+
 		err << "=Missing preset!=There is no preset defined for the index {index}.";
 	}
 
@@ -484,7 +484,7 @@ bool maf::Console::do_commands(const std::vector<std::string_view> & commands) {
 	}
 }
 
-bool maf::Console::input(std::string_view input) {
+bool maf::Console::input(string_view input) {
 	auto v = parse_input(input);
 	return do_commands(v);
 }
@@ -493,24 +493,24 @@ maf::StyledText const& maf::Console::output() const {
 	return _output;
 }
 
-void maf::Console::read_output(std::string_view contents) {
+void maf::Console::read_output(string_view contents) {
 	try {
 		_output = format_text(contents);
 	} catch (format_text_error const& error) {
-		std::string msg = "\n\nERROR: ";
+		string msg = "\n\nERROR: ";
 		error.write(msg);
 		msg += " in the following string:\n\n";
 
 		_output.clear();
 		_output.emplace_back("Error!", StyledString::title_attributes);
 		_output.emplace_back(msg, StyledString::default_attributes);
-		_output.emplace_back(std::string{error.input}, StyledString::monospace_attributes);
+		_output.emplace_back(string{error.input}, StyledString::monospace_attributes);
 	}
 }
 
 void maf::Console::refresh_output() {
 	const Screen *current_screen = nullptr;
-	std::string str;
+	string str;
 
 	if (has_help_screen()) {
 		current_screen = _help_screen.get();
@@ -530,10 +530,10 @@ maf::StyledText const& maf::Console::error_message() const {
 	return _error_message;
 }
 
-void maf::Console::read_error_message(std::string_view raw_err_msg, TextParams const& params) {
+void maf::Console::read_error_message(string_view raw_err_msg, TextParams const& params) {
 	// TODO: Catch exceptions when preprocessing the text.
 	auto preprocessed_err_msg = preprocess_text(raw_err_msg, params);
-	
+
 	// TODO: Catch exceptions when formatting the text.
 	// Might make sense to show another error message in this case, explaining
 	// why the original error message couldn't be parsed?
@@ -600,7 +600,10 @@ void maf::Console::end_game() {
 		ofs << "\n====== ";
 		ofs << std::put_time(std::localtime(&t), "%F %T");
 		ofs << " ======\n\n";
-		_game_log->write_transcript(ofs);
+
+		string transcript;
+		_game_log->write_transcript(transcript);
+		ofs << transcript;
 
 		_game_log.reset();
 	}
@@ -614,9 +617,9 @@ const maf::Rulebook & maf::Console::active_rulebook() const {
 	}
 }
 
-void maf::Console::begin_game(const std::vector<std::string> &pl_names,
-                              const std::vector<Role::ID> &r_ids,
-                              const std::vector<Wildcard::ID> &w_ids,
+void maf::Console::begin_game(const vector<string> &pl_names,
+                              const vector<Role::ID> &r_ids,
+                              const vector<Wildcard::ID> &w_ids,
                               const Rulebook &rulebook)
 {
 	if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};

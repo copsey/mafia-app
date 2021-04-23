@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sstream>
 
 #include "../util/map.hpp"
 #include "../util/random.hpp"
@@ -19,21 +18,23 @@ maf::Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 	auto is_zero = [](double w) { return w == 0; };
 
 	if (std::any_of(util::item_begin(weights), util::item_end(weights), is_negative)) {
-		std::ostringstream err{};
-		err << "A wildcard with alias " << alias() << " was created with a negative role weight.";
+		string msg = "A wildcard with alias ";
+		msg += alias();
+		msg += " was created with a negative role weight.";
 
-		throw std::invalid_argument{err.str()};
+		throw std::invalid_argument{msg};
 	}
 
 	if (std::all_of(util::item_begin(weights), util::item_end(weights), is_zero)) {
-		std::ostringstream err{};
-		err << "A wildcard with alias " << alias() << " was created with every role weight set to zero.";
+		string msg = "A wildcard with alias ";
+		msg += alias();
+		msg += " was created with every role weight set to zero.";
 
-		throw std::invalid_argument{err.str()};
+		throw std::invalid_argument{msg};
 	}
 }
 
-const char * maf::Wildcard::alias() const {
+maf::string_view maf::Wildcard::alias() const {
 	return maf::alias(_id);
 }
 
@@ -45,12 +46,12 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 		return std::none_of(rulebook.roles_begin(), rulebook.roles_end(), wrong_alignment);
 	} else {
-		std::vector<double> probabilities = _dist.probabilities();
+		auto probs = _dist.probabilities();
 
 		for (std::size_t i{0}; i < _role_ids.size(); ++i) {
 			auto& r = rulebook.look_up(_role_ids[i]);
 			if (r.alignment() != alignment) {
-				double p = probabilities[i];
+				double p = probs[i];
 				if (p > 0.0) return false;
 			}
 		}
@@ -61,23 +62,22 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 
 const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 	if (uses_evaluator()) {
-		std::vector<util::ref<const Role>> role_refs{};
-		std::vector<double> weights{};
+		vector<util::ref<const Role>> role_refs{};
+		vector<double> weights{};
 
 		auto evaluate_role = [&](const Role & role) {
 			double w = _evaluator(role);
 
 			if (w < 0.0) {
-				std::ostringstream err{};
-				err << "A wildcard with alias "
-				    << alias()
-				    << " returned the negative role weight of "
-				    << w
-				    << " for the role with alias "
-				    << role.alias()
-				    << ".";
+				string msg = "A wildcard with alias ";
+				msg += alias();
+				msg += " returned the negative role weight of ";
+				msg += std::to_string(w);
+				msg += " for the role with alias ";
+				msg += role.alias();
+				msg += ".";
 
-				throw std::logic_error{err.str()};
+				throw std::logic_error{msg};
 			} else if (w > 0.0) {
 				role_refs.emplace_back(role);
 				weights.push_back(w);
@@ -87,12 +87,11 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 		rulebook.for_each_role(evaluate_role);
 
 		if (role_refs.size() == 0) {
-			std::ostringstream err{};
-			err << "A wildcard with alias "
-			    << alias()
-			    << " chose zero as the weight of every role in the rulebook.";
+			string msg = "A wildcard with alias ";
+			msg += alias();
+			msg += " chose zero as the weight of every role in the rulebook.";
 
-			throw std::logic_error{err.str()};
+			throw std::logic_error{msg};
 		}
 
 		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
@@ -102,7 +101,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 	}
 }
 
-const char * maf::alias(Wildcard::ID id) {
+maf::string_view maf::alias(Wildcard::ID id) {
 	switch (id) {
 		case Wildcard::ID::any:
 			return "random";

@@ -5,6 +5,7 @@
 #include <optional>
 #include <ostream>
 
+#include "../util/stdlib.hpp"
 #include "../logic/logic.hpp"
 #include "format.hpp"
 
@@ -14,7 +15,7 @@
 
 namespace maf {
 	struct Help_Screen: Screen {
-		std::string_view txt_subdir() const override
+		string_view txt_subdir() const override
 		{ return "txt/help/"; }
 	};
 
@@ -24,7 +25,7 @@ namespace maf {
 
 		util::ref<const Event> event;
 
-		std::string_view id() const final
+		string_view id() const final
 		{ return event->id(); }
 	};
 
@@ -34,10 +35,10 @@ namespace maf {
 
 		util::ref<const Role> role;
 
-		std::string_view id() const final
+		string_view id() const final
 		{ return alias(role->id()); }
 
-		std::string_view txt_subdir() const override
+		string_view txt_subdir() const override
 		{ return "txt/help/roles/"; }
 
 		void set_params(TextParams & params) const override;
@@ -49,23 +50,22 @@ namespace maf {
 		//
 		// It's possible to provide an optional alignment, in which case only
 		// roles of that alignment will be listed.
-		List_Roles_Screen(const Rulebook& rulebook, std::optional<Alignment> alignment = std::nullopt)
-		: _rulebook{rulebook}, _filter_alignment{alignment}
-		{ }
+		List_Roles_Screen(const Rulebook& rulebook, optional<Alignment> alignment = std::nullopt)
+		: _rulebook{rulebook}, _filter_alignment{alignment} { }
 
-		std::string_view id() const final
+		string_view id() const final
 		{ return "list-roles"; }
 
 		void set_params(TextParams & params) const override;
 
 	private:
 		util::ref<const Rulebook> _rulebook;
-		std::optional<Alignment> _filter_alignment;
+		optional<Alignment> _filter_alignment;
 	};
 
 
 	struct Setup_Help_Screen: Help_Screen {
-		std::string_view id() const final
+		string_view id() const final
 		{ return "setup"; }
 	};
 
@@ -75,7 +75,7 @@ namespace maf {
 		: _player_ref{player}, _game_log_ref{game_log}
 		{ }
 
-		std::string_view id() const final
+		string_view id() const final
 		{ return "player-info"; }
 
 		void set_params(TextParams & params) const override;

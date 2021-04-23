@@ -2,6 +2,7 @@
 #define MAFIA_LOGIC_GAME
 
 #include "../util/ref.hpp"
+#include "../util/stdlib.hpp"
 
 #include "player.hpp"
 #include "role_ref.hpp"
@@ -281,8 +282,8 @@ namespace maf
 		// Start a new game with the given parameters, creating a set of players
 		// and assigning each player an initial role.
 		// Note that this could lead to the game immediately ending.
-		Game(const std::vector<Role::ID> &role_ids,
-		     const std::vector<Wildcard::ID> &wildcard_ids,
+		Game(const vector<Role::ID> &role_ids,
+		     const vector<Wildcard::ID> &wildcard_ids,
 		     const Rulebook &rulebook = Rulebook{});
 
 		// The rulebook being used to run the game.
@@ -295,11 +296,11 @@ namespace maf
 		//
 
 		// The participating players, both present and not present.
-		const std::vector<Player> & players() const;
+		const vector<Player> & players() const;
 		// A vector containing every player remaining.
-		std::vector<util::ref<const Player>> remaining_players() const;
+		vector<util::ref<const Player>> remaining_players() const;
 		// A vector containing every player remaining with the given alignment.
-		std::vector<util::ref<const Player>> remaining_players(Alignment alignment) const;
+		vector<util::ref<const Player>> remaining_players(Alignment alignment) const;
 		// The number of players remaining.
 		std::size_t num_players_left() const;
 		// The number of players remaining with the given alignment.
@@ -370,7 +371,7 @@ namespace maf
 		///
 		/// The results are stored in chronological order, with the most
 		/// recent investigations at the end of the vector.
-		const std::vector<Investigation> & investigations() const
+		const vector<Investigation> & investigations() const
 		{
 			return _investigations;
 		}
@@ -379,7 +380,7 @@ namespace maf
 		bool game_has_ended() const;
 
 	private:
-		std::vector<Player> _players{};
+		vector<Player> _players{};
 		Rulebook _rulebook;
 
 		bool _has_ended{false};
@@ -393,13 +394,13 @@ namespace maf
 		Player *_mafia_kill_caster{nullptr};
 		Player *_mafia_kill_target{nullptr};
 
-		std::vector<std::pair<Player *, Player *>> _pending_kills{};
-		std::vector<std::pair<Player *, Player *>> _pending_heals{};
-		std::vector<std::pair<Player *, Player *>> _pending_investigations{};
-		std::vector<std::pair<Player *, Player *>> _pending_peddles{};
+		vector<pair<Player *, Player *>> _pending_kills{};
+		vector<pair<Player *, Player *>> _pending_heals{};
+		vector<pair<Player *, Player *>> _pending_investigations{};
+		vector<pair<Player *, Player *>> _pending_peddles{};
 
-		std::vector<Player *> _pending_haunters{};
-		std::vector<Investigation> _investigations{};
+		vector<Player *> _pending_haunters{};
+		vector<Investigation> _investigations{};
 
 		// Gets the player with the given ID.
 		// Throws an exception if no such player could be found.

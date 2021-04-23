@@ -5,7 +5,6 @@
 #include "help_screens.hpp"
 #include "names.hpp"
 
-
 void maf::Role_Info_Screen::set_params(TextParams& params) const {
 	params["role"] = escaped(full_name(*role));
 }
@@ -16,7 +15,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 	params["show_mafia"] = (_filter_alignment == Alignment::mafia);
 	params["show_freelance"] = (_filter_alignment == Alignment::freelance);
 
-	std::vector<util::ref<const Role>> filtered_roles;
+	vector<util::ref<const Role>> filtered_roles;
 
 	if (_filter_alignment) {
 		switch (*_filter_alignment) {
@@ -42,7 +41,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 
 	util::sort(filtered_roles, order_by_full_name);
 
-	std::vector<TextParams> roles;
+	vector<TextParams> roles;
 	for (auto role_ref: filtered_roles) {
 		auto& subparams = roles.emplace_back();
 		auto& role = *role_ref;
@@ -53,7 +52,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 		subparams["role.aligned_to_freelance"] = (role.alignment() == Alignment::freelance);
 	}
 
-	params["roles"] = std::move(roles);
+	params["roles"] = move(roles);
 }
 
 void maf::Player_Info_Screen::set_params(TextParams& params) const {
@@ -61,11 +60,11 @@ void maf::Player_Info_Screen::set_params(TextParams& params) const {
 	auto& game = game_log.game();
 	auto& player = *_player_ref;
 
-	std::vector<TextParams> investigations;
+	vector<TextParams> investigations;
 	for (auto& inv: game.investigations()) {
 		if (inv.caster() == player) {
 			auto& subparams = investigations.emplace_back();
-			subparams["date"] = std::to_string(inv.date());
+			subparams["date"] = static_cast<int>(inv.date());
 			subparams["target"] = escaped(game_log.get_name(inv.target()));
 			subparams["target.suspicious"] = inv.result();
 		}
@@ -73,17 +72,17 @@ void maf::Player_Info_Screen::set_params(TextParams& params) const {
 
 	params["daytime"] = (game.time() == Time::day);
 	params["nighttime"] = (game.time() == Time::night);
-	
+
 	params["player"] = escaped(game_log.get_name(player));
 	params["role"] = escaped(full_name(player.role()));
 	params["has_wildcard"] = (player.wildcard() != nullptr);
 	params["has_lynch_vote"] = (player.lynch_vote() != nullptr);
-	params["investigations"] = std::move(investigations);
-	
+	params["investigations"] = move(investigations);
+
 	if (player.wildcard()) {
 		params["wildcard.alias"] = escaped(player.wildcard()->alias());
 	}
-	
+
 	if (player.lynch_vote()) {
 		params["lynch_vote"] = escaped(game_log.get_name(*player.lynch_vote()));
 	}

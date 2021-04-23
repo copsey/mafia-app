@@ -4,6 +4,7 @@
 #include <memory>
 #include <string_view>
 
+#include "../util/stdlib.hpp"
 #include "events.hpp"
 
 namespace maf {
@@ -17,7 +18,7 @@ namespace maf {
 
 		// Signifies that no player could be found with the given name.
 		struct Player_not_found {
-			std::string name;
+			string name;
 		};
 
 		// An exception signifying that an ability use has not been programmed in
@@ -30,9 +31,9 @@ namespace maf {
 		struct Cannot_advance { };
 
 		// Creates a new game log, managing a game with the given parameters.
-		Game_log(const std::vector<std::string> &player_names,
-		         const std::vector<Role::ID> &role_ids,
-		         const std::vector<Wildcard::ID> &wildcard_ids,
+		Game_log(const vector<string> &player_names,
+		         const vector<Role::ID> &role_ids,
+		         const vector<Wildcard::ID> &wildcard_ids,
 		         const Rulebook &rulebook = Rulebook{});
 
 		// The game being managed.
@@ -62,11 +63,11 @@ namespace maf {
 
 		// Handles the given commands, by passing them to the current event.
 		// Throws an exception if the commands couldn't be handled.
-		void do_commands(const std::vector<std::string_view> & commands);
+		void do_commands(const vector<string_view> & commands);
 
-		// Writes a transcript to os, containing a summary of every event which
-		// has occurred so far, in chronological order.
-		void write_transcript(std::ostream &os) const;
+		// Writes a transcript to `str`, containing a summary of every event
+		// that has occurred so far, in chronological order.
+		void write_transcript(string & str) const;
 
 		// Finds the player with the given ID.
 		// Throws an exception if no such player could be found.
@@ -74,13 +75,13 @@ namespace maf {
 
 		// Finds the player whose name matches the given string, up to case.
 		// Throws an exception if no such player could be found.
-		const Player & find_player(std::string_view name) const;
+		const Player & find_player(string_view name) const;
 
 		/// Get the name of the given player.
-		std::string_view get_name(const Player & player) const;
+		string_view get_name(const Player & player) const;
 
 		/// Get the name of the player with the given ID.
-		std::string_view get_name(Player::ID id) const;
+		string_view get_name(Player::ID id) const;
 
 
 
@@ -118,9 +119,9 @@ namespace maf {
 	private:
 		Game _game;
 
-		std::vector<std::string> _player_names;
+		vector<string> _player_names;
 
-		std::vector<std::unique_ptr<Event>> _log{};
+		vector<unique_ptr<Event>> _log{};
 		decltype(_log)::size_type _log_index{0};
 
 		// Adds an event to the end of the log.

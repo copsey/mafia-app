@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "../util/algorithm.hpp"
+#include "../util/stdlib.hpp"
 
 #include "game_log.hpp"
 #include "help_screens.hpp"
@@ -42,7 +43,7 @@ namespace maf {
 		// error_message() is empty.
 		// Returns false if the commands are invalid for some reason. In this
 		// case, output() remains unchanged and error_message() is non-empty.
-		bool do_commands(const std::vector<std::string_view> & commands);
+		bool do_commands(const vector<string_view> & commands);
 		// Process the given input string, by seperating it into commands
 		// delimited by whitespace. For example, the input "add p Brutus" becomes
 		// {"add", "p", "Brutus"}.
@@ -50,13 +51,13 @@ namespace maf {
 		// is empty.
 		// Returns false if the input is invalid for some reason. In this case,
 		// output() remains unchanged and error_message() is non-empty.
-		bool input(std::string_view input);
+		bool input(string_view input);
 
 		// The most recent output. Never empty.
 		const StyledText & output() const;
 		// Format the given contents, updating the output to display the styled
 		// text obtained.
-		void read_output(std::string_view contents);
+		void read_output(string_view contents);
 		// Updates the output to display the appropriate screen.
 		void refresh_output();
 
@@ -66,7 +67,7 @@ namespace maf {
 		const StyledText & error_message() const;
 		// Reads the tagged string `str`, updating the error message to
 		// display the styled text obtained.
-		void read_error_message(std::string_view str, TextParams const& params = {});
+		void read_error_message(string_view str, TextParams const& params = {});
 		// Removes the current error message.
 		void clear_error_message();
 
@@ -109,9 +110,9 @@ namespace maf {
 
 	private:
 		struct Game_parameters {
-			std::vector<std::string> player_names;
-			std::vector<Role::ID> role_ids;
-			std::vector<Wildcard::ID> wildcard_ids;
+			vector<string> player_names;
+			vector<Role::ID> role_ids;
+			vector<Wildcard::ID> wildcard_ids;
 			Rulebook rulebook;
 		};
 
@@ -121,14 +122,14 @@ namespace maf {
 		StyledText _output{};
 		StyledText _error_message{};
 
-		std::unique_ptr<Game_log> _game_log{};
+		unique_ptr<Game_log> _game_log{};
 		Setup_screen _setup_screen{};
-		std::unique_ptr<Help_Screen> _help_screen{};
-		std::unique_ptr<Question> _question{};
+		unique_ptr<Help_Screen> _help_screen{};
+		unique_ptr<Question> _question{};
 
-		void begin_game(const std::vector<std::string> &player_names,
-		                const std::vector<Role::ID> &role_ids,
-		                const std::vector<Wildcard::ID> &wildcard_ids,
+		void begin_game(const vector<string> &player_names,
+		                const vector<Role::ID> &role_ids,
+		                const vector<Wildcard::ID> &wildcard_ids,
 		                const Rulebook &rulebook);
 		void begin_pending_game();
 		void begin_preset(int i);

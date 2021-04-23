@@ -26,10 +26,6 @@ void maf::Player::kick() {
 	_kicked = true;
 }
 
-bool maf::Player::has_been_lynched() const {
-	return _lynched;
-}
-
 void maf::Player::lynch(Date date) {
 	kill(date, Time::day);
 	_lynched = true;
@@ -46,10 +42,6 @@ void maf::Player::refresh() {
 	
 	_healed = false;
 	_on_drugs = false;
-}
-
-const std::vector<maf::Ability> & maf::Player::compulsory_abilities() const {
-	return _compulsory_abilities;
 }
 
 void maf::Player::add_compulsory_ability(Ability ability) {
@@ -80,8 +72,4 @@ void maf::Player::give_drugs() {
 
 void maf::Player::haunt(const Player &haunter) {
 	_haunter = &haunter;
-}
-
-bool maf::operator==(const Player & p1, const Player & p2) {
-	return p1.id() == p2.id();
 }

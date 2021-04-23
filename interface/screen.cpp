@@ -3,9 +3,9 @@
 
 #include "screen.hpp"
 
-std::string maf::Screen::txt_path() const {
+maf::string maf::Screen::txt_path() const {
 	// FIXME: This is horrendously fragile.
-	std::string fname = "/Users/Jack/Documents/Developer/Projects/mafia/";
+	string fname = "/Users/Jack/Documents/Developer/Projects/mafia/";
 
 	fname += "resources/";
 	fname += this->txt_subdir();
@@ -14,8 +14,8 @@ std::string maf::Screen::txt_path() const {
 	return fname;
 }
 
-std::string maf::Screen::load_txt() const {
-	std::string contents;
+maf::string maf::Screen::load_txt() const {
+	string contents;
 
 	auto path = this->txt_path();
 	std::ifstream input{path};
@@ -34,7 +34,7 @@ std::string maf::Screen::load_txt() const {
 	return contents;
 }
 
-void maf::Screen::write(std::string & output) const {
+void maf::Screen::write(string & output) const {
 	auto raw_txt = this->load_txt();
 
 	TextParams params;
@@ -43,7 +43,7 @@ void maf::Screen::write(std::string & output) const {
 	try {
 		output += preprocess_text(raw_txt, params);
 	} catch (preprocess_text_error const& error) {
-		std::string msg;
+		string msg;
 		error.write(msg);
 
 		output += "=Error!=\n\nERROR: ";

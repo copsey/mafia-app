@@ -11,6 +11,7 @@
 #include "../util/algorithm.hpp"
 #include "../util/char.hpp"
 #include "../util/parse.hpp"
+#include "../util/stdlib.hpp"
 #include "../util/string.hpp"
 
 namespace maf {
@@ -20,7 +21,7 @@ namespace maf {
 	// # Examples
 	// - `escaped("My {string}")` returns `"My \{string\}"`
 	// - `escaped("under_score")` returns `"under\_score"`
-	std::string escaped(std::string_view str_view);
+	string escaped(string_view str_view);
 
 	// A single parameter used when preprocessing text.
 	struct TextParam;
@@ -70,26 +71,25 @@ namespace maf {
 		preprocess_text_errc errc;
 
 		// The input string that couldn't be processed.
-		std::string_view input;
+		string_view input;
 
 		// Further info about the error. This will be one of the following:
 		// - An iterator pointing to where the error occurred.
 		// - The substring that caused the error.
-		std::variant<std::string_view::iterator, std::string_view> param;
+		variant<string_view::iterator, string_view> param;
 
 		// Position in input string where the error occurred.
-		std::string_view::size_type pos() const;
+		string_view::size_type pos() const;
 
 		preprocess_text_error(preprocess_text_errc errc,
-							  std::string_view::iterator iter)
+							  string_view::iterator iter)
 		: errc{errc}, param{iter} { }
 
-		preprocess_text_error(preprocess_text_errc errc,
-							  std::string_view substr)
+		preprocess_text_error(preprocess_text_errc errc, string_view substr)
 		: errc{errc}, param{substr} { }
 
 		// Write a description of this error to `output`.
-		void write(std::string & output) const;
+		void write(string & output) const;
 	};
 
 	// Find all directives of the form `"{...}"` in `input` and perform a
@@ -119,7 +119,7 @@ namespace maf {
 	// There are many more directives possible than this example demonstrates.
 	// See the file `resources/txt/cheatsheet.txt` included with the source code
 	// for further information.
-	std::string preprocess_text(std::string_view input, TextParams const& params);
+	string preprocess_text(string_view input, TextParams const& params);
 
 
 	// A string coupled with a set of suggested attributes. Each attribute is
@@ -177,15 +177,15 @@ namespace maf {
 
 		StyledString() = default;
 
-		StyledString(std::string string, attributes_t attributes)
+		StyledString(string string, attributes_t attributes)
 		: string{string}, attributes{attributes} { }
 
-		std::string string;
+		string string;
 		attributes_t attributes;
 	};
 
 	// A vector of styled strings, used to form a block of text.
-	using StyledText = std::vector<StyledString>;
+	using StyledText = vector<StyledString>;
 
 	// Error code for exceptions that can be thrown when calling
 	// `format_text`.
@@ -199,34 +199,34 @@ namespace maf {
 		format_text_errc errc;
 
 		// The input string that couldn't be processed.
-		std::string_view input;
+		string_view input;
 
 		// An iterator pointing to where the error occurred.
-		std::string_view::iterator i;
+		string_view::iterator i;
 
 		// An (optional) iterator that forms a range `{i, j}` when paired with
 		// `i`.
 		//
 		// Only used by certain error codes to signify where in the input string
 		// an invalid substring occurs.
-		std::string_view::iterator j;
+		string_view::iterator j;
 
 		// Position in input string where the error occurred.
-		std::string_view::size_type pos() const {
+		string_view::size_type pos() const {
 			return i - input.begin();
 		}
 
-		format_text_error(format_text_errc errc, std::string_view::iterator i)
+		format_text_error(format_text_errc errc, string_view::iterator i)
 		: errc{errc}, i{i}, j{}
 		{ }
 
-		format_text_error(format_text_errc errc, std::string_view::iterator i,
-						  std::string_view::iterator j)
+		format_text_error(format_text_errc errc, string_view::iterator i,
+						  string_view::iterator j)
 		: errc{errc}, i{i}, j{j}
 		{ }
 
 		// Write a description of this error to `output`.
-		void write(std::string & output) const;
+		void write(string & output) const;
 	};
 
 	// Parse `input` to find all of its special characters and perform a
@@ -244,7 +244,7 @@ namespace maf {
 	//
 	// See the file `resources/txt/cheatsheet.txt` included with this source
 	// code for more information.
-	inline StyledText format_text(std::string_view input,
+	inline StyledText format_text(string_view input,
 	                              StyledString::attributes_t attributes = StyledString::default_attributes);
 }
 
@@ -254,11 +254,11 @@ namespace maf {
  */
 
 namespace maf::_textparam_impl {
-	using Base = std::variant<
+	using Base = variant<
 		bool,
 		int,
-		std::string,
-		std::vector<TextParams>>;
+		string,
+		vector<TextParams>>;
 }
 
 struct maf::TextParam: _textparam_impl::Base {
@@ -267,7 +267,7 @@ struct maf::TextParam: _textparam_impl::Base {
 
 
 namespace maf::_textparams_impl {
-	using Base = std::map<std::string_view, TextParam>;
+	using Base = std::map<string_view, TextParam>;
 }
 
 struct maf::TextParams: _textparams_impl::Base {
@@ -276,17 +276,7 @@ struct maf::TextParams: _textparams_impl::Base {
 
 
 namespace maf::_preprocess_text_impl {
-	using std::move;
-	using std::make_unique;
-	using std::literals::operator""sv;
-
-	using string = std::string;
-	using string_view = std::string_view;
-	using iterator = std::string_view::iterator;
-	template <typename T> using vector = std::vector<T>;
-	template <typename T> using optional = std::optional<T>;
-	template <typename T> using unique_ptr = std::unique_ptr<T>;
-	template <typename... Ts> using variant = std::variant<Ts...>;
+	using iterator = string_view::iterator;
 
 	inline bool is_brace(char ch) {
 		return ch == '{' || ch == '}';
@@ -845,7 +835,7 @@ namespace maf::_preprocess_text_impl {
 
 
 	struct conditional: expression {
-		using conditional_sequence = std::pair<logical_test, sequence>;
+		using conditional_sequence = pair<logical_test, sequence>;
 
 		vector<conditional_sequence> conditional_subexprs;
 		optional<sequence> default_subexpr;
@@ -1340,9 +1330,7 @@ namespace maf::_preprocess_text_impl {
 }
 
 
-inline std::string maf::preprocess_text(std::string_view input,
-								        TextParams const& params)
-{
+inline maf::string maf::preprocess_text(string_view input, TextParams const& params) {
 	using namespace _preprocess_text_impl;
 
 	string output;
@@ -1370,7 +1358,7 @@ inline std::string maf::preprocess_text(std::string_view input,
 }
 
 
-inline std::string_view::size_type maf::preprocess_text_error::pos() const {
+inline maf::string_view::size_type maf::preprocess_text_error::pos() const {
 	using namespace _preprocess_text_impl;
 
 	auto get_iter = [&](auto&& arg) {
@@ -1392,7 +1380,7 @@ inline std::string_view::size_type maf::preprocess_text_error::pos() const {
 }
 
 
-inline void maf::preprocess_text_error::write(std::string & output) const {
+inline void maf::preprocess_text_error::write(string & output) const {
 	using namespace _preprocess_text_impl;
 
 	auto pos = std::to_string(this->pos());
@@ -1524,7 +1512,7 @@ inline void maf::preprocess_text_error::write(std::string & output) const {
 
 
 namespace maf::_format_text_impl {
-	using iterator = std::string_view::iterator;
+	using iterator = string_view::iterator;
 
 	inline bool is_format_code(char ch) {
 		switch (ch) {
@@ -1551,8 +1539,8 @@ namespace maf::_format_text_impl {
 		return std::find_if(begin, end, is_escapable);
 	}
 
-	inline std::string escaped(iterator begin, iterator end) {
-		std::string output;
+	inline string escaped(iterator begin, iterator end) {
+		string output;
 
 		for (auto i = begin; ; ) {
 			auto j = find_escapable(i, end);
@@ -1581,7 +1569,7 @@ namespace maf::_format_text_impl {
 	// - Throws `format_text_error` if the range `{begin, begin+1}` does not
 	// represent an escape sequence.
 	inline iterator	parse_escape_sequence(iterator begin, iterator end,
-										  std::string & str)
+										  string & str)
 	{
 		if (begin == end) {
 			auto errc = format_text_errc::invalid_escape_sequence;
@@ -1606,7 +1594,7 @@ namespace maf::_format_text_impl {
 	}
 
 
-	inline void move_block(StyledText & text, std::string & block,
+	inline void move_block(StyledText & text, string & block,
 						   StyledString::attributes_t attributes)
 	{
 		if (!block.empty()) {
@@ -1731,7 +1719,7 @@ namespace maf::_format_text_impl {
 	inline StyledText format_text(iterator begin, iterator end,
 								  StyledString::attributes_t attributes)
 	{
-		std::string block;
+		string block;
 		StyledText output;
 
 		for (auto i = begin; ; ) {
@@ -1766,13 +1754,13 @@ namespace maf::_format_text_impl {
 }
 
 
-inline std::string maf::escaped(std::string_view str) {
+inline maf::string maf::escaped(string_view str) {
 	using namespace _format_text_impl;
 	return _format_text_impl::escaped(str.begin(), str.end());
 }
 
 
-inline maf::StyledText maf::format_text(std::string_view input,
+inline maf::StyledText maf::format_text(string_view input,
 							            StyledString::attributes_t attributes)
 {
 	using namespace _format_text_impl;
@@ -1786,7 +1774,7 @@ inline maf::StyledText maf::format_text(std::string_view input,
 }
 
 
-inline void maf::format_text_error::write(std::string & output) const {
+inline void maf::format_text_error::write(string & output) const {
 	auto pos = std::to_string(this->pos());
 
 	switch (errc) {

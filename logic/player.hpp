@@ -1,6 +1,7 @@
 #ifndef MAFIA_LOGIC_PLAYER
 #define MAFIA_LOGIC_PLAYER
 
+#include "../util/stdlib.hpp"
 #include "time.hpp"
 #include "wildcard.hpp"
 
@@ -139,7 +140,7 @@ namespace maf {
 		void kick();
 
 		/// Whether the player has been lynched.
-		bool has_been_lynched() const;
+		bool has_been_lynched() const {	return _lynched; }
 
 		/// Lynch the player, effectively removing them from the game.
 		///
@@ -166,7 +167,9 @@ namespace maf {
 
 		/// The abilities that the player must respond to before the game can
 		/// continue.
-		const std::vector<Ability> & compulsory_abilities() const;
+		const vector<Ability> & compulsory_abilities() const {
+			return _compulsory_abilities;
+		}
 
 		/// Add a compulsory ability that the player must respond to before the
 		/// game can continue.
@@ -268,7 +271,7 @@ namespace maf {
 		Date _date_of_death;
 		Time _time_of_death;
 
-		std::vector<Ability> _compulsory_abilities = {};
+		vector<Ability> _compulsory_abilities = {};
 
 		const Player * _lynch_vote = nullptr;
 		const Player * _haunter = nullptr;
@@ -284,7 +287,9 @@ namespace maf {
 	/// Check if two players are the same.
 	///
 	/// This is fully determined by checking if they have the same ID.
-	bool operator==(const Player & p1, const Player & p2);
+	inline bool operator==(const Player & p1, const Player & p2) {
+		return p1.id() == p2.id();
+	}
 }
 
 #endif

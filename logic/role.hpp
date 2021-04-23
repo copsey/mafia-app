@@ -1,8 +1,7 @@
 #ifndef MAFIA_LOGIC_ROLE
 #define MAFIA_LOGIC_ROLE
 
-#include <optional>
-#include <string_view>
+#include "../util/stdlib.hpp"
 
 namespace maf {
 	class Rulebook;
@@ -68,7 +67,7 @@ namespace maf {
 
 		/// The alias of the role.
 		/// Equivalent to `alias(this->id())`.
-		std::string_view alias() const;
+		string_view alias() const;
 
 		/// The alignment of the role.
 		Alignment alignment() const {
@@ -78,14 +77,12 @@ namespace maf {
 		/// The ability of the role, if it has one.
 		///
 		/// @throws `std::bad_optional_access` if the role has no ability.
-		Ability ability() const
-		{
+		Ability ability() const {
 			return _ability_or_none.value();
 		}
 
 		/// Whether the role has an ability.
-		bool has_ability() const
-		{
+		bool has_ability() const {
 			return _ability_or_none.has_value();
 		}
 
@@ -125,7 +122,7 @@ namespace maf {
 	private:
 		ID _id;
 		Alignment _alignment{Alignment::freelance};
-		std::optional<Ability> _ability_or_none{};
+		optional<Ability> _ability_or_none{};
 		Win_condition _win_condition{Win_condition::survive};
 		Peace_condition _peace_condition{Peace_condition::always_peaceful};
 		bool _suspicious{false};
@@ -137,7 +134,7 @@ namespace maf {
 	};
 
 	/// The alias corresponding to the given role ID.
-	std::string_view alias(Role::ID id);
+	string_view alias(Role::ID id);
 }
 
 #endif

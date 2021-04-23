@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../util/ref.hpp"
+#include "../util/stdlib.hpp"
 
 #include "role.hpp"
 #include "wildcard.hpp"
@@ -38,7 +39,7 @@ namespace maf {
 		///
 		/// This could be because the alias doesn't correspond to a role ID.
 		struct Missing_role_alias {
-			std::string alias;
+			string alias;
 		};
 
 		/// Exception signifying that a role with the given ID already exists.
@@ -57,7 +58,7 @@ namespace maf {
 		///
 		/// This could be because the alias doesn't correspond to a wildcard ID.
 		struct Missing_wildcard_alias {
-			std::string alias;
+			string alias;
 		};
 
 		/// Exception signifying that a wildcard with the given ID already exists.
@@ -66,7 +67,7 @@ namespace maf {
 		};
 
 		/// Type for iterators used to define sequences of roles within rulebooks.
-		using Role_Iterator = std::vector<Role>::const_iterator;
+		using Role_Iterator = vector<Role>::const_iterator;
 
 		/// Make a rulebook with the latest edition.
 		Rulebook()
@@ -94,16 +95,16 @@ namespace maf {
 		}
 
 		/// A vector containing every role defined in the rulebook.
-		std::vector<util::ref<const Role>> all_roles() const;
+		vector<util::ref<const Role>> all_roles() const;
 
 		/// A vector containing every village role defined in the rulebook.
-		std::vector<util::ref<const Role>> village_roles() const;
+		vector<util::ref<const Role>> village_roles() const;
 
 		/// A vector containing every mafia role defined in the rulebook.
-		std::vector<util::ref<const Role>> mafia_roles() const;
+		vector<util::ref<const Role>> mafia_roles() const;
 
 		/// A vector containing every freelance role defined in the rulebook.
-		std::vector<util::ref<const Role>> freelance_roles() const;
+		vector<util::ref<const Role>> freelance_roles() const;
 
 		/// Evaluate the function `f` on each role present in this rulebook.
 		template <typename F>
@@ -112,20 +113,20 @@ namespace maf {
 		}
 
 		/// A vector containing every wildcard defined in the rulebook.
-		const std::vector<Wildcard> & wildcards() const {
+		const vector<Wildcard> & wildcards() const {
 			return _wildcards;
 		}
 
 		/// A vector containing every village-only wildcard defined in the
 		/// rulebook.
-		std::vector<util::ref<const Wildcard>> village_wildcards() const;
+		vector<util::ref<const Wildcard>> village_wildcards() const;
 
 		/// A vector containing every mafia-only wildcard defined in the rulebook.
-		std::vector<util::ref<const Wildcard>> mafia_wildcards() const;
+		vector<util::ref<const Wildcard>> mafia_wildcards() const;
 
 		/// A vector containing every freelance-only wildcard defined in the
 		/// rulebook.
-		std::vector<util::ref<const Wildcard>> freelance_wildcards() const;
+		vector<util::ref<const Wildcard>> freelance_wildcards() const;
 
 		/// Whether the rulebook contains a given role.
 		bool contains(RoleRef r_ref) const;
@@ -134,7 +135,7 @@ namespace maf {
 		bool contains_wildcard(Wildcard::ID id) const;
 
 		/// Whether the rulebook contains a wildcard with the given alias.
-		bool contains_wildcard(std::string_view alias) const;
+		bool contains_wildcard(string_view alias) const;
 
 		/// Get the role with the given ID.
 		///
@@ -144,7 +145,7 @@ namespace maf {
 		/// Get the role with the given alias.
 		///
 		// @throws `Missing_role_alias` if none could be found.
-		Role & get_role(std::string_view alias);
+		Role & get_role(string_view alias);
 
 		/// Get the role with the given alias.
 		/// 
@@ -164,12 +165,12 @@ namespace maf {
 		/// Get the wildcard with the given alias.
 		///
 		/// @throws `Missing_wildcard_alias` if none could be found.
-		Wildcard & get_wildcard(std::string_view alias);
+		Wildcard & get_wildcard(string_view alias);
 
 		/// Get the wildcard with the given alias.
 		///
 		/// @throws `Missing_wildcard_alias` if none could be found.
-		const Wildcard & get_wildcard(std::string_view alias) const;
+		const Wildcard & get_wildcard(string_view alias) const;
 
 		/// Create and store a new role with the given ID.
 		///
@@ -223,8 +224,8 @@ namespace maf {
 
 	private:
 		Edition _edition;
-		std::vector<Role> _roles{};
-		std::vector<Wildcard> _wildcards{};
+		vector<Role> _roles{};
+		vector<Wildcard> _wildcards{};
 	};
 }
 

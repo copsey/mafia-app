@@ -73,54 +73,54 @@ maf::Rulebook::Rulebook(Edition edition) : _edition{edition}
 	});
 }
 
-std::vector<maf::util::ref<const maf::Role>> maf::Rulebook::all_roles() const {
-	std::vector<util::ref<const Role>> v{};
+maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::all_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) v.emplace_back(r);
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Role>> maf::Rulebook::village_roles() const {
-	std::vector<util::ref<const Role>> v{};
+maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::village_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::village) v.emplace_back(r);
 	}
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
-	std::vector<util::ref<const Role>> v{};
+maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::mafia) v.emplace_back(r);
 	}
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
-	std::vector<util::ref<const Role>> v{};
+maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
+	vector<util::ref<const Role>> v{};
 	for (auto & r: _roles) {
 		if (r.alignment() == Alignment::freelance) v.emplace_back(r);
 	}
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
-	std::vector<util::ref<const Wildcard>> v{};
+maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::village, *this)) v.emplace_back(w);
 	}
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
-	std::vector<util::ref<const Wildcard>> v{};
+maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::mafia, *this)) v.emplace_back(w);
 	}
 	return v;
 }
 
-std::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
-	std::vector<util::ref<const Wildcard>> v{};
+maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
+	vector<util::ref<const Wildcard>> v{};
 	for (auto & w: _wildcards) {
 		if (w.matches_alignment(Alignment::freelance, *this)) v.emplace_back(w);
 	}
@@ -139,7 +139,7 @@ bool maf::Rulebook::contains_wildcard(Wildcard::ID id) const {
 	return false;
 }
 
-bool maf::Rulebook::contains_wildcard(std::string_view alias) const {
+bool maf::Rulebook::contains_wildcard(string_view alias) const {
 	for (auto & w: _wildcards) {
 		if (w.alias() == alias) return true;
 	}
@@ -155,12 +155,12 @@ maf::Role & maf::Rulebook::get_role(Role::ID id) {
 	throw Missing_role_ID{id};
 }
 
-maf::Role & maf::Rulebook::get_role(std::string_view alias) {
+maf::Role & maf::Rulebook::get_role(string_view alias) {
 	for (auto & r: _roles) {
 		if (r.alias() == alias) return r;
 	}
 
-	throw Missing_role_alias{std::string{alias}};
+	throw Missing_role_alias{string{alias}};
 }
 
 maf::Role const& maf::Rulebook::look_up(RoleRef r_ref) const {
@@ -183,20 +183,20 @@ const maf::Wildcard & maf::Rulebook::get_wildcard(Wildcard::ID id) const {
 	throw Missing_wildcard_ID{id};
 }
 
-maf::Wildcard & maf::Rulebook::get_wildcard(std::string_view alias) {
+maf::Wildcard & maf::Rulebook::get_wildcard(string_view alias) {
 	for (auto & w: _wildcards) {
 		if (w.alias() == alias) return w;
 	}
 
-	throw Missing_wildcard_alias{std::string{alias}};
+	throw Missing_wildcard_alias{string{alias}};
 }
 
-const maf::Wildcard & maf::Rulebook::get_wildcard(std::string_view alias) const {
+const maf::Wildcard & maf::Rulebook::get_wildcard(string_view alias) const {
 	for (auto & w: _wildcards) {
 		if (w.alias() == alias) return w;
 	}
 
-	throw Missing_wildcard_alias{std::string{alias}};
+	throw Missing_wildcard_alias{string{alias}};
 }
 
 maf::Role & maf::Rulebook::new_role(Role::ID id) {

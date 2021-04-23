@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "../util/algorithm.hpp"
+#include "../util/stdlib.hpp"
+#include "../util/string.hpp"
 
 namespace maf {
 	// Decide whether or not the sequence `seq` of string-like objects matches
@@ -12,9 +14,8 @@ namespace maf {
 	// `std::size(seq)` equals `std::size(arr)`, and at each position `i`,
 	// either `arr[i]` is a blank string or `seq[i]` equals `arr[i]`.
 	template <typename Seq, std::size_t N>
-	bool commands_match(const Seq & seq, const std::string_view (&arr)[N])
-	{
-		auto eq = [](auto& s1, std::string_view s2) {
+	bool commands_match(const Seq & seq, const string_view (&arr)[N]) {
+		auto eq = [](auto& s1, string_view s2) {
 			return std::empty(s2) || s1 == s2;
 		};
 
@@ -22,10 +23,8 @@ namespace maf {
 	}
 
 	template <typename Str, std::size_t N>
-	bool commands_match(const std::vector<Str> & v,
-						const std::string_view (&arr)[N])
-	{
-		auto eq = [](auto& s1, std::string_view s2) {
+	bool commands_match(const vector<Str> & v, const string_view (&arr)[N]) {
+		auto eq = [](auto& s1, string_view s2) {
 			return std::empty(s2) || s1 == s2;
 		};
 
@@ -54,24 +53,22 @@ namespace maf {
 	// @example `"do X   with Y"` maps to `{"do", "X", "with", "Y"}`.
 	//
 	// @pre `{begin,end}` is a valid range.
-	// @pre `ForwardIter` can be converted to `std::string_view::iterator`.
+	// @pre `ForwardIter` can be converted to `string_view::iterator`.
 	template <typename ForwardIter>
 	inline auto parse_input(ForwardIter begin, ForwardIter end)
-	-> std::vector<std::string_view>
-	{
+	-> vector<string_view> {
 		auto is_space = [](char ch) { return ch == ' ' || ch == '\t'; };
 		
-		std::vector<std::string_view> commands;
+		vector<string_view> commands;
 		
 		for (auto i = std::find_if_not(begin, end, is_space); i != end; ) {
 			auto j = std::find_if(i, end, is_space);
 			
 			// Note: here we are guaranteed that i != j, since
 			// 1) *i is not a space, and 2) either *j is a space or *j == end.
-			auto iter = std::string_view::iterator{i};
-			auto dist = std::distance(i, j);
-			auto size = static_cast<std::string_view::size_type>(dist);
-			commands.emplace_back(iter, size);
+
+			auto command = util::make_string_view(i, j);
+			commands.push_back(command);
 			
 			i = std::find_if_not(j, end, is_space);
 		}
@@ -79,9 +76,7 @@ namespace maf {
 		return commands;
 	}
 
-	inline auto parse_input(std::string_view str)
-	-> std::vector<std::string_view>
-	{
+	inline auto parse_input(string_view str) -> vector<string_view> {
 		return parse_input(str.begin(), str.end());
 	}
 }
