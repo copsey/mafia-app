@@ -1585,6 +1585,8 @@ namespace maf::_format_text_impl {
 
 		if (char ch = *i; *begin == '\\' && is_escapable(ch)) {
 			str += ch;
+		} else if (*begin == '\\' && ch == '\n') {
+			// exclude this character from `str`
 		} else {
 			auto errc = format_text_errc::invalid_escape_sequence;
 			throw format_text_error{errc, begin, i + 1};

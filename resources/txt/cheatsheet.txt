@@ -34,3 +34,4 @@ Escape sequences:
   \~  -- tilde
   \{  -- left curly brace
   \}  -- right curly brace
+  \<newline> -- don't display this newline in the output
