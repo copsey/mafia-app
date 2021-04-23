@@ -294,10 +294,6 @@ namespace maf::_preprocess_text_impl {
 		return std::find_if(begin, end, is_brace);
 	}
 
-	inline bool is_whitespace(char ch) {
-		return ch == ' ' || ch == '\t';
-	}
-
 	// # Example
 	// Given the following input:
 	// ```
@@ -307,7 +303,7 @@ namespace maf::_preprocess_text_impl {
 	// ```
 	// return `next`.
 	inline iterator skip_whitespace(iterator begin, iterator end) {
-		return std::find_if_not(begin, end, is_whitespace);
+		return std::find_if_not(begin, end, util::is_whitespace);
 	}
 
 
@@ -532,7 +528,7 @@ namespace maf::_preprocess_text_impl {
 		};
 
 		static bool is_delimiter(char ch) {
-			return is_brace(ch) || is_whitespace(ch);
+			return is_brace(ch) || util::is_whitespace(ch);
 		}
 
 		// # Example

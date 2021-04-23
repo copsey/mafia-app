@@ -523,7 +523,8 @@ void maf::Console::refresh_output() {
 	}
 
 	current_screen->write(str);
-	read_output(str);
+	auto substr = util::drop_whitespace_from_end(str);
+	read_output(substr);
 }
 
 maf::StyledText const& maf::Console::error_message() const {

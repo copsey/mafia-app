@@ -19,6 +19,16 @@ namespace maf::util {
 			return false;
 		}
 	}
+
+	// Check if `ch` produces whitespace.
+	inline bool is_whitespace(char ch) {
+		switch (ch) {
+		case ' ': case '\t': case '\n': case '\r':
+			return true;
+		default:
+			return false;
+		}
+	}
 }
 
 #endif

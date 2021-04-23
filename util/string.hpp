@@ -24,6 +24,22 @@ namespace maf::util {
 		auto length = static_cast<std::string_view::size_type>(end - begin);
 		return std::string_view{begin, length};
 	}
+
+	// Get a subview of `str` with all whitespace removed from the end.
+	[[nodiscard]] inline auto drop_whitespace_from_end(std::string_view str)
+	-> std::string_view {
+		auto rbegin = str.rbegin(), rend = str.rend();
+		auto rmid = std::find_if_not(rbegin, rend, is_whitespace);
+		auto mid = rmid.base();
+		return make_string_view(str.begin(), mid);
+	}
+
+	inline void erase_whitespace_from_end(std::string & str) {
+		auto rbegin = str.rbegin(), rend = str.rend();
+		auto rmid = std::find_if_not(rbegin, rend, is_whitespace);
+		auto mid = rmid.base();
+		str.erase(mid, str.end());
+	}
 }
 
 #endif
