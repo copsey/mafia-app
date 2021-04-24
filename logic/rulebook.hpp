@@ -1,6 +1,7 @@
 #ifndef MAFIA_LOGIC_RULEBOOK
 #define MAFIA_LOGIC_RULEBOOK
 
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
@@ -95,16 +96,7 @@ namespace maf {
 		}
 
 		/// A vector containing every role defined in the rulebook.
-		vector<util::ref<const Role>> all_roles() const;
-
-		/// A vector containing every village role defined in the rulebook.
-		vector<util::ref<const Role>> village_roles() const;
-
-		/// A vector containing every mafia role defined in the rulebook.
-		vector<util::ref<const Role>> mafia_roles() const;
-
-		/// A vector containing every freelance role defined in the rulebook.
-		vector<util::ref<const Role>> freelance_roles() const;
+		vector<std::reference_wrapper<const Role>> roles() const;
 
 		/// Evaluate the function `f` on each role present in this rulebook.
 		template <typename F>
@@ -148,7 +140,7 @@ namespace maf {
 		Role & get_role(string_view alias);
 
 		/// Get the role with the given alias.
-		/// 
+		///
 		/// Throw `std::out_of_range` if none could be found.
 		Role const& look_up(RoleRef r_ref) const;
 

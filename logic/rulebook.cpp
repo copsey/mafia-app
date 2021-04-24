@@ -1,3 +1,5 @@
+#include "../util/algorithm.hpp"
+
 #include "role_ref.hpp"
 #include "rulebook.hpp"
 
@@ -73,34 +75,8 @@ maf::Rulebook::Rulebook(Edition edition) : _edition{edition}
 	});
 }
 
-maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::all_roles() const {
-	vector<util::ref<const Role>> v{};
-	for (auto & r: _roles) v.emplace_back(r);
-	return v;
-}
-
-maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::village_roles() const {
-	vector<util::ref<const Role>> v{};
-	for (auto & r: _roles) {
-		if (r.alignment() == Alignment::village) v.emplace_back(r);
-	}
-	return v;
-}
-
-maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::mafia_roles() const {
-	vector<util::ref<const Role>> v{};
-	for (auto & r: _roles) {
-		if (r.alignment() == Alignment::mafia) v.emplace_back(r);
-	}
-	return v;
-}
-
-maf::vector<maf::util::ref<const maf::Role>> maf::Rulebook::freelance_roles() const {
-	vector<util::ref<const Role>> v{};
-	for (auto & r: _roles) {
-		if (r.alignment() == Alignment::freelance) v.emplace_back(r);
-	}
-	return v;
+maf::vector<std::reference_wrapper<const maf::Role>> maf::Rulebook::roles() const {
+	return util::get_crefs(_roles);
 }
 
 maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {

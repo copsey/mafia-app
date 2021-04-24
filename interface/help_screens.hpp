@@ -64,6 +64,8 @@ namespace maf {
 
 		static bool _compare_by_name(Role const& role_1, Role const& role_2);
 		static TextParams _get_params(Role const& role);
+
+		vector<std::reference_wrapper<const Role>> _get_roles() const;
 	};
 
 

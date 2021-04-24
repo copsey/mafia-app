@@ -24,35 +24,28 @@ maf::TextParams maf::List_Roles_Screen::_get_params(Role const& role) {
 	return params;
 }
 
+maf::vector<std::reference_wrapper<const maf::Role>> maf::List_Roles_Screen::_get_roles() const {
+	auto roles = _rulebook->roles();
+
+	if (_filter_alignment) {
+		util::remove_if(roles, [&](Role const& role) {
+			return role.alignment() != *_filter_alignment;
+		});
+	}
+
+	util::sort(roles, _compare_by_name);
+
+	return roles;
+}
+
 void maf::List_Roles_Screen::set_params(TextParams& params) const {
 	params["show_all"] = (!_filter_alignment);
 	params["show_village"] = (_filter_alignment == Alignment::village);
 	params["show_mafia"] = (_filter_alignment == Alignment::mafia);
 	params["show_freelance"] = (_filter_alignment == Alignment::freelance);
 
-	vector<std::reference_wrapper<const Role>> filtered_roles;
-
-	if (_filter_alignment) {
-		switch (*_filter_alignment) {
-		case Alignment::village:
-			filtered_roles = _rulebook->village_roles();
-			break;
-
-		case Alignment::mafia:
-			filtered_roles = _rulebook->mafia_roles();
-			break;
-
-		case Alignment::freelance:
-			filtered_roles = _rulebook->freelance_roles();
-			break;
-		}
-	} else {
-		filtered_roles = _rulebook->all_roles();
-	}
-
-	util::sort(filtered_roles, _compare_by_name);
-
-	params["roles"] = util::transformed_copy(filtered_roles, _get_params);
+	auto roles = this->_get_roles();
+	params["roles"] = util::transformed_copy(roles, _get_params);
 }
 
 void maf::Player_Info_Screen::set_params(TextParams& params) const {

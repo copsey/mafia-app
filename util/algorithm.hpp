@@ -2,6 +2,7 @@
 #define MAFIA_UTIL_ALGORITHM
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <type_traits>
 
@@ -181,13 +182,14 @@ namespace maf::util {
 		std::transform(begin(cont), end(cont), out, unary_op);
 	}
 
-	// Create a container of type `OutCont`, and fill it with the elements of
-	// `cont` after being transformed by `unary_op`.
-	template <typename OutCont,
-	          typename InCont,
+	// Create a container of type `OutCont` filled with the elements of `cont`
+	// after each has been transformed by `unary_op`.
+	template <typename OutContainer,
+	          typename InContainer,
 	          typename UnaryOperation>
-	OutCont transform_into(InCont const& cont, UnaryOperation unary_op) {
-		OutCont out{};
+	auto transform_into(InContainer const& cont, UnaryOperation unary_op)
+	-> OutContainer {
+		OutContainer out{};
 		util::transform(cont, std::back_inserter(out), unary_op);
 		return out;
 	}
@@ -203,6 +205,32 @@ namespace maf::util {
 	-> Container<OutType> {
 		return util::transform_into<Container<OutType>>(cont, unary_op);
 	}
+
+	// Get references to the elements of `cont`.
+	template <template <typename...> class Container,
+			  typename T,
+			  typename... Xs>
+	auto get_refs(Container<T, Xs...> const& cont)
+	-> Container<std::reference_wrapper<T>> {
+		auto get_ref = [](T& x) -> std::reference_wrapper<T> {
+			return std::ref(x);
+		};
+
+		return util::transformed_copy(cont, get_ref);
+	}
+
+	// Get constant references to the elements of `cont`.
+	template <template <typename...> class Container,
+			  typename T,
+			  typename... Xs>
+	auto get_crefs(Container<T, Xs...> const& cont)
+	-> Container<std::reference_wrapper<const T>> {
+		auto get_cref = [](T const& x) -> std::reference_wrapper<const T> {
+			return std::cref(x);
+		};
+
+		return util::transformed_copy(cont, get_cref);
+	}
 	
 	// Remove each element from `c` that is equal to `t`.
 	template <typename Cont, typename T>
@@ -216,6 +244,51 @@ namespace maf::util {
 	void remove_if(Cont & c, Pred p) {
 		using std::begin, std::end;
 		c.erase(std::remove_if(begin(c), end(c), p), end(c));
+	}
+
+	// Create a container of type `OutContainer` holding the elements `x` of
+	// `cont` for which `pred(x)` is true.
+	template <typename OutContainer,
+			  typename InContainer,
+			  typename Predicate>
+	OutContainer filter_into(InContainer const& cont, Predicate pred) {
+		using std::begin, std::end;
+		OutContainer out{};
+		std::copy_if(begin(cont), end(cont), std::back_inserter(out), pred);
+		return out;
+	}
+
+	// Get the elements `x` of `cont` for which `pred(x)` is true.
+	template <template <typename...> class Container,
+			  typename T,
+			  typename Predicate,
+			  typename... Xs>
+	auto filtered_copy(Container<T, Xs...> const& cont, Predicate pred)
+	-> Container<T> {
+		return util::filter_into<Container<T>>(cont, pred);
+	}
+
+	// Get references to the elements `x` of `cont` for which `pred(x)` is true.
+	template <template <typename...> class Container,
+			  typename T,
+			  typename Predicate,
+			  typename... Xs>
+	auto filtered_refs(Container<T, Xs...> const& cont, Predicate pred)
+	-> Container<std::reference_wrapper<T>> {
+		using T_Ref = std::reference_wrapper<T>;
+		return util::filter_into<Container<T_Ref>>(cont, pred);
+	}
+
+	// Get constant references to the elements `x` of `cont` for which `pred(x)`
+	// is true.
+	template <template <typename...> class Container,
+			  typename T,
+			  typename Predicate,
+			  typename... Xs>
+	auto filtered_crefs(Container<T, Xs...> const& cont, Predicate pred)
+	-> Container<std::reference_wrapper<const T>> {
+		using T_Ref = std::reference_wrapper<const T>;
+		return util::filter_into<Container<T_Ref>>(cont, pred);
 	}
 	
 	// Sort the elements in `c` by `<`.
