@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <type_traits>
 
 #include "random.hpp"
 
@@ -10,19 +11,22 @@ namespace maf::util {
 	// Check if `p(t)` is true for all `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool all_of(Cont const& c, Pred p) {
-		return std::all_of(std::begin(c), std::end(c), p);
+		using std::begin, std::end;
+		return std::all_of(begin(c), end(c), p);
 	}
 	
 	// Check if `p(t)` is true for at least one `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool any_of(Cont const& c, Pred p) {
-		return std::any_of(std::begin(c), std::end(c), p);
+		using std::begin, std::end;
+		return std::any_of(begin(c), end(c), p);
 	}
 	
 	// Check if `p(t)` is false for all `t` in `c`.
 	template <typename Cont, typename Pred>
-	bool none_of(const Cont & c, Pred p) {
-		return std::none_of(std::begin(c), std::end(c), p);
+	bool none_of(Cont const& c, Pred p) {
+		using std::begin, std::end;
+		return std::none_of(begin(c), end(c), p);
 	}
 	
 	// Check if `t` is equal to any values in the range `[i,j)`.
@@ -38,7 +42,8 @@ namespace maf::util {
 	// Check if `t` is equal to any elements in `c`.
 	template <typename Cont, typename T>
 	bool contains(const Cont & c, const T & t) {
-		return contains(std::begin(c), std::end(c), t);
+		using std::begin, std::end;
+		return util::contains(begin(c), end(c), t);
 	}
 	
 	// Check if the two sequences `[i1,j1)` and `[i2,j2)` match,
@@ -69,7 +74,8 @@ namespace maf::util {
 	//   `i2 == std::begin(c2)`, `j2 == std::end(c2)`.
 	template <typename Cont1, typename Cont2, typename Eq>
 	bool matches(const Cont1 & c1, const Cont2 & c2, Eq eq) {
-		return matches(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2), eq);
+		using std::begin, std::end;
+		return util::matches(begin(c1), end(c1), begin(c2), end(c2), eq);
 	}
 	
 	// Check if the two sequences `[i1,j1)` and `[i2,j2)` are equivalent.
@@ -91,7 +97,7 @@ namespace maf::util {
 		using T2 = decltype(*i2);
 		
 		auto eq = [](const T1 & t1, const T2 & t2) { return t1 == t2; };
-		return matches(i1, j1, i2, j2, eq);
+		return util::matches(i1, j1, i2, j2, eq);
 	}
 	
 	// Same as `equivalent(i1, j1, i2, j2)`, where
@@ -99,7 +105,8 @@ namespace maf::util {
 	//   `i2 == std::begin(c2)`, `j2 == std::end(c2)`.
 	template <typename Cont1, typename Cont2>
 	bool equivalent(const Cont1 & c1, const Cont2 & c2) {
-		return equivalent(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2));
+		using std::begin, std::end;
+		return util::equivalent(begin(c1), end(c1), begin(c2), end(c2));
 	}
 	
 	// Find the first position `i` in `c` such that `*i == t`.
@@ -107,7 +114,8 @@ namespace maf::util {
 	// If no such position exists, `std::end(c)` is returned instead.
 	template <typename Cont, typename T>
 	auto find(Cont & c, const T & t) -> decltype(std::begin(c)) {
-		return std::find(std::begin(c), std::end(c), t);
+		using std::begin, std::end;
+		return std::find(begin(c), end(c), t);
 	}
 	
 	// Find the first position `i` in `c` such that `p(*i)` is true.
@@ -115,16 +123,18 @@ namespace maf::util {
 	// If no such position exists, `std::end(c)` is returned instead.
 	template <typename Cont, typename Pred>
 	auto find_if(Cont & c, Pred p) -> decltype(std::begin(c)) {
-		return std::find_if(std::begin(c), std::end(c), p);
+		using std::begin, std::end;
+		return std::find_if(begin(c), end(c), p);
 	}
 
 	// Count the number of elements `x` in `c` such that `p(x)` is true.
 	template <typename Cont, typename Pred>
 	auto count_if(const Cont & c, Pred p) -> decltype(std::size(c)) {
+		using std::begin, std::end;
+
 		decltype(std::size(c)) n{0};
 
-		auto end = std::end(c);
-		for (auto i = std::begin(c); i != end; ++i) {
+		for (auto i = begin(c); i != end(c); ++i) {
 			if (p(*i)) ++n;
 		}
 
@@ -134,9 +144,8 @@ namespace maf::util {
 	// Count the number of elements in `c` equal to `t`.
 	template <typename Cont, typename T>
 	auto count(const Cont & c, const T & t) -> decltype(std::size(c)) {
-		using V = decltype(*std::begin(c));
-		auto eq_t = [&t](const V & v) { return v == t; };
-		return count_if(c, eq_t);
+		auto eq_t = [&t](auto&& v) { return v == t; };
+		return util::count_if(c, eq_t);
 	}
 	
 	// Find the position of the largest element in `c` with respect to `<`.
@@ -144,7 +153,8 @@ namespace maf::util {
 	// If `c` is empty, `std::end(c)` is returned instead.
 	template <typename Cont>
 	auto max_element(Cont & c) -> decltype(std::begin(c)) {
-		return std::max_element(std::begin(c), std::end(c));
+		using std::begin, std::end;
+		return std::max_element(begin(c), end(c));
 	}
 	
 	// Find the position of the largest element in `c` with respect to `lt`.
@@ -152,61 +162,101 @@ namespace maf::util {
 	// If `c` is empty, `std::end(c)` is returned instead.
 	template <typename Cont, typename Comp>
 	auto max_element(Cont & c, Comp lt) -> decltype(std::begin(c)) {
-		return std::max_element(std::begin(c), std::end(c), lt);
+		using std::begin, std::end;
+		return std::max_element(begin(c), end(c), lt);
 	}
 	
-	// Replace every element in `c` with a copy of `t`.
+	// Replace every element in `cont` with a copy of `t`.
 	template <typename Cont, typename T>
-	void fill(Cont & c, const T & t) {
-		std::fill(std::begin(c), std::end(c), t);
+	void fill(Cont & cont, const T & t) {
+		using std::begin, std::end;
+		std::fill(begin(cont), end(cont), t);
+	}
+
+	// Fill `out` with the elements of `in` after being transformed by
+	// `unary_op`.
+	template <typename Container, typename OutIter, typename UnaryOperation>
+	void transform(Container const& cont, OutIter out, UnaryOperation unary_op) {
+		using std::begin, std::end;
+		std::transform(begin(cont), end(cont), out, unary_op);
+	}
+
+	// Create a container of type `OutCont`, and fill it with the elements of
+	// `cont` after being transformed by `unary_op`.
+	template <typename OutCont,
+	          typename InCont,
+	          typename UnaryOperation>
+	OutCont transform_into(InCont const& cont, UnaryOperation unary_op) {
+		OutCont out{};
+		util::transform(cont, std::back_inserter(out), unary_op);
+		return out;
+	}
+
+	// Get a copy of `cont` where each element has been transformed by
+	// `unary_op`.
+	template <template <typename...> class Container,
+	          typename InType,
+	          typename UnaryOperation,
+	          typename OutType = std::invoke_result_t<UnaryOperation, InType>,
+	          typename... Xs>
+	auto transformed_copy(Container<InType, Xs...> const& cont, UnaryOperation unary_op)
+	-> Container<OutType> {
+		return util::transform_into<Container<OutType>>(cont, unary_op);
 	}
 	
 	// Remove each element from `c` that is equal to `t`.
 	template <typename Cont, typename T>
 	void remove(Cont & c, const T & t) {
-		c.erase(std::remove(std::begin(c), std::end(c), t), std::end(c));
+		using std::begin, std::end;
+		c.erase(std::remove(begin(c), end(c), t), end(c));
 	}
 	
 	// Remove each element `t` from `c` for which `p(t)` is true.
 	template <typename Cont, typename Pred>
 	void remove_if(Cont & c, Pred p) {
-		c.erase(std::remove_if(std::begin(c), std::end(c), p), std::end(c));
+		using std::begin, std::end;
+		c.erase(std::remove_if(begin(c), end(c), p), end(c));
 	}
 	
 	// Sort the elements in `c` by `<`.
 	template <typename Cont>
 	void sort(Cont & c) {
-		std::sort(std::begin(c), std::end(c));
+		using std::begin, std::end;
+		std::sort(begin(c), end(c));
 	}
 	
 	// Sort the elements in `c` by `lt`.
 	template <typename Cont, typename Comp>
 	void sort(Cont & c, Comp lt) {
-		std::sort(std::begin(c), std::end(c), lt);
+		using std::begin, std::end;
+		std::sort(begin(c), end(c), lt);
 	}
 	
 	// Reverse the order of elements in `c`.
 	template <typename Cont>
 	void reverse(Cont & c) {
-		std::reverse(std::begin(c), std::end(c));
+		using std::begin, std::end;
+		std::reverse(begin(c), end(c));
 	}
 
 	// Randomise the order of elements in `c` using `g`.
 	template <typename Cont, typename RNG>
 	void shuffle_with(Cont & c, RNG && g) {
-		std::shuffle(std::begin(c), std::end(c), g);
+		using std::begin, std::end;
+		std::shuffle(begin(c), end(c), g);
 	}
 
 	// Randomise the order of elements in `[b,e)` using `util::random_engine`.
 	template <typename Iter>
 	void shuffle(Iter b, Iter e) {
-		std::shuffle(b, e, random_engine);
+		std::shuffle(b, e, util::random_engine);
 	}
 
 	// Randomise the order of elements in `c` using `util::random_engine`.
 	template <typename Cont>
 	void shuffle(Cont & c) {
-		std::shuffle(std::begin(c), std::end(c), random_engine);
+		using std::begin, std::end;
+		std::shuffle(begin(c), end(c), util::random_engine);
 	}
 }
 

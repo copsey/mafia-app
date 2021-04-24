@@ -1,4 +1,5 @@
 #include <fstream>
+#include <functional>
 
 #include "../util/algorithm.hpp"
 
@@ -9,13 +10,27 @@ void maf::Role_Info_Screen::set_params(TextParams& params) const {
 	params["role"] = escaped(full_name(*role));
 }
 
+bool maf::List_Roles_Screen::_compare_by_name(Role const& role_1, Role const& role_2) {
+	return full_name(role_1) < full_name(role_2);
+}
+
+maf::TextParams maf::List_Roles_Screen::_get_params(Role const& role) {
+	TextParams params;
+	params["role"] = escaped(full_name(role));
+	params["role.alias"] = escaped(role.alias());
+	params["role.aligned_to_village"] = (role.alignment() == Alignment::village);
+	params["role.aligned_to_mafia"] = (role.alignment() == Alignment::mafia);
+	params["role.aligned_to_freelance"] = (role.alignment() == Alignment::freelance);
+	return params;
+}
+
 void maf::List_Roles_Screen::set_params(TextParams& params) const {
 	params["show_all"] = (!_filter_alignment);
 	params["show_village"] = (_filter_alignment == Alignment::village);
 	params["show_mafia"] = (_filter_alignment == Alignment::mafia);
 	params["show_freelance"] = (_filter_alignment == Alignment::freelance);
 
-	vector<util::ref<const Role>> filtered_roles;
+	vector<std::reference_wrapper<const Role>> filtered_roles;
 
 	if (_filter_alignment) {
 		switch (*_filter_alignment) {
@@ -35,24 +50,9 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 		filtered_roles = _rulebook->all_roles();
 	}
 
-	auto order_by_full_name = [](auto&& r1, auto&& r2) {
-		return full_name(*r1) < full_name(*r2);
-	};
+	util::sort(filtered_roles, _compare_by_name);
 
-	util::sort(filtered_roles, order_by_full_name);
-
-	vector<TextParams> roles;
-	for (auto role_ref: filtered_roles) {
-		auto& subparams = roles.emplace_back();
-		auto& role = *role_ref;
-		subparams["role"] = escaped(full_name(role));
-		subparams["role.alias"] = escaped(role.alias());
-		subparams["role.aligned_to_village"] = (role.alignment() == Alignment::village);
-		subparams["role.aligned_to_mafia"] = (role.alignment() == Alignment::mafia);
-		subparams["role.aligned_to_freelance"] = (role.alignment() == Alignment::freelance);
-	}
-
-	params["roles"] = move(roles);
+	params["roles"] = util::transformed_copy(filtered_roles, _get_params);
 }
 
 void maf::Player_Info_Screen::set_params(TextParams& params) const {

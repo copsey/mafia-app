@@ -61,6 +61,9 @@ namespace maf {
 	private:
 		util::ref<const Rulebook> _rulebook;
 		optional<Alignment> _filter_alignment;
+
+		static bool _compare_by_name(Role const& role_1, Role const& role_2);
+		static TextParams _get_params(Role const& role);
 	};
 
 
