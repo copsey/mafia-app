@@ -9,60 +9,44 @@ maf::Game_log::Game_log(const vector<string> &player_names,
                         const vector<Role::ID> &role_ids,
                         const vector<Wildcard::ID> &wildcard_ids,
                         const Rulebook &rulebook)
-: _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names}
+: _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names},
+game{_game}, players{game.players()}
 {
 	if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
 		throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
 	}
 
-	for (const Player &player: _game.players()) {
-		store_event(new Player_given_initial_role{
-			*this, player, player.role(), player.wildcard()
-		});
+	for (const Player &player: this->players) {
+		log_player_given_role(player);
 	}
 
 	if (_game.game_has_ended()) {
-		store_event(new Game_ended(*this));
+		log_game_ended();
 		return;
 	}
 
 	_game.begin_night();
-	store_event(new Time_changed{*this, 0, Time::night});
+	log_time_changed(Date{0}, Time::night);
 
-	vector<Event *> new_events{};
+	auto prev_size = _log.size();
 
 	if (_game.num_players_left(Alignment::mafia) > 0) {
-		new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), true});
+		log_mafia_meeting(true);
 	}
 
-	for (auto & player: _game.remaining_players()) {
-		if (player->role().is_role_faker() && !player->has_fake_role()) {
-			new_events.push_back(new Choose_fake_role{*this, *player});
+	for (auto& player: players) {
+		if (player.is_present() && player.role().is_role_faker() && !player.has_fake_role()) {
+			emplace_screen<Choose_fake_role>(player);
 		}
 	}
 
-	util::shuffle(new_events);
-	if (new_events.size() == 0) {
+	if (_log.size() == prev_size) {
 		log_boring_night();
 	} else {
-		for (Event *event: new_events) _log.emplace_back(event);
+		util::shuffle(_log.begin() + prev_size, _log.end());
 	}
 
 	try_to_log_night_ended();
-}
-
-const maf::Game & maf::Game_log::game() const {
-	return _game;
-}
-
-bool maf::Game_log::contains(RoleRef r_ref) const
-{
-	return this->game().contains(r_ref);
-}
-
-maf::Role const& maf::Game_log::look_up(RoleRef r_ref) const
-{
-	return this->game().look_up(r_ref);
 }
 
 void maf::Game_log::advance() {
@@ -104,7 +88,7 @@ void maf::Game_log::write_transcript(string & output) const {
 }
 
 const maf::Player & maf::Game_log::find_player(Player::ID id) const {
-	for (const Player &player: _game.players()) {
+	for (const Player &player: this->players) {
 		if (id == player.id()) return player;
 	}
 
@@ -115,7 +99,7 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
 const maf::Player & maf::Game_log::find_player(string_view name) const {
 	for (Player::ID i = 0; i < _player_names.size(); ++i) {
 		if (util::equal_up_to_case(name, _player_names[i])) {
-			return _game.players()[i];
+			return players[i];
 		}
 	}
 
@@ -133,7 +117,7 @@ maf::string_view maf::Game_log::get_name(Player::ID id) const {
 void maf::Game_log::kick_player(Player::ID id) {
 	_game.kick_player(id);
 	const Player &player = find_player(id);
-	store_event(new Player_kicked{*this, player, player.role()});
+	emplace_screen<Player_kicked>(player);
 
 	if (_game.game_has_ended()) {
 		log_game_ended();
@@ -186,44 +170,19 @@ void maf::Game_log::begin_night() {
 	_game.begin_night();
 	log_time_changed();
 
-	vector<Event *> new_events{};
+	auto screens_before_night = _log.size();
 
-	if (_game.mafia_can_use_kill()) {
-		new_events.push_back(new Mafia_meeting{*this, _game.remaining_players(Alignment::mafia), false});
-	}
+	if (game.mafia_can_use_kill()) log_mafia_meeting(false);
 
 	/* FIXME: minimise number of events when a player has multiple things to do this night. */
-	for (const Player &player: _game.players()) {
-		for (Ability ability: player.compulsory_abilities()) {
-			switch (ability.id) {
-				case Ability::ID::kill:
-					new_events.push_back(new Kill_use{*this, player});
-					break;
-
-				case Ability::ID::heal:
-					new_events.push_back(new Heal_use{*this, player});
-					break;
-
-				case Ability::ID::investigate:
-					new_events.push_back(new Investigate_use{*this, player});
-					break;
-
-				case Ability::ID::peddle:
-					new_events.push_back(new Peddle_use{*this, player});
-					break;
-
-				default:
-					throw Unexpected_ability{ability};
-			}
-		}
+	for (const Player &player: players) {
+		log_ability_use(player);
 	}
 
-	util::shuffle(new_events);
-
-	if (new_events.size() == 0) {
+	if (_log.size() == screens_before_night) {
 		log_boring_night();
 	} else {
-		for (Event *event: new_events) _log.emplace_back(event);
+		util::shuffle(_log.begin() + screens_before_night, _log.end());
 	}
 
 	try_to_log_night_ended();
@@ -284,49 +243,89 @@ void maf::Game_log::skip_peddle(Player::ID caster_id) {
 	try_to_log_night_ended();
 }
 
-void maf::Game_log::store_event(Event *event) {
-	_log.emplace_back(event);
+void maf::Game_log::log_player_given_role(Player const& player) {
+	emplace_screen<Player_given_initial_role>(player, player.role(), player.wildcard());
 }
 
 void maf::Game_log::log_time_changed() {
-	store_event(new Time_changed{*this, _game.date(), _game.time()});
+	log_time_changed(game.date(), game.time());
+}
+
+void maf::Game_log::log_time_changed(Date date, Time time) {
+	emplace_screen<Time_changed>(date, time);
 }
 
 void maf::Game_log::log_obituary(Date date) {
-	vector<util::ref<const Player>> deaths{};
-	for (const Player &p: _game.players()) {
-		if (p.is_dead() && p.time_of_death() == Time::night && p.date_of_death() == date) {
-			deaths.emplace_back(p);
-		}
-	}
-	store_event(new Obituary{*this, deaths});
+	auto died_this_night = [&](Player const& player) {
+		return (player.is_dead()
+				&& player.time_of_death() == Time::night
+				&& player.date_of_death() == date);
+	};
+
+	auto deaths = util::filtered_crefs(players, died_this_night);
+	emplace_screen<Obituary>(move(deaths));
 }
 
 void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Player *recent_vote_target) {
-	store_event(new Town_meeting{*this, _game.remaining_players(), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target});
+	auto is_present = [](Player const& player) {
+		return player.is_present();
+	};
+
+	auto townsfolk = util::filtered_crefs(players, is_present);
+	emplace_screen<Town_meeting>(move(townsfolk), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target);
 }
 
 void maf::Game_log::log_lynch_result(const Player *victim) {
-	store_event(new Lynch_result{*this, victim, victim ? &victim->role() : nullptr});
+	Role const* role = victim ? &victim->role() : nullptr;
+	emplace_screen<Lynch_result>(victim, role);
 }
 
 void maf::Game_log::log_duel_result(const Player &caster, const Player &target) {
-	auto & winner = caster.is_alive() ? caster : target;
-	auto & loser  = caster.is_alive() ? target : caster;
-	
-	store_event(new Duel_result{*this, caster, target, winner, loser});
+	auto& winner = caster.is_alive() ? caster : target;
+	auto& loser  = caster.is_alive() ? target : caster;
+
+	emplace_screen<Duel_result>(caster, target, winner, loser);
+}
+
+void maf::Game_log::log_ability_use(Player const& player) {
+	for (Ability ability: player.compulsory_abilities()) {
+		switch (ability.id) {
+		case Ability::ID::kill:
+			emplace_screen<Kill_use>(player);
+			break;
+
+		case Ability::ID::heal:
+			emplace_screen<Heal_use>(player);
+			break;
+
+		case Ability::ID::investigate:
+			emplace_screen<Investigate_use>(player);
+			break;
+
+		case Ability::ID::peddle:
+			emplace_screen<Peddle_use>(player);
+			break;
+
+		default:
+			throw Unexpected_ability{ability};
+		}
+	}
+}
+
+void maf::Game_log::log_mafia_meeting(bool initial_meeting) {
+	emplace_screen<Mafia_meeting>(_game.remaining_players(Alignment::mafia), initial_meeting);
 }
 
 void maf::Game_log::log_boring_night() {
-	store_event(new Boring_night{*this});
+	emplace_screen<Boring_night>();
 }
 
 void maf::Game_log::log_investigation_result(Investigation investigation) {
-	store_event(new Investigation_result{*this, investigation});
+	emplace_screen<Investigation_result>(investigation);
 }
 
 void maf::Game_log::log_game_ended() {
-	store_event(new Game_ended{*this});
+	emplace_screen<Game_ended>();
 }
 
 void maf::Game_log::try_to_log_night_ended() {
@@ -334,7 +333,7 @@ void maf::Game_log::try_to_log_night_ended() {
 		auto date = _game.date();
 
 		for (auto & inv: _game.investigations()) {
-			if (inv.date() + 1 == date) { // only show results from previous night
+			if (inv.date + 1 == date) { // only show results from previous night
 				log_investigation_result(inv);
 			}
 		}

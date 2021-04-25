@@ -1,6 +1,7 @@
 #ifndef MAFIA_UTIL_STDLIB
 #define MAFIA_UTIL_STDLIB
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -20,6 +21,7 @@ namespace maf {
 	template <typename T> using unique_ptr = std::unique_ptr<T>;
 	template <typename... Ts> using variant = std::variant<Ts...>;
 	template <typename T> using vector = std::vector<T>;
+	template <typename T> using vector_of_refs = std::vector<std::reference_wrapper<T>>;
 	
 	// Functions
 

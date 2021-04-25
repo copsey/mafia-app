@@ -157,7 +157,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err << "=Invalid alias!=\n\nNo wildcard could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list w@ to see a list of each wildcard and its alias.)";
 	}
 	catch (const Game::Kick_failed &e) {
-		err_params["player"] = escaped(_game_log->get_name(*e.player));
+		err_params["player"] = escaped(_game_log->get_name(e.player));
 
 		err << "=Kick failed!=\n\n";
 
@@ -189,8 +189,10 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Lynch_vote_failed &e) {
-		err_params["voter"] = escaped(_game_log->get_name(*e.voter));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["voter"] = escaped(_game_log->get_name(e.voter));
+		if (e.target) {
+			err_params["target"] = escaped(_game_log->get_name(*(e.target)));
+		}
 
 		err << "=Lynch vote failed!=\n\n";
 
@@ -217,8 +219,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Duel_failed &e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Duel failed!=\n\n";
 
@@ -269,7 +271,7 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Choose_fake_role_failed &e) {
-		err_params["player"] = escaped(_game_log->get_name(*e.player));
+		err_params["player"] = escaped(_game_log->get_name(e.player));
 
 		err << "=Choose fake role failed!=\n\n";
 
@@ -292,8 +294,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Mafia_kill_failed &e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Mafia kill failed!=\n\n";
 
@@ -322,8 +324,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Kill_failed &e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Kill failed!=\n\n";
 
@@ -343,8 +345,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Heal_failed &e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Heal failed!=\n\n";
 
@@ -367,8 +369,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (const Game::Investigate_failed &e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Investigation failed!=\n\n";
 
@@ -391,8 +393,8 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		}
 	}
 	catch (Game::Peddle_failed const& e) {
-		err_params["caster"] = escaped(_game_log->get_name(*e.caster));
-		err_params["target"] = escaped(_game_log->get_name(*e.target));
+		err_params["caster"] = escaped(_game_log->get_name(e.caster));
+		err_params["target"] = escaped(_game_log->get_name(e.target));
 
 		err << "=Peddle failed!=\n\n";
 
@@ -442,12 +444,12 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 		err << "=Missing player!=\n\nA player named @{player}@ could not be found.";
 	}
 	catch (const Setup_screen::Rolecard_unselected &e) {
-		err_params["alias"] = escaped(e.role->alias());
+		err_params["alias"] = escaped(e.role.alias());
 
 		err << "=Rolecard not selected!=\n\nNo copies of the rolecard with alias @{alias}@ have been selected.";
 	}
 	catch (const Setup_screen::Wildcard_unselected &e) {
-		err_params["alias"] = escaped(e.wildcard->alias());
+		err_params["alias"] = escaped(e.wildcard.alias());
 
 		err << "=Wildcard not selected!=\n\nNo copies of the wildcard with alias @{alias}@ have been selected.";
 	}
@@ -579,7 +581,7 @@ void maf::Console::clear_question() {
 
 const maf::Game & maf::Console::game() const {
 	if (!has_game()) throw No_game_in_progress();
-	return _game_log->game();
+	return _game_log->game;
 }
 
 const maf::Game_log & maf::Console::game_log() const {
@@ -612,7 +614,7 @@ void maf::Console::end_game() {
 
 const maf::Rulebook & maf::Console::active_rulebook() const {
 	if (has_game()) {
-		return _game_log->game().rulebook();
+		return _game_log->game.rulebook();
 	} else {
 		return _setup_screen.rulebook();
 	}

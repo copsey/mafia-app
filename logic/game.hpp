@@ -1,7 +1,6 @@
 #ifndef MAFIA_LOGIC_GAME
 #define MAFIA_LOGIC_GAME
 
-#include "../util/ref.hpp"
 #include "../util/stdlib.hpp"
 
 #include "player.hpp"
@@ -15,60 +14,31 @@ namespace maf
 	/// Note that only references to `caster` and `target` are stored, and so
 	/// the lifetime of an investigation result should not exceed the lifetime
 	/// of the players concerned.
-	struct Investigation
-	{
-		Investigation(const Player& caster, const Player& target, Date date, bool result)
-			: _caster_ref{caster}, _target_ref{target}, _date{date}, _result{result}
-		{ }
-
+	struct Investigation {
 		/// The player that performed the investigation.
-		const Player& caster() const
-		{
-			return *_caster_ref;
-		}
-
+		const Player & caster;
 		/// The target of the investigation.
-		const Player& target() const
-		{
-			return *_target_ref;
-		}
-
+		const Player & target;
 		/// The date on which the investigation occurred.
-		Date date() const
-		{
-			return _date;
-		}
-
+		Date date;
 		/// The result of the investigation.
-		///
-		/// @returns `true` if the target appeared as suspicious,
-		/// `false` otherwise.
-		bool result() const
-		{
-			return _result;
-		}
+		/// `true` if the target appeared as suspicious, `false` otherwise.
+		bool result;
 
-	private:
-		util::ref<const Player> _caster_ref;
-		util::ref<const Player> _target_ref;
-		Date _date;
-		bool _result;
+		Investigation(const Player & caster, const Player & target, Date date, bool result)
+		: caster{caster}, target{target}, date{date}, result{result} { }
 	};
 
 
-	struct Game
-	{
+	struct Game {
 		// Signifies that no player could be found with the given ID.
-		struct Player_not_found
-		{
+		struct Player_not_found {
 			Player::ID id;
 		};
 
 		// An exception signifying that the given player couldn't be kicked.
-		struct Kick_failed
-		{
-			enum class Reason
-			{
+		struct Kick_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing,
 				already_kicked
@@ -77,15 +47,13 @@ namespace maf
 			Kick_failed(const Player &player, Reason reason)
 			: player{player}, reason{reason} { }
 
-			util::ref<const Player> player;
+			const Player & player;
 			Reason reason;
 		};
 
 		// Signifies that a lynch cannot occur at the moment.
-		struct Lynch_failed
-		{
-			enum class Reason
-			{
+		struct Lynch_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing
 			};
@@ -94,10 +62,8 @@ namespace maf
 		};
 
 		// Signifies that the caster cannot cast a lynch vote against the target.
-		struct Lynch_vote_failed
-		{
-			enum class Reason
-			{
+		struct Lynch_vote_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing,
 				voter_is_not_present,
@@ -106,20 +72,18 @@ namespace maf
 			};
 
 			Lynch_vote_failed(const Player &voter,
-									const Player *target,
-									Reason reason)
+							  const Player *target,
+							  Reason reason)
 			: voter{voter}, target{target}, reason{reason} { }
 
-			util::ref<const Player> voter;
-			const Player *target;
+			const Player & voter;
+			const Player * target;
 			Reason reason;
 		};
 
 		// Signifies that a duel cannot occur between the caster and the target.
-		struct Duel_failed
-		{
-			enum class Reason
-			{
+		struct Duel_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing,
 				caster_is_not_present,
@@ -130,20 +94,18 @@ namespace maf
 			};
 
 			Duel_failed(const Player &caster,
-							const Player &target,
-							Reason reason)
+						const Player &target,
+						Reason reason)
 			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
 		// An exception signifying that the next night cannot begin right now.
-		struct Begin_night_failed
-		{
-			enum class Reason
-			{
+		struct Begin_night_failed {
+			enum class Reason {
 				game_ended,
 				already_night,
 				lynch_can_occur
@@ -152,10 +114,8 @@ namespace maf
 			Reason reason;
 		};
 
-		struct Choose_fake_role_failed
-		{
-			enum class Reason
-			{
+		struct Choose_fake_role_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing,
 				player_is_not_faker,
@@ -163,19 +123,17 @@ namespace maf
 			};
 
 			Choose_fake_role_failed(const Player &player, const Role &fake_role,
-											Reason reason)
+									Reason reason)
 			: player{player}, fake_role{fake_role}, reason{reason} { }
 
-			util::ref<const Player> player;
-			util::ref<const Role> fake_role;
+			const Player & player;
+			const Role & fake_role;
 			Reason reason;
 		};
 
 		// Signifies that the caster cannot perform the mafia's kill on the target.
-		struct Mafia_kill_failed
-		{
-			enum class Reason
-			{
+		struct Mafia_kill_failed {
+			enum class Reason {
 				game_ended,
 				bad_timing,
 				already_used,
@@ -188,18 +146,15 @@ namespace maf
 			Mafia_kill_failed(const Player &caster,
 			                  const Player &target,
 			                  Reason reason)
-				: caster{caster}, target{target}, reason{reason}
-			{ }
+			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
-		struct Kill_failed
-		{
-			enum class Reason
-			{
+		struct Kill_failed {
+			enum class Reason {
 				game_ended,
 				caster_cannot_kill,
 				target_is_not_present,
@@ -207,19 +162,16 @@ namespace maf
 			};
 
 			Kill_failed(const Player &caster, const Player &target, Reason reason)
-				: caster{caster}, target{target}, reason{reason}
-			{ }
+			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
 		// An exception signifying that the caster cannot heal the target.
-		struct Heal_failed
-		{
-			enum class Reason
-			{
+		struct Heal_failed {
+			enum class Reason {
 				game_ended,
 				caster_cannot_heal,
 				target_is_not_present,
@@ -227,18 +179,15 @@ namespace maf
 			};
 
 			Heal_failed(const Player& caster, const Player& target, Reason reason)
-				: caster{caster}, target{target}, reason{reason}
-			{ }
+			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
-		struct Investigate_failed
-		{
-			enum class Reason
-			{
+		struct Investigate_failed {
+			enum class Reason {
 				game_ended,
 				caster_cannot_investigate,
 				target_is_not_present,
@@ -247,18 +196,15 @@ namespace maf
 
 			Investigate_failed(const Player &caster, const Player &target,
 			                   Reason reason)
-				: caster{caster}, target{target}, reason{reason}
-			{ }
+			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
-		struct Peddle_failed
-		{
-			enum class Reason
-			{
+		struct Peddle_failed {
+			enum class Reason {
 				game_ended,
 				caster_cannot_peddle,
 				target_is_not_present,
@@ -267,11 +213,10 @@ namespace maf
 
 			Peddle_failed(const Player &caster, const Player &target,
 			              Reason reason)
-				: caster{caster}, target{target}, reason{reason}
-			{ }
+			: caster{caster}, target{target}, reason{reason} { }
 
-			util::ref<const Player> caster;
-			util::ref<const Player> target;
+			const Player & caster;
+			const Player & target;
 			Reason reason;
 		};
 
@@ -298,9 +243,9 @@ namespace maf
 		// The participating players, both present and not present.
 		const vector<Player> & players() const;
 		// A vector containing every player remaining.
-		vector<util::ref<const Player>> remaining_players() const;
+		vector_of_refs<const Player> remaining_players() const;
 		// A vector containing every player remaining with the given alignment.
-		vector<util::ref<const Player>> remaining_players(Alignment alignment) const;
+		vector_of_refs<const Player> remaining_players(Alignment alignment) const;
 		// The number of players remaining.
 		std::size_t num_players_left() const;
 		// The number of players remaining with the given alignment.

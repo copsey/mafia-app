@@ -2,7 +2,6 @@
 
 #include "../util/map.hpp"
 #include "../util/random.hpp"
-#include "../util/ref.hpp"
 
 #include "wildcard.hpp"
 #include "role_ref.hpp"
@@ -60,9 +59,9 @@ bool maf::Wildcard::matches_alignment(Alignment alignment, const Rulebook & rule
 	}
 }
 
-const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
+const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) const {
 	if (uses_evaluator()) {
-		vector<util::ref<const Role>> role_refs{};
+		vector_of_refs<const Role> roles{};
 		vector<double> weights{};
 
 		auto evaluate_role = [&](const Role & role) {
@@ -79,14 +78,14 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 
 				throw std::logic_error{msg};
 			} else if (w > 0.0) {
-				role_refs.emplace_back(role);
+				roles.emplace_back(role);
 				weights.push_back(w);
 			}
 		};
 
 		rulebook.for_each_role(evaluate_role);
 
-		if (role_refs.size() == 0) {
+		if (roles.empty()) {
 			string msg = "A wildcard with alias ";
 			msg += alias();
 			msg += " chose zero as the weight of every role in the rulebook.";
@@ -95,9 +94,11 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) {
 		}
 
 		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
-		return *role_refs[dist(util::random_engine)];
+		return roles[dist(util::random_engine)];
 	} else {
-		return rulebook.look_up(_role_ids[_dist(util::random_engine)]);
+		auto& mut_dist = const_cast<std::discrete_distribution<decltype(_role_ids)::size_type> &>(_dist);
+		auto role_id = _role_ids[mut_dist(util::random_engine)];
+		return rulebook.look_up(role_id);
 	}
 }
 

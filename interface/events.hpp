@@ -1,7 +1,6 @@
 #ifndef MAFIA_EVENT_H
 #define MAFIA_EVENT_H
 
-#include "../util/ref.hpp"
 #include "../util/stdlib.hpp"
 
 #include "../logic/logic.hpp"
@@ -21,10 +20,12 @@ namespace maf {
 		/// A reference to the game log passed in is stored in the event, in order
 		/// to allow commands to be handled as a generic screen.
 		Event(Game_log & game_log)
-		: _game_log_ref{game_log} { }
+		: _game_log{game_log} { }
+
+		Game const& game() const;
 
 		/// Get this event's stored game log.
-		Game_log & game_log() const { return *_game_log_ref; }
+		Game_log & game_log() const { return _game_log; }
 
 		string_view txt_subdir() const override { return "txt/events/"; }
 
@@ -43,7 +44,7 @@ namespace maf {
 		string escaped_name(Role const& role) const;
 
 	private:
-		util::ref<Game_log> _game_log_ref;
+		Game_log & _game_log;
 	};
 
 
@@ -82,7 +83,7 @@ namespace maf {
 
 
 	struct Obituary: Event {
-		Obituary(Game_log & game_log, vector<util::ref<const Player>> deaths)
+		Obituary(Game_log & game_log, vector_of_refs<const Player> deaths)
 		: Event{game_log}, _deaths{deaths} { }
 
 		string_view id() const final { return "obituary"; }
@@ -91,14 +92,16 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector<util::ref<const Player>> _deaths;
+		vector_of_refs<const Player> _deaths;
 		std::ptrdiff_t _deaths_index{-1};
+
+		TextParams _get_params(Player const& player) const;
 	};
 
 
 	struct Town_meeting: Event {
 		Town_meeting(Game_log & game_log,
-		             vector<util::ref<const Player>> players,
+		             vector_of_refs<const Player> players,
 		             Date date,
 		             bool lynch_can_occur,
 		             const Player * next_lynch_victim,
@@ -120,26 +123,28 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector<util::ref<const Player>> _players;
+		vector_of_refs<const Player> _players;
 		Date _date;
 		bool _lynch_can_occur;
 		const Player *_next_lynch_victim;
 		const Player *_recent_vote_caster;
 		const Player *_recent_vote_target;
+
+		TextParams _get_params(Player const& player) const;
 	};
 
 
 	struct Player_kicked: Event {
-		Player_kicked(Game_log & game_log, const Player & player, const Role & player_role)
-		: Event{game_log}, player{player}, player_role{player_role} { }
+		Player_kicked(Game_log & game_log, const Player & player)
+		: Event{game_log}, _player{player} { }
 
 		string_view id() const final { return "player-kicked"; }
 
-		util::ref<const Player> player;
-		util::ref<const Role> player_role;
-
 		void do_commands(const vector<string_view> & commands) override;
 		void set_params(TextParams & params) const override;
+
+	private:
+		Player const& _player;
 	};
 
 
@@ -167,10 +172,10 @@ namespace maf {
 
 		string_view id() const final { return "duel-result"; }
 
-		util::ref<const Player> caster;
-		util::ref<const Player> target;
-		util::ref<const Player> winner;
-		util::ref<const Player> loser;
+		const Player & caster;
+		const Player & target;
+		const Player & winner;
+		const Player & loser;
 
 		void do_commands(const vector<string_view> & commands) override;
 		void set_params(TextParams & params) const override;
@@ -196,7 +201,7 @@ namespace maf {
 
 	struct Mafia_meeting: Event {
 		Mafia_meeting(Game_log & game_log,
-		              vector<util::ref<const Player>> mafiosi,
+					  vector_of_refs<const Player> mafiosi,
 		              bool is_initial_meeting)
 			: Event{game_log}, _mafiosi{mafiosi}, _initial{is_initial_meeting}
 		{ }
@@ -207,7 +212,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector<util::ref<const Player>> _mafiosi;
+		vector_of_refs<const Player> _mafiosi;
 		bool _initial;
 		bool _go_to_sleep{false};
 	};

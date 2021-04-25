@@ -1,12 +1,11 @@
 #ifndef MAFIA_LOGIC_RULEBOOK
 #define MAFIA_LOGIC_RULEBOOK
 
-#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "../util/ref.hpp"
+#include "../util/algorithm.hpp"
 #include "../util/stdlib.hpp"
 
 #include "role.hpp"
@@ -96,7 +95,9 @@ namespace maf {
 		}
 
 		/// A vector containing every role defined in the rulebook.
-		vector<std::reference_wrapper<const Role>> roles() const;
+		vector_of_refs<const Role> roles() const {
+			return util::get_crefs(_roles);
+		}
 
 		/// Evaluate the function `f` on each role present in this rulebook.
 		template <typename F>
@@ -105,20 +106,9 @@ namespace maf {
 		}
 
 		/// A vector containing every wildcard defined in the rulebook.
-		const vector<Wildcard> & wildcards() const {
-			return _wildcards;
+		vector_of_refs<const Wildcard> wildcards() const {
+			return util::get_crefs(_wildcards);
 		}
-
-		/// A vector containing every village-only wildcard defined in the
-		/// rulebook.
-		vector<util::ref<const Wildcard>> village_wildcards() const;
-
-		/// A vector containing every mafia-only wildcard defined in the rulebook.
-		vector<util::ref<const Wildcard>> mafia_wildcards() const;
-
-		/// A vector containing every freelance-only wildcard defined in the
-		/// rulebook.
-		vector<util::ref<const Wildcard>> freelance_wildcards() const;
 
 		/// Whether the rulebook contains a given role.
 		bool contains(RoleRef r_ref) const;

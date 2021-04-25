@@ -1,3 +1,5 @@
+#include <iterator>
+
 #include "../util/algorithm.hpp"
 #include "../util/random.hpp"
 
@@ -12,31 +14,31 @@ using WC = maf::Win_condition;
 maf::Game::Game(const vector<Role::ID> & role_ids,
                 const vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
-	: _rulebook{rulebook}
-{
-	using Card = pair<util::ref<const Role>, const Wildcard*>;
+: _rulebook{rulebook} {
+	using Card = pair<const Role *, const Wildcard *>;
 
 	vector<Card> cards{};
+	auto append_to_cards = std::back_inserter(cards);
 
-	for (Role::ID r_id : role_ids) {
-		cards.emplace_back(_rulebook.look_up(r_id), nullptr);
-	}
+	util::transform(role_ids, append_to_cards, [&](Role::ID id) -> Card {
+		auto& role = _rulebook.look_up(id);
+		return {&role, nullptr};
+	});
 
-	for (Wildcard::ID id : wildcard_ids) {
-		Wildcard& wildcard = _rulebook.get_wildcard(id);
-		cards.emplace_back(wildcard.pick_role(_rulebook), &wildcard);
-	}
+	util::transform(wildcard_ids, append_to_cards, [&](Wildcard::ID id) -> Card {
+		auto& wildcard = _rulebook.get_wildcard(id);
+		auto& role = wildcard.pick_role(_rulebook);
+		return {&role, &wildcard};
+	});
 
 	util::shuffle(cards);
 
 	for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
-		_players.emplace_back(i);
-
-		Player& player = _players.back();
+		Player& player = _players.emplace_back(i);
 		Card& card = cards[i];
 
-		player.assign_role(*card.first);
-		if (card.second) player.set_wildcard(*card.second);
+		player.assign_role(*(card.first));
+		if (card.second) player.set_wildcard(*(card.second));
 	}
 
 	try_to_end();
@@ -62,24 +64,16 @@ const maf::vector<maf::Player> & maf::Game::players() const
 	return _players;
 }
 
-maf::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players() const
-{
-	vector<util::ref<const Player>> vec{};
-	for (const Player& pl: _players) {
-		if (pl.is_present()) vec.emplace_back(pl);
-	}
-	return vec;
+maf::vector_of_refs<const maf::Player> maf::Game::remaining_players() const {
+	return util::filtered_crefs(_players, [&](const Player & player) {
+		return player.is_present();
+	});
 }
 
-maf::vector<maf::util::ref<const maf::Player>> maf::Game::remaining_players(Alignment alignment) const
-{
-	vector<util::ref<const Player>> vec{};
-	for (const Player& pl: _players) {
-		if (pl.is_present() && pl.alignment() == alignment) {
-			vec.emplace_back(pl);
-		}
-	}
-	return vec;
+maf::vector_of_refs<const maf::Player> maf::Game::remaining_players(Alignment alignment) const {
+	return util::filtered_crefs(_players, [&](const Player & player) {
+		return player.is_present() && player.alignment() == alignment;
+	});
 }
 
 std::size_t maf::Game::num_players_left() const

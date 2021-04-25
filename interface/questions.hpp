@@ -1,7 +1,6 @@
 #ifndef MAFIA_INTERFACE_QUESTIONS
 #define MAFIA_INTERFACE_QUESTIONS
 
-#include "../util/ref.hpp"
 #include "../util/stdlib.hpp"
 
 #include "screen.hpp"
@@ -30,7 +29,7 @@ namespace maf {
 
 
 	struct Confirm_end_game: Question {
-		Confirm_end_game(Console & console): _console_ref(console) { }
+		Confirm_end_game(Console & console): _console(console) { }
 
 		string_view id() const override
 		{ return "end-game"; }
@@ -38,7 +37,7 @@ namespace maf {
 		bool do_commands(const vector<string_view> & commands) override;
 
 	private:
-		util::ref<Console> _console_ref;
+		Console & _console;
 	};
 
 

@@ -75,34 +75,6 @@ maf::Rulebook::Rulebook(Edition edition) : _edition{edition}
 	});
 }
 
-maf::vector<std::reference_wrapper<const maf::Role>> maf::Rulebook::roles() const {
-	return util::get_crefs(_roles);
-}
-
-maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::village_wildcards() const {
-	vector<util::ref<const Wildcard>> v{};
-	for (auto & w: _wildcards) {
-		if (w.matches_alignment(Alignment::village, *this)) v.emplace_back(w);
-	}
-	return v;
-}
-
-maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::mafia_wildcards() const {
-	vector<util::ref<const Wildcard>> v{};
-	for (auto & w: _wildcards) {
-		if (w.matches_alignment(Alignment::mafia, *this)) v.emplace_back(w);
-	}
-	return v;
-}
-
-maf::vector<maf::util::ref<const maf::Wildcard>> maf::Rulebook::freelance_wildcards() const {
-	vector<util::ref<const Wildcard>> v{};
-	for (auto & w: _wildcards) {
-		if (w.matches_alignment(Alignment::freelance, *this)) v.emplace_back(w);
-	}
-	return v;
-}
-
 bool maf::Rulebook::contains(RoleRef r_ref) const {
 	return r_ref.member_of(*this);
 }

@@ -37,12 +37,14 @@ namespace maf {
 		         const Rulebook &rulebook = Rulebook{});
 
 		// The game being managed.
-		const Game & game() const;
+		Game const& game;
+		// All of the players in the game.
+		vector<Player> const& players;
 
 		// methods inherited from Game
 		//
-		bool contains(RoleRef r_ref) const;
-		Role const& look_up(RoleRef r_ref) const;
+		bool contains(RoleRef r_ref) const { return _game.contains(r_ref); }
+		Role const& look_up(RoleRef r_ref) const { return _game.look_up(r_ref); }
 		//
 
 		// The current event in the log.
@@ -124,15 +126,23 @@ namespace maf {
 		vector<unique_ptr<Event>> _log{};
 		decltype(_log)::size_type _log_index{0};
 
-		// Adds an event to the end of the log.
-		// Automatically assumes ownership of the event.
-		void store_event(Event *event);
+		template <typename ScreenType, typename... Args>
+		auto emplace_screen(Args&&... args)
+		-> std::enable_if_t<std::is_base_of_v<Event, ScreenType>> {
+			auto event = make_unique<ScreenType>(*this, args...);
+			_log.push_back(move(event));
+		}
+
 		// Adds the specified event to the end of the log.
+		void log_player_given_role(Player const& player);
 		void log_time_changed();
+		void log_time_changed(Date date, Time time);
 		void log_obituary(Date date);
 		void log_town_meeting(const Player *recent_vote_caster = nullptr, const Player *recent_vote_target = nullptr);
 		void log_lynch_result(const Player *victim);
 		void log_duel_result(const Player &caster, const Player &target);
+		void log_ability_use(Player const& player);
+		void log_mafia_meeting(bool initial_meeting);
 		void log_boring_night();
 		void log_investigation_result(Investigation investigation);
 		void log_game_ended();

@@ -36,7 +36,6 @@
 		F809EE2C1FC1975B003348BC /* command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
 		F810404B1D49D9F9004E31CF /* time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = time.hpp; sourceTree = "<group>"; };
 		F811CB881B6AB07C002EF3E1 /* string.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
-		F828BC791B91069800439CA0 /* ref.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ref.hpp; sourceTree = "<group>"; };
 		F84FE05C1AF3B9DF00BF4992 /* Mafia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mafia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F84FE0601AF3B9DF00BF4992 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F84FE0611AF3B9DF00BF4992 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -194,7 +193,6 @@
 				F8882E5C1B8CE995009166BB /* map.hpp */,
 				0400AC8C262E476300FE59AB /* parse.hpp */,
 				F84FE0921AF3BB1A00BF4992 /* random.hpp */,
-				F828BC791B91069800439CA0 /* ref.hpp */,
 				0400AC922631F42A00FE59AB /* stdlib.hpp */,
 				F811CB881B6AB07C002EF3E1 /* string.hpp */,
 			);

@@ -33,14 +33,14 @@ namespace maf {
 		struct Rolecard_unselected {
 			Rolecard_unselected(const Role &r): role{r} { }
 
-			util::ref<const Role> role;
+			const Role & role;
 		};
 
 		// Signifies that no copies of the given wildcard have been chosen.
 		struct Wildcard_unselected {
 			Wildcard_unselected(const Wildcard &w): wildcard{w} { }
 
-			util::ref<const Wildcard> wildcard;
+			const Wildcard & wildcard;
 		};
 
 		// Signifies that a set of commands couldn't be interpreted.

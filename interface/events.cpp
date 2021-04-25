@@ -5,6 +5,10 @@
 #include "events.hpp"
 #include "names.hpp"
 
+maf::Game const& maf::Event::game() const {
+	return _game_log.game;
+}
+
 void maf::Event::summarise(string & output) const {
 	// FIXME: This is horrendously fragile.
 	string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
@@ -81,13 +85,19 @@ void maf::Obituary::do_commands(const vector<string_view> & commands) {
 	}
 }
 
+maf::TextParams maf::Obituary::_get_params(Player const& player) const {
+	TextParams params;
+	params["deceased"] = escaped_name(player);
+	return params;
+}
+
 void maf::Obituary::set_params(TextParams& params) const {
 	params["anyone_died"] = !_deaths.empty();
 	params["num_deaths"] = static_cast<int>(_deaths.size());
 	params["show_death"] = (_deaths_index >= 0);
 
 	if (_deaths_index >= 0) {
-		const Player& deceased = *_deaths[_deaths_index];
+		const Player& deceased = _deaths[_deaths_index];
 		params["deceased"] = escaped_name(deceased);
 		params["deceased.is_haunted"] = deceased.is_haunted();
 
@@ -97,13 +107,7 @@ void maf::Obituary::set_params(TextParams& params) const {
 		}
 	}
 
-	vector<TextParams> deaths;
-	for (auto& p_ref: _deaths) {
-		auto& subparams = deaths.emplace_back();
-		auto& player = *p_ref;
-		subparams["deceased"] = escaped_name(player);
-	}
-	params["deaths"] = move(deaths);
+	params["deaths"] = util::transformed_copy(_deaths, [&](Player const& player) { return this->_get_params(player); });
 }
 
 void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
@@ -160,6 +164,24 @@ void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
 	}
 }
 
+maf::TextParams maf::Town_meeting::_get_params(Player const& player) const {
+	TextParams params;
+
+	params["player"] = escaped_name(player);
+
+	if (_lynch_can_occur) {
+		auto lynch_vote = player.lynch_vote();
+
+		params["player.has_voted"] = (lynch_vote != nullptr);
+
+		if (lynch_vote) {
+			params["player.vote"] = escaped_name(*lynch_vote);
+		}
+	}
+
+	return params;
+}
+
 void maf::Town_meeting::set_params(TextParams & params) const {
 	params["date"] = static_cast<int>(_date);
 	params["lynch_can_occur"] = _lynch_can_occur;
@@ -180,24 +202,11 @@ void maf::Town_meeting::set_params(TextParams & params) const {
 		} else {
 			params["recent_abstain.caster"] = escaped_name(*_recent_vote_caster);
 		}
-
 	}
 
-	vector<TextParams> townsfolk;
-
-	for (auto p_ref: _players) {
-		auto& subparams = townsfolk.emplace_back();
-
-		subparams["player"] = escaped_name(*p_ref);
-		if (_lynch_can_occur) {
-			subparams["player.has_voted"] = (p_ref->lynch_vote() != nullptr);
-			if (p_ref->lynch_vote() != nullptr) {
-				subparams["player.vote"] = escaped_name(*(p_ref->lynch_vote()));
-			}
-		}
-	}
-
-	params["townsfolk"] = move(townsfolk);
+	params["townsfolk"] = util::transformed_copy(_players, [&](Player const& player) {
+		return this->_get_params(player);
+	});
 }
 
 void maf::Player_kicked::do_commands(const vector<string_view> & commands) {
@@ -209,8 +218,8 @@ void maf::Player_kicked::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Player_kicked::set_params(TextParams & params) const {
-	params["player"] = escaped_name(*player);
-	params["role"] = escaped_name(player->role());
+	params["player"] = escaped_name(_player);
+	params["role"] = escaped_name(_player.role());
 }
 
 void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
@@ -244,12 +253,12 @@ void maf::Duel_result::do_commands(const vector<string_view> & commands) {
 }
 
 void maf::Duel_result::set_params(TextParams & params) const {
-	params["caster"] = escaped_name(*caster);
+	params["caster"] = escaped_name(caster);
 	params["caster.won_duel"] = (caster == target);
-	params["target"] = escaped_name(*target);
-	params["winner"] = escaped_name(*winner);
-	params["loser"] = escaped_name(*loser);
-	params["winner.fled"] = !winner->is_present();
+	params["target"] = escaped_name(target);
+	params["winner"] = escaped_name(winner);
+	params["loser"] = escaped_name(loser);
+	params["winner.fled"] = !(winner.is_present());
 }
 
 void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
@@ -312,8 +321,8 @@ void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
 		}
 	} else {
 		if (commands_match(commands, {"kill", ""}) && _mafiosi.size() == 1) {
-			auto & caster = *(_mafiosi.front());
-			auto & target = glog.find_player(commands[1]);
+			const Player & caster = _mafiosi.front();
+			const Player & target = glog.find_player(commands[1]);
 
 			glog.cast_mafia_kill(caster.id(), target.id());
 			_go_to_sleep = true;
@@ -338,14 +347,13 @@ void maf::Mafia_meeting::set_params(TextParams& params) const {
 	params["first_meeting"] = _initial;
 
 	if (_mafiosi.size() == 1) {
-		auto& player = *_mafiosi.front();
+		const Player & player = _mafiosi.front();
 		params["player"] = escaped_name(player);
 		params["role"] = escaped_name(player.role());
 		params["mafia.size"] = 1;
 	} else {
 		vector<TextParams> mafia;
-		for (auto p_ref: _mafiosi) {
-			auto& player = *p_ref;
+		for (const Player & player: _mafiosi) {
 			auto& subparams = mafia.emplace_back();
 			subparams["player"] = escaped_name(player);
 			subparams["role"] = escaped_name(player.role());
@@ -506,10 +514,10 @@ void maf::Investigation_result::do_commands(const vector<string_view> & commands
 }
 
 void maf::Investigation_result::set_params(TextParams& params) const {
-	params["caster"] = escaped_name(investigation.caster());
+	params["caster"] = escaped_name(investigation.caster);
 	params["finished"] = _go_to_sleep;
-	params["target"] = escaped_name(investigation.target());
-	params["target.suspicious"] = investigation.result();
+	params["target"] = escaped_name(investigation.target);
+	params["target.suspicious"] = investigation.result;
 }
 
 void maf::Game_ended::do_commands(const vector<string_view> & commands) {
@@ -520,7 +528,7 @@ void maf::Game_ended::set_params(TextParams& params) const {
 	vector<TextParams> winners_params;
 	vector<TextParams> losers_params;
 
-	for (auto& player: game_log().game().players()) {
+	for (auto& player: game_log().players) {
 		TextParams subparams;
 		subparams["player"] = escaped_name(player);
 		subparams["role"] = escaped_name(player.role());

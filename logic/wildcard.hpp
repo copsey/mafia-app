@@ -57,7 +57,7 @@ namespace maf {
 		///
 		/// If instead the wildcard uses weights, each role with a positive weight
 		/// must be defined in `rulebook`.
-		const Role & pick_role(const Rulebook & rulebook);
+		const Role & pick_role(const Rulebook & rulebook) const;
 
 	private:
 		ID _id;
