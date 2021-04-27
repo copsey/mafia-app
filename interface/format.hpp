@@ -32,43 +32,41 @@ namespace maf {
 	// are fully owned. Typically each key will be a compile-time constant.
 	struct TextParams;
 
-	// Error code for exceptions that can be thrown when calling
-	// `preprocess_text`.
-	enum class preprocess_text_errc {
-		missing_integer,
-		token_not_integer,
-		integer_out_of_range,
-
-		missing_parameter,
-		token_not_param_name,
-
-		missing_command,
-		token_not_command,
-
-		missing_comp_operand,
-		token_not_comp_operand,
-
-		missing_relation,
-		token_not_relation,
-
-		missing_escape_sequence,
-		token_not_escape_sequence,
-
-		unclosed_directive,
-		too_many_closing_braces,
-		unexpected_command,
-		too_many_tokens,
-
-		unclosed_expression,
-
-		parameter_not_available,
-		wrong_parameter_type
-	};
-
 	// Type for exceptions that can be thrown when calling `preprocess_text`.
 	struct preprocess_text_error {
-		// Error code for this exception.
-		preprocess_text_errc errc;
+		enum class error_code {
+			missing_integer,
+			token_not_integer,
+			integer_out_of_range,
+
+			missing_parameter,
+			token_not_param_name,
+
+			missing_command,
+			token_not_command,
+
+			missing_comp_operand,
+			token_not_comp_operand,
+
+			missing_relation,
+			token_not_relation,
+
+			missing_escape_sequence,
+			token_not_escape_sequence,
+
+			unclosed_directive,
+			too_many_closing_braces,
+			unexpected_command,
+			too_many_tokens,
+
+			unclosed_expression,
+
+			parameter_not_available,
+			wrong_parameter_type
+		};
+
+		// An error code signifying what went wrong.
+		error_code code;
 
 		// The input string that couldn't be processed.
 		string_view input;
@@ -81,12 +79,11 @@ namespace maf {
 		// Position in input string where the error occurred.
 		string_view::size_type pos() const;
 
-		preprocess_text_error(preprocess_text_errc errc,
-							  string_view::iterator iter)
-		: errc{errc}, param{iter} { }
+		preprocess_text_error(error_code code, string_view::iterator iter)
+		: code{code}, param{iter} { }
 
-		preprocess_text_error(preprocess_text_errc errc, string_view substr)
-		: errc{errc}, param{substr} { }
+		preprocess_text_error(error_code code, string_view substr)
+		: code{code}, param{substr} { }
 
 		// Write a description of this error to `output`.
 		void write(string & output) const;
@@ -189,14 +186,16 @@ namespace maf {
 
 	// Error code for exceptions that can be thrown when calling
 	// `format_text`.
-	enum class format_text_errc {
-		invalid_escape_sequence
-	};
+
 
 	// Type for exceptions that can be thrown when calling `format_text`.
 	struct format_text_error {
-		// Error code for this exception.
-		format_text_errc errc;
+		enum class error_code {
+			invalid_escape_sequence
+		};
+
+		// An error code signifying what went wrong.
+		error_code code;
 
 		// The input string that couldn't be processed.
 		string_view input;
@@ -207,8 +206,8 @@ namespace maf {
 		// An (optional) iterator that forms a range `{i, j}` when paired with
 		// `i`.
 		//
-		// Only used by certain error codes to signify where in the input string
-		// an invalid substring occurs.
+		// Only used by certain error codes to signify where in the input
+		// string an invalid substring occurs.
 		string_view::iterator j;
 
 		// Position in input string where the error occurred.
@@ -216,13 +215,13 @@ namespace maf {
 			return i - input.begin();
 		}
 
-		format_text_error(format_text_errc errc, string_view::iterator i)
-		: errc{errc}, i{i}, j{}
+		format_text_error(error_code code, string_view::iterator i)
+		: code{code}, i{i}, j{}
 		{ }
 
-		format_text_error(format_text_errc errc, string_view::iterator i,
+		format_text_error(error_code code, string_view::iterator i,
 						  string_view::iterator j)
-		: errc{errc}, i{i}, j{j}
+		: code{code}, i{i}, j{j}
 		{ }
 
 		// Write a description of this error to `output`.
@@ -277,6 +276,8 @@ struct maf::TextParams: _textparams_impl::Base {
 
 namespace maf::_preprocess_text_impl {
 	using iterator = string_view::iterator;
+	using error = preprocess_text_error;
+	using errc = error::error_code;
 
 	inline bool is_brace(char ch) {
 		return ch == '{' || ch == '}';
@@ -317,8 +318,7 @@ namespace maf::_preprocess_text_impl {
 		auto iter = params.find(name);
 
 		if (iter == params.end()) {
-			auto errc = preprocess_text_errc::parameter_not_available;
-			throw preprocess_text_error{errc, name};
+			throw error{errc::parameter_not_available, name};
 		}
 
 		return (*iter).second;
@@ -341,14 +341,13 @@ namespace maf::_preprocess_text_impl {
 		if (auto ptr = std::get_if<ParamType>(&param)) {
 			return *ptr;
 		} else {
-			auto errc = preprocess_text_errc::wrong_parameter_type;
-			throw preprocess_text_error{errc, name};
+			throw error{errc::wrong_parameter_type, name};
 		}
 	}
 
 
-	// Visit the parameter from `params` whose key is equal to `name` using the
-	// provided function.
+	// Visit the parameter from `params` whose key is equal to `name` using
+	// the provided function.
 	//
 	// # Exceptions
 	// - Throws `preprocess_text_error` with code `parameter_not_available` if
@@ -667,9 +666,8 @@ namespace maf::_preprocess_text_impl {
 
 			case type_t::command:
 				{
-					auto errc = preprocess_text_errc::unexpected_command;
 					auto cmd_name = this->extract_command_name();
-					throw preprocess_text_error{errc, cmd_name};
+					throw error{errc::unexpected_command, cmd_name};
 				}
 			}
 		}
@@ -719,13 +717,11 @@ namespace maf::_preprocess_text_impl {
 		auto token = directive::get_token(begin, end);
 
 		if (token.empty()) {
-			auto errc = preprocess_text_errc::missing_parameter;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::missing_parameter, begin};
 		}
 
 		if (!is_param_name(token)) {
-			auto errc = preprocess_text_errc::token_not_param_name;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_param_name, token};
 		}
 
 		name = token;
@@ -748,14 +744,12 @@ namespace maf::_preprocess_text_impl {
 										  string_view & esc_seq)
 	{
 		if (begin == end || *begin != '\\') {
-			auto errc = preprocess_text_errc::missing_escape_sequence;
-			throw preprocess_text_error{errc, begin};
+			throw preprocess_text_error{errc::missing_escape_sequence, begin};
 		}
 
 		if (begin + 1 == end) {
-			auto errc = preprocess_text_errc::token_not_escape_sequence;
-			auto token = string_view{begin, 1};
-			throw preprocess_text_error{errc, token};
+			string_view token{begin,1};
+			throw preprocess_text_error{errc::token_not_escape_sequence, token};
 		}
 
 		esc_seq = string_view{begin, 2};
@@ -884,8 +878,7 @@ namespace maf::_preprocess_text_impl {
 			} else if constexpr (std::is_same_v<T, string>) {
 				output += arg;
 			} else {
-				auto errc = preprocess_text_errc::wrong_parameter_type;
-				throw preprocess_text_error{errc, param_name};
+				throw error{errc::wrong_parameter_type, param_name};
 			}
 		};
 
@@ -928,18 +921,15 @@ namespace maf::_preprocess_text_impl {
 
 	inline void read_into(int & integer, string_view token) {
 		if (!is_integer(token)) {
-			auto errc = preprocess_text_errc::token_not_integer;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_integer, token};
 		}
 
 		if (auto result = util::from_chars(token, integer);
-			result.ec == std::errc::invalid_argument)
+		    result.ec == std::errc::invalid_argument)
 		{
-			auto errc = preprocess_text_errc::token_not_integer;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_integer, token};
 		} else if (result.ec == std::errc::result_out_of_range) {
-			auto errc = preprocess_text_errc::integer_out_of_range;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::integer_out_of_range, token};
 		}
 	}
 
@@ -948,8 +938,7 @@ namespace maf::_preprocess_text_impl {
 		auto token = directive::get_token(begin, end);
 
 		if (token.empty()) {
-			auto errc = preprocess_text_errc::missing_integer;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::missing_integer, begin};
 		}
 
 		read_into(integer, token);
@@ -966,8 +955,7 @@ namespace maf::_preprocess_text_impl {
 		} else if (token == ">") {
 			rel = relation::greater_than;
 		} else {
-			auto errc = preprocess_text_errc::token_not_relation;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_relation, token};
 		}
 	}
 
@@ -976,8 +964,7 @@ namespace maf::_preprocess_text_impl {
 		auto token = directive::get_token(begin, end);
 
 		if (token.empty()) {
-			auto errc = preprocess_text_errc::missing_relation;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::missing_relation, begin};
 		}
 
 		read_into(rel, token);
@@ -990,8 +977,7 @@ namespace maf::_preprocess_text_impl {
 		auto token = directive::get_token(begin, end);
 
 		if (token.empty()) {
-			auto errc = preprocess_text_errc::missing_comp_operand;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::missing_comp_operand, begin};
 		}
 
 		if (is_integer(token)) {
@@ -1000,19 +986,16 @@ namespace maf::_preprocess_text_impl {
 			if (auto result = util::from_chars(token, integer);
 				result.ec == std::errc::invalid_argument)
 			{
-				auto errc = preprocess_text_errc::token_not_integer;
-				throw preprocess_text_error{errc, token};
+				throw error{errc::token_not_integer, token};
 			} else if (result.ec == std::errc::result_out_of_range) {
-				auto errc = preprocess_text_errc::integer_out_of_range;
-				throw preprocess_text_error{errc, token};
+				throw error{errc::integer_out_of_range, token};
 			}
 
 			(*this) = integer;
 		} else if (is_param_name(token)) {
 			(*this) = token;
 		} else {
-			auto errc = preprocess_text_errc::token_not_comp_operand;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_comp_operand, token};
 		}
 
 		return token.end();
@@ -1042,8 +1025,7 @@ namespace maf::_preprocess_text_impl {
 		} else if (token == "end") {
 			cmd = command::end;
 		} else {
-			auto errc = preprocess_text_errc::token_not_command;
-			throw preprocess_text_error{errc, token};
+			throw error{errc::token_not_command, token};
 		}
 	}
 
@@ -1052,8 +1034,7 @@ namespace maf::_preprocess_text_impl {
 		auto token = directive::get_token(begin, end);
 
 		if (token.empty()) {
-			auto errc = preprocess_text_errc::missing_command;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::missing_command, begin};
 		}
 
 		read_into(cmd, token);
@@ -1094,8 +1075,7 @@ namespace maf::_preprocess_text_impl {
 
 	inline iterator directive::parse(iterator begin, iterator end, string_view input) {
 		if (char ch = *begin; ch == '}') {
-			auto errc = preprocess_text_errc::too_many_closing_braces;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::too_many_closing_braces, begin};
 		} else if (ch != '{') {
 			// FIXME: Throw exception due to invalid syntax.
 		}
@@ -1104,8 +1084,7 @@ namespace maf::_preprocess_text_impl {
 		auto dir_end = find_brace(i, end);
 
 		if (dir_end == end || *dir_end != '}') {
-			auto errc = preprocess_text_errc::unclosed_directive;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::unclosed_directive, begin};
 		}
 
 		this->content = util::make_string_view(i, dir_end);
@@ -1147,9 +1126,8 @@ namespace maf::_preprocess_text_impl {
 		i = skip_whitespace(i, dir_end);
 
 		if (i != dir_end) {
-			auto errc = preprocess_text_errc::too_many_tokens;
 			auto token = directive::get_token(i, dir_end);
-			throw preprocess_text_error{errc, token};
+			throw error{errc::too_many_tokens, token};
 		}
 
 		return i + "}"sv.size();
@@ -1179,9 +1157,8 @@ namespace maf::_preprocess_text_impl {
 		i = skip_whitespace(i, dir_end);
 
 		if (i != dir_end) {
-			auto errc = preprocess_text_errc::too_many_tokens;
 			auto token = directive::get_token(i, dir_end);
-			throw preprocess_text_error{errc, token};
+			throw error{errc::too_many_tokens, token};
 		}
 
 		return i + "}"sv.size();
@@ -1290,8 +1267,7 @@ namespace maf::_preprocess_text_impl {
 			}
 
 			if (i == end) {
-				auto errc = preprocess_text_errc::unclosed_expression;
-				throw preprocess_text_error{errc, begin};
+				throw error{errc::unclosed_expression, begin};
 			}
 		}
 	}
@@ -1311,8 +1287,7 @@ namespace maf::_preprocess_text_impl {
 		i = subexpr.parse(i, end, input);
 
 		if (i == end) {
-			auto errc = preprocess_text_errc::unclosed_expression;
-			throw preprocess_text_error{errc, begin};
+			throw error{errc::unclosed_expression, begin};
 		}
 
 		{ // Stage 2: Parse the "end" command
@@ -1333,20 +1308,20 @@ inline maf::string maf::preprocess_text(string_view input, TextParams const& par
 
 	try {
 		sequence expr;
-		auto next = expr.parse(input.begin(), input.end(), input);
 
-		if (next != input.end()) {
+		if (auto next = expr.parse(input.begin(), input.end(), input);
+		    next != input.end())
+		{
 			directive dir;
 			dir.parse(next, input.end(), input);
 
-			auto errc = preprocess_text_errc::unexpected_command;
 			auto cmd_name = dir.extract_command_name();
-			throw preprocess_text_error{errc, cmd_name};
+			throw error{errc::unexpected_command, cmd_name};
 		}
 
 		expr.write(output, params);
-	} catch (preprocess_text_error & err) {
-		err.input = input;
+	} catch (preprocess_text_error & error) {
+		error.input = input;
 		throw;
 	}
 
@@ -1377,129 +1352,127 @@ inline maf::string_view::size_type maf::preprocess_text_error::pos() const {
 
 
 inline void maf::preprocess_text_error::write(string & output) const {
-	using namespace _preprocess_text_impl;
-
 	auto pos = std::to_string(this->pos());
 
-	switch (errc) {
-	case preprocess_text_errc::token_not_command:
+	switch (this->code) {
+	case error_code::token_not_command:
 		output += "Invalid command \"";
 		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::token_not_comp_operand:
+	case error_code::token_not_comp_operand:
 		output += "Expected either an integer or a parameter, instead got \"";
 		output += std::get<string_view>(param);
 		output += "\", at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::token_not_escape_sequence:
+	case error_code::token_not_escape_sequence:
 		output += "Invalid escape sequence \"";
 		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::token_not_integer:
+	case error_code::token_not_integer:
 		output += "Expected an integer, instead got \"";
 		output += std::get<string_view>(param);
 		output += "\", at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::token_not_param_name:
+	case error_code::token_not_param_name:
 		output += "Expected a parameter, instead got \"";
 		output += std::get<string_view>(param);
 		output += "\", at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::token_not_relation:
+	case error_code::token_not_relation:
 		output += "Expected a relation (e.g. '<'), instead got \"";
 		output += std::get<string_view>(param);
 		output += "\", at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_command:
+	case error_code::missing_command:
 		output += "Expected a command at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_comp_operand:
+	case error_code::missing_comp_operand:
 		output += "Expected an integer or parameter at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_parameter:
+	case error_code::missing_parameter:
 		output += "Expected a parameter at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_relation:
+	case error_code::missing_relation:
 		output += "Expected a relation at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::parameter_not_available:
+	case error_code::parameter_not_available:
 		output += "Unrecognised parameter name \"";
 		output += std::get<string_view>(param);
 		output += "\" at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::too_many_closing_braces:
+	case error_code::too_many_closing_braces:
 		output += "Unexpected '}' at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::too_many_tokens:
+	case error_code::too_many_tokens:
 		output += "An extra token \"";
 		output += std::get<string_view>(param);
 		output += "\" appears at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::unclosed_directive:
+	case error_code::unclosed_directive:
 		output += "No closing brace found for '{' at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::unclosed_expression:
+	case error_code::unclosed_expression:
 		output += "No \"end\" directive found for the expression starting at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::unexpected_command:
+	case error_code::unexpected_command:
 		output += "The command \"";
 		output += std::get<string_view>(param);
 		output += "\" cannot be used at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::wrong_parameter_type:
+	case error_code::wrong_parameter_type:
 		output += "The parameter \"";
 		output += std::get<string_view>(param);
 		output += "\" has the wrong type at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_integer:
+	case error_code::missing_integer:
 		output += "Expected an integer at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::integer_out_of_range:
+	case error_code::integer_out_of_range:
 		output += "The integer \"";
 		output += std::get<string_view>(param);
 		output += "\" is too large, located at position ";
 		output += pos;
 		break;
 
-	case preprocess_text_errc::missing_escape_sequence:
+	case error_code::missing_escape_sequence:
 		output += "Expected an escape sequence at position ";
 		output += pos;
 		break;
@@ -1509,6 +1482,8 @@ inline void maf::preprocess_text_error::write(string & output) const {
 
 namespace maf::_format_text_impl {
 	using iterator = string_view::iterator;
+	using error = format_text_error;
+	using errc = error::error_code;
 
 	inline bool is_format_code(char ch) {
 		switch (ch) {
@@ -1568,15 +1543,13 @@ namespace maf::_format_text_impl {
 										  string & str)
 	{
 		if (begin == end) {
-			auto errc = format_text_errc::invalid_escape_sequence;
-			throw format_text_error{errc, begin, end};
+			throw error{errc::invalid_escape_sequence, begin, end};
 		}
 
 		auto i = begin + 1;
 
 		if (i == end) {
-			auto errc = format_text_errc::invalid_escape_sequence;
-			throw format_text_error{errc, begin, i};
+			throw error{errc::invalid_escape_sequence, begin, i};
 		}
 
 		if (char ch = *i; *begin == '\\' && is_escapable(ch)) {
@@ -1584,8 +1557,7 @@ namespace maf::_format_text_impl {
 		} else if (*begin == '\\' && ch == '\n') {
 			// exclude this character from `str`
 		} else {
-			auto errc = format_text_errc::invalid_escape_sequence;
-			throw format_text_error{errc, begin, i + 1};
+			throw error{errc::invalid_escape_sequence, begin, i + 1};
 		}
 
 		return i + 1;
@@ -1753,7 +1725,6 @@ namespace maf::_format_text_impl {
 
 
 inline maf::string maf::escaped(string_view str) {
-	using namespace _format_text_impl;
 	return _format_text_impl::escaped(str.begin(), str.end());
 }
 
@@ -1761,10 +1732,10 @@ inline maf::string maf::escaped(string_view str) {
 inline maf::StyledText maf::format_text(string_view input,
 							            StyledString::attributes_t attributes)
 {
-	using namespace _format_text_impl;
-
 	try {
-		return _format_text_impl::format_text(input.begin(), input.end(), attributes);
+		auto begin = input.begin();
+		auto end = input.end();
+		return _format_text_impl::format_text(begin, end, attributes);
 	} catch (format_text_error & error) {
 		error.input = input;
 		throw;
@@ -1775,8 +1746,8 @@ inline maf::StyledText maf::format_text(string_view input,
 inline void maf::format_text_error::write(string & output) const {
 	auto pos = std::to_string(this->pos());
 
-	switch (errc) {
-	case format_text_errc::invalid_escape_sequence:
+	switch (this->code) {
+	case error_code::invalid_escape_sequence:
 		output += "Invalid escape sequence \"";
 		output.append(i, j);
 		output += "\" at position ";
