@@ -1237,7 +1237,6 @@ namespace maf::_preprocess_text_impl {
 			directive dir;
 			auto next = dir.parse(i, end, input);
 
-			using type = directive::type_t;
 			if (stage == 1) {
 				dir.verify_instance_of(command::if_);
 
