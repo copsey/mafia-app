@@ -1,1 +1,0 @@
-{caster} decided that {target} was {!if target.suspicious}suspicious{!else}innocent{!end}.

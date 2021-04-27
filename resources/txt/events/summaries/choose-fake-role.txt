@@ -1,3 +1,0 @@
-{!if fake_role.chosen}
-{player} was given the {fake_role} as a fake role.
-{!end}

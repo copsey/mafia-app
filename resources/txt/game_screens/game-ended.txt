@@ -1,0 +1,23 @@
+=Game Over=
+
+The game has ended!
+
+{!if winners.size > 0}
+The following players won:
+{!list winners}
+ - {player}, the {role}
+{!end}
+{!else}
+Nobody won.
+{!end}
+
+{!if losers.size > 0}
+Commiserations go out to:
+{!list losers}
+ - {player}, the {role}
+{!end}
+{!else}
+Nobody lost.
+{!end}
+
+%To return to the setup screen, enter @end@.

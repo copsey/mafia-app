@@ -3,8 +3,8 @@
 #include "../util/algorithm.hpp"
 #include "../util/string.hpp"
 
-#include "events.hpp"
 #include "game_log.hpp"
+#include "game_screens.hpp"
 
 maf::Game_log::Game_log(Console & console,
 						const vector<string> &player_names,
@@ -33,7 +33,7 @@ players{game.players()}
 	_game.begin_night();
 	log_time_changed(Date{0}, Time::night);
 
-	auto prev_size = _log.size();
+	auto prev_size = _screen_stack.size();
 
 	if (_game.num_players_left(Alignment::mafia) > 0) {
 		log_mafia_meeting(true);
@@ -45,29 +45,29 @@ players{game.players()}
 		}
 	}
 
-	if (_log.size() == prev_size) {
+	if (_screen_stack.size() == prev_size) {
 		log_boring_night();
 	} else {
-		util::shuffle(_log.begin() + prev_size, _log.end());
+		util::shuffle(_screen_stack.begin() + prev_size, _screen_stack.end());
 	}
 
 	try_to_log_night_ended();
 }
 
 void maf::Game_log::advance() {
-	if (_log_index + 1 < _log.size()) {
-		++_log_index;
+	if (_screen_stack_index + 1 < _screen_stack.size()) {
+		++_screen_stack_index;
 	} else {
 		throw Cannot_advance{};
 	}
 }
 
 void maf::Game_log::do_commands(const vector<string_view> & commands) {
-	_log[_log_index]->do_commands(commands);
+	_screen_stack[_screen_stack_index]->do_commands(commands);
 }
 
 void maf::Game_log::write_transcript(string & output) const {
-	for (auto& event: _log) {
+	for (auto& event: _screen_stack) {
 		string raw_text;
 		event->summarise(raw_text);
 
@@ -175,7 +175,7 @@ void maf::Game_log::begin_night() {
 	_game.begin_night();
 	log_time_changed();
 
-	auto screens_before_night = _log.size();
+	auto screens_before_night = _screen_stack.size();
 
 	if (game.mafia_can_use_kill()) log_mafia_meeting(false);
 
@@ -184,10 +184,10 @@ void maf::Game_log::begin_night() {
 		log_ability_use(player);
 	}
 
-	if (_log.size() == screens_before_night) {
+	if (_screen_stack.size() == screens_before_night) {
 		log_boring_night();
 	} else {
-		util::shuffle(_log.begin() + screens_before_night, _log.end());
+		util::shuffle(_screen_stack.begin() + screens_before_night, _screen_stack.end());
 	}
 
 	try_to_log_night_ended();

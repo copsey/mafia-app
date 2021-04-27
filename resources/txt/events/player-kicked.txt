@@ -1,4 +1,1 @@
-={player} kicked=
-
-{player} was kicked from the game!
-They were the {role}.
+{player} was kicked.

@@ -5,12 +5,13 @@
 #include <string_view>
 
 #include "../util/stdlib.hpp"
+#include "../util/type_traits.hpp"
 
 #include "../logic/logic.hpp"
 
 namespace maf {
 	struct Console;
-	struct Event;
+	struct Game_screen;
 
 	struct Game_log {
 		/// Exception signifying that an attempt was made to create a game with
@@ -31,7 +32,7 @@ namespace maf {
 			Ability ability;
 		};
 
-		// Signifies that there are no more events to advance to.
+		// Signifies that there are no more screens to advance to.
 		struct Cannot_advance { };
 
 		// Creates a new game log, managing a game with the given parameters.
@@ -52,23 +53,17 @@ namespace maf {
 		Role const& look_up(RoleRef r_ref) const { return _game.look_up(r_ref); }
 		//
 
-		// The current event in the log.
-		// There will always be at least one event.
-		const Event & current_event() const {
-			return *_log[_log_index];
+		// The game screen that's currently active.
+		const Game_screen & active_screen() const {
+			return *_screen_stack[_screen_stack_index];
 		}
 
-		// The total number of events that have occurred in the game.
-		std::size_t num_events() const {
-			return _log.size();
-		}
-
-		// Tries to continue forward to the next state in the events.
-		// Throws an exception if all of the events in the game log have been
+		// Tries to continue forward to the next screen.
+		// Throws an exception if all of the screens in the game log have been
 		// depleted.
 		void advance();
 
-		// Handles the given commands, by passing them to the current event.
+		// Handles the given commands, by passing them to the active screen.
 		// Throws an exception if the commands couldn't be handled.
 		void do_commands(const vector<string_view> & commands);
 
@@ -128,16 +123,16 @@ namespace maf {
 
 		vector<string> _player_names;
 
-		vector<unique_ptr<Event>> _log{};
-		decltype(_log)::size_type _log_index{0};
+		vector<unique_ptr<Game_screen>> _screen_stack{};
+		decltype(_screen_stack)::size_type _screen_stack_index{0};
 
 		Console & _console;
 
 		template <typename ScreenType, typename... Args>
 		auto _append_screen(Args&&... args)
-		-> std::enable_if_t<std::is_base_of_v<Event, ScreenType>> {
-			auto event = make_unique<ScreenType>(_console, args...);
-			_log.push_back(move(event));
+		-> enable_if<is_base_of<Game_screen, ScreenType>> {
+			auto screen = make_unique<ScreenType>(_console, args...);
+			_screen_stack.push_back(move(screen));
 		}
 
 		// Adds the specified event to the end of the log.

@@ -1,13 +1,7 @@
+{--- Print an extra newline}
+
 {!if daytime}
-=Day {date}=
-
-~Dawn breaks, and dim sunlight beams onto the weary townsfolk...~
-
-It is now day {date}. Anybody still asleep can wake up.
+Day {date} began.
 {!else}
-=Night {date}=
-
-~As darkness sets in, the townsfolk return to the comforts of their shelters...~
-
-It is now night {date}. Everybody still in the game should go to sleep.
+Night {date} began.
 {!end}

@@ -8,8 +8,8 @@
 #include "../logic/logic.hpp"
 #include "format.hpp"
 
-#include "events.hpp"
 #include "game_log.hpp"
+#include "game_screens.hpp"
 #include "screen.hpp"
 
 namespace maf {
@@ -22,13 +22,13 @@ namespace maf {
 	};
 
 
-	struct Event_Help_Screen: Help_Screen {
-		Event_Help_Screen(Console & console, const Event &e):
-		Help_Screen{console}, event{e} { }
+	struct Game_help_screen: Help_Screen {
+		Game_help_screen(Console & console, const Game_screen & screen):
+		Help_Screen{console}, game_screen{screen} { }
 
-		const Event & event;
+		const Game_screen & game_screen;
 
-		string_view id() const final { return event.id(); }
+		string_view id() const final { return game_screen.id(); }
 	};
 
 

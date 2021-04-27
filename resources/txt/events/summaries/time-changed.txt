@@ -1,7 +1,0 @@
-{--- Print an extra newline}
-
-{!if daytime}
-Day {date} began.
-{!else}
-Night {date} began.
-{!end}

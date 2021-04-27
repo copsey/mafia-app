@@ -3,8 +3,8 @@ CXXFLAGS=-std=c++17
 src = \
 	cli/main.cpp \
 	interface/console.cpp \
-	interface/events.cpp \
 	interface/game_log.cpp \
+	interface/game_screens.cpp \
 	interface/help_screens.cpp \
 	interface/names.cpp \
 	interface/questions.cpp \

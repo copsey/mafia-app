@@ -1,14 +1,3 @@
-=Obituary=
-
-{!if show_death}
-{deceased} died during the night!
-{!if deceased.is_haunted}
-
-A slip of paper was found by their bed. On it has been written the name "{ghost}" over and over...
-{!end}
-{!else_if anyone_died}
-{--- FIXME: Reword to remove use of "us".}
-It appears that {num_deaths} of us did not survive the night...
-{!else}
-Nobody died during the night.
+{!list deaths}
+{deceased} died during the night.
 {!end}

@@ -73,12 +73,12 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 	
 	// Play some music.
 	if (_console.has_game()) {
-		const maf::Event & event = _console.game_log().current_event();
+		const maf::Game_screen & screen = _console.game_log().active_screen();
 
-		if (event.id() == "time-changed") {
-			auto & specific_event = static_cast<const maf::Time_changed &>(event);
+		if (screen.id() == "time-changed") {
+			auto & specific_screen = static_cast<const maf::Time_changed &>(screen);
 
-			if (specific_event.time == maf::Time::day) {
+			if (specific_screen.time == maf::Time::day) {
 				[_delegate playMusic:MafiaPlaylistItem_Daytime];
 			} else {
 				switch (arc4random_uniform(4)) {
@@ -95,15 +95,15 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 						break;
 				}
 			}
-		} else if (event.id() == "lynch-result") {
-			auto & specific_event = static_cast<const maf::Lynch_result &>(event);
+		} else if (screen.id() == "lynch-result") {
+			auto & specific_screen = static_cast<const maf::Lynch_result &>(screen);
 
-			if (specific_event.victim && specific_event.victim_role->is_troll()) {
+			if (specific_screen.victim && specific_screen.victim_role->is_troll()) {
 				[_delegate playMusic:MafiaPlaylistItem_TrollLynch];
 			}
-		} else if (event.id() == "duel-result") {
+		} else if (screen.id() == "duel-result") {
 			[_delegate playMusic:MafiaPlaylistItem_Duel];
-		} else if (event.id() == "game-ended") {
+		} else if (screen.id() == "game-ended") {
 			[_delegate playMusic:MafiaPlaylistItem_GameEnded];
 		}
 	}

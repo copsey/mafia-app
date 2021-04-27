@@ -1,15 +1,5 @@
-=Duel=
-
-{caster} has challenged {target} to a duel!
-
-The pistols are loaded, and the participants take ten paces in opposite directions.
-
-~3... 2... 1... *BANG!!*~
-
-The lifeless body of {loser} falls to the ground. {winner} lets out a sigh of relief.
-{!if winner.fled}
-
-With that, {winner} throws their gun to the ground and flees from the village.
+{!if caster.won_duel}
+{caster} won a duel against {target}.
+{!else}
+{caster} lost a duel against {target}.
 {!end}
-
-%When you have finished with this screen, enter @ok@.

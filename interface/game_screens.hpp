@@ -1,5 +1,5 @@
-#ifndef MAFIA_EVENT_H
-#define MAFIA_EVENT_H
+#ifndef MAFIA_GAME_SCREENS
+#define MAFIA_GAME_SCREENS
 
 #include "../util/stdlib.hpp"
 
@@ -14,16 +14,14 @@ namespace maf {
 	struct Console;
 	struct Game_log;
 
-	struct Event: Screen {
+	struct Game_screen: Screen {
 		using Screen::Screen;
 
-		// Get this event's stored game.
 		const Game & game() const;
-		// Get this event's stored game log.
 		Game_log & game_log();
 		const Game_log & game_log() const;
 
-		string_view txt_subdir() const override { return "txt/events/"; }
+		string_view txt_subdir() const override { return "txt/game_screens/"; }
 
 		void do_commands(const CmdSequence & commands) override;
 
@@ -36,12 +34,12 @@ namespace maf {
 	};
 
 
-	struct Player_given_initial_role: Event {
+	struct Player_given_initial_role: Game_screen {
 		Player_given_initial_role(Console & console,
 								  const Player & player,
 								  const Role & role,
 								  const Wildcard * wildcard)
-		: Event{console}, _player{player}, _role{role}, _wildcard{wildcard} { }
+		: Game_screen{console}, _player{player}, _role{role}, _wildcard{wildcard} { }
 
 		string_view id() const final { return "player-given-role"; }
 
@@ -56,9 +54,9 @@ namespace maf {
 	};
 
 
-	struct Time_changed: Event {
+	struct Time_changed: Game_screen {
 		Time_changed(Console & console, Date d, Time t)
-		: Event{console}, date{d}, time{t} { }
+		: Game_screen{console}, date{d}, time{t} { }
 
 		string_view id() const final { return "time-changed"; }
 
@@ -70,9 +68,9 @@ namespace maf {
 	};
 
 
-	struct Obituary: Event {
+	struct Obituary: Game_screen {
 		Obituary(Console & console, vector_of_refs<const Player> deaths)
-		: Event{console}, _deaths{deaths} { }
+		: Game_screen{console}, _deaths{deaths} { }
 
 		string_view id() const final { return "obituary"; }
 
@@ -87,7 +85,7 @@ namespace maf {
 	};
 
 
-	struct Town_meeting: Event {
+	struct Town_meeting: Game_screen {
 		Town_meeting(Console & console,
 		             vector_of_refs<const Player> players,
 		             Date date,
@@ -96,7 +94,7 @@ namespace maf {
 		             const Player * recent_lynch_vote_caster,
 		             const Player * recent_lynch_vote_target)
 		:
-			Event{console},
+			Game_screen{console},
 			_players{players},
 			_date{date},
 			_lynch_can_occur{lynch_can_occur},
@@ -126,9 +124,9 @@ namespace maf {
 	};
 
 
-	struct Player_kicked: Event {
+	struct Player_kicked: Game_screen {
 		Player_kicked(Console & console, const Player & player)
-		: Event{console}, _player{player} { }
+		: Game_screen{console}, _player{player} { }
 
 		string_view id() const final { return "player-kicked"; }
 
@@ -140,9 +138,9 @@ namespace maf {
 	};
 
 
-	struct Lynch_result: Event {
+	struct Lynch_result: Game_screen {
 		Lynch_result(Console & console, const Player * victim, const Role * victim_role)
-		: Event{console}, victim{victim}, victim_role{victim_role} { }
+		: Game_screen{console}, victim{victim}, victim_role{victim_role} { }
 
 		string_view id() const final { return "lynch-result"; }
 
@@ -157,9 +155,9 @@ namespace maf {
 	};
 
 
-	struct Duel_result: Event {
+	struct Duel_result: Game_screen {
 		Duel_result(Console & console, const Player & caster, const Player & target, const Player & winner, const Player & loser)
-		: Event{console}, caster{caster}, target{target}, winner{winner}, loser{loser} { }
+		: Game_screen{console}, caster{caster}, target{target}, winner{winner}, loser{loser} { }
 
 		string_view id() const final { return "duel-result"; }
 
@@ -173,9 +171,9 @@ namespace maf {
 	};
 
 
-	struct Choose_fake_role: Event {
+	struct Choose_fake_role: Game_screen {
 		Choose_fake_role(Console & console, const Player & player)
-		: Event{console}, _player{player} { }
+		: Game_screen{console}, _player{player} { }
 
 		string_view id() const final { return "choose-fake-role"; }
 
@@ -189,11 +187,11 @@ namespace maf {
 	};
 
 
-	struct Mafia_meeting: Event {
+	struct Mafia_meeting: Game_screen {
 		Mafia_meeting(Console & console,
 					  vector_of_refs<const Player> mafiosi,
 		              bool is_first_meeting)
-		: Event{console}, _mafiosi{mafiosi}, _first_meeting{is_first_meeting}
+		: Game_screen{console}, _mafiosi{mafiosi}, _first_meeting{is_first_meeting}
 		{ }
 
 		string_view id() const final { return "mafia-meeting"; }
@@ -211,9 +209,9 @@ namespace maf {
 	};
 
 
-	struct Kill_use: Event {
+	struct Kill_use: Game_screen {
 		Kill_use(Console & console, const Player & caster)
-		: Event{console}, _caster{caster} { }
+		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-kill"; }
 
@@ -226,9 +224,9 @@ namespace maf {
 	};
 
 
-	struct Heal_use: Event {
+	struct Heal_use: Game_screen {
 		Heal_use(Console & console, const Player & caster)
-		: Event{console}, _caster{caster} { }
+		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-heal"; }
 
@@ -241,9 +239,9 @@ namespace maf {
 	};
 
 
-	struct Investigate_use: Event {
+	struct Investigate_use: Game_screen {
 		Investigate_use(Console & console, const Player & caster)
-		: Event{console}, _caster{caster} { }
+		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-investigate"; }
 
@@ -256,9 +254,9 @@ namespace maf {
 	};
 
 
-	struct Peddle_use: Event {
+	struct Peddle_use: Game_screen {
 		Peddle_use(Console & console, const Player & caster)
-		: Event{console}, _caster{caster} { }
+		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-peddle"; }
 
@@ -271,8 +269,8 @@ namespace maf {
 	};
 
 
-	struct Boring_night: Event {
-		using Event::Event;
+	struct Boring_night: Game_screen {
+		using Game_screen::Game_screen;
 
 		string_view id() const final { return "boring-night"; }
 
@@ -281,9 +279,9 @@ namespace maf {
 	};
 
 
-	struct Investigation_result: Event {
+	struct Investigation_result: Game_screen {
 		Investigation_result(Console & console, Investigation investigation)
-		: Event{console}, investigation{investigation} { }
+		: Game_screen{console}, investigation{investigation} { }
 
 		string_view id() const final { return "investigation-result"; }
 
@@ -297,8 +295,8 @@ namespace maf {
 	};
 
 
-	struct Game_ended: Event {
-		using Event::Event;
+	struct Game_ended: Game_screen {
+		using Game_screen::Game_screen;
 
 		string_view id() const final { return "game-ended"; }
 

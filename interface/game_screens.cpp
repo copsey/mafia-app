@@ -2,24 +2,24 @@
 
 #include "command.hpp"
 #include "console.hpp"
-#include "events.hpp"
+#include "game_screens.hpp"
 #include "names.hpp"
 
-const maf::Game & maf::Event::game() const {
+const maf::Game & maf::Game_screen::game() const {
 	return console().game_log().game;
 }
 
-maf::Game_log & maf::Event::game_log() {
+maf::Game_log & maf::Game_screen::game_log() {
 	return console().game_log();
 }
 
-const maf::Game_log & maf::Event::game_log() const {
+const maf::Game_log & maf::Game_screen::game_log() const {
 	return console().game_log();
 }
 
-void maf::Event::do_commands(const CmdSequence & commands) {
+void maf::Game_screen::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"help"})) {
-		console().show_help_screen<Event_Help_Screen>(*this);
+		console().show_help_screen<Game_help_screen>(*this);
 	} else if (commands_match(commands, {"end"})) {
 		console().show_question<Confirm_end_game>();
 	} else {
@@ -27,12 +27,11 @@ void maf::Event::do_commands(const CmdSequence & commands) {
 	}
 }
 
-void maf::Event::summarise(string & output) const {
+void maf::Game_screen::summarise(string & output) const {
 	// FIXME: This is horrendously fragile.
 	string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
 
-	fname += this->txt_subdir();
-	fname += "summaries/";
+	fname += "txt/events/";
 	fname += this->id();
 	fname += ".txt";
 
@@ -44,11 +43,11 @@ void maf::Event::summarise(string & output) const {
 	}
 }
 
-maf::string maf::Event::escaped_name(Player const& player) const {
+maf::string maf::Game_screen::escaped_name(Player const& player) const {
 	return escaped(game_log().get_name(player));
 }
 
-maf::string maf::Event::escaped_name(Role const& role) const {
+maf::string maf::Game_screen::escaped_name(Role const& role) const {
 	return escaped(full_name(role));
 }
 
@@ -57,7 +56,7 @@ void maf::Player_given_initial_role::do_commands(const CmdSequence & commands) {
 		if (_is_private) game_log().advance();
 		else _is_private = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -77,7 +76,7 @@ void maf::Time_changed::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -95,7 +94,7 @@ void maf::Obituary::do_commands(const CmdSequence & commands) {
 			game_log().advance();
 		}
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -172,7 +171,7 @@ void maf::Town_meeting::_do_other_commands(const CmdSequence & commands) {
 		game_log().stage_duel(caster.id(), target.id());
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -225,7 +224,7 @@ void maf::Player_kicked::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -238,7 +237,7 @@ void maf::Lynch_result::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -260,7 +259,7 @@ void maf::Duel_result::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -287,7 +286,7 @@ void maf::Choose_fake_role::do_commands(const CmdSequence & commands) {
 			throw Rulebook::Missing_role_alias{string{commands[1]}};
 		}
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -315,7 +314,7 @@ void maf::Mafia_meeting::_do_commands_for_first_meeting(const CmdSequence & comm
 		if (_finished) game_log().advance();
 		else _finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -337,7 +336,7 @@ void maf::Mafia_meeting::_do_commands_for_regular_meeting(const CmdSequence & co
 		game_log().skip_mafia_kill();
 		_finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -373,7 +372,7 @@ void maf::Kill_use::do_commands(const CmdSequence & commands) {
 		game_log().skip_kill(_caster.id());
 		_finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -393,7 +392,7 @@ void maf::Heal_use::do_commands(const CmdSequence & commands) {
 		game_log().skip_heal(_caster.id());
 		_finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -413,7 +412,7 @@ void maf::Investigate_use::do_commands(const CmdSequence & commands) {
 		game_log().skip_investigate(_caster.id());
 		_finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -433,7 +432,7 @@ void maf::Peddle_use::do_commands(const CmdSequence & commands) {
 		game_log().skip_peddle(_caster.id());
 		_finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -446,7 +445,7 @@ void maf::Boring_night::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -459,7 +458,7 @@ void maf::Investigation_result::do_commands(const CmdSequence & commands) {
 		if (_finished) game_log().advance();
 		else _finished = true;
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 
@@ -476,7 +475,7 @@ void maf::Game_ended::do_commands(const CmdSequence & commands) {
 	{
 		console().end_game();
 	} else {
-		Event::do_commands(commands);
+		Game_screen::do_commands(commands);
 	}
 }
 

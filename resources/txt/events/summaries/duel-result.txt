@@ -1,5 +1,0 @@
-{!if caster.won_duel}
-{caster} won a duel against {target}.
-{!else}
-{caster} lost a duel against {target}.
-{!end}

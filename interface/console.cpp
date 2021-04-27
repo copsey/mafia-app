@@ -317,7 +317,7 @@ bool maf::Console::do_commands(const CmdSequence & commands) {
 
 		err << "=Player not found!=\n\nA player named @{player}@ could not be found.";
 	}
-	catch (const Event::Bad_commands &e) {
+	catch (const Screen::Bad_commands &e) {
 		err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter @help@ if you're unsure what to do.)";
 	}
 	catch (const Setup_screen::Bad_player_name &e) {
@@ -439,7 +439,7 @@ const maf::Screen & maf::Console::active_screen() const {
 	} else if (_question) {
 		return *_question;
 	} else if (_game_log) {
-		return _game_log->current_event();
+		return _game_log->active_screen();
 	} else {
 		return _setup_screen;
 	}

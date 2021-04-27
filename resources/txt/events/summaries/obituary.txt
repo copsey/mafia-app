@@ -1,3 +1,0 @@
-{!list deaths}
-{deceased} died during the night.
-{!end}

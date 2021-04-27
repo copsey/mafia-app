@@ -23,7 +23,7 @@
 		F8BC030E234621A20009732C /* role_ref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8BC030D234621A20009732C /* role_ref.cpp */; };
 		F8C84C011AF7ED05007243BA /* Application.xib in Resources */ = {isa = PBXBuildFile; fileRef = F8C84C001AF7ED05007243BA /* Application.xib */; };
 		F8C84C921AF4F80A00B40E54 /* InterfaceGlue.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */; };
-		F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* events.cpp */; };
+		F8D5DB351B84E43B00D032D6 /* game_screens.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D5DB331B84E43B00D032D6 /* game_screens.cpp */; };
 		F8D646E71B85F36200E72222 /* game_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D646E51B85F36200E72222 /* game_log.cpp */; };
 		F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8D772D51AF4B42100E16BB6 /* console.cpp */; };
 /* End PBXBuildFile section */
@@ -73,8 +73,8 @@
 		F8C84C901AF4F80A00B40E54 /* InterfaceGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InterfaceGlue.h; sourceTree = "<group>"; };
 		F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = InterfaceGlue.mm; sourceTree = "<group>"; };
 		F8D3F4AE1B859D39007D134B /* format.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = format.hpp; sourceTree = "<group>"; };
-		F8D5DB331B84E43B00D032D6 /* events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = events.cpp; sourceTree = "<group>"; };
-		F8D5DB341B84E43B00D032D6 /* events.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = events.hpp; sourceTree = "<group>"; };
+		F8D5DB331B84E43B00D032D6 /* game_screens.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_screens.cpp; sourceTree = "<group>"; };
+		F8D5DB341B84E43B00D032D6 /* game_screens.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game_screens.hpp; sourceTree = "<group>"; };
 		F8D646E51B85F36200E72222 /* game_log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game_log.cpp; sourceTree = "<group>"; };
 		F8D646E61B85F36200E72222 /* game_log.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game_log.hpp; sourceTree = "<group>"; };
 		F8D646E81B85F4F800E72222 /* iTunes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
@@ -144,11 +144,11 @@
 				F809EE2C1FC1975B003348BC /* command.hpp */,
 				F8D772D61AF4B42100E16BB6 /* console.hpp */,
 				F8D772D51AF4B42100E16BB6 /* console.cpp */,
-				F8D5DB341B84E43B00D032D6 /* events.hpp */,
-				F8D5DB331B84E43B00D032D6 /* events.cpp */,
 				F8D3F4AE1B859D39007D134B /* format.hpp */,
 				F8D646E61B85F36200E72222 /* game_log.hpp */,
 				F8D646E51B85F36200E72222 /* game_log.cpp */,
+				F8D5DB341B84E43B00D032D6 /* game_screens.hpp */,
+				F8D5DB331B84E43B00D032D6 /* game_screens.cpp */,
 				F880CA041B89BEC600144257 /* help_screens.hpp */,
 				F880CA031B89BEC600144257 /* help_screens.cpp */,
 				F858FAD31AFF5A16004D7058 /* names.hpp */,
@@ -282,7 +282,7 @@
 				F88A4DF11B8C9D1D0033A040 /* setup_screen.cpp in Sources */,
 				F880CA051B89BEC600144257 /* help_screens.cpp in Sources */,
 				F880CA0B1B8A606300144257 /* questions.cpp in Sources */,
-				F8D5DB351B84E43B00D032D6 /* events.cpp in Sources */,
+				F8D5DB351B84E43B00D032D6 /* game_screens.cpp in Sources */,
 				F8D646E71B85F36200E72222 /* game_log.cpp in Sources */,
 				F8D772D71AF4B42100E16BB6 /* console.cpp in Sources */,
 				F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */,
