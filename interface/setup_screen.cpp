@@ -6,6 +6,52 @@
 #include "names.hpp"
 #include "setup_screen.hpp"
 
+struct Game_parameters {
+	maf::vector<maf::string> player_names;
+	maf::vector<maf::Role::ID> role_ids;
+	maf::vector<maf::Wildcard::ID> wildcard_ids;
+	maf::Rulebook rulebook;
+};
+
+const std::array<Game_parameters, 3> _presets = {
+	Game_parameters{
+		{"Augustus", "Brutus", "Claudius", "Drusilla"},
+		{
+			maf::Role::ID::peasant,
+			maf::Role::ID::racketeer,
+			maf::Role::ID::coward
+		},
+		{maf::Wildcard::ID::village_basic},
+		{}
+	},
+	Game_parameters{
+		{"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
+		{
+			maf::Role::ID::peasant,
+			maf::Role::ID::peasant,
+			maf::Role::ID::doctor,
+			maf::Role::ID::detective,
+			maf::Role::ID::dealer,
+			maf::Role::ID::musketeer
+		},
+		{},
+		{}
+	},
+	Game_parameters{
+		{"Alice", "Bob", "Charlie", "Daisy", "Eduardo", "Fiona"},
+		{
+			maf::Role::ID::godfather,
+			maf::Role::ID::actor,
+			maf::Role::ID::serial_killer,
+			maf::Role::ID::village_idiot,
+			maf::Role::ID::village_idiot,
+			maf::Role::ID::village_idiot
+		},
+		{},
+		{}
+	}
+};
+
 
 const maf::Rulebook & maf::Setup_screen::rulebook() const {
 	return _rulebook;
@@ -178,12 +224,53 @@ void maf::Setup_screen::clear_all() {
 	clear_all_cards();
 }
 
-maf::unique_ptr<maf::Game_log> maf::Setup_screen::new_game_log() const {
-	return make_unique<Game_log>(player_names(), rolecard_ids(), wildcard_ids(), _rulebook);
+maf::unique_ptr<maf::Game_log> maf::Setup_screen::begin_pending_game() {
+	return make_unique<Game_log>(console(),
+								 player_names(),
+								 rolecard_ids(),
+								 wildcard_ids(),
+								 rulebook());
+}
+
+maf::unique_ptr<maf::Game_log> maf::Setup_screen::begin_preset(int i) {
+	if (i >= 0 && i < std::size(_presets)) {
+		Game_parameters params = _presets[i];
+		return make_unique<Game_log>(console(),
+									 params.player_names,
+									 params.role_ids,
+									 params.wildcard_ids,
+									 params.rulebook);
+	} else {
+		throw Missing_preset{i};
+	}
 }
 
 void maf::Setup_screen::do_commands(const vector<string_view> & commands) {
-	if (commands_match(commands, {"add", "p", ""})) {
+	if (commands_match(commands, {"begin"})) {
+		auto new_game = begin_pending_game();
+		console().store_game(move(new_game));
+	} else if (commands_match(commands, {"preset"})) {
+		int num_presets = std::size(_presets);
+		std::uniform_int_distribution<int> uid{0, num_presets - 1};
+		int random_preset = uid(util::random_engine);
+		auto new_game = begin_preset(random_preset);
+		console().store_game(move(new_game));
+	} else if (commands_match(commands, {"preset", ""})) {
+		int i;
+		auto& str = commands[1];
+
+		if (auto result = std::from_chars(std::begin(str), std::end(str), i);
+			result.ec == std::errc{})
+		{
+			begin_preset(i);
+		} else {
+			string msg = "=Error!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
+			auto params = TextParams{};
+			params["str"] = escaped(str);
+
+			throw Generic_error{move(msg), move(params)};
+		}
+	} else if (commands_match(commands, {"add", "p", ""})) {
 		add_player(commands[2]);
 	} else if (commands_match(commands, {"take", "p", ""})) {
 		remove_player(commands[2]);
@@ -209,8 +296,10 @@ void maf::Setup_screen::do_commands(const vector<string_view> & commands) {
 		clear_all_cards();
 	} else if (commands_match(commands, {"clear"})) {
 		clear_all();
+	} else if (commands_match(commands, {"help"})) {
+		console().show_help_screen<Setup_Help_Screen>();
 	} else {
-		throw Bad_commands{};
+		Screen::do_commands(commands);
 	}
 }
 

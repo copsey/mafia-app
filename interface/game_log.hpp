@@ -5,9 +5,13 @@
 #include <string_view>
 
 #include "../util/stdlib.hpp"
-#include "events.hpp"
+
+#include "../logic/logic.hpp"
 
 namespace maf {
+	struct Console;
+	struct Event;
+
 	struct Game_log {
 		/// Exception signifying that an attempt was made to create a game with
 		/// an unequal number of players and cards.
@@ -31,7 +35,8 @@ namespace maf {
 		struct Cannot_advance { };
 
 		// Creates a new game log, managing a game with the given parameters.
-		Game_log(const vector<string> &player_names,
+		Game_log(Console & console,
+				 const vector<string> &player_names,
 		         const vector<Role::ID> &role_ids,
 		         const vector<Wildcard::ID> &wildcard_ids,
 		         const Rulebook &rulebook = Rulebook{});
@@ -126,10 +131,12 @@ namespace maf {
 		vector<unique_ptr<Event>> _log{};
 		decltype(_log)::size_type _log_index{0};
 
+		Console & _console;
+
 		template <typename ScreenType, typename... Args>
-		auto emplace_screen(Args&&... args)
+		auto _append_screen(Args&&... args)
 		-> std::enable_if_t<std::is_base_of_v<Event, ScreenType>> {
-			auto event = make_unique<ScreenType>(*this, args...);
+			auto event = make_unique<ScreenType>(_console, args...);
 			_log.push_back(move(event));
 		}
 

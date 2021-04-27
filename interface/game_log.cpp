@@ -3,20 +3,25 @@
 #include "../util/algorithm.hpp"
 #include "../util/string.hpp"
 
+#include "events.hpp"
 #include "game_log.hpp"
 
-maf::Game_log::Game_log(const vector<string> &player_names,
+maf::Game_log::Game_log(Console & console,
+						const vector<string> &player_names,
                         const vector<Role::ID> &role_ids,
                         const vector<Wildcard::ID> &wildcard_ids,
-                        const Rulebook &rulebook)
-: _game{role_ids, wildcard_ids, rulebook}, _player_names{player_names},
-game{_game}, players{game.players()}
+                        const Rulebook &rulebook):
+_console{console},
+_game{role_ids, wildcard_ids, rulebook},
+_player_names{player_names},
+game{_game},
+players{game.players()}
 {
 	if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
 		throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
 	}
 
-	for (const Player &player: this->players) {
+	for (const Player & player: this->players) {
 		log_player_given_role(player);
 	}
 
@@ -36,7 +41,7 @@ game{_game}, players{game.players()}
 
 	for (auto& player: players) {
 		if (player.is_present() && player.role().is_role_faker() && !player.has_fake_role()) {
-			emplace_screen<Choose_fake_role>(player);
+			_append_screen<Choose_fake_role>(player);
 		}
 	}
 
@@ -117,7 +122,7 @@ maf::string_view maf::Game_log::get_name(Player::ID id) const {
 void maf::Game_log::kick_player(Player::ID id) {
 	_game.kick_player(id);
 	const Player &player = find_player(id);
-	emplace_screen<Player_kicked>(player);
+	_append_screen<Player_kicked>(player);
 
 	if (_game.game_has_ended()) {
 		log_game_ended();
@@ -244,7 +249,7 @@ void maf::Game_log::skip_peddle(Player::ID caster_id) {
 }
 
 void maf::Game_log::log_player_given_role(Player const& player) {
-	emplace_screen<Player_given_initial_role>(player, player.role(), player.wildcard());
+	_append_screen<Player_given_initial_role>(player, player.role(), player.wildcard());
 }
 
 void maf::Game_log::log_time_changed() {
@@ -252,7 +257,7 @@ void maf::Game_log::log_time_changed() {
 }
 
 void maf::Game_log::log_time_changed(Date date, Time time) {
-	emplace_screen<Time_changed>(date, time);
+	_append_screen<Time_changed>(date, time);
 }
 
 void maf::Game_log::log_obituary(Date date) {
@@ -263,7 +268,7 @@ void maf::Game_log::log_obituary(Date date) {
 	};
 
 	auto deaths = util::filtered_crefs(players, died_this_night);
-	emplace_screen<Obituary>(move(deaths));
+	_append_screen<Obituary>(move(deaths));
 }
 
 void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Player *recent_vote_target) {
@@ -272,38 +277,38 @@ void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Pla
 	};
 
 	auto townsfolk = util::filtered_crefs(players, is_present);
-	emplace_screen<Town_meeting>(move(townsfolk), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target);
+	_append_screen<Town_meeting>(move(townsfolk), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target);
 }
 
 void maf::Game_log::log_lynch_result(const Player *victim) {
 	Role const* role = victim ? &victim->role() : nullptr;
-	emplace_screen<Lynch_result>(victim, role);
+	_append_screen<Lynch_result>(victim, role);
 }
 
 void maf::Game_log::log_duel_result(const Player &caster, const Player &target) {
 	auto& winner = caster.is_alive() ? caster : target;
 	auto& loser  = caster.is_alive() ? target : caster;
 
-	emplace_screen<Duel_result>(caster, target, winner, loser);
+	_append_screen<Duel_result>(caster, target, winner, loser);
 }
 
 void maf::Game_log::log_ability_use(Player const& player) {
 	for (Ability ability: player.compulsory_abilities()) {
 		switch (ability.id) {
 		case Ability::ID::kill:
-			emplace_screen<Kill_use>(player);
+			_append_screen<Kill_use>(player);
 			break;
 
 		case Ability::ID::heal:
-			emplace_screen<Heal_use>(player);
+			_append_screen<Heal_use>(player);
 			break;
 
 		case Ability::ID::investigate:
-			emplace_screen<Investigate_use>(player);
+			_append_screen<Investigate_use>(player);
 			break;
 
 		case Ability::ID::peddle:
-			emplace_screen<Peddle_use>(player);
+			_append_screen<Peddle_use>(player);
 			break;
 
 		default:
@@ -313,19 +318,19 @@ void maf::Game_log::log_ability_use(Player const& player) {
 }
 
 void maf::Game_log::log_mafia_meeting(bool initial_meeting) {
-	emplace_screen<Mafia_meeting>(_game.remaining_players(Alignment::mafia), initial_meeting);
+	_append_screen<Mafia_meeting>(_game.remaining_players(Alignment::mafia), initial_meeting);
 }
 
 void maf::Game_log::log_boring_night() {
-	emplace_screen<Boring_night>();
+	_append_screen<Boring_night>();
 }
 
 void maf::Game_log::log_investigation_result(Investigation investigation) {
-	emplace_screen<Investigation_result>(investigation);
+	_append_screen<Investigation_result>(investigation);
 }
 
 void maf::Game_log::log_game_ended() {
-	emplace_screen<Game_ended>();
+	_append_screen<Game_ended>();
 }
 
 void maf::Game_log::try_to_log_night_ended() {

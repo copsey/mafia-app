@@ -6,38 +6,22 @@
 #include "screen.hpp"
 
 namespace maf {
-	struct Console;
-	
 	// TODO: Place all Questions into separate 'question' child namespace of 'maf'.
 
 	 
 	struct Question: Screen {
-		// Signifies that a question failed to process a set of commands.
-		struct Bad_commands { };
-
-		string_view txt_subdir() const override
-		{ return "txt/questions/"; }
-
-		// Handles the given commands, taking action as appropriate.
-		//
-		// Returns true if the question has been fully answered, and false otherwise.
-		// If false, then the tagged string outputted by write may have changed.
-		//
-		// Throws an exception if the commands couldn't be handled.
-		virtual bool do_commands(const vector<string_view> & commands) = 0;
+		using Screen::Screen;
+		
+		string_view txt_subdir() const override { return "txt/questions/"; }
 	};
 
 
 	struct Confirm_end_game: Question {
-		Confirm_end_game(Console & console): _console(console) { }
+		using Question::Question;
 
-		string_view id() const override
-		{ return "end-game"; }
+		string_view id() const override { return "end-game"; }
 
-		bool do_commands(const vector<string_view> & commands) override;
-
-	private:
-		Console & _console;
+		void do_commands(const CmdSequence & commands) override;
 	};
 
 

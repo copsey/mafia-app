@@ -46,6 +46,8 @@ namespace maf {
 		// Signifies that a set of commands couldn't be interpreted.
 		struct Bad_commands { };
 
+		using Screen::Screen;
+
 		string_view id() const final { return "setup"; }
 
 		// The rulebook to be used in the pending game.
@@ -102,13 +104,13 @@ namespace maf {
 		// Removes all of the players and cards that have been chosen.
 		void clear_all();
 
-		// Begins a new game using the current parameters, stored in a game log.
-		unique_ptr<Game_log> new_game_log() const;
+		unique_ptr<Game_log> begin_pending_game();
+		unique_ptr<Game_log> begin_preset(int i);
 
 		// Handles the given commands, making alterations to the setup screen as
 		// appropriate.
 		// Throws an exception if the commands couldn't be interpreted.
-		void do_commands(const vector<string_view> &commands);
+		void do_commands(const CmdSequence & commands) override;
 
 		void set_params(TextParams & params) const override;
 

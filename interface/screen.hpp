@@ -8,10 +8,22 @@
 #include "format.hpp"
 
 namespace maf {
+	struct Console;
+
 	// A single screen from the console. Intended to be used as a base class,
 	// providing a common interface for all screens.
 	struct Screen {
+		// Create a screen belonging to `console`.
+		//
+		// Note that only a reference to `console` is stored. As such, the
+		// lifetime of this screen must not outlive the console.
+		Screen(Console & console): _console{console} { }
+
 		virtual ~Screen() = default;
+
+		// The console owning this screen.
+		Console & console() { return _console; }
+		const Console & console() const { return _console; }
 
 		// A string to identify the screen by. Used for example when loading
 		// resources from the file system.
@@ -33,6 +45,20 @@ namespace maf {
 		// Apply `preprocess_text` to the contents of the ".txt" file for this
 		// screen, and write the result to `output`.
 		void write(string & output) const;
+
+		// Handles the given commands, taking action as appropriate.
+		//
+		// Returns true if the question has been fully answered, and false otherwise.
+		// If false, then the tagged string outputted by write may have changed.
+		//
+		// Throws an exception if the commands couldn't be handled.
+		virtual void do_commands(const CmdSequence & commands);
+
+		// An error thrown when a screen fails to handle a set of commands.
+		struct Bad_commands { };
+
+	private:
+		Console & _console;
 	};
 }
 

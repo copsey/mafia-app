@@ -2,6 +2,7 @@
 #define MAFIA_LOGIC_ROLE
 
 #include "../util/stdlib.hpp"
+#include "../util/string.hpp"
 
 namespace maf {
 	class Rulebook;

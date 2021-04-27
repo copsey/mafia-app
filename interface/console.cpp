@@ -13,126 +13,16 @@
 #include "console.hpp"
 #include "names.hpp"
 
-const std::array<maf::Console::Game_parameters, maf::Console::num_presets> maf::Console::_presets{
-	maf::Console::Game_parameters{
-		{"Augustus", "Brutus", "Claudius", "Drusilla"},
-		{maf::Role::ID::peasant, maf::Role::ID::racketeer, maf::Role::ID::coward},
-		{maf::Wildcard::ID::village_basic},
-		maf::Rulebook{}
-	},
-	maf::Console::Game_parameters{
-		{"Nine", "Ten", "Jack", "Queen", "King", "Ace"},
-		{maf::Role::ID::peasant, maf::Role::ID::peasant,maf::Role::ID::doctor, maf::Role::ID::detective, maf::Role::ID::dealer, maf::Role::ID::musketeer},
-		{},
-		maf::Rulebook{}
-	},
-	maf::Console::Game_parameters{
-		{"Alice", "Bob", "Charlie", "Daisy", "Eduardo", "Fiona"},
-		{maf::Role::ID::godfather, maf::Role::ID::actor, maf::Role::ID::serial_killer, maf::Role::ID::village_idiot, maf::Role::ID::village_idiot, maf::Role::ID::village_idiot},
-		{},
-		maf::Rulebook{}
-	}
-};
-
-maf::Console::Console() {
+maf::Console::Console(): _setup_screen{*this} {
 	refresh_output();
 }
 
-bool maf::Console::do_commands(const vector<string_view> & commands) {
+bool maf::Console::do_commands(const CmdSequence & commands) {
 	std::stringstream err{}; // Write an error here if something goes wrong.
 	TextParams err_params = {}; // (include parameters for error message here)
 
 	try {
-		if (commands.size() == 0) {
-			err << "=Missing input!=\n\nEntering a blank input has no effect.\n(enter @help@ if you're unsure what to do.)";
-		}
-		else if (commands_match(commands, {"help"})) {
-			if (has_game()) {
-				store_help_screen(new Event_Help_Screen{_game_log->current_event()});
-			} else {
-				store_help_screen(new Setup_Help_Screen());
-			}
-		}
-		else if (commands_match(commands, {"help", "r", ""})) {
-			RoleRef r_ref = commands[2];
-
-			try {
-				auto& role = active_rulebook().look_up(r_ref);
-				store_help_screen(new Role_Info_Screen(role));
-			} catch (std::out_of_range) {
-				throw Rulebook::Missing_role_alias{std::string(commands[2])};
-			}
-		}
-		else if (commands_match(commands, {"list", "r"})) {
-			store_help_screen(new List_Roles_Screen(active_rulebook()));
-		}
-		else if (commands_match(commands, {"list", "r", "v"})) {
-			store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::village));
-		}
-		else if (commands_match(commands, {"list", "r", "m"})) {
-			store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::mafia));
-		}
-		else if (commands_match(commands, {"list", "r", "f"})) {
-			store_help_screen(new List_Roles_Screen(active_rulebook(), Alignment::freelance));
-		}
-		else if (commands_match(commands, {"info", ""})) {
-			if (!has_game()) {
-				err << "=No game in progress!=\n\nThere is no game in progress to display information about.";
-			} else {
-				auto& approx_name = commands[1];
-				auto& player = _game_log->find_player(approx_name);
-
-				store_help_screen(new Player_Info_Screen{player, *_game_log});
-			}
-		}
-		else if (has_help_screen()) {
-			if (commands_match(commands, {"ok"})) {
-				clear_help_screen();
-			} else {
-				err << "=Invalid input!=\n\nPlease leave the help screen that is currently being displayed before trying to do anything else.\n(this is done by entering @ok@)";
-			}
-		}
-		else if (has_question()) {
-			if (_question->do_commands(commands)) {
-				clear_question();
-			}
-		}
-		else if (commands_match(commands, {"end"})) {
-			if (!has_game()) {
-				err << "=No game in progress!=\n\nThere is no game in progress to end.";
-			} else if (dynamic_cast<const Game_ended *>(&_game_log->current_event())) {
-				end_game();
-			} else {
-				store_question(new Confirm_end_game(*this));
-			}
-		}
-		else if (has_game()) {
-			_game_log->do_commands(commands);
-		}
-		else if (commands_match(commands, {"begin"})) {
-			begin_pending_game();
-		}
-		else if (commands_match(commands, {"preset"})) {
-			std::uniform_int_distribution<int> uid{0, static_cast<int>(num_presets) - 1};
-			begin_preset(uid(util::random_engine));
-		}
-		else if (commands_match(commands, {"preset", ""})) {
-			int i;
-			auto& str = commands[1];
-
-			if (auto result = std::from_chars(std::begin(str), std::end(str), i);
-				result.ec == std::errc{})
-			{
-				begin_preset(i);
-			} else {
-				err_params["str"] = escaped(str);
-
-				err << "=Invalid input!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
-			}
-		}
-		else {
-			_setup_screen.do_commands(commands);
-		}
+		active_screen().do_commands(commands);
 
 		/* FIXME: add  "list w", "list w v", "list w m", "list w f". */
 
@@ -474,13 +364,16 @@ bool maf::Console::do_commands(const vector<string_view> & commands) {
 
 		err << "=Missing preset!=There is no preset defined for the index {index}.";
 	}
+	catch (const Generic_error & error) {
+		err_params = error.params;
+		err << error.msg;
+	}
 
 	if (err.tellp() == 0) {
 		refresh_output();
 		clear_error_message();
 		return true;
-	}
-	else {
+	} else {
 		read_error_message(err.str(), err_params);
 		return false;
 	}
@@ -511,20 +404,8 @@ void maf::Console::read_output(string_view contents) {
 }
 
 void maf::Console::refresh_output() {
-	const Screen *current_screen = nullptr;
 	string str;
-
-	if (has_help_screen()) {
-		current_screen = _help_screen.get();
-	} else if (has_question()) {
-		current_screen = _question.get();
-	} else if (has_game()) {
-		current_screen = &(_game_log->current_event());
-	} else {
-		current_screen = &_setup_screen;
-	}
-
-	current_screen->write(str);
+	active_screen().write(str);
 	auto substr = util::drop_whitespace_from_end(str);
 	read_output(substr);
 }
@@ -547,50 +428,21 @@ void maf::Console::clear_error_message() {
 	_error_message.clear();
 }
 
-const maf::Help_Screen * maf::Console::help_screen() const {
-	return _help_screen.get();
+maf::Screen & maf::Console::active_screen() {
+	const Console * const_this = this;
+	return const_cast<Screen &>(const_this->active_screen());
 }
 
-bool maf::Console::has_help_screen() const {
-	return static_cast<bool>(_help_screen);
-}
-
-void maf::Console::store_help_screen(Help_Screen *hs) {
-	_help_screen.reset(hs);
-}
-
-void maf::Console::clear_help_screen() {
-	_help_screen.reset();
-}
-
-const maf::Question * maf::Console::question() const {
-	return _question.get();
-}
-
-bool maf::Console::has_question() const {
-	return static_cast<bool>(_question);
-}
-
-void maf::Console::store_question(Question *q) {
-	_question.reset(q);
-}
-
-void maf::Console::clear_question() {
-	_question.reset();
-}
-
-const maf::Game & maf::Console::game() const {
-	if (!has_game()) throw No_game_in_progress();
-	return _game_log->game;
-}
-
-const maf::Game_log & maf::Console::game_log() const {
-	if (!has_game()) throw No_game_in_progress();
-	return *_game_log;
-}
-
-bool maf::Console::has_game() const {
-	return (bool)_game_log;
+const maf::Screen & maf::Console::active_screen() const {
+	if (_help_screen) {
+		return *_help_screen;
+	} else if (_question) {
+		return *_question;
+	} else if (_game_log) {
+		return _game_log->current_event();
+	} else {
+		return _setup_screen;
+	}
 }
 
 void maf::Console::end_game() {
@@ -617,30 +469,5 @@ const maf::Rulebook & maf::Console::active_rulebook() const {
 		return _game_log->game.rulebook();
 	} else {
 		return _setup_screen.rulebook();
-	}
-}
-
-void maf::Console::begin_game(const vector<string> &pl_names,
-                              const vector<Role::ID> &r_ids,
-                              const vector<Wildcard::ID> &w_ids,
-                              const Rulebook &rulebook)
-{
-	if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
-	_game_log.reset(new Game_log{pl_names, r_ids, w_ids, rulebook});
-}
-
-void maf::Console::begin_pending_game()
-{
-	if (has_game()) throw Begin_game_failed{Begin_game_failed::Reason::game_already_in_progress};
-	_game_log = _setup_screen.new_game_log();
-}
-
-void maf::Console::begin_preset(int i)
-{
-	if (i >= 0 && i < num_presets) {
-		Game_parameters params = _presets[i];
-		begin_game(params.player_names, params.role_ids, params.wildcard_ids, params.rulebook);
-	} else {
-		throw Missing_preset{i};
 	}
 }

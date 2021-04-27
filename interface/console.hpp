@@ -2,13 +2,11 @@
 #define MAFIA_CONSOLE_H
 
 #include <array>
-#include <memory>
-#include <string_view>
-#include <utility>
 
-#include "../util/algorithm.hpp"
 #include "../util/stdlib.hpp"
+#include "../util/type_traits.hpp"
 
+#include "command.hpp"
 #include "game_log.hpp"
 #include "help_screens.hpp"
 #include "questions.hpp"
@@ -33,6 +31,11 @@ namespace maf {
 		Reason reason;
 	};
 
+	struct Generic_error {
+		string msg;
+		TextParams params;
+	};
+
 
 	struct Console {
 		// Creates a new console, displaying some initial output.
@@ -43,7 +46,7 @@ namespace maf {
 		// error_message() is empty.
 		// Returns false if the commands are invalid for some reason. In this
 		// case, output() remains unchanged and error_message() is non-empty.
-		bool do_commands(const vector<string_view> & commands);
+		bool do_commands(const CmdSequence & commands);
 		// Process the given input string, by seperating it into commands
 		// delimited by whitespace. For example, the input "add p Brutus" becomes
 		// {"add", "p", "Brutus"}.
@@ -71,34 +74,56 @@ namespace maf {
 		// Removes the current error message.
 		void clear_error_message();
 
-		// Gets the help screen currently being stored, or nullptr if none exists.
-		const Help_Screen * help_screen() const;
-		// Checks if a help screen is currently being stored.
-		bool has_help_screen() const;
-		// Stores hs, deleting any help screen that is already being stored.
-		// Automatically assumes ownership of hs.
-		void store_help_screen(Help_Screen *hs);
-		// Deletes the current help screen, if one is being stored.
-		void clear_help_screen();
+		// Get the screen currently being displayed.
+		Screen & active_screen();
+		const Screen & active_screen() const;
+
+		// Get the help screen currently being stored, or `nullptr` if none
+		// exists.
+		const Help_Screen * help_screen() const { return _help_screen.get(); }
+		// Check if a help screen is currently being stored.
+		bool has_help_screen() const { return _help_screen != nullptr; }
+		// Create a new help screen, replacing any that is already being
+		// stored.
+		template <typename ScreenType, typename... Args>
+		void show_help_screen(Args&&... args) {
+			_help_screen = make_unique<ScreenType>(*this, args...);
+		}
+		// Delete the help screen, if one is being stored. Otherwise has no
+		// effect.
+		void dismiss_help_screen() { _help_screen.reset(); }
 
 		// Gets the question currently being stored, or nullptr if none exists.
-		const Question * question() const;
+		const Question * question() const { return _question.get(); }
 		// Checks if a question is currently being stored.
-		bool has_question() const;
-		// Stores q, deleting any question that is already being stored.
-		// Automatically assumes ownership of q.
-		void store_question(Question *q);
-		// Deletes the current question, if one is being stored.
-		void clear_question();
+		bool has_question() const { return _question != nullptr; }
+		// Create a new question, replacing any that is already being stored.
+		template <typename ScreenType, typename... Args>
+		void show_question(Args&&... args) {
+			_question = make_unique<ScreenType>(*this, args...);
+		}
+		// Delete the current question, if one is being stored. Otherwise has
+		// no effect.
+		void dismiss_question() { _question.reset(); }
 
-		// The current game in progress.
-		// Throws an exception if no game is in progress.
-		const Game & game() const;
 		// The game log managing the current game in progress.
 		// Throws an exception if no game is in progress.
-		const Game_log & game_log() const;
+		Game_log & game_log() {
+			if (!has_game()) throw No_game_in_progress{};
+			return *_game_log;
+		}
+		// The game log managing the current game in progress.
+		// Throws an exception if no game is in progress.
+		const Game_log & game_log() const {
+			if (!has_game()) throw No_game_in_progress{};
+			return *_game_log;
+		}
 		// Checks if a game is currently in progress.
-		bool has_game() const;
+		bool has_game() const { return _game_log != nullptr; }
+
+		void store_game(unique_ptr<Game_log> game_log) {
+			_game_log = move(game_log);
+		}
 
 		// Instantly ends any game in progress, and saves a transcript of it.
 		// (the game may not have actually reached an end state.)
@@ -109,30 +134,13 @@ namespace maf {
 		const Rulebook & active_rulebook() const;
 
 	private:
-		struct Game_parameters {
-			vector<string> player_names;
-			vector<Role::ID> role_ids;
-			vector<Wildcard::ID> wildcard_ids;
-			Rulebook rulebook;
-		};
-
-		static constexpr std::size_t num_presets{3};
-		static const std::array<Game_parameters, num_presets> _presets;
-
 		StyledText _output{};
 		StyledText _error_message{};
 
+		Setup_screen _setup_screen;
 		unique_ptr<Game_log> _game_log{};
-		Setup_screen _setup_screen{};
 		unique_ptr<Help_Screen> _help_screen{};
 		unique_ptr<Question> _question{};
-
-		void begin_game(const vector<string> &player_names,
-		                const vector<Role::ID> &role_ids,
-		                const vector<Wildcard::ID> &wildcard_ids,
-		                const Rulebook &rulebook);
-		void begin_pending_game();
-		void begin_preset(int i);
 	};
 }
 

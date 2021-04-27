@@ -2,13 +2,13 @@
 #include "console.hpp"
 #include "questions.hpp"
 
-bool maf::Confirm_end_game::do_commands(vector<string_view> const& commands) {
+void maf::Confirm_end_game::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"yes"})) {
-		_console.end_game();
-		return true;
+		console().end_game();
+		console().dismiss_question();
 	} else if (commands_match(commands, {"no"})) {
-		return true;
+		console().dismiss_question();
 	} else {
-		throw Bad_commands();
+		Question::do_commands(commands);
 	}
 }

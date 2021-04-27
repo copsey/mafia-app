@@ -1,6 +1,10 @@
 #include <fstream>
 #include <iterator>
 
+#include "../logic/logic.hpp"
+
+#include "command.hpp"
+#include "console.hpp"
 #include "screen.hpp"
 
 maf::string maf::Screen::txt_path() const {
@@ -50,5 +54,33 @@ void maf::Screen::write(string & output) const {
 		output += escaped(msg);
 		output += " in the following string:\n\n@";
 		output += escaped(error.input);
+	}
+}
+
+void maf::Screen::do_commands(const CmdSequence & commands) {
+	if (commands.size() == 0) {
+		string msg = "=Missing input!=\n\nEntering a blank input has no effect.\n(enter @help@ if you're unsure what to do.)";
+		auto params = TextParams{};
+		throw Generic_error{move(msg), move(params)};
+	} else if (commands_match(commands, {"help", "r", ""})) {
+		try {
+			const Role & role = console().active_rulebook().look_up(commands[2]);
+			console().show_help_screen<Role_Info_Screen>(role);
+		} catch (std::out_of_range) {
+			throw Rulebook::Missing_role_alias{std::string(commands[2])};
+		}
+	} else if (commands_match(commands, {"list", "r"})) {
+		console().show_help_screen<List_Roles_Screen>();
+	} else if (commands_match(commands, {"list", "r", "v"})) {
+		console().show_help_screen<List_Roles_Screen>(Alignment::village);
+	} else if (commands_match(commands, {"list", "r", "m"})) {
+		console().show_help_screen<List_Roles_Screen>(Alignment::mafia);
+	} else if (commands_match(commands, {"list", "r", "f"})) {
+		console().show_help_screen<List_Roles_Screen>(Alignment::freelance);
+	} else if (commands_match(commands, {"info", ""})) {
+		const Player & player = console().game_log().find_player(commands[1]);
+		console().show_help_screen<Player_Info_Screen>(player);
+	} else {
+		throw Bad_commands{};
 	}
 }

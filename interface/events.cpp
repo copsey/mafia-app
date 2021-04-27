@@ -5,8 +5,26 @@
 #include "events.hpp"
 #include "names.hpp"
 
-maf::Game const& maf::Event::game() const {
-	return _game_log.game;
+const maf::Game & maf::Event::game() const {
+	return console().game_log().game;
+}
+
+maf::Game_log & maf::Event::game_log() {
+	return console().game_log();
+}
+
+const maf::Game_log & maf::Event::game_log() const {
+	return console().game_log();
+}
+
+void maf::Event::do_commands(const CmdSequence & commands) {
+	if (commands_match(commands, {"help"})) {
+		console().show_help_screen<Event_Help_Screen>(*this);
+	} else if (commands_match(commands, {"end"})) {
+		console().show_question<Confirm_end_game>();
+	} else {
+		Screen::do_commands(commands);
+	}
 }
 
 void maf::Event::summarise(string & output) const {
@@ -34,46 +52,42 @@ maf::string maf::Event::escaped_name(Role const& role) const {
 	return escaped(full_name(role));
 }
 
-void maf::Player_given_initial_role::do_commands(const vector<string_view> & commands) {
+void maf::Player_given_initial_role::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
-		if (_is_private) {
-			game_log().advance();
-		} else {
-			_is_private = true;
-		}
+		if (_is_private) game_log().advance();
+		else _is_private = true;
 	} else {
-		throw Bad_commands{};
+		Event::do_commands(commands);
 	}
 }
 
-void maf::Player_given_initial_role::set_params(TextParams& params) const {
-	params["from_wildcard"] = (_w != nullptr);
-	params["player"] = escaped_name(*_p);
+void maf::Player_given_initial_role::set_params(TextParams & params) const {
+	params["from_wildcard"] = (_wildcard != nullptr);
+	params["player"] = escaped_name(_player);
 	params["private"] = _is_private;
-	params["role"] = escaped_name(*_r);
-	params["role.alias"] = escaped(_r->alias());
+	params["role"] = escaped_name(_role);
+	params["role.alias"] = escaped(_role.alias());
 
-	if (_w != nullptr) {
-		params["wildcard.alias"] = escaped(_w->alias());
+	if (_wildcard != nullptr) {
+		params["wildcard.alias"] = escaped(_wildcard->alias());
 	}
 }
 
-void maf::Time_changed::do_commands(const vector<string_view> & commands) {
+void maf::Time_changed::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
-	}
-	else {
-		throw Bad_commands{};
+	} else {
+		Event::do_commands(commands);
 	}
 }
 
-void maf::Time_changed::set_params(TextParams& params) const {
+void maf::Time_changed::set_params(TextParams & params) const {
 	params["date"] = static_cast<int>(date);
 	params["daytime"] = (time == Time::day);
 	params["nighttime"] = (time == Time::night);
 }
 
-void maf::Obituary::do_commands(const vector<string_view> & commands) {
+void maf::Obituary::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		if (_deaths_index + 1 < _deaths.size()) {
 			++_deaths_index;
@@ -81,11 +95,11 @@ void maf::Obituary::do_commands(const vector<string_view> & commands) {
 			game_log().advance();
 		}
 	} else {
-		throw Bad_commands{};
+		Event::do_commands(commands);
 	}
 }
 
-maf::TextParams maf::Obituary::_get_params(Player const& player) const {
+maf::TextParams maf::Obituary::_get_params(const Player & player) const {
 	TextParams params;
 	params["deceased"] = escaped_name(player);
 	return params;
@@ -107,60 +121,58 @@ void maf::Obituary::set_params(TextParams& params) const {
 		}
 	}
 
-	params["deaths"] = util::transformed_copy(_deaths, [&](Player const& player) { return this->_get_params(player); });
+	params["deaths"] = util::transformed_copy(_deaths, [&](const Player & player) {
+		return this->_get_params(player);
+	});
 }
 
-void maf::Town_meeting::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
+void maf::Town_meeting::do_commands(const CmdSequence & commands) {
 	if (_lynch_can_occur) {
-		if (commands_match(commands, {"kick", ""})) {
-			auto & pl_name = commands[1];
-			auto & pl = glog.find_player(pl_name);
-
-			glog.kick_player(pl.id());
-			glog.advance();
-		} else if (commands_match(commands, {"", "vote", ""})) {
-			auto & voter = glog.find_player(commands[0]);
-			auto & target = glog.find_player(commands[2]);
-
-			glog.cast_lynch_vote(voter.id(), target.id());
-			glog.advance();
-		} else if (commands_match(commands, {"", "abstain"})) {
-			auto & voter = glog.find_player(commands[0]);
-
-			glog.clear_lynch_vote(voter.id());
-			glog.advance();
-		} else if (commands_match(commands, {"lynch"})) {
-			glog.process_lynch_votes();
-			glog.advance();
-		} else if (commands_match(commands, {"", "duel", ""})) {
-			auto & caster = glog.find_player(commands[0]);
-			auto & target = glog.find_player(commands[2]);
-
-			glog.stage_duel(caster.id(), target.id());
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+		_do_commands_before_lynch(commands);
 	} else {
-		if (commands_match(commands, {"night"})) {
-			glog.begin_night();
-			glog.advance();
-		} else if (commands_match(commands, {"kick", ""})) {
-			const Player & pl = glog.find_player(commands[1]);
+		_do_commands_after_lynch(commands);
+	}
+}
 
-			glog.kick_player(pl.id());
-			glog.advance();
-		} else if (commands_match(commands, {"", "duel", ""})) {
-			const Player & caster = glog.find_player(commands[0]);
-			const Player & target = glog.find_player(commands[2]);
+void maf::Town_meeting::_do_commands_before_lynch(const CmdSequence & commands) {
+	if (commands_match(commands, {"", "vote", ""})) {
+		const Player & voter  = game_log().find_player(commands[0]);
+		const Player & target = game_log().find_player(commands[2]);
+		game_log().cast_lynch_vote(voter.id(), target.id());
+		game_log().advance();
+	} else if (commands_match(commands, {"", "abstain"})) {
+		const Player & voter = game_log().find_player(commands[0]);
+		game_log().clear_lynch_vote(voter.id());
+		game_log().advance();
+	} else if (commands_match(commands, {"lynch"})) {
+		game_log().process_lynch_votes();
+		game_log().advance();
+	} else {
+		_do_other_commands(commands);
+	}
+}
 
-			glog.stage_duel(caster.id(), target.id());
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Town_meeting::_do_commands_after_lynch(const CmdSequence & commands) {
+	if (commands_match(commands, {"night"})) {
+		game_log().begin_night();
+		game_log().advance();
+	} else {
+		_do_other_commands(commands);
+	}
+}
+
+void maf::Town_meeting::_do_other_commands(const CmdSequence & commands) {
+	if (commands_match(commands, {"kick", ""})) {
+		const Player & player = game_log().find_player(commands[1]);
+		game_log().kick_player(player.id());
+		game_log().advance();
+	} else if (commands_match(commands, {"", "duel", ""})) {
+		const Player & caster = game_log().find_player(commands[0]);
+		const Player & target = game_log().find_player(commands[2]);
+		game_log().stage_duel(caster.id(), target.id());
+		game_log().advance();
+	} else {
+		Event::do_commands(commands);
 	}
 }
 
@@ -209,11 +221,11 @@ void maf::Town_meeting::set_params(TextParams & params) const {
 	});
 }
 
-void maf::Player_kicked::do_commands(const vector<string_view> & commands) {
+void maf::Player_kicked::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		throw Bad_commands{};
+		Event::do_commands(commands);
 	}
 }
 
@@ -222,11 +234,11 @@ void maf::Player_kicked::set_params(TextParams & params) const {
 	params["role"] = escaped_name(_player.role());
 }
 
-void maf::Lynch_result::do_commands(const vector<string_view> &commands) {
+void maf::Lynch_result::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		throw Bad_commands{};
+		Event::do_commands(commands);
 	}
 }
 
@@ -244,11 +256,11 @@ void maf::Lynch_result::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Duel_result::do_commands(const vector<string_view> & commands) {
+void maf::Duel_result::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
 	} else {
-		throw Bad_commands{};
+		Event::do_commands(commands);
 	}
 }
 
@@ -261,41 +273,27 @@ void maf::Duel_result::set_params(TextParams & params) const {
 	params["winner.fled"] = !(winner.is_present());
 }
 
-void maf::Choose_fake_role::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
-	} else if (_fake_role) {
-		if (commands_match(commands, {"ok"})) {
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
+void maf::Choose_fake_role::do_commands(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (_fake_role && commands_match(commands, {"ok"})) {
+		_finished = true;
+	} else if (commands_match(commands, {"choose", ""})) {
+		try {
+			const Role & fake_role = game_log().look_up(commands[1]);
+			game_log().choose_fake_role(_player.id(), fake_role.id());
+			_fake_role = _player.fake_role();
+		} catch (std::out_of_range) {
+			throw Rulebook::Missing_role_alias{string{commands[1]}};
 		}
 	} else {
-		if (commands_match(commands, {"choose", ""})) {
-			auto& role_alias = commands[1];
-
-			try {
-				auto & fake_role = glog.look_up(role_alias);
-				glog.choose_fake_role(_player->id(), fake_role.id());
-				_fake_role = _player->fake_role();
-			} catch (std::out_of_range) {
-				throw Rulebook::Missing_role_alias{string{role_alias}};
-			}
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Choose_fake_role::set_params(TextParams & params) const {
-	params["finished"] = _go_to_sleep;
-	params["player"] = escaped_name(*_player);
+	params["finished"] = _finished;
+	params["player"] = escaped_name(_player);
 	params["fake_role.chosen"] = (_fake_role != nullptr);
 
 	if (_fake_role) {
@@ -304,47 +302,48 @@ void maf::Choose_fake_role::set_params(TextParams & params) const {
 	}
 }
 
-void maf::Mafia_meeting::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
-	} else if (_initial) {
-		if (commands_match(commands, {"ok"})) {
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Mafia_meeting::do_commands(const CmdSequence & commands) {
+	if (_first_meeting) {
+		_do_commands_for_first_meeting(commands);
 	} else {
-		if (commands_match(commands, {"kill", ""}) && _mafiosi.size() == 1) {
-			const Player & caster = _mafiosi.front();
-			const Player & target = glog.find_player(commands[1]);
+		_do_commands_for_regular_meeting(commands);
+	}
+}
 
-			glog.cast_mafia_kill(caster.id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"", "kill", ""})) {
-			auto & caster = glog.find_player(commands[0]);
-			auto & target = glog.find_player(commands[2]);
+void maf::Mafia_meeting::_do_commands_for_first_meeting(const CmdSequence & commands) {
+	if (commands_match(commands, {"ok"})) {
+		if (_finished) game_log().advance();
+		else _finished = true;
+	} else {
+		Event::do_commands(commands);
+	}
+}
 
-			glog.cast_mafia_kill(caster.id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"skip"})) {
-			/* FIXME: show "confirm skip?" screen. */
-			glog.skip_mafia_kill();
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Mafia_meeting::_do_commands_for_regular_meeting(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (_mafiosi.size() == 1 && commands_match(commands, {"kill", ""})) {
+		const Player & caster = _mafiosi.front();
+		const Player & target = game_log().find_player(commands[1]);
+		game_log().cast_mafia_kill(caster.id(), target.id());
+		_finished = true;
+	} else if (_mafiosi.size() > 1 && commands_match(commands, {"", "kill", ""})) {
+		const Player & caster = game_log().find_player(commands[0]);
+		const Player & target = game_log().find_player(commands[2]);
+		game_log().cast_mafia_kill(caster.id(), target.id());
+		_finished = true;
+	} else if (commands_match(commands, {"skip"})) {
+		// TODO: Show "confirm skip?" screen.
+		game_log().skip_mafia_kill();
+		_finished = true;
+	} else {
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Mafia_meeting::set_params(TextParams& params) const {
-	params["finished"] = _go_to_sleep;
-	params["first_meeting"] = _initial;
+	params["finished"] = _finished;
+	params["first_meeting"] = _first_meeting;
 
 	if (_mafiosi.size() == 1) {
 		const Player & player = _mafiosi.front();
@@ -363,165 +362,122 @@ void maf::Mafia_meeting::set_params(TextParams& params) const {
 	}
 }
 
-void maf::Kill_use::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Kill_use::do_commands(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (!_finished && commands_match(commands, {"check", ""})) {
+		const Player & target = game_log().find_player(commands[1]);
+		game_log().cast_kill(_caster.id(), target.id());
+		_finished = true;
+	} else if (!_finished && commands_match(commands, {"skip"})) {
+		game_log().skip_kill(_caster.id());
+		_finished = true;
 	} else {
-		if (commands_match(commands, {"kill", ""})) {
-			auto & target_name = commands[1];
-			auto & target = glog.find_player(target_name);
-
-			glog.cast_kill(_caster->id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"skip"})) {
-			glog.skip_kill(_caster->id());
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Kill_use::set_params(TextParams& params) const {
-	params["caster"] = escaped_name(*_caster);
-	params["finished"] = _go_to_sleep;
+	params["caster"] = escaped_name(_caster);
+	params["finished"] = _finished;
 }
 
-void maf::Heal_use::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Heal_use::do_commands(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (!_finished && commands_match(commands, {"heal", ""})) {
+		const Player & target = game_log().find_player(commands[1]);
+		game_log().cast_heal(_caster.id(), target.id());
+		_finished = true;
+	} else if (!_finished && commands_match(commands, {"skip"})) {
+		game_log().skip_heal(_caster.id());
+		_finished = true;
 	} else {
-		if (commands_match(commands, {"heal", ""})) {
-			auto & target_name = commands[1];
-			auto & target = glog.find_player(target_name);
-
-			glog.cast_heal(_caster->id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"skip"})) {
-			glog.skip_heal(_caster->id());
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Heal_use::set_params(TextParams& params) const {
-	params["caster"] = escaped_name(*_caster);
-	params["finished"] = _go_to_sleep;
+	params["caster"] = escaped_name(_caster);
+	params["finished"] = _finished;
 }
 
-void maf::Investigate_use::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Investigate_use::do_commands(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (!_finished && commands_match(commands, {"check", ""})) {
+		const Player & target = game_log().find_player(commands[1]);
+		game_log().cast_investigate(_caster.id(), target.id());
+		_finished = true;
+	} else if (!_finished && commands_match(commands, {"skip"})) {
+		game_log().skip_investigate(_caster.id());
+		_finished = true;
 	} else {
-		if (commands_match(commands, {"check", ""})) {
-			auto & target_name = commands[1];
-			auto & target = glog.find_player(target_name);
-
-			glog.cast_investigate(_caster->id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"skip"})) {
-			glog.skip_investigate(_caster->id());
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
-void maf::Investigate_use::set_params(TextParams& params) const {
-	params["caster"] = escaped_name(*_caster);
-	params["finished"] = _go_to_sleep;
+void maf::Investigate_use::set_params(TextParams & params) const {
+	params["caster"] = escaped_name(_caster);
+	params["finished"] = _finished;
 }
 
-void maf::Peddle_use::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Peddle_use::do_commands(const CmdSequence & commands) {
+	if (_finished && commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else if (!_finished && commands_match(commands, {"target", ""})) {
+		const Player & target = game_log().find_player(commands[1]);
+		game_log().cast_peddle(_caster.id(), target.id());
+		_finished = true;
+	} else if (!_finished && commands_match(commands, {"skip"})) {
+		game_log().skip_peddle(_caster.id());
+		_finished = true;
 	} else {
-		if (commands_match(commands, {"target", ""})) {
-			auto & target_name = commands[1];
-			auto & target = glog.find_player(target_name);
-
-			glog.cast_peddle(_caster->id(), target.id());
-			_go_to_sleep = true;
-		} else if (commands_match(commands, {"skip"})) {
-			glog.skip_peddle(_caster->id());
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Peddle_use::set_params(TextParams& params) const {
-	params["caster"] = escaped_name(*_caster);
-	params["finished"] = _go_to_sleep;
+	params["caster"] = escaped_name(_caster);
+	params["finished"] = _finished;
 }
 
-void maf::Boring_night::do_commands(const vector<string_view> & commands) {
+void maf::Boring_night::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();
-	}
-	else {
-		throw Bad_commands{};
+	} else {
+		Event::do_commands(commands);
 	}
 }
 
-void maf::Boring_night::set_params(TextParams& params) const
-{ }
+void maf::Boring_night::set_params(TextParams& params) const {
+	// Nothing to do
+}
 
-void maf::Investigation_result::do_commands(const vector<string_view> & commands) {
-	auto & glog = game_log();
-
-	if (_go_to_sleep) {
-		if (commands_match(commands, {"ok"})) {
-			glog.advance();
-		} else {
-			throw Bad_commands{};
-		}
+void maf::Investigation_result::do_commands(const CmdSequence & commands) {
+	if (commands_match(commands, {"ok"})) {
+		if (_finished) game_log().advance();
+		else _finished = true;
 	} else {
-		if (commands_match(commands, {"ok"})) {
-			_go_to_sleep = true;
-		} else {
-			throw Bad_commands{};
-		}
+		Event::do_commands(commands);
 	}
 }
 
 void maf::Investigation_result::set_params(TextParams& params) const {
 	params["caster"] = escaped_name(investigation.caster);
-	params["finished"] = _go_to_sleep;
+	params["finished"] = _finished;
 	params["target"] = escaped_name(investigation.target);
 	params["target.suspicious"] = investigation.result;
 }
 
-void maf::Game_ended::do_commands(const vector<string_view> & commands) {
-	throw Bad_commands{};
+void maf::Game_ended::do_commands(const CmdSequence & commands) {
+	if (commands_match(commands, {"end"})
+		|| commands_match(commands, {"ok"}))
+	{
+		console().end_game();
+	} else {
+		Event::do_commands(commands);
+	}
 }
 
 void maf::Game_ended::set_params(TextParams& params) const {

@@ -14,30 +14,31 @@
 
 namespace maf {
 	struct Help_Screen: Screen {
-		string_view txt_subdir() const override
-		{ return "txt/help/"; }
+		Help_Screen(Console & console): Screen{console} { }
+
+		string_view txt_subdir() const override { return "txt/help/"; }
+
+		void do_commands(const CmdSequence & commands) override;
 	};
 
 
 	struct Event_Help_Screen: Help_Screen {
-		Event_Help_Screen(const Event &e): event{e} { }
+		Event_Help_Screen(Console & console, const Event &e):
+		Help_Screen{console}, event{e} { }
 
-		Event const& event;
+		const Event & event;
 
-		string_view id() const final
-		{ return event.id(); }
+		string_view id() const final { return event.id(); }
 	};
 
 
 	struct Role_Info_Screen: Help_Screen {
-		Role_Info_Screen(const Role &role):
-		_role_id{role.id()} { }
+		Role_Info_Screen(Console & console, const Role &role):
+		Help_Screen{console}, _role_id{role.id()} { }
 
-		string_view id() const final
-		{ return alias(_role_id); }
+		string_view id() const final { return alias(_role_id); }
 
-		string_view txt_subdir() const override
-		{ return "txt/help/roles/"; }
+		string_view txt_subdir() const override { return "txt/help/roles/"; }
 
 		void set_params(TextParams & params) const override;
 
@@ -51,17 +52,15 @@ namespace maf {
 		//
 		// It's possible to provide an optional alignment, in which case only
 		// roles of that alignment will be listed.
-		List_Roles_Screen(Rulebook const& rulebook,
+		List_Roles_Screen(Console & console,
 						  optional<Alignment> alignment = std::nullopt)
-		: _rulebook{rulebook}, _filter_alignment{alignment} { }
+		: Help_Screen{console}, _filter_alignment{alignment} { }
 
-		string_view id() const final
-		{ return "list-roles"; }
+		string_view id() const final { return "list-roles"; }
 
 		void set_params(TextParams & params) const override;
 
 	private:
-		Rulebook const& _rulebook;
 		optional<Alignment> _filter_alignment;
 
 		static bool _compare_by_name(Role const& role_1, Role const& role_2);
@@ -72,23 +71,22 @@ namespace maf {
 
 
 	struct Setup_Help_Screen: Help_Screen {
-		string_view id() const final
-		{ return "setup"; }
+		using Help_Screen::Help_Screen;
+
+		string_view id() const final { return "setup"; }
 	};
 
 
 	struct Player_Info_Screen: Help_Screen {
-		Player_Info_Screen(const Player & player, const Game_log & game_log)
-		: _player{player}, _game_log{game_log} { }
+		Player_Info_Screen(Console & console, const Player & player)
+		: Help_Screen{console}, _player{player} { }
 
-		string_view id() const final
-		{ return "player-info"; }
+		string_view id() const final { return "player-info"; }
 
 		void set_params(TextParams & params) const override;
 
 	private:
 		const Player & _player;
-		const Game_log & _game_log;
 	};
 }
 
