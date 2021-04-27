@@ -99,7 +99,7 @@ namespace maf {
 			param{substr}
 		{}
 
-		// Get a description of this error.
+		// Get a description of the error.
 		string message() const;
 	};
 
@@ -214,32 +214,15 @@ namespace maf {
 		// The input string that couldn't be processed.
 		string_view input;
 
-		// An iterator pointing to where the error occurred.
-		string_view::iterator i;
+		// The substring that caused the error.
+		string_view param;
 
-		// An (optional) iterator that forms a range `{i, j}` when paired with
-		// `i`.
-		//
-		// Only used by certain error codes to signify where in the input
-		// string an invalid substring occurs.
-		string_view::iterator j;
+		// Position in input string where the error occurred. It's computed
+		// from `this->input` and `this->param`.
+		string_view::size_type pos() const;
 
-		// Position in input string where the error occurred.
-		string_view::size_type pos() const {
-			return i - input.begin();
-		}
-
-		format_text_error(error_code code, string_view::iterator i):
-			code{code},
-			i{i},
-			j{}
-		{}
-
-		format_text_error(error_code code, string_view::iterator i,
-						  string_view::iterator j):
-			code{code},
-			i{i},
-			j{j}
+		format_text_error(error_code code, string_view substr):
+			param{substr}
 		{}
 
 		// Get a description of the error.
@@ -1562,13 +1545,15 @@ namespace maf::_format_text_impl {
 										  string & str)
 	{
 		if (begin == end) {
-			throw error{errc::invalid_escape_sequence, begin, end};
+			auto substr = util::make_string_view(begin, end);
+			throw error{errc::invalid_escape_sequence, substr};
 		}
 
 		auto i = begin + 1;
 
 		if (i == end) {
-			throw error{errc::invalid_escape_sequence, begin, i};
+			auto substr = util::make_string_view(begin, i);
+			throw error{errc::invalid_escape_sequence, substr};
 		}
 
 		if (char ch = *i; *begin == '\\' && is_escapable(ch)) {
@@ -1576,7 +1561,8 @@ namespace maf::_format_text_impl {
 		} else if (*begin == '\\' && ch == '\n') {
 			// exclude this character from `str`
 		} else {
-			throw error{errc::invalid_escape_sequence, begin, i + 1};
+			auto substr = util::make_string_view(begin, i + 1);
+			throw error{errc::invalid_escape_sequence, substr};
 		}
 
 		return i + 1;
@@ -1762,6 +1748,11 @@ inline maf::StyledText maf::format_text(string_view input,
 }
 
 
+inline maf::string_view::size_type maf::format_text_error::pos() const {
+	return param.begin() - input.begin();
+}
+
+
 inline maf::string maf::format_text_error::message() const {
 	string msg;
 	auto pos = std::to_string(this->pos());
@@ -1769,7 +1760,7 @@ inline maf::string maf::format_text_error::message() const {
 	switch (this->code) {
 	case error_code::invalid_escape_sequence:
 		msg += "Invalid escape sequence \"";
-		msg.append(i, j);
+		msg += this->param;
 		msg += "\" at position ";
 		msg += pos;
 		break;
