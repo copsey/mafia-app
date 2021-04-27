@@ -13,6 +13,7 @@
 #include "../util/parse.hpp"
 #include "../util/stdlib.hpp"
 #include "../util/string.hpp"
+#include "../util/type_traits.hpp"
 
 namespace maf {
 	// Create a new string based on `str_view`, but with each escapable
@@ -873,9 +874,9 @@ namespace maf::_preprocess_text_impl {
 		auto print = [&](auto && arg) {
 			using T = std::decay_t<decltype(arg)>;
 
-			if constexpr (std::is_same_v<T, int>) {
+			if constexpr (is_same<T, int>) {
 				output += std::to_string(arg);
-			} else if constexpr (std::is_same_v<T, string>) {
+			} else if constexpr (is_same<T, string>) {
 				output += arg;
 			} else {
 				throw error{errc::wrong_parameter_type, param_name};
@@ -1334,13 +1335,12 @@ inline maf::string_view::size_type maf::preprocess_text_error::pos() const {
 	auto get_iter = [&](auto&& arg) {
 		using T = std::decay_t<decltype(arg)>;
 
-		static_assert(std::is_same_v<T, iterator>
-					  || std::is_same_v<T, string_view>,
+		static_assert(is_same<T, iterator> || is_same<T, string_view>,
 		"Unexpected type for 'info' parameter in 'preprocess_text_error'");
 
-		if constexpr (std::is_same_v<T, iterator>) {
+		if constexpr (is_same<T, iterator>) {
 			return arg;
-		} else if constexpr (std::is_same_v<T, string_view>) {
+		} else if constexpr (is_same<T, string_view>) {
 			return arg.begin();
 		}
 	};
