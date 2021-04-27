@@ -393,7 +393,7 @@ void maf::Console::read_output(string_view contents) {
 		_output = format_text(contents);
 	} catch (format_text_error const& error) {
 		string msg = "\n\nERROR: ";
-		error.write(msg);
+		msg += error.message();
 		msg += " in the following string:\n\n";
 
 		_output.clear();

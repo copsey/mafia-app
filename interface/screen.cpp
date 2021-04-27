@@ -46,12 +46,9 @@ void maf::Screen::write(string & output) const {
 
 	try {
 		output += preprocess_text(raw_txt, params);
-	} catch (preprocess_text_error const& error) {
-		string msg;
-		error.write(msg);
-
+	} catch (const preprocess_text_error & error) {
 		output += "=Error!=\n\nERROR: ";
-		output += escaped(msg);
+		output += escaped(error.message());
 		output += " in the following string:\n\n@";
 		output += escaped(error.input);
 	}

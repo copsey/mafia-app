@@ -72,22 +72,35 @@ namespace maf {
 		// The input string that couldn't be processed.
 		string_view input;
 
-		// Further info about the error. This will be one of the following:
-		// - An iterator pointing to where the error occurred.
-		// - The substring that caused the error.
+		// Further info about the error. This will be either:
+		// - an iterator pointing to where the error occurred; or
+		// - the substring that caused the error.
 		variant<string_view::iterator, string_view> param;
 
-		// Position in input string where the error occurred.
+		// Position in input string where the error occurred. It's computed
+		// from `this->input` and `this->param`.
 		string_view::size_type pos() const;
 
-		preprocess_text_error(error_code code, string_view::iterator iter)
-		: code{code}, param{iter} { }
+		// Construct an error whose `param` is `iter`.
+		//
+		// # Preconditions
+		// - `iter` must point to a character in `input`.
+		preprocess_text_error(error_code code, string_view::iterator iter):
+			code{code},
+			param{iter}
+		{}
 
-		preprocess_text_error(error_code code, string_view substr)
-		: code{code}, param{substr} { }
+		// Construct an error whose `param` is `substr`.
+		//
+		// # Preconditions
+		// - `substr` must be a subview of `input`.
+		preprocess_text_error(error_code code, string_view substr):
+			code{code},
+			param{substr}
+		{}
 
-		// Write a description of this error to `output`.
-		void write(string & output) const;
+		// Get a description of this error.
+		string message() const;
 	};
 
 	// Find all directives of the form `"{...}"` in `input` and perform a
@@ -216,17 +229,21 @@ namespace maf {
 			return i - input.begin();
 		}
 
-		format_text_error(error_code code, string_view::iterator i)
-		: code{code}, i{i}, j{}
-		{ }
+		format_text_error(error_code code, string_view::iterator i):
+			code{code},
+			i{i},
+			j{}
+		{}
 
 		format_text_error(error_code code, string_view::iterator i,
-						  string_view::iterator j)
-		: code{code}, i{i}, j{j}
-		{ }
+						  string_view::iterator j):
+			code{code},
+			i{i},
+			j{j}
+		{}
 
-		// Write a description of this error to `output`.
-		void write(string & output) const;
+		// Get a description of the error.
+		string message() const;
 	};
 
 	// Parse `input` to find all of its special characters and perform a
@@ -1350,132 +1367,135 @@ inline maf::string_view::size_type maf::preprocess_text_error::pos() const {
 }
 
 
-inline void maf::preprocess_text_error::write(string & output) const {
+inline maf::string maf::preprocess_text_error::message() const {
+	string msg;
 	auto pos = std::to_string(this->pos());
 
 	switch (this->code) {
 	case error_code::token_not_command:
-		output += "Invalid command \"";
-		output += std::get<string_view>(param);
-		output += "\" at position ";
-		output += pos;
+		msg += "Invalid command \"";
+		msg += std::get<string_view>(param);
+		msg += "\" at position ";
+		msg += pos;
 		break;
 
 	case error_code::token_not_comp_operand:
-		output += "Expected either an integer or a parameter, instead got \"";
-		output += std::get<string_view>(param);
-		output += "\", at position ";
-		output += pos;
+		msg += "Expected either an integer or a parameter, instead got \"";
+		msg += std::get<string_view>(param);
+		msg += "\", at position ";
+		msg += pos;
 		break;
 
 	case error_code::token_not_escape_sequence:
-		output += "Invalid escape sequence \"";
-		output += std::get<string_view>(param);
-		output += "\" at position ";
-		output += pos;
+		msg += "Invalid escape sequence \"";
+		msg += std::get<string_view>(param);
+		msg += "\" at position ";
+		msg += pos;
 		break;
 
 	case error_code::token_not_integer:
-		output += "Expected an integer, instead got \"";
-		output += std::get<string_view>(param);
-		output += "\", at position ";
-		output += pos;
+		msg += "Expected an integer, instead got \"";
+		msg += std::get<string_view>(param);
+		msg += "\", at position ";
+		msg += pos;
 		break;
 
 	case error_code::token_not_param_name:
-		output += "Expected a parameter, instead got \"";
-		output += std::get<string_view>(param);
-		output += "\", at position ";
-		output += pos;
+		msg += "Expected a parameter, instead got \"";
+		msg += std::get<string_view>(param);
+		msg += "\", at position ";
+		msg += pos;
 		break;
 
 	case error_code::token_not_relation:
-		output += "Expected a relation (e.g. '<'), instead got \"";
-		output += std::get<string_view>(param);
-		output += "\", at position ";
-		output += pos;
+		msg += "Expected a relation (e.g. '<'), instead got \"";
+		msg += std::get<string_view>(param);
+		msg += "\", at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_command:
-		output += "Expected a command at position ";
-		output += pos;
+		msg += "Expected a command at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_comp_operand:
-		output += "Expected an integer or parameter at position ";
-		output += pos;
+		msg += "Expected an integer or parameter at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_parameter:
-		output += "Expected a parameter at position ";
-		output += pos;
+		msg += "Expected a parameter at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_relation:
-		output += "Expected a relation at position ";
-		output += pos;
+		msg += "Expected a relation at position ";
+		msg += pos;
 		break;
 
 	case error_code::parameter_not_available:
-		output += "Unrecognised parameter name \"";
-		output += std::get<string_view>(param);
-		output += "\" at position ";
-		output += pos;
+		msg += "Unrecognised parameter name \"";
+		msg += std::get<string_view>(param);
+		msg += "\" at position ";
+		msg += pos;
 		break;
 
 	case error_code::too_many_closing_braces:
-		output += "Unexpected '}' at position ";
-		output += pos;
+		msg += "Unexpected '}' at position ";
+		msg += pos;
 		break;
 
 	case error_code::too_many_tokens:
-		output += "An extra token \"";
-		output += std::get<string_view>(param);
-		output += "\" appears at position ";
-		output += pos;
+		msg += "An extra token \"";
+		msg += std::get<string_view>(param);
+		msg += "\" appears at position ";
+		msg += pos;
 		break;
 
 	case error_code::unclosed_directive:
-		output += "No closing brace found for '{' at position ";
-		output += pos;
+		msg += "No closing brace found for '{' at position ";
+		msg += pos;
 		break;
 
 	case error_code::unclosed_expression:
-		output += "No \"end\" directive found for the expression starting at position ";
-		output += pos;
+		msg += "No \"end\" directive found for the expression starting at position ";
+		msg += pos;
 		break;
 
 	case error_code::unexpected_command:
-		output += "The command \"";
-		output += std::get<string_view>(param);
-		output += "\" cannot be used at position ";
-		output += pos;
+		msg += "The command \"";
+		msg += std::get<string_view>(param);
+		msg += "\" cannot be used at position ";
+		msg += pos;
 		break;
 
 	case error_code::wrong_parameter_type:
-		output += "The parameter \"";
-		output += std::get<string_view>(param);
-		output += "\" has the wrong type at position ";
-		output += pos;
+		msg += "The parameter \"";
+		msg += std::get<string_view>(param);
+		msg += "\" has the wrong type at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_integer:
-		output += "Expected an integer at position ";
-		output += pos;
+		msg += "Expected an integer at position ";
+		msg += pos;
 		break;
 
 	case error_code::integer_out_of_range:
-		output += "The integer \"";
-		output += std::get<string_view>(param);
-		output += "\" is too large, located at position ";
-		output += pos;
+		msg += "The integer \"";
+		msg += std::get<string_view>(param);
+		msg += "\" is too large, located at position ";
+		msg += pos;
 		break;
 
 	case error_code::missing_escape_sequence:
-		output += "Expected an escape sequence at position ";
-		output += pos;
+		msg += "Expected an escape sequence at position ";
+		msg += pos;
 		break;
 	}
+
+	return msg;
 }
 
 
@@ -1742,17 +1762,20 @@ inline maf::StyledText maf::format_text(string_view input,
 }
 
 
-inline void maf::format_text_error::write(string & output) const {
+inline maf::string maf::format_text_error::message() const {
+	string msg;
 	auto pos = std::to_string(this->pos());
 
 	switch (this->code) {
 	case error_code::invalid_escape_sequence:
-		output += "Invalid escape sequence \"";
-		output.append(i, j);
-		output += "\" at position ";
-		output += pos;
+		msg += "Invalid escape sequence \"";
+		msg.append(i, j);
+		msg += "\" at position ";
+		msg += pos;
 		break;
 	}
+
+	return msg;
 }
 
 
