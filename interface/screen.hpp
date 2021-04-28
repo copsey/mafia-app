@@ -46,12 +46,14 @@ namespace maf {
 		// screen, and write the result to `output`.
 		void write(string & output) const;
 
-		// Handles the given commands, taking action as appropriate.
+		// Attempt to apply the given commands to the console. Each screen
+		// will handle commands differently.
 		//
-		// Returns true if the question has been fully answered, and false otherwise.
-		// If false, then the tagged string outputted by write may have changed.
+		// By default, try to show a help screen based on the given commands
+		// and, if that fails, throw an exception.
 		//
-		// Throws an exception if the commands couldn't be handled.
+		// # Exceptions
+		// Throws `Bad_commands` if the commands couldn't be handled.
 		virtual void do_commands(const CmdSequence & commands);
 
 		// An error thrown when a screen fails to handle a set of commands.
