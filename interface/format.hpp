@@ -822,13 +822,20 @@ namespace maf::_preprocess_text_impl {
 		void write(string & output, TextParams const& params) const override;
 
 		iterator parse(iterator begin, iterator end, string_view input) override;
+
+	private:
+		template <typename ExprType>
+		enable_if<is_base_of<expression, ExprType>,
+			iterator>
+		_parse_onto_end (iterator begin, iterator end, string_view input);
 	};
 
 
-	struct conditional: expression {
+	class conditional: public expression {
+	public:
 		using conditional_sequence = pair<logical_test, sequence>;
 
-		vector<conditional_sequence> conditional_subexprs;
+		vector<conditional_sequence> cond_subexprs;
 		optional<sequence> default_subexpr;
 
 		void write(string & output, TextParams const& params) const override;
@@ -841,12 +848,22 @@ namespace maf::_preprocess_text_impl {
 		// "Lorem {!if ipsum} ... {!end} amet"
 		// ```
 		// append `{"ipsum", /* sequence parsed from "..." */}` to
-		// `this->conditional_subexprs` and return `next`.
+		// `this->cond_subexprs` and return `next`.
 		iterator parse(iterator begin, iterator end, string_view input) override;
+
+	private:
+		iterator _first;
+
+		iterator _parse_first_cond_subexpr (iterator begin, iterator end,
+			string_view input);
+		iterator _parse_remaining_subexprs (iterator begin, iterator end,
+			string_view input);
+		iterator _parse_end (iterator begin, iterator end, string_view input);
 	};
 
 
-	struct loop: expression {
+	class loop: public expression {
+	public:
 		string_view param_name;
 		sequence subexpr;
 
@@ -862,6 +879,13 @@ namespace maf::_preprocess_text_impl {
 		// set `this->param_name` to `"grace"`, set `this->subexpr` to the
 		// result of parsing `...` as a sequence, and return `next`.
 		iterator parse(iterator begin, iterator end, string_view input) override;
+
+	private:
+		iterator _first;
+
+		iterator _parse_list_subexpr (iterator begin, iterator end,
+			string_view input);
+		iterator _parse_end (iterator begin, iterator end, string_view input);
 	};
 
 
@@ -895,7 +919,7 @@ namespace maf::_preprocess_text_impl {
 
 
 	inline void conditional::write(string & output, TextParams const& params) const {
-		for (auto& [test, expr]: this->conditional_subexprs) {
+		for (auto& [test, expr]: this->cond_subexprs) {
 			bool use_this_subexpr = test.resolve(params);
 
 			if (use_this_subexpr) {
@@ -1148,11 +1172,11 @@ namespace maf::_preprocess_text_impl {
 		if (cmd == command::if_ || cmd == command::else_if) {
 			logical_test test;
 			i = test.parse(i, dir_end);
-			this->test = test;
+			this->test = move(test);
 		} else if (cmd == command::list) {
 			string_view param_name;
 			i = parse_param_name(i, dir_end, param_name);
-			this->param_name = param_name;
+			this->param_name = move(param_name);
 		}
 
 		i = skip_whitespace(i, dir_end);
@@ -1166,19 +1190,21 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator plain_text::parse(iterator begin, iterator end, string_view input) {
-		for (iterator i = begin; ; ) {
+	inline iterator plain_text::parse (iterator begin, iterator end,
+		string_view input)
+	{
+		for (auto i = begin; ; ) {
 			auto next = find_delimiter(i, end);
 			str.append(i, next);
 			i = next;
 
-			if (i != end && *i == '\\') {
-				string_view esc_seq;
-				i = parse_escape_sequence(i, end, esc_seq);
-				str += esc_seq;
-			} else {
+			if (i == end || *i != '\\') {
 				return i;
 			}
+
+			string_view esc_seq;
+			i = parse_escape_sequence(i, end, esc_seq);
+			str += esc_seq;
 		}
 	}
 
@@ -1194,109 +1220,158 @@ namespace maf::_preprocess_text_impl {
 	}
 
 
-	inline iterator sequence::parse(iterator begin, iterator end, string_view input) {
+	inline iterator sequence::parse (iterator begin, iterator end,
+		string_view input)
+	{
 		for (auto i = begin; i != end; ) {
-			unique_ptr<expression> expr;
-
-			if (char ch = *i; is_brace(ch)) {
-				directive dir;
-				auto next = dir.parse(i, end, input);
-
-				using type = directive::type_t;
-				if (dir.is_instance_of(type::comment)) {
-					i = next;
-					continue; // comments are not expressions.
-				} else if (dir.is_instance_of(type::substitution)) {
-					expr = make_unique<substitution>();
-				} else if (dir.is_instance_of(command::if_)) {
-					expr = make_unique<conditional>();
-				} else if (dir.is_instance_of(command::list)) {
-					expr = make_unique<loop>();
-				} else {
-					return i; // stop when directive is not recognised.
-				}
-			} else {
-				expr = make_unique<plain_text>();
+			if (char ch = *i; !is_brace(ch)) {
+				i = _parse_onto_end<plain_text>(i, end, input);
+				continue;
 			}
 
-			i = expr->parse(i, end, input);
-			subexprs.push_back(move(expr));
+			directive dir;
+			auto next = dir.parse(i, end, input);
+
+			using type = directive::type_t;
+			if (dir.is_instance_of(type::comment)) {
+				i = next;
+			} else if (dir.is_instance_of(type::substitution)) {
+				i = _parse_onto_end<substitution>(i, end, input);
+			} else if (dir.is_instance_of(command::if_)) {
+				i = _parse_onto_end<conditional>(i, end, input);
+			} else if (dir.is_instance_of(command::list)) {
+				i = _parse_onto_end<loop>(i, end, input);
+			} else {
+				return i; // stop when directive is not recognised.
+			}
 		}
 
 		return end;
 	}
 
 
-	inline iterator conditional::parse(iterator begin, iterator end, string_view input) {
-		iterator i = begin;
-
-		// Perform the procedure in three stages:
-		//  1. Parse the "if" command
-		//  2. Parse the (optional) "else_if" and "else" commands
-		//  3. Parse the "end" command
-		for (int stage = 1; ; ) {
-			directive dir;
-			auto next = dir.parse(i, end, input);
-
-			if (stage == 1) {
-				dir.verify_instance_of(command::if_);
-
-				sequence expr;
-				i = expr.parse(next, end, input);
-				conditional_subexprs.push_back({move(*dir.test), move(expr)});
-
-				++stage;
-			} else if (stage == 2) {
-				if (dir.is_instance_of(command::else_if)) {
-					sequence expr;
-					i = expr.parse(next, end, input);
-					conditional_subexprs.push_back({move(*dir.test), move(expr)});
-				} else if (dir.is_instance_of(command::else_)) {
-					sequence expr;
-					i = expr.parse(next, end, input);
-					default_subexpr = move(expr);
-
-					++stage;
-				} else {
-					++stage;
-				}
-			} else /* stage == 3 */ {
-				dir.verify_instance_of(command::end);
-
-				return next;
-			}
-
-			if (i == end) {
-				throw error{errc::unclosed_expression, begin};
-			}
-		}
+	template <typename ExprType>
+	enable_if<is_base_of<expression, ExprType>,
+		iterator>
+	sequence::_parse_onto_end (iterator begin, iterator end,
+		string_view input)
+	{
+		auto expr = make_unique<ExprType>();
+		auto next = expr->parse(begin, end, input);
+		this->subexprs.push_back(move(expr));
+		return next;
 	}
 
 
-	inline iterator loop::parse(iterator begin, iterator end, string_view input) {
+	inline iterator conditional::parse(iterator begin, iterator end,
+		string_view input)
+	{
+		auto i = this->_first = begin;
+		i = _parse_first_cond_subexpr(i, end, input);
+		i = _parse_remaining_subexprs(i, end, input);
+		i = _parse_end(i, end, input);
+		return i;
+	}
+
+
+	inline iterator conditional::_parse_first_cond_subexpr (iterator begin,
+		iterator end, string_view input)
+	{
+		directive dir;
+		auto next = dir.parse(begin, end, input);
+		dir.verify_instance_of(command::if_);
+		auto& test = *(dir.test);
+
+		sequence expr;
+		next = expr.parse(next, end, input);
+		cond_subexprs.push_back({move(test), move(expr)});
+
+		return next;
+	}
+
+
+	inline iterator conditional::_parse_remaining_subexprs (iterator
+		begin, iterator end, string_view input)
+	{
 		auto i = begin;
 
-		{ // Stage 1: Parse the "list" command
+		for ( ; i != end; ) {
 			directive dir;
-			i = dir.parse(i, end, input);
-			dir.verify_instance_of(command::list);
+			auto subexpr_begin = dir.parse(i, end, input);
 
-			this->param_name = *(dir.param_name);
-		}
+			if (dir.is_instance_of(command::else_if)) {
+				auto& test = *(dir.test);
 
-		i = subexpr.parse(i, end, input);
+				sequence expr;
+				i = expr.parse(subexpr_begin, end, input);
+				cond_subexprs.push_back({move(test), move(expr)});
+			} else if (dir.is_instance_of(command::else_)) {
+				sequence expr;
+				i = expr.parse(subexpr_begin, end, input);
+				default_subexpr = move(expr);
 
-		if (i == end) {
-			throw error{errc::unclosed_expression, begin};
-		}
-
-		{ // Stage 2: Parse the "end" command
-			directive dir;
-			i = dir.parse(i, end, input);
-			dir.verify_instance_of(command::end);
+				break;
+			} else {
+				break; // stop when the directive is not recognised
+				       // note: `i` still points to the start of the directive
+			}
 		}
 
 		return i;
+	}
+
+
+	inline iterator conditional::_parse_end (iterator begin, iterator end,
+		string_view input)
+	{
+		if (begin == end) {
+			throw error{errc::unclosed_expression, this->_first};
+		}
+
+		directive dir;
+		auto next = dir.parse(begin, end, input);
+		dir.verify_instance_of(command::end);
+
+		return next;
+	}
+
+
+	inline iterator loop::parse (iterator begin, iterator end,
+		string_view input)
+	{
+		auto i = this->_first = begin;
+		i = _parse_list_subexpr(i, end, input);
+		i = _parse_end(i, end, input);
+		return i;
+	}
+
+
+	inline iterator loop::_parse_list_subexpr (iterator begin, iterator end,
+		string_view input)
+	{
+		directive dir;
+		auto next = dir.parse(begin, end, input);
+		dir.verify_instance_of(command::list);
+		this->param_name = *(dir.param_name);
+
+		next = this->subexpr.parse(next, end, input);
+
+		return next;
+	}
+
+
+	inline iterator loop::_parse_end (iterator begin, iterator end,
+		string_view input)
+	{
+		if (begin == end) {
+			throw error{errc::unclosed_expression, this->_first};
+		}
+
+		directive dir;
+		auto next = dir.parse(begin, end, input);
+		dir.verify_instance_of(command::end);
+
+		return next;
 	}
 }
 
