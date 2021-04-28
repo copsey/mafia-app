@@ -313,17 +313,21 @@ void maf::Setup_screen::set_params(TextParams & params) const {
 	}
 
 	for (auto&& [role_id, count]: _role_ids) {
-		auto& subparams = cards.emplace_back();
-		subparams["card"] = escaped(full_name(role_id));
-		subparams["count"] = static_cast<int>(count);
-		subparams["type"] = 1;
+		if (count > 0) {
+			auto& subparams = cards.emplace_back();
+			subparams["card"] = escaped(full_name(role_id));
+			subparams["count"] = static_cast<int>(count);
+			subparams["type"] = 1;
+		}
 	}
 
 	for (auto&& [wildcard_id, count]: _wildcard_ids) {
-		auto& subparams = cards.emplace_back();
-		subparams["card"] = escaped(alias(wildcard_id));
-		subparams["count"] = static_cast<int>(count);
-		subparams["type"] = 2;
+		if (count > 0) {
+			auto& subparams = cards.emplace_back();
+			subparams["card"] = escaped(alias(wildcard_id));
+			subparams["count"] = static_cast<int>(count);
+			subparams["type"] = 2;
+		}
 	}
 
 	params["players.size"] = static_cast<int>(players.size());
