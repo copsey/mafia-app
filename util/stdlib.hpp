@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include <gsl/pointers>
+
 namespace maf {
 	template <typename T> using optional = std::optional<T>;
 	template <typename T1, typename T2> using pair = std::pair<T1, T2>;
@@ -18,7 +20,9 @@ namespace maf {
 	template <typename... Ts> using variant = std::variant<Ts...>;
 	template <typename T> using vector = std::vector<T>;
 	template <typename T> using vector_of_refs = std::vector<std::reference_wrapper<T>>;
-	
+
+	template <typename T> using not_null = gsl::not_null<T>;
+
 	// Functions
 
 	using std::make_unique;

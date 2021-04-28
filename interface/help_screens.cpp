@@ -59,7 +59,7 @@ void maf::List_Roles_Screen::set_params(TextParams& params) const {
 
 void maf::Player_Info_Screen::set_params(TextParams& params) const {
 	auto& game_log = console().game_log();
-	auto& game = game_log.game;
+	auto& game = game_log.game();
 
 	auto get_investigation_params = [&](const Investigation & investigation) {
 		TextParams params;

@@ -1,10 +1,9 @@
 #ifndef MAFIA_SCREEN
 #define MAFIA_SCREEN
 
-#include <string>
-#include <string_view>
-
 #include "../util/stdlib.hpp"
+#include "../util/string.hpp"
+
 #include "format.hpp"
 
 namespace maf {
@@ -15,15 +14,14 @@ namespace maf {
 	struct Screen {
 		// Create a screen belonging to `console`.
 		//
-		// Note that only a reference to `console` is stored. As such, the
+		// Note that only a pointer to `console` is stored. As such, the
 		// lifetime of this screen must not outlive the console.
-		Screen(Console & console): _console{console} { }
+		Screen(Console & console) : _console{&console} {}
 
 		virtual ~Screen() = default;
 
 		// The console owning this screen.
-		Console & console() { return _console; }
-		const Console & console() const { return _console; }
+		Console & console() const { return *_console; }
 
 		// A string to identify the screen by. Used for example when loading
 		// resources from the file system.
@@ -60,7 +58,7 @@ namespace maf {
 		struct Bad_commands { };
 
 	private:
-		Console & _console;
+		not_null<Console *> _console;
 	};
 }
 

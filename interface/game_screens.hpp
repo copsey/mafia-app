@@ -2,6 +2,7 @@
 #define MAFIA_GAME_SCREENS
 
 #include "../util/stdlib.hpp"
+#include "../util/string.hpp"
 
 #include "../logic/logic.hpp"
 
@@ -39,7 +40,7 @@ namespace maf {
 								  const Player & player,
 								  const Role & role,
 								  const Wildcard * wildcard)
-		: Game_screen{console}, _player{player}, _role{role}, _wildcard{wildcard} { }
+		: Game_screen{console}, _player{&player}, _role{&role}, _wildcard{wildcard} { }
 
 		string_view id() const final { return "player-given-role"; }
 
@@ -47,8 +48,8 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _player;
-		const Role & _role;
+		not_null<const Player *> _player;
+		not_null<const Role *> _role;
 		const Wildcard * _wildcard;
 		bool _is_private{false};
 	};
@@ -173,7 +174,7 @@ namespace maf {
 
 	struct Choose_fake_role: Game_screen {
 		Choose_fake_role(Console & console, const Player & player)
-		: Game_screen{console}, _player{player} { }
+		: Game_screen{console}, _player{&player} { }
 
 		string_view id() const final { return "choose-fake-role"; }
 
@@ -181,7 +182,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _player;
+		not_null<const Player *> _player;
 		const Role * _fake_role{nullptr};
 		bool _finished{false};
 	};

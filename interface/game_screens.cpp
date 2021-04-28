@@ -6,7 +6,7 @@
 #include "names.hpp"
 
 const maf::Game & maf::Game_screen::game() const {
-	return console().game_log().game;
+	return console().game_log().game();
 }
 
 maf::Game_log & maf::Game_screen::game_log() {
@@ -62,10 +62,10 @@ void maf::Player_given_initial_role::do_commands(const CmdSequence & commands) {
 
 void maf::Player_given_initial_role::set_params(TextParams & params) const {
 	params["from_wildcard"] = (_wildcard != nullptr);
-	params["player"] = escaped_name(_player);
+	params["player"] = escaped_name(*_player);
 	params["private"] = _is_private;
-	params["role"] = escaped_name(_role);
-	params["role.alias"] = escaped(_role.alias());
+	params["role"] = escaped_name(*_role);
+	params["role.alias"] = escaped(_role->alias());
 
 	if (_wildcard != nullptr) {
 		params["wildcard.alias"] = escaped(_wildcard->alias());
@@ -280,8 +280,8 @@ void maf::Choose_fake_role::do_commands(const CmdSequence & commands) {
 	} else if (commands_match(commands, {"choose", ""})) {
 		try {
 			const Role & fake_role = game_log().look_up(commands[1]);
-			game_log().choose_fake_role(_player.id(), fake_role.id());
-			_fake_role = _player.fake_role();
+			game_log().choose_fake_role(_player->id(), fake_role.id());
+			_fake_role = _player->fake_role();
 		} catch (std::out_of_range) {
 			throw Rulebook::Missing_role_alias{string{commands[1]}};
 		}
@@ -292,7 +292,7 @@ void maf::Choose_fake_role::do_commands(const CmdSequence & commands) {
 
 void maf::Choose_fake_role::set_params(TextParams & params) const {
 	params["finished"] = _finished;
-	params["player"] = escaped_name(_player);
+	params["player"] = escaped_name(*_player);
 	params["fake_role.chosen"] = (_fake_role != nullptr);
 
 	if (_fake_role) {
@@ -483,7 +483,7 @@ void maf::Game_ended::set_params(TextParams& params) const {
 	vector<TextParams> winners_params;
 	vector<TextParams> losers_params;
 
-	for (auto& player: game_log().players) {
+	for (auto& player: game_log().players()) {
 		TextParams subparams;
 		subparams["player"] = escaped_name(player);
 		subparams["role"] = escaped_name(player.role());

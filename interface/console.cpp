@@ -466,7 +466,7 @@ void maf::Console::end_game() {
 
 const maf::Rulebook & maf::Console::active_rulebook() const {
 	if (has_game()) {
-		return _game_log->game.rulebook();
+		return _game_log->game().rulebook();
 	} else {
 		return _setup_screen.rulebook();
 	}

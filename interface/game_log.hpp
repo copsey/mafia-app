@@ -13,7 +13,8 @@ namespace maf {
 	struct Console;
 	struct Game_screen;
 
-	struct Game_log {
+	class Game_log {
+	public:
 		/// Exception signifying that an attempt was made to create a game with
 		/// an unequal number of players and cards.
 		struct Players_to_cards_mismatch {
@@ -43,9 +44,9 @@ namespace maf {
 		         const Rulebook &rulebook = Rulebook{});
 
 		// The game being managed.
-		Game const& game;
+		const Game & game() const { return _game; }
 		// All of the players in the game.
-		vector<Player> const& players;
+		const vector<Player> & players() const { return game().players(); }
 
 		// methods inherited from Game
 		//
@@ -85,9 +86,6 @@ namespace maf {
 		/// Get the name of the player with the given ID.
 		string_view get_name(Player::ID id) const;
 
-
-
-
 		void kick_player(Player::ID id);
 
 		void cast_lynch_vote(Player::ID voter_id, Player::ID target_id);
@@ -115,9 +113,6 @@ namespace maf {
 		void cast_peddle(Player::ID caster_id, Player::ID target_id);
 		void skip_peddle(Player::ID caster_id);
 
-
-
-
 	private:
 		Game _game;
 
@@ -126,12 +121,12 @@ namespace maf {
 		vector<unique_ptr<Game_screen>> _screen_stack{};
 		decltype(_screen_stack)::size_type _screen_stack_index{0};
 
-		Console & _console;
+		not_null<Console *> _console;
 
 		template <typename ScreenType, typename... Args>
-		auto _append_screen(Args&&... args)
-		-> enable_if<is_base_of<Game_screen, ScreenType>> {
-			auto screen = make_unique<ScreenType>(_console, args...);
+		enable_if<is_base_of<Game_screen, ScreenType>>
+		_append_screen(Args&&... args) {
+			auto screen = make_unique<ScreenType>(*_console, args...);
 			_screen_stack.push_back(move(screen));
 		}
 

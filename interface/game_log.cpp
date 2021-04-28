@@ -6,22 +6,22 @@
 #include "game_log.hpp"
 #include "game_screens.hpp"
 
-maf::Game_log::Game_log(Console & console,
-						const vector<string> &player_names,
-                        const vector<Role::ID> &role_ids,
-                        const vector<Wildcard::ID> &wildcard_ids,
-                        const Rulebook &rulebook):
-_console{console},
-_game{role_ids, wildcard_ids, rulebook},
-_player_names{player_names},
-game{_game},
-players{game.players()}
+maf::Game_log::Game_log (
+	Console & console,
+	const vector<string> & player_names,
+	const vector<Role::ID> & role_ids,
+	const vector<Wildcard::ID> & wildcard_ids,
+	const Rulebook & rulebook)
+:
+	_console{&console},
+	_game{role_ids, wildcard_ids, rulebook},
+	_player_names{player_names}
 {
 	if (player_names.size() != role_ids.size() + wildcard_ids.size()) {
 		throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
 	}
 
-	for (const Player & player: this->players) {
+	for (const Player & player: players()) {
 		log_player_given_role(player);
 	}
 
@@ -39,7 +39,7 @@ players{game.players()}
 		log_mafia_meeting(true);
 	}
 
-	for (auto& player: players) {
+	for (const Player & player: players()) {
 		if (player.is_present() && player.role().is_role_faker() && !player.has_fake_role()) {
 			_append_screen<Choose_fake_role>(player);
 		}
@@ -93,7 +93,7 @@ void maf::Game_log::write_transcript(string & output) const {
 }
 
 const maf::Player & maf::Game_log::find_player(Player::ID id) const {
-	for (const Player &player: this->players) {
+	for (const Player & player: players()) {
 		if (id == player.id()) return player;
 	}
 
@@ -102,13 +102,16 @@ const maf::Player & maf::Game_log::find_player(Player::ID id) const {
 }
 
 const maf::Player & maf::Game_log::find_player(string_view name) const {
-	for (Player::ID i = 0; i < _player_names.size(); ++i) {
-		if (util::equal_up_to_case(name, _player_names[i])) {
-			return players[i];
-		}
-	}
+	auto names_match = [&](const Player & player) -> bool {
+		return util::equal_up_to_case(name, this->get_name(player));
+	};
 
-	throw Player_not_found{string{name}};
+	auto iter = util::find_if(players(), names_match);
+
+	if (iter == players().end())
+		throw Player_not_found{string{name}};
+
+	return *iter;
 }
 
 maf::string_view maf::Game_log::get_name(const Player & player) const {
@@ -177,10 +180,10 @@ void maf::Game_log::begin_night() {
 
 	auto screens_before_night = _screen_stack.size();
 
-	if (game.mafia_can_use_kill()) log_mafia_meeting(false);
+	if (_game.mafia_can_use_kill()) log_mafia_meeting(false);
 
 	/* FIXME: minimise number of events when a player has multiple things to do this night. */
-	for (const Player &player: players) {
+	for (const Player & player: players()) {
 		log_ability_use(player);
 	}
 
@@ -253,7 +256,7 @@ void maf::Game_log::log_player_given_role(Player const& player) {
 }
 
 void maf::Game_log::log_time_changed() {
-	log_time_changed(game.date(), game.time());
+	log_time_changed(_game.date(), _game.time());
 }
 
 void maf::Game_log::log_time_changed(Date date, Time time) {
@@ -267,7 +270,7 @@ void maf::Game_log::log_obituary(Date date) {
 				&& player.date_of_death() == date);
 	};
 
-	auto deaths = util::filtered_crefs(players, died_this_night);
+	auto deaths = util::filtered_crefs(players(), died_this_night);
 	_append_screen<Obituary>(move(deaths));
 }
 
@@ -276,7 +279,7 @@ void maf::Game_log::log_town_meeting(const Player *recent_vote_caster, const Pla
 		return player.is_present();
 	};
 
-	auto townsfolk = util::filtered_crefs(players, is_present);
+	auto townsfolk = util::filtered_crefs(players(), is_present);
 	_append_screen<Town_meeting>(move(townsfolk), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target);
 }
 
