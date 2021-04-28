@@ -363,8 +363,12 @@ namespace maf::_preprocess_text_impl {
 
 
 	// Check if `token` is a textual representation of an integer.
-	// This is true if it matches the regex `/^\d+$/`.
+	// This is true if it matches the regex `/^-?\d+$/`.
 	inline bool is_integer(string_view token) {
+		if (!token.empty() && token.front() == '-') {
+			token.remove_prefix(1);
+		}
+
 		return !token.empty() && util::all_of(token, util::is_digit);
 	}
 
@@ -1542,9 +1546,9 @@ inline maf::string maf::preprocess_text_error::message() const {
 		break;
 
 	case error_code::integer_out_of_range:
-		msg += "The integer \"";
+		msg += "The integer ";
 		msg += std::get<string_view>(param);
-		msg += "\" is too large, located at position ";
+		msg += " is too large, located at position ";
 		msg += pos;
 		break;
 
