@@ -262,7 +262,8 @@ void maf::Setup_screen::do_commands(const vector<string_view> & commands) {
 		if (auto result = std::from_chars(std::begin(str), std::end(str), i);
 			result.ec == std::errc{})
 		{
-			begin_preset(i);
+			auto new_game = begin_preset(i);
+			console().store_game(move(new_game));
 		} else {
 			string msg = "=Error!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
 			auto params = TextParams{};
