@@ -362,7 +362,7 @@ bool maf::Console::do_commands(const CmdSequence & commands) {
 	catch (const Missing_preset &e) {
 		err_params["index"] = e.index;
 
-		err << "=Missing preset!=There is no preset defined for the index {index}.";
+		err << "=Error!=\n\nThere is no preset defined for the index {index}.";
 	}
 	catch (const Generic_error & error) {
 		err_params = error.params;
