@@ -55,15 +55,15 @@ maf::Game_log::Game_log (
 }
 
 void maf::Game_log::advance() {
-	if (_screen_stack_index + 1 < _screen_stack.size()) {
-		++_screen_stack_index;
+	if (_screen_stack_idx + 1 < _screen_stack.size()) {
+		++_screen_stack_idx;
 	} else {
 		throw Cannot_advance{};
 	}
 }
 
 void maf::Game_log::do_commands(const vector<string_view> & commands) {
-	_screen_stack[_screen_stack_index]->do_commands(commands);
+	_screen_stack[_screen_stack_idx]->do_commands(commands);
 }
 
 void maf::Game_log::write_transcript(string & output) const {

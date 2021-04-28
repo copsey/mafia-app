@@ -57,7 +57,7 @@ namespace maf {
 
 		// The game screen that's currently active.
 		const Game_screen & active_screen() const {
-			return *_screen_stack[_screen_stack_index];
+			return *_screen_stack[_screen_stack_idx];
 		}
 
 		// Tries to continue forward to the next screen.
