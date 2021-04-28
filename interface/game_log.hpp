@@ -4,6 +4,7 @@
 #include <memory>
 #include <string_view>
 
+#include "../util/misc.hpp"
 #include "../util/stdlib.hpp"
 #include "../util/type_traits.hpp"
 
@@ -119,7 +120,7 @@ namespace maf {
 		vector<string> _player_names;
 
 		vector<unique_ptr<Game_screen>> _screen_stack{};
-		decltype(_screen_stack)::size_type _screen_stack_index{0};
+		index _screen_stack_idx{0};
 
 		not_null<Console *> _console;
 

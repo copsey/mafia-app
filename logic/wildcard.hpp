@@ -5,7 +5,9 @@
 #include <map>
 #include <random>
 
+#include "../util/misc.hpp"
 #include "../util/stdlib.hpp"
+
 #include "role.hpp"
 
 namespace maf {
@@ -63,7 +65,7 @@ namespace maf {
 		ID _id;
 		Role_evaluator _evaluator{};
 		vector<Role::ID> _role_ids{};
-		std::discrete_distribution<decltype(_role_ids)::size_type> _dist{};
+		std::discrete_distribution<index> _dist{};
 
 		/// Whether the wildcard uses a role evaluator when picking a role.
 		///

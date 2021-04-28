@@ -23,8 +23,6 @@ namespace maf {
 
 	template <typename T> using not_null = gsl::not_null<T>;
 
-	// Functions
-
 	using std::make_unique;
 	using std::move;
 	using std::swap;

@@ -1,6 +1,7 @@
 #include <iterator>
 
 #include "../util/algorithm.hpp"
+#include "../util/misc.hpp"
 #include "../util/random.hpp"
 
 #include "game.hpp"
@@ -33,7 +34,7 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
 
 	util::shuffle(cards);
 
-	for (decltype(cards)::size_type i = 0; i < cards.size(); ++i) {
+	for (index i = 0; i < cards.size(); ++i) {
 		Player& player = _players.emplace_back(i);
 		Card& card = cards[i];
 

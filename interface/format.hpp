@@ -10,6 +10,7 @@
 
 #include "../util/algorithm.hpp"
 #include "../util/char.hpp"
+#include "../util/misc.hpp"
 #include "../util/parse.hpp"
 #include "../util/stdlib.hpp"
 #include "../util/string.hpp"
@@ -79,7 +80,7 @@ namespace maf {
 
 		// Position in input string where the error occurred. It's computed
 		// from `this->input` and `this->param`.
-		string_view::size_type pos() const;
+		index pos() const;
 
 		// Construct an error whose `param` is `iter`.
 		//
@@ -219,7 +220,7 @@ namespace maf {
 
 		// Position in input string where the error occurred. It's computed
 		// from `this->input` and `this->param`.
-		string_view::size_type pos() const;
+		index pos() const;
 
 		format_text_error(error_code code, string_view substr):
 			param{substr}
@@ -1404,7 +1405,7 @@ inline maf::string maf::preprocess_text(string_view input, TextParams const& par
 }
 
 
-inline maf::string_view::size_type maf::preprocess_text_error::pos() const {
+inline maf::index maf::preprocess_text_error::pos() const {
 	using namespace _preprocess_text_impl;
 
 	auto get_iter = [&](auto&& arg) {
@@ -1823,7 +1824,7 @@ inline maf::StyledText maf::format_text(string_view input,
 }
 
 
-inline maf::string_view::size_type maf::format_text_error::pos() const {
+inline maf::index maf::format_text_error::pos() const {
 	return param.begin() - input.begin();
 }
 

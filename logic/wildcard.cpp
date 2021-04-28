@@ -96,7 +96,7 @@ const maf::Role & maf::Wildcard::pick_role(const Rulebook & rulebook) const {
 		std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
 		return roles[dist(util::random_engine)];
 	} else {
-		auto& mut_dist = const_cast<std::discrete_distribution<decltype(_role_ids)::size_type> &>(_dist);
+		auto& mut_dist = const_cast<std::discrete_distribution<index> &>(_dist);
 		auto role_id = _role_ids[mut_dist(util::random_engine)];
 		return rulebook.look_up(role_id);
 	}

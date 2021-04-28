@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "char.hpp"
+#include "misc.hpp"
 
 namespace maf {
 	using std::literals::operator""sv;
@@ -18,7 +19,7 @@ namespace maf::util {
 	inline bool equal_up_to_case(string_view s1, string_view s2) {
 		if (s1.size() != s2.size()) return false;
 
-		for (string_view::size_type i = 0; i != s1.size(); ++i) {
+		for (index i = 0; i != s1.size(); ++i) {
 			if (!equal_up_to_case(s1[i], s2[i])) return false;
 		}
 
