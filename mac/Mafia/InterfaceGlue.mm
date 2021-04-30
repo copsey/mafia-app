@@ -13,7 +13,9 @@ using weight_option = maf::StyledString::attributes_t::weight_option;
 using typeface_option = maf::StyledString::attributes_t::typeface_option;
 using semantics_option = maf::StyledString::attributes_t::semantics_option;
 
-@implementation InterfaceGlue
+@implementation InterfaceGlue {
+	maf::Console _console;
+}
 
 - (void)awakeFromNib {
 	[self showOutput];

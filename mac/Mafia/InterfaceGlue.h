@@ -12,9 +12,7 @@
 
 #import "AppDelegate.h"
 
-@interface InterfaceGlue : NSObject {
-   maf::Console _console;
-}
+@interface InterfaceGlue : NSObject
 
 @property (weak) IBOutlet AppDelegate *delegate;
 @property (unsafe_unretained) IBOutlet NSTextView *output;
