@@ -5,6 +5,7 @@
 #include "console.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"
+#include <charconv>
 
 struct Game_parameters {
 	maf::vector<maf::string> player_names;

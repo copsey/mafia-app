@@ -11,6 +11,7 @@ src = \
 	interface/screen.cpp \
 	interface/setup_screen.cpp \
 	interface/text/format.cpp \
+	interface/text/preprocess.cpp \
 	logic/game.cpp \
 	logic/player.cpp \
 	logic/role.cpp \
