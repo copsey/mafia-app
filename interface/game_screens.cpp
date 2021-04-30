@@ -72,6 +72,33 @@ void maf::Player_given_initial_role::set_params(TextParams & params) const {
 	}
 }
 
+void maf::Wildcards_resolved::do_commands(const CmdSequence & commands) {
+	if (commands_match(commands, {"ok"})) {
+		game_log().advance();
+	} else {
+		Game_screen::do_commands(commands);
+	}
+}
+
+void maf::Wildcards_resolved::set_params(TextParams & params) const {
+	std::map<not_null<const Role *>, int> cards;
+
+	for (const Role & role : console().game_log().game().random_roles()) {
+		if (cards.count(&role) > 0) {
+			cards[&role] += 1;
+		} else {
+			cards[&role] = 1;
+		}
+	}
+
+	params["cards"] = util::transform_into<vector<TextParams>>(cards, [&](auto& elem) -> TextParams {
+		TextParams params{};
+		params["role"] = escaped_name(*(elem.first));
+		params["count"] = elem.second;
+		return params;
+	});
+}
+
 void maf::Time_changed::do_commands(const CmdSequence & commands) {
 	if (commands_match(commands, {"ok"})) {
 		game_log().advance();

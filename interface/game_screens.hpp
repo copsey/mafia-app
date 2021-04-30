@@ -55,6 +55,17 @@ namespace maf {
 	};
 
 
+	class Wildcards_resolved : public Game_screen {
+	public:
+		using Game_screen::Game_screen;
+
+		string_view id() const final { return "wildcards-resolved"; }
+
+		void do_commands(const CmdSequence & commands) override;
+		void set_params(TextParams & params) const override;
+	};
+
+
 	struct Time_changed: Game_screen {
 		Time_changed(Console & console, Date d, Time t)
 		: Game_screen{console}, date{d}, time{t} { }

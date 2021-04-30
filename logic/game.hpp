@@ -240,6 +240,9 @@ namespace maf
 		Role const& look_up(RoleRef r_ref) const;
 		//
 
+		// All of the roles obtained from wildcards in this game.
+		const vector<std::reference_wrapper<const Role>> & random_roles() const;
+
 		// The participating players, both present and not present.
 		const vector<Player> & players() const;
 		// A vector containing every player remaining.
@@ -327,6 +330,7 @@ namespace maf
 	private:
 		vector<Player> _players{};
 		Rulebook _rulebook;
+		vector<std::reference_wrapper<const Role>> _random_roles{};
 
 		bool _has_ended{false};
 

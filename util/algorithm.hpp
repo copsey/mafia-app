@@ -166,6 +166,15 @@ namespace maf::util {
 		using std::begin, std::end;
 		return std::max_element(begin(c), end(c), lt);
 	}
+
+	// Copy the elements of `cont` into `out`.
+	template <typename Container, typename Iterator>
+	void copy(Container & cont, Iterator out) {
+		using std::begin, std::end;
+		auto first = begin(cont);
+		auto last = end(cont);
+		std::copy(first, last, out);
+	}
 	
 	// Replace every element in `cont` with a copy of `t`.
 	template <typename Cont, typename T>

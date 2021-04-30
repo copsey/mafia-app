@@ -21,6 +21,10 @@ maf::Game_log::Game_log (
 		throw Players_to_cards_mismatch{player_names.size(), role_ids.size() + wildcard_ids.size()};
 	}
 
+	if (!game().random_roles().empty()) {
+		_append_screen<Wildcards_resolved>();
+	}
+
 	for (const Player & player: players()) {
 		log_player_given_role(player);
 	}

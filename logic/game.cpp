@@ -16,30 +16,29 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
                 const vector<Wildcard::ID> & wildcard_ids,
                 const Rulebook & rulebook)
 : _rulebook{rulebook} {
-	using Card = pair<const Role *, const Wildcard *>;
+	auto append_to_random_roles = std::back_inserter(_random_roles);
 
-	vector<Card> cards{};
+	util::transform(wildcard_ids, append_to_random_roles, [&](Wildcard::ID id) -> const Role & {
+		Wildcard & wildcard = _rulebook.get_wildcard(id);
+		const Role & role = wildcard.pick_role(_rulebook);
+		return role;
+	});
+
+	vector<std::reference_wrapper<const Role>> cards{};
 	auto append_to_cards = std::back_inserter(cards);
 
-	util::transform(role_ids, append_to_cards, [&](Role::ID id) -> Card {
-		auto& role = _rulebook.look_up(id);
-		return {&role, nullptr};
+	util::transform(role_ids, append_to_cards, [&](Role::ID id) -> const Role & {
+		const Role & role = _rulebook.look_up(id);
+		return role;
 	});
-
-	util::transform(wildcard_ids, append_to_cards, [&](Wildcard::ID id) -> Card {
-		auto& wildcard = _rulebook.get_wildcard(id);
-		auto& role = wildcard.pick_role(_rulebook);
-		return {&role, &wildcard};
-	});
-
+	util::copy(_random_roles, append_to_cards);
 	util::shuffle(cards);
 
 	for (index i = 0; i < cards.size(); ++i) {
-		Player& player = _players.emplace_back(i);
-		Card& card = cards[i];
+		auto& player = _players.emplace_back(i);
+		auto& card = cards[i];
 
-		player.assign_role(*(card.first));
-		if (card.second) player.set_wildcard(*(card.second));
+		player.assign_role(card);
 	}
 
 	try_to_end();
@@ -58,6 +57,11 @@ bool maf::Game::contains(RoleRef r_ref) const
 maf::Role const& maf::Game::look_up(RoleRef r_ref) const
 {
 	return rulebook().look_up(r_ref);
+}
+
+auto maf::Game::random_roles() const
+-> const maf::vector<std::reference_wrapper<const maf::Role>> & {
+	return _random_roles;
 }
 
 const maf::vector<maf::Player> & maf::Game::players() const
