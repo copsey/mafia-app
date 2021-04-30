@@ -10,6 +10,7 @@ src = \
 	interface/questions.cpp \
 	interface/screen.cpp \
 	interface/setup_screen.cpp \
+	interface/text/format.cpp \
 	logic/game.cpp \
 	logic/player.cpp \
 	logic/role.cpp \
