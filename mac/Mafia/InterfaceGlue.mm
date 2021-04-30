@@ -7,6 +7,14 @@
 //
 
 #import "InterfaceGlue.h"
+#include "console.hpp"
+
+@interface InterfaceGlue ()
+
++ (NSFont *)fontFor:(maf::StyledString::attributes_t)attributes;
++ (NSDictionary *)attributesFor:(maf::StyledString::attributes_t)attributes;
+
+@end
 
 using style_option = maf::StyledString::attributes_t::style_option;
 using weight_option = maf::StyledString::attributes_t::weight_option;
@@ -15,9 +23,11 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 
 @implementation InterfaceGlue {
 	maf::Console _console;
+	bool _game_in_progress;
 }
 
 - (void)awakeFromNib {
+	_game_in_progress = false;
 	[self showOutput];
 }
 
@@ -25,17 +35,21 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 	std::string_view str = {self.input.stringValue.UTF8String};
 	
 	if (_console.input(str)) {
-		/* FIXME: make more reliable, e.g., "preset i" doesn't get caught by this method */
-		if (str == "begin" || str == "preset") {
-			[_delegate playMusic:MafiaPlaylistItem_Beginning];
-		} else if (str == "end") {
-			[_delegate playMusic:MafiaPlaylistItem_None];
-		}
-		
 		[self showOutput];
 	} else {
 		[self showErrorMessage];
 	}
+
+	// Check if a game just started or ended. If so, change the music that's
+	// playing.
+
+	if (!_game_in_progress && _console.has_game()) {
+		[_delegate playMusic:MafiaPlaylistItem_Beginning];
+	} else if (_game_in_progress && !_console.has_game()) {
+		[_delegate playMusic:MafiaPlaylistItem_None];
+	}
+
+	_game_in_progress = _console.has_game();
 }
 
 - (void)clearInput {
