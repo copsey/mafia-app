@@ -81,13 +81,8 @@ void maf::Player_Info_Screen::set_params(TextParams& params) const {
 
 	params["player"] = escaped(game_log.get_name(_player));
 	params["role"] = escaped(full_name(_player.role()));
-	params["has_wildcard"] = (_player.wildcard() != nullptr);
 	params["has_lynch_vote"] = (_player.lynch_vote() != nullptr);
 	params["investigations"] = investigations;
-
-	if (_player.wildcard()) {
-		params["wildcard.alias"] = escaped(_player.wildcard()->alias());
-	}
 
 	if (_player.lynch_vote()) {
 		params["lynch_vote"] = escaped(game_log.get_name(*_player.lynch_vote()));

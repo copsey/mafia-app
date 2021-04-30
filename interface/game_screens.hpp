@@ -38,9 +38,8 @@ namespace maf {
 	struct Player_given_initial_role: Game_screen {
 		Player_given_initial_role(Console & console,
 								  const Player & player,
-								  const Role & role,
-								  const Wildcard * wildcard)
-		: Game_screen{console}, _player{&player}, _role{&role}, _wildcard{wildcard} { }
+								  const Role & role)
+		: Game_screen{console}, _player{&player}, _role{&role} { }
 
 		string_view id() const final { return "player-given-role"; }
 
@@ -50,7 +49,6 @@ namespace maf {
 	private:
 		not_null<const Player *> _player;
 		not_null<const Role *> _role;
-		const Wildcard * _wildcard;
 		bool _is_private{false};
 	};
 

@@ -256,7 +256,7 @@ void maf::Game_log::skip_peddle(Player::ID caster_id) {
 }
 
 void maf::Game_log::log_player_given_role(Player const& player) {
-	_append_screen<Player_given_initial_role>(player, player.role(), player.wildcard());
+	_append_screen<Player_given_initial_role>(player, player.role());
 }
 
 void maf::Game_log::log_time_changed() {

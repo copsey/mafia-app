@@ -2,10 +2,6 @@
 
 {!if private}
 {player}, your role is the {role}.
-{!if from_wildcard}
-
-You were randomly given this role from the @{wildcard.alias}@ wildcard.
-{!end}
 
 %To see a full description of your role, enter @help r {role.alias}@.
 {!else}

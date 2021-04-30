@@ -1,16 +1,11 @@
 =Info: {player}=
 
 *Role:* {role}.
-{!if has_wildcard}
-
-{--- FIXME: Replace wildcard alias with something else}
-You were randomly given this role from the @{wildcard.alias}@ wildcard.
-{!end}
 
 {!if daytime}
 *Voting to lynch:* {!if has_lynch_vote}{lynch_vote}.{!else}No one.{!end}
-{!end}
 
+{!end}
 {!list investigations}
 You checked {target} on night {date}, who appeared to be {!if target.suspicious}suspicious{!else}innocent{!end}.
 {!end}

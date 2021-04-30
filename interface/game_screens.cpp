@@ -61,15 +61,10 @@ void maf::Player_given_initial_role::do_commands(const CmdSequence & commands) {
 }
 
 void maf::Player_given_initial_role::set_params(TextParams & params) const {
-	params["from_wildcard"] = (_wildcard != nullptr);
 	params["player"] = escaped_name(*_player);
 	params["private"] = _is_private;
 	params["role"] = escaped_name(*_role);
 	params["role.alias"] = escaped(_role->alias());
-
-	if (_wildcard != nullptr) {
-		params["wildcard.alias"] = escaped(_wildcard->alias());
-	}
 }
 
 void maf::Wildcards_resolved::do_commands(const CmdSequence & commands) {

@@ -35,10 +35,8 @@ maf::Game::Game(const vector<Role::ID> & role_ids,
 	util::shuffle(cards);
 
 	for (index i = 0; i < cards.size(); ++i) {
-		auto& player = _players.emplace_back(i);
-		auto& card = cards[i];
-
-		player.assign_role(card);
+		const Role & role = cards[i];
+		_players.emplace_back(i, role);
 	}
 
 	try_to_end();

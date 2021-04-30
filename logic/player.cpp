@@ -1,24 +1,10 @@
 #include "player.hpp"
 
-
-void maf::Player::assign_role(const Role & role) {
-	_role_ptr = &role;
-	_fake_role_ptr = nullptr;
-}
-
-void maf::Player::set_wildcard(const Wildcard & wildcard) {
-	_wildcard_ptr = &wildcard;
-}
-
 void maf::Player::kill(Date date, Time time) {
 	_alive = false;
 	_present = false;
 	_date_of_death = date;
 	_time_of_death = time;
-}
-
-void maf::Player::leave() {
-	_present = false;
 }
 
 void maf::Player::kick() {
@@ -29,10 +15,6 @@ void maf::Player::kick() {
 void maf::Player::lynch(Date date) {
 	kill(date, Time::day);
 	_lynched = true;
-}
-
-void maf::Player::give_fake_role(const maf::Role & role) {
-	_fake_role_ptr = &role;
 }
 
 void maf::Player::refresh() {
@@ -56,20 +38,4 @@ void maf::Player::remove_compulsory_ability(Ability ability) {
 		}
 	}
 	/* FIXME: throw exception if compulsory ability is not currently stored. */
-}
-
-void maf::Player::cast_lynch_vote(const Player & target) {
-	_lynch_vote = &target;
-}
-
-bool maf::Player::is_suspicious() const {
-	return role().is_suspicious() || _on_drugs;
-}
-
-void maf::Player::give_drugs() {
-	_on_drugs = true;
-}
-
-void maf::Player::haunt(const Player &haunter) {
-	_haunter = &haunter;
 }
