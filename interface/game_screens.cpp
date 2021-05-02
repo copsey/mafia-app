@@ -1,4 +1,4 @@
-#include <fstream>
+#include "../util/fstream.hpp"
 
 #include "command.hpp"
 #include "console.hpp"
@@ -36,11 +36,8 @@ namespace maf {
 		fname += this->id();
 		fname += ".txt";
 
-		auto input = std::ifstream{fname};
-
-		if (input) {
-			std::istreambuf_iterator<char> input_iter{input}, eos{};
-			output.append(input_iter, eos);
+		if (ifstream input{fname}; input) {
+			output += util::read_all(input);
 		}
 	}
 

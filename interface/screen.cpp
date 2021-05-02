@@ -1,5 +1,4 @@
-#include <fstream>
-#include <iterator>
+#include "../util/fstream.hpp"
 
 #include "../core/core.hpp"
 
@@ -23,11 +22,9 @@ namespace maf {
 		string contents;
 
 		auto path = this->txt_path();
-		std::ifstream input{path};
 
-		if (input) {
-			std::istreambuf_iterator<char> input_iter{input}, eos{};
-			contents.append(input_iter, eos);
+		if (ifstream input{path}; input) {
+			contents = util::read_all(input);
 		} else {
 			contents += "=Error!=\n\nERROR: No text found for the @";
 			contents += escaped(this->id());

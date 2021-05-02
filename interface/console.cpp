@@ -1,11 +1,11 @@
 #include <charconv>
 #include <ctime>
-#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
 
 #include "../util/algorithm.hpp"
+#include "../util/fstream.hpp"
 #include "../util/random.hpp"
 #include "../util/string.hpp"
 
@@ -433,11 +433,12 @@ namespace maf {
 
 	void Console::end_game() {
 		// TODO: Choose file location where history is saved
+		string_view path{"/Users/Jack/Documents/Developer/Projects/mafia/misc/game_history.txt"};
 
 		if (has_game()) {
 			std::time_t t = std::time(nullptr);
 
-			std::ofstream ofs{"/Users/Jack/Documents/Developer/Projects/mafia/misc/game_history.txt", std::ofstream::app};
+			ofstream ofs{path, ofstream::app};
 			ofs << "\n====== ";
 			ofs << std::put_time(std::localtime(&t), "%F %T");
 			ofs << " ======\n\n";

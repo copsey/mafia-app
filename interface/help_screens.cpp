@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include "../util/algorithm.hpp"
 
 #include "command.hpp"
