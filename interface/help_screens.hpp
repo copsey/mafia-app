@@ -5,7 +5,7 @@
 #include <ostream>
 
 #include "../util/stdlib.hpp"
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 #include "format.hpp"
 
 #include "game_log.hpp"

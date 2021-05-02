@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iterator>
 
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 
 #include "command.hpp"
 #include "console.hpp"

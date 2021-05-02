@@ -6,7 +6,7 @@
 #include <set>
 
 #include "../util/stdlib.hpp"
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 
 #include "game_log.hpp"
 #include "names.hpp"

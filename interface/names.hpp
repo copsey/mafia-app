@@ -2,7 +2,7 @@
 #define MAFIA_NAMES_H
 
 #include "../util/stdlib.hpp"
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 
 namespace maf {
 	// The full name of the given role.

@@ -49,7 +49,7 @@
 		F84FE0661AF3B9DF00BF4992 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F84FE0811AF3BB1A00BF4992 /* game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game.cpp; sourceTree = "<group>"; };
 		F84FE0821AF3BB1A00BF4992 /* game.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game.hpp; sourceTree = "<group>"; };
-		F84FE0851AF3BB1A00BF4992 /* logic.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logic.hpp; sourceTree = "<group>"; };
+		F84FE0851AF3BB1A00BF4992 /* core.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = core.hpp; sourceTree = "<group>"; };
 		F84FE0891AF3BB1A00BF4992 /* player.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = player.hpp; sourceTree = "<group>"; };
 		F84FE08A1AF3BB1A00BF4992 /* role.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = role.hpp; sourceTree = "<group>"; };
 		F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rulebook.cpp; sourceTree = "<group>"; };
@@ -110,7 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				F84FE08E1AF3BB1A00BF4992 /* util */,
-				F84FE0801AF3BB1A00BF4992 /* logic */,
+				F84FE0801AF3BB1A00BF4992 /* core */,
 				F84FE07F1AF3BB1A00BF4992 /* interface */,
 				F84FE05E1AF3B9DF00BF4992 /* mac */,
 				F84FE05D1AF3B9DF00BF4992 /* Products */,
@@ -178,12 +178,12 @@
 			path = ../interface;
 			sourceTree = "<group>";
 		};
-		F84FE0801AF3BB1A00BF4992 /* logic */ = {
+		F84FE0801AF3BB1A00BF4992 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				F84FE0851AF3BB1A00BF4992 /* core.hpp */,
 				F84FE0821AF3BB1A00BF4992 /* game.hpp */,
 				F84FE0811AF3BB1A00BF4992 /* game.cpp */,
-				F84FE0851AF3BB1A00BF4992 /* logic.hpp */,
 				F84FE0891AF3BB1A00BF4992 /* player.hpp */,
 				F886CDEE1B87014200915D2D /* player.cpp */,
 				F84FE08A1AF3BB1A00BF4992 /* role.hpp */,
@@ -196,8 +196,8 @@
 				F8882E5A1B8CE4E6009166BB /* wildcard.hpp */,
 				F8882E591B8CE4E6009166BB /* wildcard.cpp */,
 			);
-			name = logic;
-			path = ../logic;
+			name = core;
+			path = ../core;
 			sourceTree = "<group>";
 		};
 		F84FE08E1AF3BB1A00BF4992 /* util */ = {

@@ -8,7 +8,7 @@
 #include "../util/stdlib.hpp"
 #include "../util/type_traits.hpp"
 
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 
 namespace maf {
 	struct Console;

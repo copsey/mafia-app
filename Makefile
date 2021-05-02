@@ -1,7 +1,12 @@
 CXXFLAGS=-std=c++17
 
 src = \
-	cli/main.cpp \
+	core/game.cpp \
+	core/player.cpp \
+	core/role.cpp \
+	core/role_ref.cpp \
+	core/rulebook.cpp \
+	core/wildcard.cpp \
 	interface/console.cpp \
 	interface/game_log.cpp \
 	interface/game_screens.cpp \
@@ -12,12 +17,7 @@ src = \
 	interface/setup_screen.cpp \
 	interface/text/format.cpp \
 	interface/text/preprocess.cpp \
-	logic/game.cpp \
-	logic/player.cpp \
-	logic/role.cpp \
-	logic/role_ref.cpp \
-	logic/rulebook.cpp \
-	logic/wildcard.cpp \
+	cli/main.cpp \
 
 objs = $(addprefix build/,$(src:.cpp=.o))
 

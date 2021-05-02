@@ -4,7 +4,7 @@
 #include "../util/stdlib.hpp"
 #include "../util/string.hpp"
 
-#include "../logic/logic.hpp"
+#include "../core/core.hpp"
 
 #include "command.hpp"
 #include "format.hpp"
