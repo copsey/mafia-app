@@ -18,7 +18,7 @@ namespace maf {
 	struct Game_screen: Screen {
 		using Screen::Screen;
 
-		const Game & game() const;
+		const core::Game & game() const;
 		Game_log & game_log();
 		const Game_log & game_log() const;
 
@@ -30,15 +30,15 @@ namespace maf {
 		// by calling `preprocess_text` with the screen's parameters.
 		void summarise(string & output) const;
 
-		string escaped_name(Player const& player) const;
-		string escaped_name(Role const& role) const;
+		string escaped_name(const core::Player & player) const;
+		string escaped_name(const core::Role & role) const;
 	};
 
 
 	struct Player_given_initial_role: Game_screen {
 		Player_given_initial_role(Console & console,
-								  const Player & player,
-								  const Role & role)
+								  const core::Player & player,
+								  const core::Role & role)
 		: Game_screen{console}, _player{&player}, _role{&role} { }
 
 		string_view id() const final { return "player-given-role"; }
@@ -47,8 +47,8 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		not_null<const Player *> _player;
-		not_null<const Role *> _role;
+		not_null<const core::Player *> _player;
+		not_null<const core::Role *> _role;
 		bool _is_private{false};
 	};
 
@@ -65,13 +65,13 @@ namespace maf {
 
 
 	struct Time_changed: Game_screen {
-		Time_changed(Console & console, Date d, Time t)
+		Time_changed(Console & console, core::Date d, core::Time t)
 		: Game_screen{console}, date{d}, time{t} { }
 
 		string_view id() const final { return "time-changed"; }
 
-		Date date;
-		Time time;
+		core::Date date;
+		core::Time time;
 
 		void do_commands(const CmdSequence & commands) override;
 		void set_params(TextParams & params) const override;
@@ -79,7 +79,7 @@ namespace maf {
 
 
 	struct Obituary: Game_screen {
-		Obituary(Console & console, vector_of_refs<const Player> deaths)
+		Obituary(Console & console, vector_of_refs<const core::Player> deaths)
 		: Game_screen{console}, _deaths{deaths} { }
 
 		string_view id() const final { return "obituary"; }
@@ -88,21 +88,21 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector_of_refs<const Player> _deaths;
+		vector_of_refs<const core::Player> _deaths;
 		std::ptrdiff_t _deaths_index{-1};
 
-		TextParams _get_params(const Player & player) const;
+		TextParams _get_params(const core::Player & player) const;
 	};
 
 
 	struct Town_meeting: Game_screen {
 		Town_meeting(Console & console,
-		             vector_of_refs<const Player> players,
-		             Date date,
+		             vector_of_refs<const core::Player> players,
+		             core::Date date,
 		             bool lynch_can_occur,
-		             const Player * next_lynch_victim,
-		             const Player * recent_lynch_vote_caster,
-		             const Player * recent_lynch_vote_target)
+		             const core::Player * next_lynch_victim,
+		             const core::Player * recent_lynch_vote_caster,
+		             const core::Player * recent_lynch_vote_target)
 		:
 			Game_screen{console},
 			_players{players},
@@ -119,14 +119,14 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector_of_refs<const Player> _players;
-		Date _date;
+		vector_of_refs<const core::Player> _players;
+		core::Date _date;
 		bool _lynch_can_occur;
-		const Player *_next_lynch_victim;
-		const Player *_recent_vote_caster;
-		const Player *_recent_vote_target;
+		const core::Player *_next_lynch_victim;
+		const core::Player *_recent_vote_caster;
+		const core::Player *_recent_vote_target;
 
-		TextParams _get_params(const Player & player) const;
+		TextParams _get_params(const core::Player & player) const;
 
 		void _do_commands_before_lynch(const CmdSequence & commands);
 		void _do_commands_after_lynch(const CmdSequence & commands);
@@ -135,7 +135,7 @@ namespace maf {
 
 
 	struct Player_kicked: Game_screen {
-		Player_kicked(Console & console, const Player & player)
+		Player_kicked(Console & console, const core::Player & player)
 		: Game_screen{console}, _player{player} { }
 
 		string_view id() const final { return "player-kicked"; }
@@ -144,21 +144,21 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _player;
+		const core::Player & _player;
 	};
 
 
 	struct Lynch_result: Game_screen {
-		Lynch_result(Console & console, const Player * victim, const Role * victim_role)
-		: Game_screen{console}, victim{victim}, victim_role{victim_role} { }
+		Lynch_result(Console & console, const core::Player * victim, const core::Role * victim_role)
+		: Game_screen{console}, victim{victim}, victim_role{victim_role} {}
 
 		string_view id() const final { return "lynch-result"; }
 
 		// The player who was lynched, or `nullptr` if nobody was lynched.
-		const Player *victim = nullptr;
+		const core::Player *victim = nullptr;
 		// The role of the player who was lynched, or `nullptr` if nobody was
 		// lynched / the role could not be determined.
-		const Role *victim_role = nullptr;
+		const core::Role *victim_role = nullptr;
 
 		void do_commands(const CmdSequence & commands) override;
 		void set_params(TextParams & params) const override;
@@ -166,15 +166,18 @@ namespace maf {
 
 
 	struct Duel_result: Game_screen {
-		Duel_result(Console & console, const Player & caster, const Player & target, const Player & winner, const Player & loser)
-		: Game_screen{console}, caster{caster}, target{target}, winner{winner}, loser{loser} { }
+		Duel_result(Console & console, const core::Player & caster,
+			const core::Player & target, const core::Player & winner,
+			const core::Player & loser)
+		: Game_screen{console}, caster{caster}, target{target},
+		winner{winner}, loser{loser} {}
 
 		string_view id() const final { return "duel-result"; }
 
-		const Player & caster;
-		const Player & target;
-		const Player & winner;
-		const Player & loser;
+		const core::Player & caster;
+		const core::Player & target;
+		const core::Player & winner;
+		const core::Player & loser;
 
 		void do_commands(const CmdSequence & commands) override;
 		void set_params(TextParams & params) const override;
@@ -182,7 +185,7 @@ namespace maf {
 
 
 	struct Choose_fake_role: Game_screen {
-		Choose_fake_role(Console & console, const Player & player)
+		Choose_fake_role(Console & console, const core::Player & player)
 		: Game_screen{console}, _player{&player} { }
 
 		string_view id() const final { return "choose-fake-role"; }
@@ -191,15 +194,15 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		not_null<const Player *> _player;
-		const Role * _fake_role{nullptr};
+		not_null<const core::Player *> _player;
+		const core::Role * _fake_role{nullptr};
 		bool _finished{false};
 	};
 
 
 	struct Mafia_meeting: Game_screen {
 		Mafia_meeting(Console & console,
-					  vector_of_refs<const Player> mafiosi,
+					  vector_of_refs<const core::Player> mafiosi,
 		              bool is_first_meeting)
 		: Game_screen{console}, _mafiosi{mafiosi}, _first_meeting{is_first_meeting}
 		{ }
@@ -210,7 +213,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		vector_of_refs<const Player> _mafiosi;
+		vector_of_refs<const core::Player> _mafiosi;
 		bool _first_meeting;
 		bool _finished{false};
 
@@ -220,7 +223,7 @@ namespace maf {
 
 
 	struct Kill_use: Game_screen {
-		Kill_use(Console & console, const Player & caster)
+		Kill_use(Console & console, const core::Player & caster)
 		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-kill"; }
@@ -229,13 +232,13 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _caster;
+		const core::Player & _caster;
 		bool _finished{false};
 	};
 
 
 	struct Heal_use: Game_screen {
-		Heal_use(Console & console, const Player & caster)
+		Heal_use(Console & console, const core::Player & caster)
 		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-heal"; }
@@ -244,13 +247,13 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _caster;
+		const core::Player & _caster;
 		bool _finished{false};
 	};
 
 
 	struct Investigate_use: Game_screen {
-		Investigate_use(Console & console, const Player & caster)
+		Investigate_use(Console & console, const core::Player & caster)
 		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-investigate"; }
@@ -259,13 +262,13 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _caster;
+		const core::Player & _caster;
 		bool _finished{false};
 	};
 
 
 	struct Peddle_use: Game_screen {
-		Peddle_use(Console & console, const Player & caster)
+		Peddle_use(Console & console, const core::Player & caster)
 		: Game_screen{console}, _caster{caster} { }
 
 		string_view id() const final { return "use-peddle"; }
@@ -274,7 +277,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _caster;
+		const core::Player & _caster;
 		bool _finished{false};
 	};
 
@@ -290,12 +293,12 @@ namespace maf {
 
 
 	struct Investigation_result: Game_screen {
-		Investigation_result(Console & console, Investigation investigation)
+		Investigation_result(Console & console, core::Investigation investigation)
 		: Game_screen{console}, investigation{investigation} { }
 
 		string_view id() const final { return "investigation-result"; }
 
-		Investigation investigation;
+		core::Investigation investigation;
 
 		void do_commands(const CmdSequence & commands) override;
 		void set_params(TextParams & params) const override;

@@ -1,12 +1,13 @@
-#ifndef MAFIA_LOGIC_PLAYER
-#define MAFIA_LOGIC_PLAYER
+#ifndef MAFIA_CORE_PLAYER_H
+#define MAFIA_CORE_PLAYER_H
 
 #include "../util/stdlib.hpp"
 #include "time.hpp"
 #include "role.hpp"
 
-namespace maf {
-	struct Player {
+namespace maf::core {
+	class Player {
+	public:
 		using ID = std::size_t;
 
 		/// Create a player with the given ID and role.

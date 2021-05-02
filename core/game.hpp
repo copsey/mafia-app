@@ -1,5 +1,5 @@
-#ifndef MAFIA_LOGIC_GAME
-#define MAFIA_LOGIC_GAME
+#ifndef MAFIA_CORE_GAME_H
+#define MAFIA_CORE_GAME_H
 
 #include "../util/stdlib.hpp"
 
@@ -7,8 +7,7 @@
 #include "role_ref.hpp"
 #include "rulebook.hpp"
 
-namespace maf
-{
+namespace maf::core {
 	/// The result of an investigation that `caster` performed on `target`.
 	///
 	/// Note that only references to `caster` and `target` are stored, and so

@@ -11,8 +11,8 @@
 #include "../core/core.hpp"
 
 namespace maf {
-	struct Console;
-	struct Game_screen;
+	class Console;
+	class Game_screen;
 
 	class Game_log {
 	public:
@@ -31,7 +31,7 @@ namespace maf {
 		// An exception signifying that an ability use has not been programmed in
 		// yet.
 		struct Unexpected_ability {
-			Ability ability;
+			core::Ability ability;
 		};
 
 		// Signifies that there are no more screens to advance to.
@@ -40,19 +40,19 @@ namespace maf {
 		// Creates a new game log, managing a game with the given parameters.
 		Game_log(Console & console,
 				 const vector<string> &player_names,
-		         const vector<Role::ID> &role_ids,
-		         const vector<Wildcard::ID> &wildcard_ids,
-		         const Rulebook &rulebook = Rulebook{});
+		         const vector<core::Role::ID> &role_ids,
+		         const vector<core::Wildcard::ID> &wildcard_ids,
+		         const core::Rulebook &rulebook = {});
 
 		// The game being managed.
-		const Game & game() const { return _game; }
+		const core::Game & game() const { return _game; }
 		// All of the players in the game.
-		const vector<Player> & players() const { return game().players(); }
+		const vector<core::Player> & players() const { return game().players(); }
 
 		// methods inherited from Game
 		//
-		bool contains(RoleRef r_ref) const { return _game.contains(r_ref); }
-		Role const& look_up(RoleRef r_ref) const { return _game.look_up(r_ref); }
+		bool contains(core::RoleRef r_ref) const { return _game.contains(r_ref); }
+		core::Role const& look_up(core::RoleRef r_ref) const { return _game.look_up(r_ref); }
 		//
 
 		// The game screen that's currently active.
@@ -75,47 +75,47 @@ namespace maf {
 
 		// Finds the player with the given ID.
 		// Throws an exception if no such player could be found.
-		const Player & find_player(Player::ID id) const;
+		const core::Player & find_player(core::Player::ID id) const;
 
 		// Finds the player whose name matches the given string, up to case.
 		// Throws an exception if no such player could be found.
-		const Player & find_player(string_view name) const;
+		const core::Player & find_player(string_view name) const;
 
 		/// Get the name of the given player.
-		string_view get_name(const Player & player) const;
+		string_view get_name(const core::Player & player) const;
 
 		/// Get the name of the player with the given ID.
-		string_view get_name(Player::ID id) const;
+		string_view get_name(core::Player::ID id) const;
 
-		void kick_player(Player::ID id);
+		void kick_player(core::Player::ID id);
 
-		void cast_lynch_vote(Player::ID voter_id, Player::ID target_id);
-		void clear_lynch_vote(Player::ID voter_id);
+		void cast_lynch_vote(core::Player::ID voter_id, core::Player::ID target_id);
+		void clear_lynch_vote(core::Player::ID voter_id);
 		void process_lynch_votes();
 
-		void stage_duel(Player::ID caster_id, Player::ID target_id);
+		void stage_duel(core::Player::ID caster_id, core::Player::ID target_id);
 
 		void begin_night();
 
-		void choose_fake_role(Player::ID player_id, Role::ID fake_role_id);
+		void choose_fake_role(core::Player::ID player_id, core::Role::ID fake_role_id);
 
-		void cast_mafia_kill(Player::ID caster_id, Player::ID target_id);
+		void cast_mafia_kill(core::Player::ID caster_id, core::Player::ID target_id);
 		void skip_mafia_kill();
 
-		void cast_kill(Player::ID caster_id, Player::ID target_id);
-		void skip_kill(Player::ID caster_id);
+		void cast_kill(core::Player::ID caster_id, core::Player::ID target_id);
+		void skip_kill(core::Player::ID caster_id);
 
-		void cast_heal(Player::ID caster_id, Player::ID target_id);
-		void skip_heal(Player::ID caster_id);
+		void cast_heal(core::Player::ID caster_id, core::Player::ID target_id);
+		void skip_heal(core::Player::ID caster_id);
 
-		void cast_investigate(Player::ID caster_id, Player::ID target_id);
-		void skip_investigate(Player::ID caster_id);
+		void cast_investigate(core::Player::ID caster_id, core::Player::ID target_id);
+		void skip_investigate(core::Player::ID caster_id);
 
-		void cast_peddle(Player::ID caster_id, Player::ID target_id);
-		void skip_peddle(Player::ID caster_id);
+		void cast_peddle(core::Player::ID caster_id, core::Player::ID target_id);
+		void skip_peddle(core::Player::ID caster_id);
 
 	private:
-		Game _game;
+		core::Game _game;
 
 		vector<string> _player_names;
 
@@ -132,17 +132,17 @@ namespace maf {
 		}
 
 		// Adds the specified event to the end of the log.
-		void log_player_given_role(Player const& player);
+		void log_player_given_role(core::Player const& player);
 		void log_time_changed();
-		void log_time_changed(Date date, Time time);
-		void log_obituary(Date date);
-		void log_town_meeting(const Player *recent_vote_caster = nullptr, const Player *recent_vote_target = nullptr);
-		void log_lynch_result(const Player *victim);
-		void log_duel_result(const Player &caster, const Player &target);
-		void log_ability_use(Player const& player);
+		void log_time_changed(core::Date date, core::Time time);
+		void log_obituary(core::Date date);
+		void log_town_meeting(const core::Player *recent_vote_caster = nullptr, const core::Player *recent_vote_target = nullptr);
+		void log_lynch_result(const core::Player *victim);
+		void log_duel_result(const core::Player &caster, const core::Player &target);
+		void log_ability_use(core::Player const& player);
 		void log_mafia_meeting(bool initial_meeting);
 		void log_boring_night();
-		void log_investigation_result(Investigation investigation);
+		void log_investigation_result(core::Investigation investigation);
 		void log_game_ended();
 		// Try to log that the night has ended, if this has actually happened.
 		void try_to_log_night_ended();

@@ -1,10 +1,10 @@
-#ifndef MAFIA_LOGIC_ROLE
-#define MAFIA_LOGIC_ROLE
+#ifndef MAFIA_CORE_ROLE_H
+#define MAFIA_CORE_ROLE_H
 
 #include "../util/stdlib.hpp"
 #include "../util/string.hpp"
 
-namespace maf {
+namespace maf::core {
 	class Rulebook;
 
 	enum class Alignment {

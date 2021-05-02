@@ -131,7 +131,7 @@ namespace maf {
 
 		// The rulebook currently being used: either the current game's rulebook
 		// if a game is in progress, or the setup screen's rulebook.
-		const Rulebook & active_rulebook() const;
+		const core::Rulebook & active_rulebook() const;
 
 	private:
 		StyledText _output{};

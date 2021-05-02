@@ -1,5 +1,5 @@
-#ifndef MAFIA_LOGIC_WILDCARD
-#define MAFIA_LOGIC_WILDCARD
+#ifndef MAFIA_CORE_WILDCARD_H
+#define MAFIA_CORE_WILDCARD_H
 
 #include <functional>
 #include <map>
@@ -10,10 +10,11 @@
 
 #include "role.hpp"
 
-namespace maf {
-	struct Rulebook;
+namespace maf::core {
+	class Rulebook;
 
-	struct Wildcard {
+	class Wildcard {
+	public:
 		enum class ID {
 			any,
 			village,
@@ -38,9 +39,7 @@ namespace maf {
 		Wildcard(ID id, const std::map<Role::ID, double> & weights);
 
 		/// The ID of the wildcard.
-		ID id() const {
-			return _id;
-		}
+		ID id() const { return _id; }
 
 		/// The alias of the wildcard.
 		///
@@ -70,9 +69,7 @@ namespace maf {
 		/// Whether the wildcard uses a role evaluator when picking a role.
 		///
 		/// If false, predefined weights are used instead.
-		bool uses_evaluator() const {
-			return static_cast<bool>(_evaluator);
-		}
+		bool uses_evaluator() const { return static_cast<bool>(_evaluator); }
 	};
 
 	/// The alias corresponding to the given wildcard ID.

@@ -31,16 +31,16 @@ namespace maf {
 
 		// Signifies that no copies of the given rolecard have been chosen.
 		struct Rolecard_unselected {
-			Rolecard_unselected(const Role &r): role{r} { }
+			Rolecard_unselected(const core::Role & r): role{r} { }
 
-			const Role & role;
+			const core::Role & role;
 		};
 
 		// Signifies that no copies of the given wildcard have been chosen.
 		struct Wildcard_unselected {
-			Wildcard_unselected(const Wildcard &w): wildcard{w} { }
+			Wildcard_unselected(const core::Wildcard & w): wildcard{w} { }
 
-			const Wildcard & wildcard;
+			const core::Wildcard & wildcard;
 		};
 
 		// Signifies that a set of commands couldn't be interpreted.
@@ -51,13 +51,13 @@ namespace maf {
 		string_view id() const final { return "setup"; }
 
 		// The rulebook to be used in the pending game.
-		const Rulebook & rulebook() const;
+		const core::Rulebook & rulebook() const;
 		// The names of the currently selected players.
 		vector<string> player_names() const;
 		// The IDs of the currently selected rolecards.
-		vector<Role::ID> rolecard_ids() const;
+		vector<core::Role::ID> rolecard_ids() const;
 		// The IDs of the currently selected wildcards.
-		vector<Wildcard::ID> wildcard_ids() const;
+		vector<core::Wildcard::ID> wildcard_ids() const;
 
 		// Checks if a player with the given name already exists.
 		bool has_player(string_view name) const;
@@ -115,10 +115,10 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		Rulebook _rulebook{};
+		core::Rulebook _rulebook{};
 		std::set<string> _player_names{};
-		std::map<Role::ID, std::size_t, Role_ID_full_name_compare> _role_ids{};
-		std::map<Wildcard::ID, std::size_t> _wildcard_ids{};
+		std::map<core::Role::ID, std::size_t, Role_ID_full_name_compare> _role_ids{};
+		std::map<core::Wildcard::ID, std::size_t> _wildcard_ids{};
 	};
 }
 

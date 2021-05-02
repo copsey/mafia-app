@@ -94,7 +94,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 		if (screen.id() == "time-changed") {
 			auto & specific_screen = static_cast<const maf::Time_changed &>(screen);
 
-			if (specific_screen.time == maf::Time::day) {
+			if (specific_screen.time == maf::core::Time::day) {
 				[_delegate playMusic:MafiaPlaylistItem_Daytime];
 			} else {
 				switch (arc4random_uniform(4)) {

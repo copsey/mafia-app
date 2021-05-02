@@ -4,6 +4,7 @@
 #include "../util/stdlib.hpp"
 #include "../util/string.hpp"
 
+#include "command.hpp"
 #include "format.hpp"
 
 namespace maf {

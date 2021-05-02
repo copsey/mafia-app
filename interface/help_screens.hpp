@@ -33,17 +33,17 @@ namespace maf {
 
 
 	struct Role_Info_Screen: Help_Screen {
-		Role_Info_Screen(Console & console, const Role &role):
+		Role_Info_Screen(Console & console, const core::Role & role):
 		Help_Screen{console}, _role_id{role.id()} { }
 
-		string_view id() const final { return alias(_role_id); }
+		string_view id() const final { return core::alias(_role_id); }
 
 		string_view txt_subdir() const override { return "txt/help/roles/"; }
 
 		void set_params(TextParams & params) const override;
 
 	private:
-		Role::ID _role_id;
+		core::Role::ID _role_id;
 	};
 
 
@@ -53,7 +53,7 @@ namespace maf {
 		// It's possible to provide an optional alignment, in which case only
 		// roles of that alignment will be listed.
 		List_Roles_Screen(Console & console,
-						  optional<Alignment> alignment = std::nullopt)
+						  optional<core::Alignment> alignment = std::nullopt)
 		: Help_Screen{console}, _filter_alignment{alignment} { }
 
 		string_view id() const final { return "list-roles"; }
@@ -61,12 +61,12 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		optional<Alignment> _filter_alignment;
+		optional<core::Alignment> _filter_alignment;
 
-		static bool _compare_by_name(Role const& role_1, Role const& role_2);
-		static TextParams _get_params(Role const& role);
+		static bool _compare_by_name(const core::Role & role_1, const core::Role & role_2);
+		static TextParams _get_params(const core::Role & role);
 
-		vector_of_refs<const Role> _get_roles() const;
+		vector_of_refs<const core::Role> _get_roles() const;
 	};
 
 
@@ -78,7 +78,7 @@ namespace maf {
 
 
 	struct Player_Info_Screen: Help_Screen {
-		Player_Info_Screen(Console & console, const Player & player)
+		Player_Info_Screen(Console & console, const core::Player & player)
 		: Help_Screen{console}, _player{player} { }
 
 		string_view id() const final { return "player-info"; }
@@ -86,7 +86,7 @@ namespace maf {
 		void set_params(TextParams & params) const override;
 
 	private:
-		const Player & _player;
+		const core::Player & _player;
 	};
 }
 

@@ -1,5 +1,5 @@
-#ifndef MAFIA_LOGIC_RULEBOOK
-#define MAFIA_LOGIC_RULEBOOK
+#ifndef MAFIA_CORE_RULEBOOK_H
+#define MAFIA_CORE_RULEBOOK_H
 
 #include <map>
 #include <string>
@@ -11,10 +11,11 @@
 #include "role.hpp"
 #include "wildcard.hpp"
 
-namespace maf {
+namespace maf::core {
 	class RoleRef;
 
-	struct Rulebook {
+	class Rulebook {
+	public:
 		/// Edition of the rules.
 		///
 		/// Although not used at the moment, this primarily exists for supporting
