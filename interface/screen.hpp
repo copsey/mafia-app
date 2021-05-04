@@ -1,7 +1,7 @@
-#ifndef MAFIA_SCREEN
-#define MAFIA_SCREEN
+#ifndef MAFIA_INTERFACE_SCREEN_H
+#define MAFIA_INTERFACE_SCREEN_H
 
-#include "../util/stdlib.hpp"
+#include "../util/memory.hpp"
 #include "../util/string.hpp"
 
 #include "command.hpp"

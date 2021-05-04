@@ -1,5 +1,5 @@
-#ifndef MAFIA_UTIL_ALGORITHM
-#define MAFIA_UTIL_ALGORITHM
+#ifndef MAFIA_UTIL_ALGORITHM_H
+#define MAFIA_UTIL_ALGORITHM_H
 
 #include <algorithm>
 #include <functional>
@@ -15,38 +15,38 @@ namespace maf::util {
 		using std::begin, std::end;
 		return std::all_of(begin(c), end(c), p);
 	}
-	
+
 	// Check if `p(t)` is true for at least one `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool any_of(Cont const& c, Pred p) {
 		using std::begin, std::end;
 		return std::any_of(begin(c), end(c), p);
 	}
-	
+
 	// Check if `p(t)` is false for all `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool none_of(Cont const& c, Pred p) {
 		using std::begin, std::end;
 		return std::none_of(begin(c), end(c), p);
 	}
-	
+
 	// Check if `t` is equal to any values in the range `[i,j)`.
 	template <typename Iter, typename T>
 	bool contains(Iter i, Iter j, const T & t) {
 		for ( ; i != j; ++i) {
 			if (*i == t) return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	// Check if `t` is equal to any elements in `c`.
 	template <typename Cont, typename T>
 	bool contains(const Cont & c, const T & t) {
 		using std::begin, std::end;
 		return util::contains(begin(c), end(c), t);
 	}
-	
+
 	// Check if the two sequences `[i1,j1)` and `[i2,j2)` match,
 	// using `eq` for comparison of values.
 	//
@@ -66,10 +66,10 @@ namespace maf::util {
 			if (i2 == j2) return false;
 			if (!eq(*i1, *i2)) return false;
 		}
-		
+
 		return i2 == j2;
 	}
-	
+
 	// Same as `matches(i1, j1, i2, j2, eq)`, where
 	//   `i1 == std::begin(c1)`, `j1 == std::end(c1)`,
 	//   `i2 == std::begin(c2)`, `j2 == std::end(c2)`.
@@ -78,7 +78,7 @@ namespace maf::util {
 		using std::begin, std::end;
 		return util::matches(begin(c1), end(c1), begin(c2), end(c2), eq);
 	}
-	
+
 	// Check if the two sequences `[i1,j1)` and `[i2,j2)` are equivalent.
 	// Comparison of values is made using `==`.
 	//
@@ -96,11 +96,11 @@ namespace maf::util {
 	bool equivalent(Iter1 i1, Iter1 j1, Iter2 i2, Iter2 j2) {
 		using T1 = decltype(*i1);
 		using T2 = decltype(*i2);
-		
+
 		auto eq = [](const T1 & t1, const T2 & t2) { return t1 == t2; };
 		return util::matches(i1, j1, i2, j2, eq);
 	}
-	
+
 	// Same as `equivalent(i1, j1, i2, j2)`, where
 	//   `i1 == std::begin(c1)`, `j1 == std::end(c1)`,
 	//   `i2 == std::begin(c2)`, `j2 == std::end(c2)`.
@@ -109,7 +109,7 @@ namespace maf::util {
 		using std::begin, std::end;
 		return util::equivalent(begin(c1), end(c1), begin(c2), end(c2));
 	}
-	
+
 	// Find the first position `i` in `c` such that `*i == t`.
 	//
 	// If no such position exists, `std::end(c)` is returned instead.
@@ -118,7 +118,7 @@ namespace maf::util {
 		using std::begin, std::end;
 		return std::find(begin(c), end(c), t);
 	}
-	
+
 	// Find the first position `i` in `c` such that `p(*i)` is true.
 	//
 	// If no such position exists, `std::end(c)` is returned instead.
@@ -148,7 +148,7 @@ namespace maf::util {
 		auto eq_t = [&t](auto&& v) { return v == t; };
 		return util::count_if(c, eq_t);
 	}
-	
+
 	// Find the position of the largest element in `c` with respect to `<`.
 	//
 	// If `c` is empty, `std::end(c)` is returned instead.
@@ -157,7 +157,7 @@ namespace maf::util {
 		using std::begin, std::end;
 		return std::max_element(begin(c), end(c));
 	}
-	
+
 	// Find the position of the largest element in `c` with respect to `lt`.
 	//
 	// If `c` is empty, `std::end(c)` is returned instead.
@@ -175,7 +175,7 @@ namespace maf::util {
 		auto last = end(cont);
 		std::copy(first, last, out);
 	}
-	
+
 	// Replace every element in `cont` with a copy of `t`.
 	template <typename Cont, typename T>
 	void fill(Cont & cont, const T & t) {
@@ -240,14 +240,14 @@ namespace maf::util {
 
 		return util::transformed_copy(cont, get_cref);
 	}
-	
+
 	// Remove each element from `c` that is equal to `t`.
 	template <typename Cont, typename T>
 	void remove(Cont & c, const T & t) {
 		using std::begin, std::end;
 		c.erase(std::remove(begin(c), end(c), t), end(c));
 	}
-	
+
 	// Remove each element `t` from `c` for which `p(t)` is true.
 	template <typename Cont, typename Pred>
 	void remove_if(Cont & c, Pred p) {
@@ -299,21 +299,21 @@ namespace maf::util {
 		using T_Ref = std::reference_wrapper<const T>;
 		return util::filter_into<Container<T_Ref>>(cont, pred);
 	}
-	
+
 	// Sort the elements in `c` by `<`.
 	template <typename Cont>
 	void sort(Cont & c) {
 		using std::begin, std::end;
 		std::sort(begin(c), end(c));
 	}
-	
+
 	// Sort the elements in `c` by `lt`.
 	template <typename Cont, typename Comp>
 	void sort(Cont & c, Comp lt) {
 		using std::begin, std::end;
 		std::sort(begin(c), end(c), lt);
 	}
-	
+
 	// Reverse the order of elements in `c`.
 	template <typename Cont>
 	void reverse(Cont & c) {

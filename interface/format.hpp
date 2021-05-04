@@ -2,9 +2,11 @@
 #define MAFIA_FORMAT
 
 #include <map>
-#include "../util/string.hpp"
-#include "../util/stdlib.hpp"
+
 #include "../util/misc.hpp"
+#include "../util/string.hpp"
+#include "../util/variant.hpp"
+#include "../util/vector.hpp"
 
 namespace maf {
 	// Create a new string based on `str_view`, but with each escapable

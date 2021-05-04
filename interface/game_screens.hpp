@@ -1,8 +1,9 @@
-#ifndef MAFIA_GAME_SCREENS
-#define MAFIA_GAME_SCREENS
+#ifndef MAFIA_GAME_SCREENS_H
+#define MAFIA_GAME_SCREENS_H
 
-#include "../util/stdlib.hpp"
+#include "../util/memory.hpp"
 #include "../util/string.hpp"
+#include "../util/vector.hpp"
 
 #include "../core/core.hpp"
 

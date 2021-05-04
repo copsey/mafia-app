@@ -1,4 +1,5 @@
 #include "../util/fstream.hpp"
+#include "../util/misc.hpp"
 
 #include "command.hpp"
 #include "console.hpp"

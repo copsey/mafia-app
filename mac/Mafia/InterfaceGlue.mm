@@ -32,8 +32,8 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 }
 
 - (IBAction)readInput:(id)sender {
-	std::string_view str = {self.input.stringValue.UTF8String};
-	
+	maf::string_view str = {self.input.stringValue.UTF8String};
+
 	if (_console.input(str)) {
 		[self showOutput];
 	} else {
@@ -59,10 +59,10 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 - (void)showOutput {
 	NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] init];
 	bool clearWhitespaceFromFront = false;
-	
+
 	for (auto & styled_str : _console.output()) {
 		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
-		
+
 		// Strip whitespace from front if last style was "title".
 		if (clearWhitespaceFromFront) {
 			NSCharacterSet *characterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
@@ -74,7 +74,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 			}
 			clearWhitespaceFromFront = false;
 		}
-		
+
 		if (styled_str.attributes.semantics == maf::StyledString::attributes_t::semantics_option::title) {
 			_output.window.title = string;
 			clearWhitespaceFromFront = true;
@@ -84,9 +84,9 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 			[attributedString appendAttributedString:newString];
 		}
 	}
-	
+
 	self.output.textStorage.attributedString = attributedString;
-	
+
 	// Play some music.
 	if (_console.has_game()) {
 		const maf::Game_screen & screen = _console.game_log().active_screen();
@@ -129,11 +129,11 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 	NSAlert *alert = [[NSAlert alloc] init];
 	NSMutableString *informativeText = [NSMutableString string];
 	bool clearWhitespaceFromFront = false;
-	
+
 	for (auto & styled_str : _console.error_message()) {
 		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
 		auto attributes = styled_str.attributes;
-		
+
 		// Strip whitespace from front if last style was "title".
 		if (clearWhitespaceFromFront) {
 			NSCharacterSet *characterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
@@ -145,7 +145,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 			}
 			clearWhitespaceFromFront = false;
 		}
-		
+
 		if (attributes.semantics == maf::StyledString::attributes_t::semantics_option::title) {
 			alert.messageText = string;
 			clearWhitespaceFromFront = true;
@@ -157,7 +157,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 			[informativeText appendString:string];
 		}
 	}
-	
+
 	alert.informativeText = informativeText;
 	[alert runModal];
 }

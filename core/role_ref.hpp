@@ -1,7 +1,8 @@
 #ifndef MAFIA_CORE_ROLE_REF_H
 #define MAFIA_CORE_ROLE_REF_H
 
-#include "../util/stdlib.hpp"
+#include "../util/variant.hpp"
+
 #include "role.hpp"
 
 namespace maf::core {
@@ -37,8 +38,10 @@ namespace maf::core {
 		Role const& resolve(Game const& game);
 
 	private:
-		using param_t = variant<Role::ID,     // ID in a rulebook
-								string_view>; // role alias
+		using param_t = variant<
+			Role::ID,   // ID in a rulebook
+			string_view // role alias
+		>;
 
 		param_t _param;
 	};

@@ -1,4 +1,6 @@
 #include "../util/algorithm.hpp"
+#include "../util/misc.hpp"
+#include "../util/parse.hpp"
 #include "../util/string.hpp"
 
 #include "command.hpp"
@@ -252,10 +254,10 @@ namespace maf {
 			console().store_game(move(new_game));
 		} else if (commands_match(commands, {"preset", ""})) {
 			int i;
-			auto& str = commands[1];
+			string_view str = commands[1];
 
-			if (auto result = std::from_chars(std::begin(str), std::end(str), i);
-				result.ec == std::errc{})
+			if (auto result = util::from_chars(str, i);
+			    result.ec == std::errc{})
 			{
 				auto new_game = begin_preset(i);
 				console().store_game(move(new_game));

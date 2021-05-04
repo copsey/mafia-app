@@ -6,7 +6,7 @@
 #include <random>
 
 #include "../util/misc.hpp"
-#include "../util/stdlib.hpp"
+#include "../util/vector.hpp"
 
 #include "role.hpp"
 

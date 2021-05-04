@@ -2,11 +2,9 @@
 #define MAFIA_CORE_RULEBOOK_H
 
 #include <map>
-#include <string>
-#include <vector>
 
 #include "../util/algorithm.hpp"
-#include "../util/stdlib.hpp"
+#include "../util/vector.hpp"
 
 #include "role.hpp"
 #include "wildcard.hpp"

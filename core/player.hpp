@@ -1,9 +1,11 @@
 #ifndef MAFIA_CORE_PLAYER_H
 #define MAFIA_CORE_PLAYER_H
 
-#include "../util/stdlib.hpp"
-#include "time.hpp"
+#include "../util/memory.hpp"
+#include "../util/vector.hpp"
+
 #include "role.hpp"
+#include "time.hpp"
 
 namespace maf::core {
 	class Player {

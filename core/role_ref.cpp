@@ -10,7 +10,7 @@
 namespace maf::core {
 	bool RoleRef::member_of(const Rulebook & rulebook) {
 		return std::visit([&](auto&& x) {
-			using T = std::decay_t<decltype(x)>;
+			using T = decay<decltype(x)>;
 			if constexpr(is_same<T, Role::ID>) {
 				return std::any_of(rulebook.roles_begin(), rulebook.roles_end(),
 								[&](auto& role){ return role.id() == x; });
@@ -27,7 +27,7 @@ namespace maf::core {
 
 	const Role & RoleRef::resolve(const Rulebook & rulebook) {
 		auto p = std::visit([&](auto&& x) {
-			using T = std::decay_t<decltype(x)>;
+			using T = decay<decltype(x)>;
 			if constexpr(is_same<T, Role::ID>) {
 				auto p = std::find_if(rulebook.roles_begin(), rulebook.roles_end(),
 									[&](auto& role){ return role.id() == x; });

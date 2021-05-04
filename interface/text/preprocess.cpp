@@ -1,11 +1,15 @@
-#include "../format.hpp"
 #include "../../util/algorithm.hpp"
 #include "../../util/char.hpp"
+#include "../../util/memory.hpp"
 #include "../../util/misc.hpp"
+#include "../../util/optional.hpp"
 #include "../../util/parse.hpp"
-#include "../../util/stdlib.hpp"
 #include "../../util/string.hpp"
 #include "../../util/type_traits.hpp"
+#include "../../util/variant.hpp"
+#include "../../util/vector.hpp"
+
+#include "../format.hpp"
 
 namespace maf::_preprocess_text_impl {
 	using iterator = string_view::iterator;
@@ -631,8 +635,8 @@ namespace maf::_preprocess_text_impl {
 
 
 	inline void substitution::write(string & output, TextParams const& params) const {
-		auto print = [&](auto && arg) {
-			using T = std::decay_t<decltype(arg)>;
+		auto print = [&](auto&& arg) {
+			using T = decay<decltype(arg)>;
 
 			if constexpr (is_same<T, int>) {
 				output += std::to_string(arg);
@@ -1144,7 +1148,7 @@ maf::index maf::preprocess_text_error::pos() const {
 	using namespace _preprocess_text_impl;
 
 	auto get_iter = [&](auto&& arg) {
-		using T = std::decay_t<decltype(arg)>;
+		using T = decay<decltype(arg)>;
 
 		static_assert(is_same<T, iterator> || is_same<T, string_view>,
 		"Unexpected type for 'info' parameter in 'preprocess_text_error'");

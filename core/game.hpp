@@ -1,8 +1,9 @@
 #ifndef MAFIA_CORE_GAME_H
 #define MAFIA_CORE_GAME_H
 
+#include "../util/misc.hpp"
 #include "../util/span.hpp"
-#include "../util/stdlib.hpp"
+#include "../util/vector.hpp"
 
 #include "player.hpp"
 #include "role_ref.hpp"

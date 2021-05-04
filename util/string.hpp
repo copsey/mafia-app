@@ -1,5 +1,5 @@
-#ifndef MAFIA_UTIL_STRING
-#define MAFIA_UTIL_STRING
+#ifndef MAFIA_UTIL_STRING_H
+#define MAFIA_UTIL_STRING_H
 
 #include <string>
 #include <string_view>
@@ -8,10 +8,11 @@
 #include "misc.hpp"
 
 namespace maf {
-	using std::literals::operator""sv;
+	using std::string;
+	using std::string_view;
 
-	using string = std::string;
-	using string_view = std::string_view;
+	using std::literals::operator""s;
+	using std::literals::operator""sv;
 }
 
 namespace maf::util {

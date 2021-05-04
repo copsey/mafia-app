@@ -1,17 +1,15 @@
-#ifndef MAFIA_CONSOLE_H
-#define MAFIA_CONSOLE_H
+#ifndef MAFIA_INTERFACE_CONSOLE_H
+#define MAFIA_INTERFACE_CONSOLE_H
 
-#include <array>
-
-#include "../util/stdlib.hpp"
-#include "../util/type_traits.hpp"
+#include "../util/memory.hpp"
+#include "../util/misc.hpp"
 
 #include "command.hpp"
+#include "format.hpp"
 #include "game_log.hpp"
 #include "help_screens.hpp"
 #include "questions.hpp"
 #include "setup_screen.hpp"
-#include "format.hpp"
 
 namespace maf {
 	// Signifies that no preset is defined with index i.

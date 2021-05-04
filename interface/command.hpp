@@ -1,12 +1,9 @@
-#ifndef MAFIA_INTERFACE_COMMAND
-#define MAFIA_INTERFACE_COMMAND
-
-#include <string_view>
-#include <vector>
+#ifndef MAFIA_INTERFACE_COMMAND_H
+#define MAFIA_INTERFACE_COMMAND_H
 
 #include "../util/algorithm.hpp"
-#include "../util/stdlib.hpp"
 #include "../util/string.hpp"
+#include "../util/vector.hpp"
 
 namespace maf {
 	// A sequence of read-only strings, treated as a set of commands.
@@ -40,22 +37,22 @@ namespace maf {
 	template <typename Iterator>
 	CmdSequence parse_input(Iterator begin, Iterator end) {
 		auto is_space = [](char ch) { return ch == ' ' || ch == '\t'; };
-		
+
 		CmdSequence commands;
-		
+
 		for (auto i = std::find_if_not(begin, end, is_space); i != end; ) {
 			auto j = std::find_if(i, end, is_space);
-			
+
 			// Here we are guaranteed that i != j, since
 			//  1) i points to a non-space character, and
 			//  2) either j points to a space or j == end.
 
 			auto cmd = util::make_string_view(i, j);
 			commands.push_back(cmd);
-			
+
 			i = std::find_if_not(j, end, is_space);
 		}
-		
+
 		return commands;
 	}
 

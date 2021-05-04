@@ -1,11 +1,13 @@
 #ifndef MAFIA_SETUP_SCREEN_H
 #define MAFIA_SETUP_SCREEN_H
 
-#include <memory>
-#include <ostream>
+#include <map>
 #include <set>
 
-#include "../util/stdlib.hpp"
+#include "../util/memory.hpp"
+#include "../util/string.hpp"
+#include "../util/vector.hpp"
+
 #include "../core/core.hpp"
 
 #include "game_log.hpp"

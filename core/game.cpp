@@ -65,15 +65,16 @@ namespace maf::core {
 	}
 
 	std::size_t Game::num_players_left() const {
-		return util::count_if(_players, std::mem_fn(&Player::is_present));
+		auto is_present = [](auto& player) { return player.is_present(); };
+		return util::count_if(_players, is_present);
 	}
 
 	std::size_t Game::num_players_left(Alignment alignment) const {
-		auto pred = [alignment](Player const& pl) {
-			return pl.is_present() && pl.alignment() == alignment;
+		auto is_member_of_alignment = [alignment](auto& player) {
+			return player.is_present() && player.alignment() == alignment;
 		};
 
-		return util::count_if(_players, pred);
+		return util::count_if(_players, is_member_of_alignment);
 	}
 
 	void Game::kick_player(Player::ID id) {

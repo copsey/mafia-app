@@ -1,12 +1,10 @@
 #ifndef MAFIA_GAME_LOG_H
 #define MAFIA_GAME_LOG_H
 
-#include <memory>
-#include <string_view>
-
+#include "../util/memory.hpp"
 #include "../util/misc.hpp"
-#include "../util/stdlib.hpp"
 #include "../util/type_traits.hpp"
+#include "../util/vector.hpp"
 
 #include "../core/core.hpp"
 

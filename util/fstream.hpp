@@ -7,9 +7,9 @@
 #include "string.hpp"
 
 namespace maf {
-    using ifstream = std::ifstream;
-    using ofstream = std::ofstream;
-    using fstream  = std::fstream;
+    using std::ifstream;
+    using std::ofstream;
+    using std::fstream;
 }
 
 namespace maf::util {

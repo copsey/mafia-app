@@ -1,17 +1,15 @@
 #ifndef MAFIA_INTERFACE_QUESTIONS
 #define MAFIA_INTERFACE_QUESTIONS
 
-#include "../util/stdlib.hpp"
-
 #include "screen.hpp"
 
 namespace maf {
 	// TODO: Place all Questions into separate 'question' child namespace of 'maf'.
 
-	 
+
 	struct Question: Screen {
 		using Screen::Screen;
-		
+
 		string_view txt_subdir() const override { return "txt/questions/"; }
 	};
 

@@ -1,7 +1,8 @@
 #ifndef MAFIA_NAMES_H
 #define MAFIA_NAMES_H
 
-#include "../util/stdlib.hpp"
+#include "../util/string.hpp"
+
 #include "../core/core.hpp"
 
 namespace maf {

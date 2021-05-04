@@ -1,5 +1,5 @@
-#ifndef MAFIA_UTIL_CHAR
-#define MAFIA_UTIL_CHAR
+#ifndef MAFIA_UTIL_CHAR_H
+#define MAFIA_UTIL_CHAR_H
 
 #include <cctype>
 

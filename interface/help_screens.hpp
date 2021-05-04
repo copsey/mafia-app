@@ -1,13 +1,12 @@
 #ifndef MAFIA_HELP_SCREENS_H
 #define MAFIA_HELP_SCREENS_H
 
-#include <optional>
-#include <ostream>
+#include "../util/optional.hpp"
+#include "../util/vector.hpp"
 
-#include "../util/stdlib.hpp"
 #include "../core/core.hpp"
-#include "format.hpp"
 
+#include "format.hpp"
 #include "game_log.hpp"
 #include "game_screens.hpp"
 #include "screen.hpp"
@@ -53,7 +52,7 @@ namespace maf {
 		// It's possible to provide an optional alignment, in which case only
 		// roles of that alignment will be listed.
 		List_Roles_Screen(Console & console,
-						  optional<core::Alignment> alignment = std::nullopt)
+						  optional<core::Alignment> alignment = nullopt)
 		: Help_Screen{console}, _filter_alignment{alignment} { }
 
 		string_view id() const final { return "list-roles"; }
