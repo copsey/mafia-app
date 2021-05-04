@@ -6,6 +6,7 @@
 namespace maf {
 	using std::istream;
 	using std::ostream;
+	using std::iostream;
 }
 
 #endif
