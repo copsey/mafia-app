@@ -38,6 +38,8 @@ namespace maf {
 int main() {
 	using namespace maf;
 
+	std::ios_base::sync_with_stdio(false);
+
 	Console console{};
 	print_output(console);
 
