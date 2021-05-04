@@ -39,7 +39,7 @@ namespace maf {
 
 		// Fill `params` with this screen's text parameters. Does nothing by
 		// default.
-		virtual void set_params(TextParams & params) const { };
+		virtual void set_params(TextParams & params) const {};
 
 		// Apply `preprocess_text` to the contents of the ".txt" file for this
 		// screen, and write the result to `output`.
@@ -56,7 +56,7 @@ namespace maf {
 		virtual void do_commands(const CmdSequence & commands);
 
 		// An error thrown when a screen fails to handle a set of commands.
-		struct Bad_commands { };
+		struct Bad_commands {};
 
 	private:
 		not_null<Console *> _console;

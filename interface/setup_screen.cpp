@@ -8,7 +8,6 @@
 #include "console.hpp"
 #include "names.hpp"
 #include "setup_screen.hpp"
-#include <charconv>
 
 namespace maf {
 	struct Game_parameters {
@@ -18,7 +17,7 @@ namespace maf {
 		core::Rulebook rulebook;
 	};
 
-	const array<Game_parameters, 3> _presets = {
+	const array _presets{
 		Game_parameters{
 			{"Augustus", "Brutus", "Claudius", "Drusilla"},
 			{

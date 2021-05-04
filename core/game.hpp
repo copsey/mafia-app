@@ -331,7 +331,7 @@ namespace maf::core {
 	private:
 		vector<Player> _players{};
 		Rulebook _rulebook;
-		vector<std::reference_wrapper<const Role>> _random_roles{};
+		vector_of_refs<const Role> _random_roles{};
 
 		bool _has_ended{false};
 
