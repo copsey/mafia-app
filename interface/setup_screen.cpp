@@ -1,4 +1,5 @@
 #include "../util/algorithm.hpp"
+#include "../util/array.hpp"
 #include "../util/misc.hpp"
 #include "../util/parse.hpp"
 #include "../util/string.hpp"
@@ -17,7 +18,7 @@ namespace maf {
 		core::Rulebook rulebook;
 	};
 
-	const std::array<Game_parameters, 3> _presets = {
+	const array<Game_parameters, 3> _presets = {
 		Game_parameters{
 			{"Augustus", "Brutus", "Claudius", "Drusilla"},
 			{
