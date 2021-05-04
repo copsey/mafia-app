@@ -47,7 +47,7 @@ int main() {
 		std::cout << ">> ";
 
 		string input;
-		if (!std::getline(std::cin, input)) break;
+		if (!getline(std::cin, input)) break;
 
 		if (input == "quit" || input == "exit") {
 			quit = true;

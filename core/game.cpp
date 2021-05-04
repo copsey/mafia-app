@@ -82,7 +82,7 @@ namespace maf::core {
 
 		Player& player = find_player(id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Kick_failed{player, Reason::game_ended};
 		if (!is_day())
 			throw Kick_failed{player, Reason::bad_timing};
@@ -127,7 +127,7 @@ namespace maf::core {
 		Player& voter = find_player(voter_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Lynch_vote_failed{voter, &target, Reason::game_ended};
 		if (!lynch_can_occur())
 			throw Lynch_vote_failed{voter, &target, Reason::bad_timing};
@@ -146,7 +146,7 @@ namespace maf::core {
 
 		Player& voter = find_player(voter_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Lynch_vote_failed{voter, nullptr, Reason::game_ended};
 		if (!lynch_can_occur())
 			throw Lynch_vote_failed{voter, nullptr, Reason::bad_timing};
@@ -159,7 +159,7 @@ namespace maf::core {
 	const Player * Game::process_lynch_votes() {
 		using Reason = Lynch_failed::Reason;
 
-		if (game_has_ended())
+		if (ended())
 			throw Lynch_failed{Reason::game_ended};
 		if (!lynch_can_occur())
 			throw Lynch_failed{Reason::bad_timing};
@@ -183,7 +183,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Duel_failed(caster, target, Reason::game_ended);
 		if (!is_day())
 			throw Duel_failed(caster, target, Reason::bad_timing);
@@ -193,7 +193,7 @@ namespace maf::core {
 			throw Duel_failed(caster, target, Reason::target_is_not_present);
 		if (caster == target)
 			throw Duel_failed(caster, target, Reason::caster_is_target);
-		if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel)
+		if (!caster.role().has_ability(Ability::ID::duel))
 			throw Duel_failed(caster, target, Reason::caster_has_no_duel);
 
 		double sum = caster.duel_strength() + target.duel_strength();
@@ -225,7 +225,7 @@ namespace maf::core {
 	void Game::begin_night() {
 		using Reason = Begin_night_failed::Reason;
 
-		if (game_has_ended())
+		if (ended())
 			throw Begin_night_failed{Reason::game_ended};
 		if (is_night())
 			throw Begin_night_failed{Reason::already_night};
@@ -265,7 +265,7 @@ namespace maf::core {
 		Player& player = find_player(player_id);
 		const Role& fake_role = _rulebook.look_up(fake_role_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Choose_fake_role_failed{player, fake_role, Reason::game_ended};
 		if (!is_night())
 			throw Choose_fake_role_failed{player, fake_role, Reason::bad_timing};
@@ -285,7 +285,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Mafia_kill_failed{caster, target, Reason::game_ended};
 		if (!is_night())
 			throw Mafia_kill_failed{caster, target, Reason::bad_timing};
@@ -308,7 +308,7 @@ namespace maf::core {
 	}
 
 	void Game::skip_mafia_kill() {
-		if (game_has_ended())
+		if (ended())
 			throw Skip_failed{};
 		if (!is_night())
 			throw Skip_failed{};
@@ -330,7 +330,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Kill_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_kill))
 			throw Kill_failed{caster, target, Reason::caster_cannot_kill};
@@ -352,7 +352,7 @@ namespace maf::core {
 
 		Player& caster = find_player(caster_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Skip_failed{};
 		if (util::none_of(caster.compulsory_abilities(), is_kill))
 			throw Skip_failed{};
@@ -372,7 +372,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Heal_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_heal))
 			throw Heal_failed{caster, target, Reason::caster_cannot_heal};
@@ -394,7 +394,7 @@ namespace maf::core {
 
 		Player& caster = find_player(caster_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Skip_failed{};
 		if (util::none_of(caster.compulsory_abilities(), is_heal))
 			throw Skip_failed{};
@@ -414,7 +414,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Investigate_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_investigate))
 			throw Investigate_failed{caster, target, Reason::caster_cannot_investigate};
@@ -436,7 +436,7 @@ namespace maf::core {
 
 		Player& caster = find_player(caster_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Skip_failed{};
 		if (util::none_of(caster.compulsory_abilities(), is_investigate))
 			throw Skip_failed{};
@@ -456,7 +456,7 @@ namespace maf::core {
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Peddle_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_peddle))
 			throw Peddle_failed{caster, target, Reason::caster_cannot_peddle};
@@ -476,7 +476,7 @@ namespace maf::core {
 
 		Player& caster = find_player(caster_id);
 
-		if (game_has_ended())
+		if (ended())
 			throw Skip_failed{};
 
 		if (util::none_of(caster.compulsory_abilities(), is_peddle))
@@ -588,7 +588,7 @@ namespace maf::core {
 	}
 
 	bool Game::try_to_end() {
-		if (_has_ended) return true;
+		if (_ended) return true;
 
 		std::size_t num_players_left = 0;
 		std::size_t num_village_left = 0;
@@ -660,7 +660,7 @@ namespace maf::core {
 			if (has_won) player.win(); else player.lose();
 		}
 
-		_has_ended = true;
+		_ended = true;
 		return true;
 	}
 }

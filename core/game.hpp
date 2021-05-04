@@ -326,14 +326,14 @@ namespace maf::core {
 		}
 
 		// Whether or not the game has ended.
-		bool game_has_ended() const { return _has_ended; }
+		bool ended() const { return _ended; }
 
 	private:
 		vector<Player> _players{};
 		Rulebook _rulebook;
 		vector_of_refs<const Role> _random_roles{};
 
-		bool _has_ended{false};
+		bool _ended{false};
 
 		Date _date{0};
 		Time _time{Time::day};

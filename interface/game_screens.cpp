@@ -133,11 +133,13 @@ namespace maf {
 		if (_deaths_index >= 0) {
 			const core::Player & deceased = _deaths[_deaths_index];
 			params["deceased"] = escaped_name(deceased);
-			params["deceased.is_haunted"] = deceased.is_haunted();
 
 			if (deceased.is_haunted()) {
 				const core::Player & ghost = *deceased.haunter();
+				params["deceased.is_haunted"] = true;
 				params["ghost"] = escaped_name(ghost);
+			} else {
+				params["deceased.is_haunted"] = false;
 			}
 		}
 
@@ -204,10 +206,11 @@ namespace maf {
 		if (_lynch_can_occur) {
 			auto lynch_vote = player.lynch_vote();
 
-			params["player.has_voted"] = (lynch_vote != nullptr);
-
 			if (lynch_vote) {
+				params["player.has_voted"] = true;
 				params["player.vote"] = escaped_name(*lynch_vote);
+			} else {
+				params["player.has_voted"] = false;
 			}
 		}
 
@@ -221,9 +224,11 @@ namespace maf {
 		params["recent_abstain"] = (_recent_vote_caster && !_recent_vote_target);
 
 		if (_lynch_can_occur) {
-			params["lynch_target.exists"] = (_next_lynch_victim != nullptr);
 			if (_next_lynch_victim) {
+				params["lynch_target.exists"] = true;
 				params["lynch_target"] = escaped_name(*_next_lynch_victim);
+			} else {
+				params["lynch_target.exists"] = false;
 			}
 		}
 
@@ -267,11 +272,13 @@ namespace maf {
 
 		if (victim) {
 			params["victim"] = escaped_name(*victim);
-			params["victim.role.hidden"] = (victim_role == nullptr);
 
 			if (victim_role) {
 				params["victim.role"] = escaped_name(*victim_role);
+				params["victim.role.hidden"] = false;
 				params["victim.role.is_troll"] = victim_role->is_troll();
+			} else {
+				params["victim.role.hidden"] = true;
 			}
 		}
 	}
@@ -314,11 +321,13 @@ namespace maf {
 	void maf::Choose_fake_role::set_params(TextParams & params) const {
 		params["finished"] = _finished;
 		params["player"] = escaped_name(*_player);
-		params["fake_role.chosen"] = (_fake_role != nullptr);
 
 		if (_fake_role) {
 			params["fake_role"] = escaped_name(*_fake_role);
 			params["fake_role.alias"] = escaped(_fake_role->alias());
+			params["fake_role.chosen"] = true;
+		} else {
+			params["fake_role.chosen"] = false;
 		}
 	}
 

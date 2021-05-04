@@ -30,7 +30,7 @@ namespace maf {
 			log_player_given_role(player);
 		}
 
-		if (_game.game_has_ended()) {
+		if (_game.ended()) {
 			log_game_ended();
 			return;
 		}
@@ -133,11 +133,12 @@ namespace maf {
 		const core::Player & player = find_player(id);
 		_append_screen<Player_kicked>(player);
 
-		if (_game.game_has_ended()) {
+		if (_game.ended()) {
 			log_game_ended();
-		} else {
-			log_town_meeting();
+			return;
 		}
+
+		log_town_meeting();
 	}
 
 	void Game_log::cast_lynch_vote(core::Player::ID voter_id, core::Player::ID target_id) {
@@ -159,11 +160,12 @@ namespace maf {
 		const core::Player * victim = _game.process_lynch_votes();
 		log_lynch_result(victim);
 
-		if (_game.game_has_ended()) {
+		if (_game.ended()) {
 			log_game_ended();
-		} else {
-			log_town_meeting();
+			return;
 		}
+
+		log_town_meeting();
 	}
 
 	void Game_log::stage_duel(core::Player::ID caster_id, core::Player::ID target_id) {
@@ -173,11 +175,12 @@ namespace maf {
 		_game.stage_duel(caster.id(), target.id());
 		log_duel_result(caster, target);
 
-		if (_game.game_has_ended()) {
+		if (_game.ended()) {
 			log_game_ended();
-		} else {
-			log_town_meeting();
+			return;
 		}
+
+		log_town_meeting();
 	}
 
 	void maf::Game_log::begin_night() {
@@ -342,26 +345,25 @@ namespace maf {
 	}
 
 	void Game_log::try_to_log_night_ended() {
-		if (_game.time() == core::Time::day) {
-			auto date = _game.date();
+		if (_game.is_night()) return;
 
-			for (auto & inv: _game.investigations()) {
-				if (inv.date + 1 == date) { // only show results from previous night
-					log_investigation_result(inv);
-				}
-			}
+		auto date = _game.date();
 
-			log_time_changed();
-
-			if (_game.date() > 1) {
-				log_obituary(_game.date() - 1);
-			}
-
-			if (_game.game_has_ended()) {
-				log_game_ended();
-			} else {
-				log_town_meeting();
-			}
+		for (auto&& inv: _game.investigations()) {
+			if (inv.date + 1 == date) // only show results from previous night
+				log_investigation_result(inv);
 		}
+
+		log_time_changed();
+
+		if (_game.date() > 1)
+			log_obituary(_game.date() - 1);
+
+		if (_game.ended()) {
+			log_game_ended();
+			return;
+		}
+
+		log_town_meeting();
 	}
 }

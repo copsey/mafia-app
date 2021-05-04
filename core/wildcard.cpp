@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include "../util/algorithm.hpp"
 #include "../util/map.hpp"
 #include "../util/random.hpp"
 
@@ -11,10 +12,10 @@ namespace maf::core {
 	Wildcard::Wildcard(ID id, const std::map<Role::ID, double> & weights) :
 		_id{id},
 		_role_ids{util::key_begin(weights), util::key_end(weights)},
-		_dist{util::item_begin(weights), util::item_end(weights)}
+		_dist{}
 	{
-		auto is_negative = [](double w) { return w < 0; };
-		auto is_zero = [](double w) { return w == 0; };
+		auto is_zero = [](auto&& x) { return x == 0; };
+		auto is_negative = [](auto&& x) { return x < 0; };
 
 		if (std::any_of(util::item_begin(weights), util::item_end(weights), is_negative)) {
 			string msg = "A wildcard with alias ";
@@ -31,6 +32,8 @@ namespace maf::core {
 
 			throw std::invalid_argument{msg};
 		}
+
+		_dist = {util::item_begin(weights), util::item_end(weights)};
 	}
 
 	string_view Wildcard::alias() const {
@@ -47,12 +50,13 @@ namespace maf::core {
 		} else {
 			auto probs = _dist.probabilities();
 
-			for (std::size_t i{0}; i < _role_ids.size(); ++i) {
-				auto& r = rulebook.look_up(_role_ids[i]);
-				if (r.alignment() != alignment) {
-					double p = probs[i];
-					if (p > 0.0) return false;
-				}
+			for (index i = 0, n = _role_ids.size(); i < n; ++i) {
+				auto& role_id = _role_ids[i];
+				auto& role = rulebook.look_up(role_id);
+				auto& p = probs[i];
+
+				if (role.alignment() != alignment && p > 0)
+					return false;
 			}
 
 			return true;
@@ -104,16 +108,16 @@ namespace maf::core {
 
 	string_view alias(Wildcard::ID id) {
 		switch (id) {
-			case Wildcard::ID::any:
-				return "random";
-			case Wildcard::ID::village:
-				return "any_village";
-			case Wildcard::ID::village_basic:
-				return "basic_village";
-			case Wildcard::ID::mafia:
-				return "any_mafia";
-			case Wildcard::ID::freelance:
-				return "any_freelance";
+		case Wildcard::ID::any:
+			return "random";
+		case Wildcard::ID::village:
+			return "any_village";
+		case Wildcard::ID::village_basic:
+			return "basic_village";
+		case Wildcard::ID::mafia:
+			return "any_mafia";
+		case Wildcard::ID::freelance:
+			return "any_freelance";
 		}
 	}
 }

@@ -11,11 +11,11 @@ namespace maf::core {
 		peasant._duel_strength = 0.333333333;
 
 		Role & doctor = new_village_role(Role::ID::doctor);
-		doctor._ability_or_none = {Ability::ID::heal};
+		doctor._ability = {Ability::ID::heal};
 		doctor._duel_strength = 0.1;
 
 		Role & detective = new_village_role(Role::ID::detective);
-		detective._ability_or_none = {Ability::ID::investigate};
+		detective._ability = {Ability::ID::investigate};
 		detective._duel_strength = 4;
 
 		Role & racketeer = new_mafia_role(Role::ID::racketeer);
@@ -26,7 +26,7 @@ namespace maf::core {
 		godfather._duel_strength = 0.4;
 
 		Role & dealer = new_mafia_role(Role::ID::dealer);
-		dealer._ability_or_none = {Ability::ID::peddle};
+		dealer._ability = {Ability::ID::peddle};
 
 		Role & coward = new_freelance_role(Role::ID::coward);
 		coward._suspicious = true;
@@ -37,7 +37,7 @@ namespace maf::core {
 		actor._duel_strength = 0.333333333;
 
 		Role & serial_killer = new_freelance_role(Role::ID::serial_killer);
-		serial_killer._ability_or_none = {Ability::ID::kill};
+		serial_killer._ability = {Ability::ID::kill};
 		serial_killer._peace_condition = Peace_condition::last_survivor;
 		serial_killer._suspicious = true;
 		serial_killer._duel_strength = 999999999;
@@ -48,7 +48,7 @@ namespace maf::core {
 		village_idiot._duel_strength = 0.001;
 
 		Role & musketeer = new_freelance_role(Role::ID::musketeer);
-		musketeer._ability_or_none = {Ability::ID::duel};
+		musketeer._ability = {Ability::ID::duel};
 		musketeer._win_condition = Win_condition::win_duel;
 
 		new_wildcard(Wildcard::ID::any, [](const Role &) {

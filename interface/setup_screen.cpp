@@ -113,13 +113,13 @@ namespace maf {
 
 	std::size_t Setup_screen::num_rolecards() const {
 		std::size_t n{0};
-		for (auto &p: _role_ids) n += p.second;
+		for (auto&& [_, count]: _role_ids) n += count;
 		return n;
 	}
 
 	std::size_t Setup_screen::num_wildcards() const {
 		std::size_t n{0};
-		for (auto &p: _wildcard_ids) n += p.second;
+		for (auto&& [_, count]: _wildcard_ids) n += count;
 		return n;
 	}
 
@@ -138,19 +138,21 @@ namespace maf {
 	}
 
 	void Setup_screen::add_rolecard(string_view alias) {
-		core::RoleRef r_ref = alias;
+		core::RoleRef r_ref{alias};
 
 		try {
-			const core::Role & r = _rulebook.look_up(r_ref);
-			++_role_ids[r.id()];
+			auto& role = _rulebook.look_up(r_ref);
+			auto& count = _role_ids[role.id()];
+			++count;
 		} catch (std::out_of_range) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
 		}
 	}
 
 	void Setup_screen::add_wildcard(string_view alias) {
-		const core::Wildcard & w = _rulebook.get_wildcard(alias);
-		++_wildcard_ids[w.id()];
+		auto& wildcard = _rulebook.get_wildcard(alias);
+		auto& count = _wildcard_ids[wildcard.id()];
+		++count;
 	}
 
 	void Setup_screen::remove_player(string_view name) {
@@ -170,10 +172,12 @@ namespace maf {
 
 		try {
 			auto& role = _rulebook.look_up(r_ref);
-			if (_role_ids[role.id()] == 0) {
+			auto& count = _role_ids[role.id()];
+
+			if (count == 0) {
 				throw Rolecard_unselected{role};
 			} else {
-				--_role_ids[role.id()];
+				--count;
 			}
 		} catch (std::out_of_range) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
@@ -181,11 +185,13 @@ namespace maf {
 	}
 
 	void Setup_screen::remove_wildcard(string_view alias) {
-		const core::Wildcard & w = _rulebook.get_wildcard(alias);
-		if (_wildcard_ids[w.id()] == 0) {
-			throw Wildcard_unselected{w};
+		auto& wildcard = _rulebook.get_wildcard(alias);
+		auto& count = _wildcard_ids[wildcard.id()];
+
+		if (count == 0) {
+			throw Wildcard_unselected{wildcard};
 		} else {
-			--_wildcard_ids[w.id()];
+			--count;
 		}
 	}
 
@@ -233,11 +239,11 @@ namespace maf {
 	}
 
 	unique_ptr<Game_log> Setup_screen::begin_preset(int i) {
-		if (i >= 0 && i < std::size(_presets)) {
-			Game_parameters params = _presets[i];
+		try {
+			Game_parameters params = _presets.at(i);
 			return make_unique<Game_log>(console(), params.player_names,
 				params.role_ids, params.wildcard_ids, params.rulebook);
-		} else {
+		} catch (const std::out_of_range &) {
 			throw Missing_preset{i};
 		}
 	}
@@ -247,9 +253,9 @@ namespace maf {
 			auto new_game = begin_pending_game();
 			console().store_game(move(new_game));
 		} else if (commands_match(commands, {"preset"})) {
-			int num_presets = std::size(_presets);
-			std::uniform_int_distribution<int> uid{0, num_presets - 1};
-			int random_preset = uid(util::random_engine);
+			int num_presets = _presets.size();
+			std::uniform_int_distribution<int> distr{0, num_presets - 1};
+			int random_preset = distr(util::random_engine);
 			auto new_game = begin_preset(random_preset);
 			console().store_game(move(new_game));
 		} else if (commands_match(commands, {"preset", ""})) {
