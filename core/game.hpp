@@ -1,6 +1,7 @@
 #ifndef MAFIA_CORE_GAME_H
 #define MAFIA_CORE_GAME_H
 
+#include "../util/span.hpp"
 #include "../util/stdlib.hpp"
 
 #include "player.hpp"
@@ -226,12 +227,12 @@ namespace maf::core {
 		// Start a new game with the given parameters, creating a set of players
 		// and assigning each player an initial role.
 		// Note that this could lead to the game immediately ending.
-		Game(const vector<Role::ID> &role_ids,
-		     const vector<Wildcard::ID> &wildcard_ids,
-		     const Rulebook &rulebook = Rulebook{});
+		Game(span<const Role::ID> role_ids,
+			span<const Wildcard::ID> wildcard_ids,
+			const Rulebook & rulebook = {});
 
 		// The rulebook being used to run the game.
-		const Rulebook & rulebook() const;
+		const Rulebook & rulebook() const { return _rulebook; }
 
 		// methods inherited from Rulebook
 		//
@@ -240,10 +241,11 @@ namespace maf::core {
 		//
 
 		// All of the roles obtained from wildcards in this game.
-		const vector<std::reference_wrapper<const Role>> & random_roles() const;
+		auto random_roles() const -> const vector_of_refs<const Role> &;
 
 		// The participating players, both present and not present.
-		const vector<Player> & players() const;
+		span<Player> players() { return _players; }
+		span<const Player> players() const { return _players; }
 		// A vector containing every player remaining.
 		vector_of_refs<const Player> remaining_players() const;
 		// A vector containing every player remaining with the given alignment.
@@ -254,13 +256,13 @@ namespace maf::core {
 		std::size_t num_players_left(Alignment alignment) const;
 
 		// The current in-game date.
-		Date date() const;
+		Date date() const { return _date; }
 		// The current in-game time.
-		Time time() const;
+		Time time() const { return _time; }
 		// Whether the time is currently day.
-		bool is_day() const;
+		bool is_day() const { return time() == Time::day; }
 		// Whether it is currently night.
-		bool is_night() const;
+		bool is_night() const { return time() == Time::night; }
 
 		// Forcibly remove the given player from the game.
 		// A player removed in this way cannot win.
@@ -289,7 +291,7 @@ namespace maf::core {
 		void choose_fake_role(Player::ID player_id, Role::ID fake_role_id);
 
 		// Whether or not the mafia can cast their nightly kill right now.
-		bool mafia_can_use_kill() const;
+		bool mafia_can_use_kill() const { return _mafia_can_use_kill; }
 		// Chooses a caster and target for the mafia's nightly kill, or skips
 		// it altogether.
 		void cast_mafia_kill(Player::ID caster_id, Player::ID target_id);
@@ -317,14 +319,13 @@ namespace maf::core {
 		/// far in the course of the game.
 		///
 		/// The results are stored in chronological order, with the most
-		/// recent investigations at the end of the vector.
-		const vector<Investigation> & investigations() const
-		{
+		/// recent investigations at the end of the span.
+		span<const Investigation> investigations() const {
 			return _investigations;
 		}
 
 		// Whether or not the game has ended.
-		bool game_has_ended() const;
+		bool game_has_ended() const { return _has_ended; }
 
 	private:
 		vector<Player> _players{};

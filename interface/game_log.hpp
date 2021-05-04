@@ -47,7 +47,7 @@ namespace maf {
 		// The game being managed.
 		const core::Game & game() const { return _game; }
 		// All of the players in the game.
-		const vector<core::Player> & players() const { return game().players(); }
+		span<const core::Player> players() const { return game().players(); }
 
 		// methods inherited from Game
 		//

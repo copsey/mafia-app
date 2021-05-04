@@ -111,9 +111,10 @@ namespace maf {
 			return util::equal_up_to_case(name, this->get_name(player));
 		};
 
-		auto iter = util::find_if(players(), names_match);
+		auto players = this->players();
+		auto iter = util::find_if(players, names_match);
 
-		if (iter == players().end())
+		if (iter == players.end())
 			throw Player_not_found{string{name}};
 
 		return *iter;
@@ -275,7 +276,8 @@ namespace maf {
 					&& player.date_of_death() == date);
 		};
 
-		auto deaths = util::filtered_crefs(players(), died_this_night);
+		auto players = this->players();
+		auto deaths = util::filter_into<vector_of_refs<const core::Player>>(players, died_this_night);
 		_append_screen<Obituary>(move(deaths));
 	}
 
@@ -284,7 +286,8 @@ namespace maf {
 			return player.is_present();
 		};
 
-		auto townsfolk = util::filtered_crefs(players(), is_present);
+		auto players = this->players();
+		auto townsfolk = util::filter_into<vector_of_refs<const core::Player>>(players, is_present);
 		_append_screen<Town_meeting>(move(townsfolk), _game.date(), _game.lynch_can_occur(), _game.next_lynch_victim(), recent_vote_caster, recent_vote_target);
 	}
 

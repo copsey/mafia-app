@@ -9,9 +9,9 @@
 namespace maf::core {
 	using WC = Win_condition;
 
-	Game::Game(const vector<Role::ID> & role_ids,
-				const vector<Wildcard::ID> & wildcard_ids,
-				const Rulebook & rulebook)
+	Game::Game(span<const Role::ID> role_ids,
+		span<const Wildcard::ID> wildcard_ids,
+		const Rulebook & rulebook)
 	: _rulebook{rulebook} {
 		auto append_to_random_roles = std::back_inserter(_random_roles);
 
@@ -21,7 +21,7 @@ namespace maf::core {
 			return role;
 		});
 
-		vector<std::reference_wrapper<const Role>> cards{};
+		vector_of_refs<const Role> cards{};
 		auto append_to_cards = std::back_inserter(cards);
 
 		util::transform(role_ids, append_to_cards, [&](Role::ID id) -> const Role & {
@@ -33,14 +33,11 @@ namespace maf::core {
 
 		for (index i = 0; i < cards.size(); ++i) {
 			const Role & role = cards[i];
-			_players.emplace_back(i, role);
+			auto player = Player{i, role};
+			_players.push_back(move(player));
 		}
 
 		try_to_end();
-	}
-
-	const Rulebook & Game::rulebook() const {
-		return _rulebook;
 	}
 
 	bool Game::contains(RoleRef r_ref) const {
@@ -51,13 +48,8 @@ namespace maf::core {
 		return rulebook().look_up(r_ref);
 	}
 
-	auto Game::random_roles() const
-	-> const vector_of_refs<const Role> & {
+	const vector_of_refs<const Role> & Game::random_roles() const {
 		return _random_roles;
-	}
-
-	const vector<Player> & Game::players() const {
-		return _players;
 	}
 
 	vector_of_refs<const Player> Game::remaining_players() const {
@@ -84,38 +76,24 @@ namespace maf::core {
 		return util::count_if(_players, pred);
 	}
 
-	Date Game::date() const {
-		return _date;
-	}
-
-	Time Game::time() const {
-		return _time;
-	}
-
-	bool Game::is_day() const {
-		return time() == Time::day;
-	}
-
-	bool Game::is_night() const {
-		return time() == Time::night;
-	}
-
 	void Game::kick_player(Player::ID id) {
+		using Reason = Kick_failed::Reason;
+
 		Player& player = find_player(id);
 
 		if (game_has_ended())
-			throw Kick_failed{player, Kick_failed::Reason::game_ended};
+			throw Kick_failed{player, Reason::game_ended};
 		if (!is_day())
-			throw Kick_failed{player, Kick_failed::Reason::bad_timing};
+			throw Kick_failed{player, Reason::bad_timing};
 		if (player.has_been_kicked())
-			throw Kick_failed{player, Kick_failed::Reason::already_kicked};
+			throw Kick_failed{player, Reason::already_kicked};
 
 		player.kick();
 		try_to_end();
 	}
 
 	const Player* Game::next_lynch_victim() const {
-		std::map<const Player*, std::size_t> votes_per_player{};
+		std::map<not_null<const Player *>, std::size_t> votes_per_player{};
 		std::size_t total_votes = 0;
 
 		for (const Player& voter : _players) {
@@ -133,8 +111,7 @@ namespace maf::core {
 
 		if (it != votes_per_player.end() && (2 * it->second > total_votes)) {
 			return it->first;
-		}
-		else {
+		} else {
 			return nullptr;
 		}
 	}
@@ -144,41 +121,47 @@ namespace maf::core {
 	}
 
 	void Game::cast_lynch_vote(Player::ID voter_id, Player::ID target_id) {
+		using Reason = Lynch_vote_failed::Reason;
+
 		Player& voter = find_player(voter_id);
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::game_ended};
+			throw Lynch_vote_failed{voter, &target, Reason::game_ended};
 		if (!lynch_can_occur())
-			throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::bad_timing};
+			throw Lynch_vote_failed{voter, &target, Reason::bad_timing};
 		if (!voter.is_present())
-			throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_not_present};
+			throw Lynch_vote_failed{voter, &target, Reason::voter_is_not_present};
 		if (!target.is_present())
-			throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::target_is_not_present};
+			throw Lynch_vote_failed{voter, &target, Reason::target_is_not_present};
 		if (voter == target)
-			throw Lynch_vote_failed{voter, &target, Lynch_vote_failed::Reason::voter_is_target};
+			throw Lynch_vote_failed{voter, &target, Reason::voter_is_target};
 
 		voter.cast_lynch_vote(target);
 	}
 
 	void Game::clear_lynch_vote(Player::ID voter_id) {
+		using Reason = Lynch_vote_failed::Reason;
+
 		Player& voter = find_player(voter_id);
 
 		if (game_has_ended())
-			throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::game_ended};
+			throw Lynch_vote_failed{voter, nullptr, Reason::game_ended};
 		if (!lynch_can_occur())
-			throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::bad_timing};
+			throw Lynch_vote_failed{voter, nullptr, Reason::bad_timing};
 		if (!voter.is_present())
-			throw Lynch_vote_failed{voter, nullptr, Lynch_vote_failed::Reason::voter_is_not_present};
+			throw Lynch_vote_failed{voter, nullptr, Reason::voter_is_not_present};
 
 		voter.clear_lynch_vote();
 	}
 
 	const Player * Game::process_lynch_votes() {
+		using Reason = Lynch_failed::Reason;
+
 		if (game_has_ended())
-			throw Lynch_failed{Lynch_failed::Reason::game_ended};
+			throw Lynch_failed{Reason::game_ended};
 		if (!lynch_can_occur())
-			throw Lynch_failed{Lynch_failed::Reason::bad_timing};
+			throw Lynch_failed{Reason::bad_timing};
 
 		auto victim = const_cast<Player*>(next_lynch_victim());
 		if (victim) {
@@ -194,34 +177,29 @@ namespace maf::core {
 	}
 
 	void Game::stage_duel(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Duel_failed::Reason;
+
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
-		if (game_has_ended()) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::game_ended);
-		}
-		if (!is_day()) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::bad_timing);
-		}
-		if (!caster.is_present()) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::caster_is_not_present);
-		}
-		if (!target.is_present()) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::target_is_not_present);
-		}
-		if (caster == target) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::caster_is_target);
-		}
-		if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::caster_has_no_duel);
-		}
+		if (game_has_ended())
+			throw Duel_failed(caster, target, Reason::game_ended);
+		if (!is_day())
+			throw Duel_failed(caster, target, Reason::bad_timing);
+		if (!caster.is_present())
+			throw Duel_failed(caster, target, Reason::caster_is_not_present);
+		if (!target.is_present())
+			throw Duel_failed(caster, target, Reason::target_is_not_present);
+		if (caster == target)
+			throw Duel_failed(caster, target, Reason::caster_is_target);
+		if (!caster.role().has_ability() || caster.role().ability().id != Ability::ID::duel)
+			throw Duel_failed(caster, target, Reason::caster_has_no_duel);
 
-		double s = caster.duel_strength() + target.duel_strength();
-		if (s <= 0.0) {
-			throw Duel_failed(caster, target, Duel_failed::Reason::bad_probability);
-		}
+		double sum = caster.duel_strength() + target.duel_strength();
+		if (sum <= 0.0)
+			throw Duel_failed(caster, target, Reason::bad_probability);
 
-		double p = caster.duel_strength() / s;
+		double p = caster.duel_strength() / sum;
 		std::bernoulli_distribution bd{p};
 
 		Player *winner, *loser;
@@ -229,8 +207,7 @@ namespace maf::core {
 		if (bd(util::random_engine)) {
 			winner = &caster;
 			loser = &target;
-		}
-		else {
+		} else {
 			winner = &target;
 			loser = &caster;
 		}
@@ -245,11 +222,14 @@ namespace maf::core {
 	}
 
 	void Game::begin_night() {
+		using Reason = Begin_night_failed::Reason;
+
 		if (game_has_ended())
-			throw Begin_night_failed{Begin_night_failed::Reason::game_ended};
+			throw Begin_night_failed{Reason::game_ended};
 		if (is_night())
-			throw Begin_night_failed{Begin_night_failed::Reason::already_night};
-		if (lynch_can_occur()) throw Begin_night_failed{Begin_night_failed::Reason::lynch_can_occur};
+			throw Begin_night_failed{Reason::already_night};
+		if (lynch_can_occur())
+			throw Begin_night_failed{Reason::lynch_can_occur};
 
 		_time = Time::night;
 
@@ -261,15 +241,15 @@ namespace maf::core {
 					Ability ability = player.role().ability();
 
 					switch (ability.id) {
-						case Ability::ID::kill:
-						case Ability::ID::heal:
-						case Ability::ID::investigate:
-						case Ability::ID::peddle:
-							player.add_compulsory_ability(ability);
-							break;
-
-						case Ability::ID::duel:
-							break;
+					using ID = Ability::ID;
+					case ID::kill:
+					case ID::heal:
+					case ID::investigate:
+					case ID::peddle:
+						player.add_compulsory_ability(ability);
+						break;
+					case ID::duel:
+						break;
 					}
 				}
 			}
@@ -279,45 +259,45 @@ namespace maf::core {
 	}
 
 	void Game::choose_fake_role(Player::ID player_id, Role::ID fake_role_id) {
+		using Reason = Choose_fake_role_failed::Reason;
+
 		Player& player = find_player(player_id);
 		const Role& fake_role = _rulebook.look_up(fake_role_id);
 
 		if (game_has_ended())
-			throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::game_ended};
+			throw Choose_fake_role_failed{player, fake_role, Reason::game_ended};
 		if (!is_night())
-			throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::bad_timing};
+			throw Choose_fake_role_failed{player, fake_role, Reason::bad_timing};
 		if (!player.is_role_faker())
-			throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::player_is_not_faker};
+			throw Choose_fake_role_failed{player, fake_role, Reason::player_is_not_faker};
 		if (player.has_fake_role())
-			throw Choose_fake_role_failed{player, fake_role, Choose_fake_role_failed::Reason::already_chosen};
+			throw Choose_fake_role_failed{player, fake_role, Reason::already_chosen};
 
 		player.give_fake_role(fake_role);
 
 		try_to_end_night();
 	}
 
-	bool Game::mafia_can_use_kill() const {
-		return _mafia_can_use_kill;
-	}
-
 	void Game::cast_mafia_kill(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Mafia_kill_failed::Reason;
+
 		Player& caster = find_player(caster_id);
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::game_ended};
+			throw Mafia_kill_failed{caster, target, Reason::game_ended};
 		if (!is_night())
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::bad_timing};
+			throw Mafia_kill_failed{caster, target, Reason::bad_timing};
 		if (!mafia_can_use_kill())
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::already_used};
+			throw Mafia_kill_failed{caster, target, Reason::already_used};
 		if (!caster.is_present())
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_present};
+			throw Mafia_kill_failed{caster, target, Reason::caster_is_not_present};
 		if (caster.alignment() != Alignment::mafia)
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_not_in_mafia};
+			throw Mafia_kill_failed{caster, target, Reason::caster_is_not_in_mafia};
 		if (!target.is_present())
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::target_is_not_present};
+			throw Mafia_kill_failed{caster, target, Reason::target_is_not_present};
 		if (caster == target)
-			throw Mafia_kill_failed{caster, target, Mafia_kill_failed::Reason::caster_is_target};
+			throw Mafia_kill_failed{caster, target, Reason::caster_is_target};
 
 		_mafia_can_use_kill = false;
 		_mafia_kill_caster = &caster;
@@ -340,6 +320,8 @@ namespace maf::core {
 	}
 
 	void Game::cast_kill(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Kill_failed::Reason;
+
 		auto is_kill = [](const Ability& abl) {
 			return abl.id == Ability::ID::kill;
 		};
@@ -348,13 +330,13 @@ namespace maf::core {
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Kill_failed{caster, target, Kill_failed::Reason::game_ended};
+			throw Kill_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_kill))
-			throw Kill_failed{caster, target, Kill_failed::Reason::caster_cannot_kill};
+			throw Kill_failed{caster, target, Reason::caster_cannot_kill};
 		if (!target.is_present())
-			throw Kill_failed{caster, target, Kill_failed::Reason::target_is_not_present};
+			throw Kill_failed{caster, target, Reason::target_is_not_present};
 		if (caster == target)
-			Kill_failed{caster, target, Kill_failed::Reason::caster_is_target};
+			throw Kill_failed{caster, target, Reason::caster_is_target};
 
 		_pending_kills.emplace_back(&caster, &target);
 		caster.remove_compulsory_ability(Ability{Ability::ID::kill});
@@ -380,6 +362,8 @@ namespace maf::core {
 	}
 
 	void Game::cast_heal(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Heal_failed::Reason;
+
 		auto is_heal = [](const Ability & abl) {
 			return abl.id == Ability::ID::heal;
 		};
@@ -388,13 +372,13 @@ namespace maf::core {
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Heal_failed{caster, target, Heal_failed::Reason::game_ended};
+			throw Heal_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_heal))
-			throw Heal_failed{caster, target, Heal_failed::Reason::caster_cannot_heal};
+			throw Heal_failed{caster, target, Reason::caster_cannot_heal};
 		if (!target.is_present())
-			throw Heal_failed{caster, target, Heal_failed::Reason::target_is_not_present};
+			throw Heal_failed{caster, target, Reason::target_is_not_present};
 		if (caster == target)
-			Heal_failed{caster, target, Heal_failed::Reason::caster_is_target};
+			throw Heal_failed{caster, target, Reason::caster_is_target};
 
 		_pending_heals.emplace_back(&caster, &target);
 		caster.remove_compulsory_ability(Ability{Ability::ID::heal});
@@ -420,6 +404,8 @@ namespace maf::core {
 	}
 
 	void Game::cast_investigate(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Investigate_failed::Reason;
+
 		auto is_investigate = [](const Ability & abl) {
 			return abl.id == Ability::ID::investigate;
 		};
@@ -428,13 +414,13 @@ namespace maf::core {
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Investigate_failed{caster, target, Investigate_failed::Reason::game_ended};
+			throw Investigate_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_investigate))
-			throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_cannot_investigate};
+			throw Investigate_failed{caster, target, Reason::caster_cannot_investigate};
 		if (!target.is_present())
-			throw Investigate_failed{caster, target, Investigate_failed::Reason::target_is_not_present};
+			throw Investigate_failed{caster, target, Reason::target_is_not_present};
 		if (caster == target)
-			throw Investigate_failed{caster, target, Investigate_failed::Reason::caster_is_target};
+			throw Investigate_failed{caster, target, Reason::caster_is_target};
 
 		_pending_investigations.emplace_back(&caster, &target);
 		caster.remove_compulsory_ability(Ability{Ability::ID::investigate});
@@ -460,6 +446,8 @@ namespace maf::core {
 	}
 
 	void Game::cast_peddle(Player::ID caster_id, Player::ID target_id) {
+		using Reason = Peddle_failed::Reason;
+
 		auto is_peddle = [](const Ability & abl) {
 			return abl.id == Ability::ID::peddle;
 		};
@@ -468,11 +456,11 @@ namespace maf::core {
 		Player& target = find_player(target_id);
 
 		if (game_has_ended())
-			throw Peddle_failed{caster, target, Peddle_failed::Reason::game_ended};
+			throw Peddle_failed{caster, target, Reason::game_ended};
 		if (util::none_of(caster.compulsory_abilities(), is_peddle))
-			throw Peddle_failed{caster, target, Peddle_failed::Reason::caster_cannot_peddle};
+			throw Peddle_failed{caster, target, Reason::caster_cannot_peddle};
 		if (!target.is_present())
-			throw Peddle_failed{caster, target, Peddle_failed::Reason::target_is_not_present};
+			throw Peddle_failed{caster, target, Reason::target_is_not_present};
 
 		_pending_peddles.emplace_back(&caster, &target);
 		caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
@@ -496,10 +484,6 @@ namespace maf::core {
 		caster.remove_compulsory_ability(Ability{Ability::ID::peddle});
 
 		try_to_end_night();
-	}
-
-	bool Game::game_has_ended() const {
-		return _has_ended;
 	}
 
 	Player & Game::find_player(Player::ID id) {
@@ -617,30 +601,25 @@ namespace maf::core {
 			if (player.is_present()) {
 				++num_players_left;
 				switch (player.alignment()) {
-					case Alignment::village:
-						++num_village_left;
-						break;
-
-					case Alignment::mafia:
-						++num_mafia_left;
-						break;
-
-					default:
-						break;
+				case Alignment::village:
+					++num_village_left;
+					break;
+				case Alignment::mafia:
+					++num_mafia_left;
+					break;
+				default:
+					break;
 				}
 
 				switch (player.peace_condition()) {
 				case Peace_condition::always_peaceful:
 					break;
-
 				case Peace_condition::village_eliminated:
 					check_for_village_eliminated = true;
 					break;
-
 				case Peace_condition::mafia_eliminated:
 					check_for_mafia_eliminated = true;
 					break;
-
 				case Peace_condition::last_survivor:
 					check_for_last_survivor = true;
 					break;
@@ -659,25 +638,21 @@ namespace maf::core {
 
 			if (!player.has_been_kicked()) {
 				switch (player.win_condition()) {
-					case Win_condition::survive:
-						has_won = player.is_alive();
-						break;
-
-					case Win_condition::village_remains:
-						has_won = (num_village_left > 0);
-						break;
-
-					case Win_condition::mafia_remains:
-						has_won = (num_mafia_left > 0);
-						break;
-
-					case Win_condition::be_lynched:
-						has_won = player.has_been_lynched();
-						break;
-
-					case Win_condition::win_duel:
-						has_won = player.has_won_duel();
-						break;
+				case Win_condition::survive:
+					has_won = player.is_alive();
+					break;
+				case Win_condition::village_remains:
+					has_won = (num_village_left > 0);
+					break;
+				case Win_condition::mafia_remains:
+					has_won = (num_mafia_left > 0);
+					break;
+				case Win_condition::be_lynched:
+					has_won = player.has_been_lynched();
+					break;
+				case Win_condition::win_duel:
+					has_won = player.has_won_duel();
+					break;
 				}
 			}
 

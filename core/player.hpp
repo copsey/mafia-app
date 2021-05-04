@@ -8,7 +8,7 @@
 namespace maf::core {
 	class Player {
 	public:
-		using ID = std::size_t;
+		using ID = index;
 
 		/// Create a player with the given ID and role.
 		///
