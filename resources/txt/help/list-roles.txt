@@ -20,21 +20,21 @@ These are all of the roles in the game:
 {!end}
 
 %Further help:
- - To see more information about role @<X>@, enter @help r <X>@.
+ - To see more information about role @<X>@, enter @help role <X>@.
 {!if show_village}
- - To show all of the roles, enter @list r@.
- - To show just the mafia roles, enter @list r m@.
- - To show just the freelance roles, enter @list r f@.
+ - To show all of the roles, enter @list roles@.
+ - To show just the mafia roles, enter @list roles mafia@.
+ - To show just the freelance roles, enter @list roles freelance@.
 {!else_if show_mafia}
- - To show all of the roles, enter @list r@.
- - To show just the village roles, enter @list r f@.
- - To show just the freelance roles, enter @list r f@.
+ - To show all of the roles, enter @list roles@.
+ - To show just the village roles, enter @list roles village@.
+ - To show just the freelance roles, enter @list roles freelance@.
 {!else_if show_freelance}
- - To show all of the roles, enter @list r@.
- - To show just the village roles, enter @list r v@.
- - To show just the mafia roles, enter @list r m@.
+ - To show all of the roles, enter @list roles@.
+ - To show just the village roles, enter @list roles village@.
+ - To show just the mafia roles, enter @list roles mafia@.
 {!else}
- - To show just the village roles, enter @list r v@.
- - To show just the mafia roles, enter @list r m@.
- - To show just the freelance roles, enter @list r f@.
+ - To show just the village roles, enter @list roles village@.
+ - To show just the mafia roles, enter @list roles mafia@.
+ - To show just the freelance roles, enter @list roles freelance@.
 {!end}

@@ -274,31 +274,31 @@ namespace maf {
 
 				throw Generic_error{move(msg), move(params)};
 			}
-		} else if (commands_match(commands, {"add", "p", ""})) {
+		} else if (commands_match(commands, {"add", "player", ""})) {
 			add_player(commands[2]);
-		} else if (commands_match(commands, {"take", "p", ""})) {
+		} else if (commands_match(commands, {"take", "player", ""})) {
 			remove_player(commands[2]);
-		} else if (commands_match(commands, {"clear", "p"})) {
+		} else if (commands_match(commands, {"clear", "players"})) {
 			clear_all_players();
-		} else if (commands_match(commands, {"add", "r", ""})) {
+		} else if (commands_match(commands, {"add", "role", ""})) {
 			add_rolecard(commands[2]);
-		} else if (commands_match(commands, {"take", "r", ""})) {
+		} else if (commands_match(commands, {"take", "role", ""})) {
 			remove_rolecard(commands[2]);
-		} else if (commands_match(commands, {"clear", "r", ""})) {
+		} else if (commands_match(commands, {"clear", "role", ""})) {
 			clear_rolecards(commands[2]);
-		} else if (commands_match(commands, {"clear", "r"})) {
+		} else if (commands_match(commands, {"clear", "roles"})) {
 			clear_all_rolecards();
-		} else if (commands_match(commands, {"add", "w", ""})) {
+		} else if (commands_match(commands, {"add", "wildcard", ""})) {
 			add_wildcard(commands[2]);
-		} else if (commands_match(commands, {"take", "w", ""})) {
+		} else if (commands_match(commands, {"take", "wildcard", ""})) {
 			remove_wildcard(commands[2]);
-		} else if (commands_match(commands, {"clear", "w", ""})) {
+		} else if (commands_match(commands, {"clear", "wildcard", ""})) {
 			clear_wildcards(commands[2]);
-		} else if (commands_match(commands, {"clear", "w"})) {
+		} else if (commands_match(commands, {"clear", "wildcards"})) {
 			clear_all_wildcards();
-		} else if (commands_match(commands, {"clear", "c"})) {
+		} else if (commands_match(commands, {"clear", "cards"})) {
 			clear_all_cards();
-		} else if (commands_match(commands, {"clear"})) {
+		} else if (commands_match(commands, {"clear", "all"})) {
 			clear_all();
 		} else if (commands_match(commands, {"help"})) {
 			console().show_help_screen<Setup_Help_Screen>();

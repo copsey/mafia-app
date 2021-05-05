@@ -58,20 +58,20 @@ namespace maf {
 			string msg = "=Missing input!=\n\nEntering a blank input has no effect.\n(enter @help@ if you're unsure what to do.)";
 			auto params = TextParams{};
 			throw Generic_error{move(msg), move(params)};
-		} else if (commands_match(commands, {"help", "r", ""})) {
+		} else if (commands_match(commands, {"help", "role", ""})) {
 			try {
 				const core::Role & role = console().active_rulebook().look_up(commands[2]);
 				console().show_help_screen<Role_Info_Screen>(role);
 			} catch (std::out_of_range) {
 				throw core::Rulebook::Missing_role_alias{std::string(commands[2])};
 			}
-		} else if (commands_match(commands, {"list", "r"})) {
+		} else if (commands_match(commands, {"list", "roles"})) {
 			console().show_help_screen<List_Roles_Screen>();
-		} else if (commands_match(commands, {"list", "r", "v"})) {
+		} else if (commands_match(commands, {"list", "roles", "village"})) {
 			console().show_help_screen<List_Roles_Screen>(core::Alignment::village);
-		} else if (commands_match(commands, {"list", "r", "m"})) {
+		} else if (commands_match(commands, {"list", "roles", "mafia"})) {
 			console().show_help_screen<List_Roles_Screen>(core::Alignment::mafia);
-		} else if (commands_match(commands, {"list", "r", "f"})) {
+		} else if (commands_match(commands, {"list", "roles", "freelance"})) {
 			console().show_help_screen<List_Roles_Screen>(core::Alignment::freelance);
 		} else if (commands_match(commands, {"info", ""})) {
 			auto& player = console().game_log().find_player(commands[1]);
