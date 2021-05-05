@@ -394,7 +394,7 @@ namespace maf {
 	void maf::Kill_use::do_commands(const CmdSequence & commands) {
 		if (_finished && commands_match(commands, {"ok"})) {
 			game_log().advance();
-		} else if (!_finished && commands_match(commands, {"check", ""})) {
+		} else if (!_finished && commands_match(commands, {"kill", ""})) {
 			auto& target = game_log().find_player(commands[1]);
 			game_log().cast_kill(_caster.id(), target.id());
 			_finished = true;
