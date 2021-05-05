@@ -56,10 +56,11 @@ namespace maf::core {
 			musketeer
 		};
 
-		/// Create a role with the given ID.
-		///
-		/// All other traits are set to their default values.
-		Role(ID id) : _id{id} {}
+		/// Create a role with the given ID and alignment. Set all other
+		/// traits to the default for that alignment.
+		Role(ID id, Alignment alignment) : _id{id}, _alignment{alignment} {
+			_set_defaults_for_alignment();
+		}
 
 		/// The ID of the role.
 		ID id() const { return _id; }
@@ -108,7 +109,7 @@ namespace maf::core {
 
 	private:
 		ID _id;
-		Alignment _alignment{Alignment::freelance};
+		Alignment _alignment;
 		optional<Ability> _ability{};
 		Win_condition _win_condition{Win_condition::survive};
 		Peace_condition _peace_condition{Peace_condition::always_peaceful};
@@ -117,10 +118,11 @@ namespace maf::core {
 		bool _role_faker{false};
 		double _duel_strength{1};
 
+		void _set_defaults_for_alignment();
+
 		friend class Rulebook;
 	};
 
-	/// The alias corresponding to the given role ID.
 	string_view alias(Role::ID id);
 }
 

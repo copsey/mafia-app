@@ -7,49 +7,60 @@ namespace maf::core {
 	Rulebook::Rulebook(Edition edition) : _edition{edition} {
 		if (edition != 1) throw Bad_edition{edition};
 
-		Role & peasant = new_village_role(Role::ID::peasant);
-		peasant._duel_strength = 0.333333333;
+		create_role(Role::ID::peasant, Alignment::village, [](Role & role) {
+			role._duel_strength = 0.333333333;
+		});
 
-		Role & doctor = new_village_role(Role::ID::doctor);
-		doctor._ability = {Ability::ID::heal};
-		doctor._duel_strength = 0.1;
+		create_role(Role::ID::doctor, Alignment::village, [](Role & role) {
+			role._ability = {Ability::ID::heal};
+			role._duel_strength = 0.1;
+		});
 
-		Role & detective = new_village_role(Role::ID::detective);
-		detective._ability = {Ability::ID::investigate};
-		detective._duel_strength = 4;
+		create_role(Role::ID::detective, Alignment::village, [](Role & role) {
+			role._ability = {Ability::ID::investigate};
+			role._duel_strength = 4;
+		});
 
-		Role & racketeer = new_mafia_role(Role::ID::racketeer);
-		racketeer._duel_strength = 9;
+		create_role(Role::ID::racketeer, Alignment::mafia, [](Role & role) {
+			role._duel_strength = 9;
+		});
 
-		Role & godfather = new_mafia_role(Role::ID::godfather);
-		godfather._suspicious = false;
-		godfather._duel_strength = 0.4;
+		create_role(Role::ID::godfather, Alignment::mafia, [](Role & role) {
+			role._suspicious = false;
+			role._duel_strength = 0.4;
+		});
 
-		Role & dealer = new_mafia_role(Role::ID::dealer);
-		dealer._ability = {Ability::ID::peddle};
+		create_role(Role::ID::dealer, Alignment::mafia, [](Role & role) {
+			role._ability = {Ability::ID::peddle};
+		});
 
-		Role & coward = new_freelance_role(Role::ID::coward);
-		coward._suspicious = true;
-		coward._duel_strength = 0.000000001;
+		create_role(Role::ID::coward, Alignment::freelance, [](Role & role) {
+			role._suspicious = true;
+			role._duel_strength = 0.000000001;
+		});
 
-		Role & actor = new_freelance_role(Role::ID::actor);
-		actor._role_faker = true;
-		actor._duel_strength = 0.333333333;
+		create_role(Role::ID::actor, Alignment::freelance, [](Role & role) {
+			role._role_faker = true;
+			role._duel_strength = 0.333333333;
+		});
 
-		Role & serial_killer = new_freelance_role(Role::ID::serial_killer);
-		serial_killer._ability = {Ability::ID::kill};
-		serial_killer._peace_condition = Peace_condition::last_survivor;
-		serial_killer._suspicious = true;
-		serial_killer._duel_strength = 999999999;
+		create_role(Role::ID::serial_killer, Alignment::freelance, [](Role & role) {
+			role._ability = {Ability::ID::kill};
+			role._peace_condition = Peace_condition::last_survivor;
+			role._suspicious = true;
+			role._duel_strength = 999999999;
+		});
 
-		Role & village_idiot = new_freelance_role(Role::ID::village_idiot);
-		village_idiot._win_condition = Win_condition::be_lynched;
-		village_idiot._troll = true;
-		village_idiot._duel_strength = 0.001;
+		create_role(Role::ID::village_idiot, Alignment::freelance, [](Role & role) {
+			role._win_condition = Win_condition::be_lynched;
+			role._troll = true;
+			role._duel_strength = 0.001;
+		});
 
-		Role & musketeer = new_freelance_role(Role::ID::musketeer);
-		musketeer._ability = {Ability::ID::duel};
-		musketeer._win_condition = Win_condition::win_duel;
+		create_role(Role::ID::musketeer, Alignment::freelance, [](Role & role) {
+			role._ability = {Ability::ID::duel};
+			role._win_condition = Win_condition::win_duel;
+		});
 
 		new_wildcard(Wildcard::ID::any, [](const Role &) {
 			return 1;
@@ -146,33 +157,12 @@ namespace maf::core {
 		throw Missing_wildcard_alias{string{alias}};
 	}
 
-	Role & Rulebook::new_role(Role::ID id) {
-		if (contains(id)) {
-			throw Preexisting_role_ID{id};
-		}
+	Role & Rulebook::add_role(Role role) {
+		if (this->contains(role.id()))
+			throw Preexisting_role_ID{role.id()};
 
-		_roles.emplace_back(id);
+		_roles.push_back(move(role));
 		return _roles.back();
-	}
-
-	Role & Rulebook::new_village_role(Role::ID id) {
-		Role & role = new_role(id);
-		role._alignment = Alignment::village;
-		role._peace_condition = Peace_condition::mafia_eliminated;
-		return role;
-	}
-
-	Role & Rulebook::new_mafia_role(Role::ID id) {
-		Role & role = new_role(id);
-		role._alignment = Alignment::mafia;
-		role._peace_condition = Peace_condition::village_eliminated;
-		role._suspicious = true;
-		role._duel_strength = 4;
-		return role;
-	}
-
-	Role & Rulebook::new_freelance_role(Role::ID id) {
-		return new_role(id);
 	}
 
 	Wildcard & Rulebook::new_wildcard(Wildcard::ID id, Wildcard::Role_evaluator evaluator) {

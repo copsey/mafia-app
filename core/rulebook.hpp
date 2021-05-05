@@ -131,7 +131,7 @@ namespace maf::core {
 		/// Get the role with the given alias.
 		///
 		/// Throw `std::out_of_range` if none could be found.
-		Role const& look_up(RoleRef r_ref) const;
+		const Role & look_up(RoleRef r_ref) const;
 
 		/// Get the wildcard with the given ID.
 		///
@@ -153,39 +153,12 @@ namespace maf::core {
 		/// @throws `Missing_wildcard_alias` if none could be found.
 		const Wildcard & get_wildcard(string_view alias) const;
 
-		/// Create and store a new role with the given ID.
+		/// Add `role` to the rulebook.
 		///
-		/// The traits of the role are set to their default values.
-		///
-		/// @returns a reference to the new role.
-		///
-		/// @throws `Preexisting_role_ID` if a role with the given ID is already
-		/// defined in the rulebook.
-		Role & new_role(Role::ID id);
-
-		/// Create and store a new role with the given ID, and default village traits.
-		///
-		/// @returns a reference to the new role.
-		///
-		/// @throws `Preexisting_role_ID` if a role with the given ID is already
-		/// defined in the rulebook.
-		Role & new_village_role(Role::ID id);
-
-		/// Create and store a new role with the given ID, and default mafia traits.
-		///
-		/// @returns a reference to the new role.
-		///
-		/// @throws `Preexisting_role_ID` if a role with the given ID is already
-		/// defined in the rulebook.
-		Role & new_mafia_role(Role::ID id);
-
-		/// Create and store a new role with the given ID, and default freelance traits.
-		///
-		/// @returns a reference to the new role.
-		///
-		/// @throws `Preexisting_role_ID` if a role with the given ID is already
-		/// defined in the rulebook.
-		Role & new_freelance_role(Role::ID id);
+		/// # Exceptions
+		/// - Throws `Preexisting_role_ID` if a role with the given ID is
+		///   already defined in the rulebook.
+		Role & add_role(Role role);
 
 		/// Create and store a new wildcard with the given ID and role evaluator.
 		///
@@ -207,6 +180,15 @@ namespace maf::core {
 		Edition _edition;
 		vector<Role> _roles{};
 		vector<Wildcard> _wildcards{};
+
+		template <typename Customiser>
+		Role & create_role(Role::ID id, Alignment alignment,
+			Customiser customise)
+		{
+			Role & role = add_role({id, alignment});
+			customise(role);
+			return role;
+		}
 	};
 }
 

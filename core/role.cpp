@@ -31,4 +31,19 @@ namespace maf::core {
 			return "musketeer";
 		}
 	}
+
+	void Role::_set_defaults_for_alignment() {
+		switch (_alignment) {
+		case Alignment::village:
+			_peace_condition = Peace_condition::mafia_eliminated;
+			break;
+		case Alignment::mafia:
+			_peace_condition = Peace_condition::village_eliminated;
+			_suspicious = true;
+			_duel_strength = 4;
+			break;
+		case Alignment::freelance:
+			break;
+		}
+	}
 }
