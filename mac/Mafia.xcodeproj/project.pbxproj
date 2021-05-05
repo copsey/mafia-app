@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		0400AC8A262D7B9200FE59AB /* screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0400AC88262D770800FE59AB /* screen.cpp */; };
 		04694F53263C218900EE9065 /* preprocess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04694F52263C218900EE9065 /* preprocess.cpp */; };
+		04E5B9FD2642D95C00BAE42D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04E5B9FC2642D95C00BAE42D /* Assets.xcassets */; };
 		04F384A9263BE66D002FBFF2 /* format.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04F384A8263BE66D002FBFF2 /* format.cpp */; };
 		F84FE0631AF3B9DF00BF4992 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0621AF3B9DF00BF4992 /* AppDelegate.m */; };
 		F84FE0651AF3B9DF00BF4992 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0641AF3B9DF00BF4992 /* main.m */; };
-		F84FE0671AF3B9DF00BF4992 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F84FE0661AF3B9DF00BF4992 /* Images.xcassets */; };
 		F84FE0931AF3BB1A00BF4992 /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE0811AF3BB1A00BF4992 /* game.cpp */; };
 		F84FE0961AF3BB1A00BF4992 /* rulebook.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F84FE08C1AF3BB1A00BF4992 /* rulebook.cpp */; };
 		F858FAD41AFF5A16004D7058 /* names.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F858FAD21AFF5A16004D7058 /* names.cpp */; };
@@ -34,6 +34,7 @@
 		0400AC87262D763800FE59AB /* screen.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = screen.hpp; sourceTree = "<group>"; };
 		0400AC88262D770800FE59AB /* screen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = screen.cpp; sourceTree = "<group>"; };
 		04694F52263C218900EE9065 /* preprocess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = preprocess.cpp; sourceTree = "<group>"; };
+		04E5B9FC2642D95C00BAE42D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04F384A8263BE66D002FBFF2 /* format.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = format.cpp; sourceTree = "<group>"; };
 		F809EE2C1FC1975B003348BC /* command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
 		F810404B1D49D9F9004E31CF /* time.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = time.hpp; sourceTree = "<group>"; };
@@ -42,7 +43,6 @@
 		F84FE0611AF3B9DF00BF4992 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F84FE0621AF3B9DF00BF4992 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		F84FE0641AF3B9DF00BF4992 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		F84FE0661AF3B9DF00BF4992 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F84FE0811AF3BB1A00BF4992 /* game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game.cpp; sourceTree = "<group>"; };
 		F84FE0821AF3BB1A00BF4992 /* game.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = game.hpp; sourceTree = "<group>"; };
 		F84FE0851AF3BB1A00BF4992 /* core.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = core.hpp; sourceTree = "<group>"; };
@@ -126,7 +126,7 @@
 				F8C84C901AF4F80A00B40E54 /* InterfaceGlue.h */,
 				F8C84C911AF4F80A00B40E54 /* InterfaceGlue.mm */,
 				F8C84C001AF7ED05007243BA /* Application.xib */,
-				F84FE0661AF3B9DF00BF4992 /* Images.xcassets */,
+				04E5B9FC2642D95C00BAE42D /* Assets.xcassets */,
 				F84FE05F1AF3B9DF00BF4992 /* Supporting Files */,
 			);
 			name = mac;
@@ -248,8 +248,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04E5B9FD2642D95C00BAE42D /* Assets.xcassets in Resources */,
 				F8C84C011AF7ED05007243BA /* Application.xib in Resources */,
-				F84FE0671AF3B9DF00BF4992 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,6 +376,7 @@
 		F84FE07A1AF3B9E000BF4992 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = Mafia/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jackcopsey.$(PRODUCT_NAME:rfc1034identifier)";
@@ -386,6 +387,7 @@
 		F84FE07B1AF3B9E000BF4992 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = Mafia/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jackcopsey.$(PRODUCT_NAME:rfc1034identifier)";
