@@ -9,6 +9,13 @@
 #include "random.hpp"
 
 namespace maf::util {
+	// Perform `f(x)` on each member `x` of `cont`.
+	template <typename Container, typename Function>
+	Function for_each(Container & cont, Function f) {
+		using std::begin, std::end;
+		return std::for_each(begin(cont), end(cont), f);
+	}
+
 	// Check if `p(t)` is true for all `t` in `c`.
 	template <typename Cont, typename Pred>
 	bool all_of(Cont const& c, Pred p) {
