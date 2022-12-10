@@ -26,7 +26,7 @@ OBJECTS = $(addprefix $(BUILDDIR)/,$(SOURCE:.cpp=.o))
 
 # Version of the C++ standard to use when compiling and linking.
 # For a list of supported values, search for `-std` in your compiler's manual.
-CXXSTANDARD = c++17
+CXXSTANDARD = c++20
 # Extra flags passed to the C++ compiler.
 CXXFLAGS += -std=$(CXXSTANDARD)
 
