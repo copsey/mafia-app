@@ -1,6 +1,7 @@
-CXXFLAGS=-std=c++17
-
-src = \
+# Name of the executable.
+EXE = mafia
+# List of C++ source files to compile.
+SOURCE = \
 	core/game.cpp \
 	core/player.cpp \
 	core/role.cpp \
@@ -18,21 +19,31 @@ src = \
 	interface/text/format.cpp \
 	interface/text/preprocess.cpp \
 	cli/main.cpp \
+# Directory where intermediate build artifacts are stored.
+BUILDDIR = build
+# List of C++ object files.
+OBJECTS = $(addprefix $(BUILDDIR)/,$(SOURCE:.cpp=.o))
 
-objs = $(addprefix build/,$(src:.cpp=.o))
+# Version of the C++ standard to use when compiling and linking.
+# For a list of supported values, search for `-std` in your compiler's manual.
+CXXSTANDARD = c++17
+# Extra flags passed to the C++ compiler.
+CXXFLAGS += -std=$(CXXSTANDARD)
 
+build: $(EXE)
 
-mafia: $(objs)
-	$(CXX) $(CXXFLAGS) $(objs) -o mafia
-
-$(objs): build/%.o: %.cpp
-	mkdir -p $(dir $@)
-	$(CXX) -c $(CXXFLAGS) $< -o $@
-
+run: build
+	@ ./$(EXE)
 
 clean:
-	rm -r ./build
-	rm ./mafia
+	$(RM) -r $(BUILDDIR)
+	$(RM) $(EXE)
 
+$(OBJECTS): build/%.o: %.cpp
+	@ mkdir -p $(dir $@)
+	$(COMPILE.cpp) -o $@ -- $<
 
-.PHONY: clean
+$(EXE): $(OBJECTS)
+	$(LINK.cpp) -o $@ -- $^
+
+.PHONY: build run clean
