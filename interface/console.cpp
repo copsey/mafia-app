@@ -41,7 +41,7 @@ namespace maf {
 		catch (const core::Rulebook::Missing_role_alias &e) {
 			err_params["alias"] = escaped(e.alias);
 
-			err << "=Invalid alias!=\n\nNo role could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list r@ to see a list of each role and its alias.)";
+			err << "=Invalid alias!=\n\nNo role could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list roles@ to see a list of each role and its alias.)";
 		}
 		catch (const core::Rulebook::Missing_wildcard_alias &e) {
 			err_params["alias"] = escaped(e.alias);
