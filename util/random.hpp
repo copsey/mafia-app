@@ -2,58 +2,70 @@
 #define MAFIA_UTIL_RANDOM_H
 
 #include <algorithm>
+#include <concepts>
 #include <iterator>
 #include <random>
 #include <ranges>
 
-namespace maf::util {
-	// A `std::mt19937` used by various algorithms.
+namespace maf::util::random {
+	// A `std::default_random_engine` used by various algorithms.
 	// Automatically seeded when the program first starts.
-	inline std::mt19937 random_engine{std::random_device{}()};
+	inline auto default_generator = std::default_random_engine{std::random_device{}()};
 
-	// Pick a random position in `[b,e)` using `g`.
-	//
-	// If `b == e`, returns `e` instead.
-	template <std::forward_iterator Iter, typename RNG>
-	Iter pick_with(Iter b, Iter e, RNG && g) {
-		if (b == e) return e;
-
-		auto n = std::distance(b, e);
-		std::uniform_int_distribution<decltype(n)> dist{0, n - 1};
-
-		std::advance(b, dist(g));
-		return b;
+	// Generate a single result from a uniform integer distribution with
+	// minimum value `a` and maximum value `b`.
+	template <std::integral Int = int>
+	auto uniform_int_trial(Int a, Int b) -> Int {
+		auto dist = std::uniform_int_distribution{a, b};
+		return dist(default_generator);
 	}
 
-	// Pick a random position in `c` using `g`.
-	//
-	// If `c` is empty, returns `std::end(c)` instead.
-	template <typename Cont, typename RNG>
-	auto pick_with(Cont & c, RNG && g) -> decltype(std::begin(c)) {
-		if (std::empty(c)) return std::end(c);
-
-		auto n = std::size(c);
-		std::uniform_int_distribution<decltype(n)> dist(0, n - 1);
-
-		auto b = std::begin(c);
-		std::advance(b, dist(g));
-		return b;
+	// Generate a single result from a Bernoulli distribution with probability
+	// `p` of success.
+	inline bool bernoulli_trial(double p) {
+		auto dist = std::bernoulli_distribution{p};
+		return dist(default_generator);
 	}
 
-	// Pick a random position in `[b,e)` using `util::random_engine`.
-	//
-	// If `b == e`, returns `e` instead.
-	template <std::forward_iterator Iter>
-	Iter pick(Iter b, Iter e) {
-		return pick_with(b, e, random_engine);
+	// Generate a single result from a discrete distribution with the
+	// provided `weights`.
+	template <std::integral ResultType = int>
+	auto discrete_trial(auto&& weights) -> ResultType {
+		auto b    = std::begin(weights);
+		auto e    = std::end(weights);
+		auto dist = std::discrete_distribution<ResultType>{b, e};
+
+		return dist(default_generator);
 	}
 
-	// Pick a random position in `c` using `util::random_engine`.
+	// Pick a random position in `range` using `random::default_generator`.
 	//
-	// If `c` is empty, returns `std::end(c)` instead.
-	template <typename Cont>
-	auto pick(Cont & c) -> decltype(std::begin(c)) {
-		return pick_with(c, random_engine);
+	// If `range` is empty, returns `std::end(range)` instead.
+	auto pick(auto& range) -> decltype(std::begin(range)) {
+		if (std::empty(range)) return std::end(range);
+
+		auto i = std::begin(range);
+		auto n = uniform_int_trial<int>(0, std::size(range) - 1);
+		std::advance(i, n);
+
+		return i;
+	}
+
+	// Pick a random position in `range` using `random::default_generator`.
+	// The likelihood of each position being selected is determined by
+	// the corresponding weight in `weights`.
+	//
+	// If `range` is empty, returns `std::end(range)` instead.
+	//
+	// Undefined behaviour if `range` and `weights` are not the same size.
+	auto pick(auto& range, auto&& weights) -> decltype(std::begin(range)) {
+		if (std::empty(range)) return std::end(range);
+
+		auto i = std::begin(range);
+		auto n = discrete_trial(weights);
+		std::advance(i, n);
+
+		return i;
 	}
 }
 

@@ -254,9 +254,8 @@ namespace maf {
 			console().store_game(move(new_game));
 		} else if (commands_match(commands, {"preset"})) {
 			int num_presets = _presets.size();
-			std::uniform_int_distribution<int> distr{0, num_presets - 1};
-			int random_preset = distr(util::random_engine);
-			auto new_game = begin_preset(random_preset);
+			auto n = util::random::uniform_int_trial(0, num_presets - 1);
+			auto new_game = begin_preset(n);
 			console().store_game(move(new_game));
 		} else if (commands_match(commands, {"preset", ""})) {
 			int i;

@@ -200,18 +200,10 @@ namespace maf::core {
 		if (sum <= 0.0)
 			throw Duel_failed(caster, target, Reason::bad_probability);
 
-		double p = caster.duel_strength() / sum;
-		std::bernoulli_distribution bd{p};
-
-		Player *winner, *loser;
-
-		if (bd(util::random_engine)) {
-			winner = &caster;
-			loser = &target;
-		} else {
-			winner = &target;
-			loser = &caster;
-		}
+		auto p      = caster.duel_strength() / sum;
+		auto result = util::random::bernoulli_trial(p);
+		auto winner = &(result ? caster : target);
+		auto loser  = &(result ? target : caster);
 
 		winner->win_duel();
 		if (winner->win_condition() == WC::win_duel) {
@@ -558,8 +550,8 @@ namespace maf::core {
 				}
 			}
 
-			if (possible_victims.size() > 0) {
-				Player& victim = **util::pick(possible_victims);
+			if (!possible_victims.empty()) {
+				Player& victim = **util::random::pick(possible_victims);
 				victim.kill(_date, _time);
 				victim.haunt(*haunter);
 			}

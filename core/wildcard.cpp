@@ -97,11 +97,11 @@ namespace maf::core {
 				throw std::logic_error{msg};
 			}
 
-			std::discrete_distribution<std::size_t> dist{weights.begin(), weights.end()};
-			return roles[dist(util::random_engine)];
+			return *util::random::pick(roles, weights);
 		} else {
 			auto& mut_dist = const_cast<std::discrete_distribution<index> &>(_dist);
-			auto role_id = _role_ids[mut_dist(util::random_engine)];
+			auto i = mut_dist(util::random::default_generator);
+			auto role_id = _role_ids[i];
 			return rulebook.look_up(role_id);
 		}
 	}

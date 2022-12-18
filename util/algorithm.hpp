@@ -328,24 +328,18 @@ namespace maf::util {
 		std::reverse(begin(c), end(c));
 	}
 
-	// Randomise the order of elements in `c` using `g`.
-	template <typename Cont, typename RNG>
-	void shuffle_with(Cont & c, RNG && g) {
-		using std::begin, std::end;
-		std::shuffle(begin(c), end(c), g);
-	}
-
-	// Randomise the order of elements in `[b,e)` using `util::random_engine`.
-	template <typename Iter>
+	// Randomise the order of elements in `[b,e)` using the default random
+	// number generator.
+	template <std::random_access_iterator Iter>
 	void shuffle(Iter b, Iter e) {
-		std::shuffle(b, e, util::random_engine);
+		std::shuffle(b, e, random::default_generator);
 	}
 
-	// Randomise the order of elements in `c` using `util::random_engine`.
-	template <typename Cont>
-	void shuffle(Cont & c) {
+	// Randomise the order of elements in `range` using the default random
+	// number generator.
+	void shuffle(auto&& range) {
 		using std::begin, std::end;
-		std::shuffle(begin(c), end(c), util::random_engine);
+		std::shuffle(begin(range), end(range), random::default_generator);
 	}
 }
 
