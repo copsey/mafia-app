@@ -3,7 +3,7 @@
 *Role:* {role}.
 
 {!if daytime}
-*Voting to lynch:* {!if has_lynch_vote}{lynch_vote}.{!else}No one.{!end}
+*Voting to lynch:* {!if has_lynch_vote}{lynch_vote}{!else}No one{!end}.
 
 {!end}
 {!list investigations}

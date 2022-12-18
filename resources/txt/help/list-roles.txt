@@ -11,11 +11,11 @@ These are all of the roles in the game:
 {!end}
 {!if show_all}
 {!list roles}
- - the {role} (@{role.alias}@), {!if role.aligned_to_village}aligned to the village{!else_if role.aligned_to_mafia}aligned to the mafia{!else}a freelance role{!end}
+ - the *{role}* (@{role.alias}@), {!if role.aligned_to_village}aligned to the village{!else_if role.aligned_to_mafia}aligned to the mafia{!else}a freelance role{!end}
 {!end}
 {!else}
 {!list roles}
- - the {role}, alias @{role.alias}@
+ - the *{role}*, alias @{role.alias}@
 {!end}
 {!end}
 

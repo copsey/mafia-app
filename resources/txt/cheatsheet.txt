@@ -3,7 +3,6 @@
 
 Preprocessing:
   {example}      -- substitute a parameter named 'example'
-                 -- ... it must be either a string or a number
   {!if p}        -- begin "if" block
   {!if x < 5}    -- use a comparison instead of a boolean
   {!if 5 > x}    -- ... each side can be either a parameter or a constant
