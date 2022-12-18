@@ -1,6 +1,7 @@
 #ifndef MAFIA_UTIL_STRING_H
 #define MAFIA_UTIL_STRING_H
 
+#include <iterator>
 #include <string>
 #include <string_view>
 
@@ -27,7 +28,7 @@ namespace maf::util {
 		return true;
 	}
 
-	template <typename Iterator>
+	template <std::contiguous_iterator Iterator>
 	string_view make_string_view(Iterator begin, Iterator end) {
 		auto data = static_cast<const char *>(begin);
 		auto length = static_cast<string_view::size_type>(end - begin);

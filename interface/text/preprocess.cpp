@@ -1,3 +1,5 @@
+#include <concepts>
+
 #include "../../util/algorithm.hpp"
 #include "../../util/char.hpp"
 #include "../../util/memory.hpp"
@@ -90,6 +92,7 @@ namespace maf::_preprocess_text_impl {
 	// - Throws `preprocess_text_error` with code `parameter_not_available` if
 	//   there is no parameter in `params` whose key is equal to `name`.
 	template <typename Visitor>
+		requires std::invocable<Visitor, TextParam>
 	auto visit_param(Visitor && f, string_view name, TextParams const& params)
 	-> decltype(visit(f, TextParam{})) {
 		auto& param = get_param(name, params);
@@ -565,9 +568,8 @@ namespace maf::_preprocess_text_impl {
 
 	private:
 		template <typename ExprType>
-		enable_if<is_base_of<expression, ExprType>,
-			iterator>
-		_parse_onto_end (iterator begin, iterator end, string_view input);
+			requires std::derived_from<ExprType, expression>
+		iterator _parse_onto_end(iterator begin, iterator end, string_view input);
 	};
 
 
@@ -991,9 +993,8 @@ namespace maf::_preprocess_text_impl {
 
 
 	template <typename ExprType>
-	enable_if<is_base_of<expression, ExprType>,
-		iterator>
-	sequence::_parse_onto_end (iterator begin, iterator end,
+		requires std::derived_from<ExprType, expression>
+	iterator sequence::_parse_onto_end(iterator begin, iterator end,
 		string_view input)
 	{
 		auto expr = make_unique<ExprType>();

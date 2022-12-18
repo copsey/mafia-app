@@ -100,6 +100,7 @@ namespace maf::core {
 
 		/// Evaluate the function `f` on each role present in this rulebook.
 		template <typename F>
+			requires std::invocable<F, Role &>
 		void for_each_role(F f) const {
 			for (const Role & r: _roles) f(r);
 		}
@@ -181,10 +182,9 @@ namespace maf::core {
 		vector<Role> _roles{};
 		vector<Wildcard> _wildcards{};
 
-		template <typename Customiser>
-		Role & create_role(Role::ID id, Alignment alignment,
-			Customiser customise)
-		{
+		template <typename F>
+			requires std::invocable<F, Role &>
+		Role & create_role(Role::ID id, Alignment alignment, F customise) {
 			Role & role = add_role({id, alignment});
 			customise(role);
 			return role;

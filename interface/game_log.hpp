@@ -1,6 +1,8 @@
 #ifndef MAFIA_GAME_LOG_H
 #define MAFIA_GAME_LOG_H
 
+#include <concepts>
+
 #include "../util/memory.hpp"
 #include "../util/misc.hpp"
 #include "../util/type_traits.hpp"
@@ -122,10 +124,10 @@ namespace maf {
 
 		not_null<Console *> _console;
 
-		template <typename ScreenType, typename... Args>
-		enable_if<is_base_of<Game_screen, ScreenType>>
-		_append_screen(Args&&... args) {
-			auto screen = make_unique<ScreenType>(*_console, args...);
+		template <typename Screen>
+			requires std::derived_from<Screen, Game_screen>
+		void _append_screen(auto&&... args) {
+			auto screen = make_unique<Screen>(*_console, args...);
 			_screen_stack.push_back(move(screen));
 		}
 

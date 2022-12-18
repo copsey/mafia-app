@@ -1,6 +1,8 @@
 #ifndef MAFIA_INTERFACE_CONSOLE_H
 #define MAFIA_INTERFACE_CONSOLE_H
 
+#include <concepts>
+
 #include "../util/memory.hpp"
 #include "../util/misc.hpp"
 
@@ -83,9 +85,10 @@ namespace maf {
 		bool has_help_screen() const { return _help_screen != nullptr; }
 		// Create a new help screen, replacing any that is already being
 		// stored.
-		template <typename ScreenType, typename... Args>
-		void show_help_screen(Args&&... args) {
-			_help_screen = make_unique<ScreenType>(*this, args...);
+		template <typename Screen>
+			requires std::derived_from<Screen, Help_Screen>
+		void show_help_screen(auto&&... args) {
+			_help_screen = make_unique<Screen>(*this, args...);
 		}
 		// Delete the help screen, if one is being stored. Otherwise has no
 		// effect.
@@ -96,9 +99,10 @@ namespace maf {
 		// Checks if a question is currently being stored.
 		bool has_question() const { return _question != nullptr; }
 		// Create a new question, replacing any that is already being stored.
-		template <typename ScreenType, typename... Args>
-		void show_question(Args&&... args) {
-			_question = make_unique<ScreenType>(*this, args...);
+		template <typename Screen>
+			requires std::derived_from<Screen, Question>
+		void show_question(auto&&... args) {
+			_question = make_unique<Screen>(*this, args...);
 		}
 		// Delete the current question, if one is being stored. Otherwise has
 		// no effect.

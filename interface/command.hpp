@@ -1,6 +1,8 @@
 #ifndef MAFIA_INTERFACE_COMMAND_H
 #define MAFIA_INTERFACE_COMMAND_H
 
+#include <iterator>
+
 #include "../util/algorithm.hpp"
 #include "../util/string.hpp"
 #include "../util/vector.hpp"
@@ -34,7 +36,7 @@ namespace maf {
 	//
 	// # Example
 	// `"do X   with Y"` maps to `{"do", "X", "with", "Y"}`.
-	template <typename Iterator>
+	template <std::contiguous_iterator Iterator>
 	CmdSequence parse_input(Iterator begin, Iterator end) {
 		auto is_space = [](char ch) { return ch == ' ' || ch == '\t'; };
 

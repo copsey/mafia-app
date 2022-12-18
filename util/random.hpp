@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include <random>
+#include <ranges>
 
 namespace maf::util {
 	// A `std::mt19937` used by various algorithms.
@@ -13,7 +14,7 @@ namespace maf::util {
 	// Pick a random position in `[b,e)` using `g`.
 	//
 	// If `b == e`, returns `e` instead.
-	template <typename Iter, typename RNG>
+	template <std::forward_iterator Iter, typename RNG>
 	Iter pick_with(Iter b, Iter e, RNG && g) {
 		if (b == e) return e;
 
@@ -42,7 +43,7 @@ namespace maf::util {
 	// Pick a random position in `[b,e)` using `util::random_engine`.
 	//
 	// If `b == e`, returns `e` instead.
-	template <typename Iter>
+	template <std::forward_iterator Iter>
 	Iter pick(Iter b, Iter e) {
 		return pick_with(b, e, random_engine);
 	}
