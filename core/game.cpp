@@ -620,39 +620,39 @@ namespace maf::core {
 			}
 		}
 
-		if ((check_for_village_eliminated && num_village_left > 0)
-		     || (check_for_mafia_eliminated && num_mafia_left > 0)
-		     || (check_for_last_survivor && num_players_left > 1)) {
-			return false;
-		}
+		_ended =
+			!(check_for_village_eliminated && num_village_left > 0)
+			&& !(check_for_mafia_eliminated && num_mafia_left > 0)
+			&& !(check_for_last_survivor && num_players_left > 1);
 
-		for (Player& player: _players) {
-			bool has_won = false;
+		if (_ended) {
+			for (Player& player: _players) {
+				bool has_won = false;
 
-			if (!player.has_been_kicked()) {
-				switch (player.win_condition()) {
-				case Win_condition::survive:
-					has_won = player.is_alive();
-					break;
-				case Win_condition::village_remains:
-					has_won = (num_village_left > 0);
-					break;
-				case Win_condition::mafia_remains:
-					has_won = (num_mafia_left > 0);
-					break;
-				case Win_condition::be_lynched:
-					has_won = player.has_been_lynched();
-					break;
-				case Win_condition::win_duel:
-					has_won = player.has_won_duel();
-					break;
+				if (!player.has_been_kicked()) {
+					switch (player.win_condition()) {
+					case Win_condition::survive:
+						has_won = player.is_alive();
+						break;
+					case Win_condition::village_remains:
+						has_won = (num_village_left > 0);
+						break;
+					case Win_condition::mafia_remains:
+						has_won = (num_mafia_left > 0);
+						break;
+					case Win_condition::be_lynched:
+						has_won = player.has_been_lynched();
+						break;
+					case Win_condition::win_duel:
+						has_won = player.has_won_duel();
+						break;
+					}
 				}
-			}
 
-			if (has_won) player.win(); else player.lose();
+				if (has_won) player.win(); else player.lose();
+			}
 		}
 
-		_ended = true;
-		return true;
+		return _ended;
 	}
 }
