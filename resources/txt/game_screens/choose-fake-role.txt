@@ -1,7 +1,7 @@
 =Choose Fake Role=
 
 {!if finished}
-%{player} should now go back to sleep.
+${player} should now go back to sleep.
 
 When you are ready, enter @ok@ to continue.
 {!else_if fake_role.chosen}
@@ -11,9 +11,9 @@ You must pretend that this is your real role for the remainder of the game. Brea
 
 Now would be a good time to study your fake role.
 
-%Enter @help role {fake_role.alias}@ to see more information about your role. When you are ready, enter @ok@ to continue.
+$Enter @help role {fake_role.alias}@ to see more information about your role. When you are ready, enter @ok@ to continue.
 {!else}
-%{player} needs to be given a fake role, which they must pretend is their true role for the rest of the game.
+${player} needs to be given a fake role, which they must pretend is their true role for the rest of the game.
 
 If they break the rules by contradicting their fake role, then they should be kicked from the game by entering @kick {player}@ during the day.
 

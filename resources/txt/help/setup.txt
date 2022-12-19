@@ -1,6 +1,6 @@
 =Help: Setup=
 
-%When you're finished with this screen, you can enter @ok@ to dismiss it.%
+$When you're finished with this screen, you can enter @ok@ to dismiss it.$
 
 The setup screen is where you can choose the players and cards that will feature in the next game of Mafia.
 

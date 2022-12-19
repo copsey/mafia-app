@@ -3,7 +3,7 @@
 {!if private}
 {player}, your role is the {role}.
 
-%To see a full description of your role, enter @help role {role.alias}@.
+$To see a full description of your role, enter @help role {role.alias}@.
 {!else}
 {player}, you are about to be shown your role.
 {!end}

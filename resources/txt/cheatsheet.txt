@@ -19,8 +19,8 @@ Text formatting:
   *important*    -- bold
   @ok@           -- monospace typeface
   =Main Menu=    -- title
-  %How to play%  -- help text
-  %Help message  -- ... it doesn't need to end with a '%' sign
+  $How to play$  -- help text
+  $Help message  -- ... it doesn't need to end with a '$' sign
   ~fancy~        -- flavour text
 
 Escape sequences:
@@ -29,7 +29,7 @@ Escape sequences:
   \*  -- asterisk
   \@  -- at sign
   \=  -- equals sign
-  \%  -- percent sign
+  \$  -- dollar sign
   \~  -- tilde
   \{  -- left curly brace
   \}  -- right curly brace

@@ -10,7 +10,7 @@ namespace maf::_format_text_impl {
 
 	bool is_format_code(char ch) {
 		switch (ch) {
-		case '_': case '*': case '@': case '=': case '%': case '~':
+		case '_': case '*': case '@': case '=': case '$': case '~':
 			return true;
 		default:
 			return false;
@@ -211,7 +211,7 @@ namespace maf::_format_text_impl {
 		case '=':
 			toggle_title_semantics(attributes);
 			break;
-		case '%':
+		case '$':
 			toggle_help_text_semantics(attributes);
 			break;
 		case '~':
@@ -235,7 +235,7 @@ namespace maf::_format_text_impl {
 			// e.g.
 			//       i             j
 			//       |             |
-			// "... %You can enter @help@ if you need..."
+			// "... $You can enter @help@ if you need..."
 
 			// e.g.
 			//          i            j

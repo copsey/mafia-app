@@ -10,4 +10,4 @@ The winner of the duel is chosen at random; however, _the other player's role ha
 
 *Notes:*
 - The game can end before the Musketeer has been involved in a duel, in which case the Musketeer loses. Make sure not to wait too long before using your ability!
-- It's possible for the Musketeer to be challenged to a duel by another Musketeer. In this case, the odds of either player winning are 50\%, and whoever wins the duel also wins the game.
+- It's possible for the Musketeer to be challenged to a duel by another Musketeer. In this case, the odds of either player winning are 50%, and whoever wins the duel also wins the game.

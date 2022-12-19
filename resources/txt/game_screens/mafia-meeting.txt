@@ -1,7 +1,7 @@
 =Mafia Meeting=
 
 {!if finished}
-%The mafia have nothing more to discuss for now, and should go back to sleep.
+$The mafia have nothing more to discuss for now, and should go back to sleep.
 
 Enter @ok@ when you are ready to continue.
 {!else_if first_meeting}
@@ -28,8 +28,8 @@ Seated around a polished walnut table are:
 The mafia are ready to choose their next victim.
 
 {!if mafia.size = 1}
-%Entering @kill <A>@ will make {player} attempt to kill player @<A>@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.
+$Entering @kill <A>@ will make {player} attempt to kill player @<A>@. If {player} doesn't want to kill anybody this night, enter @skip@ instead.
 {!else}
-%Entering @<A> kill <B>@ will make player @<A>@ attempt to kill player @<B>@. Player @<A>@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.
+$Entering @<A> kill <B>@ will make player @<A>@ attempt to kill player @<B>@. Player @<A>@ must be a member of the mafia. If the mafia have chosen not to kill anybody this night, enter @skip@ instead.
 {!end}
 {!end}

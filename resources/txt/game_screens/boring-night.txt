@@ -3,6 +3,6 @@
 
 ~It is warm outside. The moon shines brightly. The gentle chirping of crickets is carried by a pleasant breeze...~
 
-%Nothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.
+$Nothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.
 
 Enter @ok@ when you're ready to continue.

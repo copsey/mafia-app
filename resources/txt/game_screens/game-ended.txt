@@ -20,4 +20,4 @@ Commiserations go out to:
 Nobody lost.
 {!end}
 
-%To return to the setup screen, enter @end@.
+$To return to the setup screen, enter @end@.

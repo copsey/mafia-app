@@ -19,7 +19,7 @@ These are all of the roles in the game:
 {!end}
 {!end}
 
-%Further help:
+$Further help:
  - To see more information about role @<X>@, enter @help role <X>@.
 {!if show_village}
  - To show all of the roles, enter @list roles@.

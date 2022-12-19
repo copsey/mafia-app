@@ -3,9 +3,9 @@
 {!if finished}
 {caster} should now go back to sleep.
 
-%When you are ready, enter @ok@ to continue.
+$When you are ready, enter @ok@ to continue.
 {!else}
 {caster}, you can choose to kill somebody this night.
 
-%Enter @kill <A>@ to kill player @<A>@, or enter @skip@ if you don't wish to kill anybody.
+$Enter @kill <A>@ to kill player @<A>@, or enter @skip@ if you don't wish to kill anybody.
 {!end}
