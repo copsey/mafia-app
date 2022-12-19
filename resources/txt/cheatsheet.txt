@@ -17,7 +17,7 @@ Preprocessing:
 Text formatting:
   _Proper noun_  -- italics
   *important*    -- bold
-  `ok`           -- monospace typeface
+  `ok`           -- monospaced typeface
   =Main Menu=    -- title
   $How to play$  -- help text
   $Help message  -- ... it doesn't need to end with a '$' sign
