@@ -5,4 +5,4 @@
 
 $Nothing of interest happened this night, although you should still wait a few moments before continuing, to maintain the illusion that something happened.
 
-Enter @ok@ when you're ready to continue.
+Enter `ok` when you're ready to continue.

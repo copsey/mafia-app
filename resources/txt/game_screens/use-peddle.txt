@@ -3,9 +3,9 @@
 {!if finished}
 {caster} should now go back to sleep.
 
-$When you are ready, enter @ok@ to continue.
+$When you are ready, enter `ok` to continue.
 {!else}
 {caster}, you can choose to peddle drugs to somebody this night.
 
-$Enter @target <A>@ to peddle drugs to player @<A>@, or enter @skip@ if you don't wish to peddle drugs to anybody.
+$Enter `target <A>` to peddle drugs to player `<A>`, or enter `skip` if you don't wish to peddle drugs to anybody.
 {!end}

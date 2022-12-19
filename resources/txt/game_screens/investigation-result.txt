@@ -3,7 +3,7 @@
 {!if finished}
 ${caster} should now go back to sleep.
 
-When you are ready, enter @ok@ to continue.
+When you are ready, enter `ok` to continue.
 {!else}
 {caster}, you have completed your investigation of {target}.
 
@@ -13,5 +13,5 @@ When you are ready, enter @ok@ to continue.
 The investigation was fruitless. {target} appears to be innocent.
 {!end}
 
-$When you are ready, enter @ok@ to continue.
+$When you are ready, enter `ok` to continue.
 {!end}

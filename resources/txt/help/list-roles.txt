@@ -11,30 +11,30 @@ These are all of the roles in the game:
 {!end}
 {!if show_all}
 {!list roles}
- - the *{role}* (@{role.alias}@), {!if role.aligned_to_village}aligned to the village{!else_if role.aligned_to_mafia}aligned to the mafia{!else}a freelance role{!end}
+ - the *{role}* (`{role.alias}`), {!if role.aligned_to_village}aligned to the village{!else_if role.aligned_to_mafia}aligned to the mafia{!else}a freelance role{!end}
 {!end}
 {!else}
 {!list roles}
- - the *{role}*, alias @{role.alias}@
+ - the *{role}*, alias `{role.alias}`
 {!end}
 {!end}
 
 $Further help:
- - To see more information about role @<X>@, enter @help role <X>@.
+ - To see more information about role `<X>`, enter `help role <X>`.
 {!if show_village}
- - To show all of the roles, enter @list roles@.
- - To show just the mafia roles, enter @list roles mafia@.
- - To show just the freelance roles, enter @list roles freelance@.
+ - To show all of the roles, enter `list roles`.
+ - To show just the mafia roles, enter `list roles mafia`.
+ - To show just the freelance roles, enter `list roles freelance`.
 {!else_if show_mafia}
- - To show all of the roles, enter @list roles@.
- - To show just the village roles, enter @list roles village@.
- - To show just the freelance roles, enter @list roles freelance@.
+ - To show all of the roles, enter `list roles`.
+ - To show just the village roles, enter `list roles village`.
+ - To show just the freelance roles, enter `list roles freelance`.
 {!else_if show_freelance}
- - To show all of the roles, enter @list roles@.
- - To show just the village roles, enter @list roles village@.
- - To show just the mafia roles, enter @list roles mafia@.
+ - To show all of the roles, enter `list roles`.
+ - To show just the village roles, enter `list roles village`.
+ - To show just the mafia roles, enter `list roles mafia`.
 {!else}
- - To show just the village roles, enter @list roles village@.
- - To show just the mafia roles, enter @list roles mafia@.
- - To show just the freelance roles, enter @list roles freelance@.
+ - To show just the village roles, enter `list roles village`.
+ - To show just the mafia roles, enter `list roles mafia`.
+ - To show just the freelance roles, enter `list roles freelance`.
 {!end}

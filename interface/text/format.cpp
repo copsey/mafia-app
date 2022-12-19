@@ -10,7 +10,7 @@ namespace maf::_format_text_impl {
 
 	bool is_format_code(char ch) {
 		switch (ch) {
-		case '_': case '*': case '@': case '=': case '$': case '~':
+		case '_': case '*': case '`': case '=': case '$': case '~':
 			return true;
 		default:
 			return false;
@@ -205,7 +205,7 @@ namespace maf::_format_text_impl {
 		case '*':
 			toggle_bold_weight(attributes);
 			break;
-		case '@':
+		case '`':
 			toggle_monospace_typeface(attributes);
 			break;
 		case '=':
@@ -235,12 +235,12 @@ namespace maf::_format_text_impl {
 			// e.g.
 			//       i             j
 			//       |             |
-			// "... $You can enter @help@ if you need..."
+			// "... $You can enter `help` if you need..."
 
 			// e.g.
 			//          i            j
 			//          |            |
-			// "... @ok@ to continue."
+			// "... `ok` to continue."
 
 			block.append(i, j);
 

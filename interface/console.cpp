@@ -41,12 +41,12 @@ namespace maf {
 		catch (const core::Rulebook::Missing_role_alias &e) {
 			err_params["alias"] = escaped(e.alias);
 
-			err << "=Invalid alias!=\n\nNo role could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list roles@ to see a list of each role and its alias.)";
+			err << "=Invalid alias!=\n\nNo role could be found whose alias is `{alias}`.\nNote that aliases are case-sensitive.\n(enter `list roles` to see a list of each role and its alias.)";
 		}
 		catch (const core::Rulebook::Missing_wildcard_alias &e) {
 			err_params["alias"] = escaped(e.alias);
 
-			err << "=Invalid alias!=\n\nNo wildcard could be found whose alias is @{alias}@.\nNote that aliases are case-sensitive.\n(enter @list w@ to see a list of each wildcard and its alias.)";
+			err << "=Invalid alias!=\n\nNo wildcard could be found whose alias is `{alias}`.\nNote that aliases are case-sensitive.\n(enter `list w` to see a list of each wildcard and its alias.)";
 		}
 		catch (const core::Game::Kick_failed &e) {
 			err_params["player"] = escaped(_game_log->get_name(e.player));
@@ -143,12 +143,12 @@ namespace maf {
 			switch (e.reason) {
 			using Reason = core::Game::Begin_night_failed::Reason;
 			case Reason::game_ended:
-				err << "The game has ended, and so cannot be continued.\n(enter @end@ to return to the game setup screen.)";
+				err << "The game has ended, and so cannot be continued.\n(enter `end` to return to the game setup screen.)";
 				break;
 			case Reason::already_night:
 				err << "It is already nighttime.";
 			case Reason::lynch_can_occur:
-				err << "The next night cannot begin until a lynch has taken place.\n(enter @lynch@ to submit the current lynch votes.)";
+				err << "The next night cannot begin until a lynch has taken place.\n(enter `lynch` to submit the current lynch votes.)";
 				break;
 			}
 		}
@@ -301,10 +301,10 @@ namespace maf {
 		catch (const Game_log::Player_not_found &e) {
 			err_params["player"] = escaped(e.name);
 
-			err << "=Player not found!=\n\nA player named @{player}@ could not be found.";
+			err << "=Player not found!=\n\nA player named `{player}` could not be found.";
 		}
 		catch (const Screen::Bad_commands &e) {
-			err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter @help@ if you're unsure what to do.)";
+			err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter `help` if you're unsure what to do.)";
 		}
 		catch (const Setup_screen::Bad_player_name &e) {
 			err << "=Invalid name!=\n\nThe name of a player can only contain letters and numbers.";
@@ -312,36 +312,36 @@ namespace maf {
 		catch (const Setup_screen::Player_already_exists &e) {
 			err_params["player"] = escaped(e.name);
 
-			err << "=Player already exists!=\n\nA player named @{player}@ has already been selected to play in the next game.\nNote that names are case-insensitive.)";
+			err << "=Player already exists!=\n\nA player named `{player}` has already been selected to play in the next game.\nNote that names are case-insensitive.)";
 		}
 		catch (const Setup_screen::Player_missing &e) {
 			err_params["player"] = escaped(e.name);
 
-			err << "=Missing player!=\n\nA player named @{player}@ could not be found.";
+			err << "=Missing player!=\n\nA player named `{player}` could not be found.";
 		}
 		catch (const Setup_screen::Rolecard_unselected &e) {
 			err_params["alias"] = escaped(e.role.alias());
 
-			err << "=Rolecard not selected!=\n\nNo copies of the rolecard with alias @{alias}@ have been selected.";
+			err << "=Rolecard not selected!=\n\nNo copies of the rolecard with alias `{alias}` have been selected.";
 		}
 		catch (const Setup_screen::Wildcard_unselected &e) {
 			err_params["alias"] = escaped(e.wildcard.alias());
 
-			err << "=Wildcard not selected!=\n\nNo copies of the wildcard with alias @{alias}@ have been selected.";
+			err << "=Wildcard not selected!=\n\nNo copies of the wildcard with alias `{alias}` have been selected.";
 		}
 		catch (const Setup_screen::Bad_commands &e) {
-			err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter @help@ if you're unsure what to do.)";
+			err << "=Unrecognised input!=\n\nThe text that you entered couldn't be recognised.\n(enter `help` if you're unsure what to do.)";
 		}
 		catch (const Question::Bad_commands &e) {
 			err << "=Invalid input!=\n\nPlease answer the question being shown before trying to do anything else.";
 		}
 		catch (const No_game_in_progress &e) {
-			err << "=No game in progress!=\n\nThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter @begin@ to begin a new game, or @help@ for a list of usable commands.)";
+			err << "=No game in progress!=\n\nThere is no game in progress at the moment, and so game-related commands cannot be used.\n(enter `begin` to begin a new game, or `help` for a list of usable commands.)";
 		}
 		catch (const Begin_game_failed &e) {
 			switch (e.reason) {
 				case Begin_game_failed::Reason::game_already_in_progress:
-					err << "=Game in progress!=\n\nA new game cannot begin until the current game ends.\n(enter @end@ to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
+					err << "=Game in progress!=\n\nA new game cannot begin until the current game ends.\n(enter `end` to force the game to end early, or if the game has already ended and you want to return to the game setup screen.)";
 					break;
 			}
 		}

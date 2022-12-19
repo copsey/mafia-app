@@ -7,4 +7,4 @@ All of the wildcards have now been turned into roles. These are as follows:
 
 It's up to you whether or not to let the players know which roles were selected.
 
-$Enter @ok@ when you're ready to continue.
+$Enter `ok` when you're ready to continue.

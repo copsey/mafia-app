@@ -27,11 +27,11 @@ namespace maf {
 		if (ifstream input{path}; input) {
 			contents = util::read_all(input);
 		} else {
-			contents += "=Error!=\n\nERROR: No text found for the @";
+			contents += "=Error!=\n\nERROR: No text found for the `";
 			contents += escaped(this->id());
-			contents += "@ screen.\n\nIt should be located at @";
+			contents += "` screen.\n\nIt should be located at `";
 			contents += escaped(path);
-			contents += "@.\n\n$Enter @ok@ to return to the previous screen.";
+			contents += "`.\n\n$Enter `ok` to return to the previous screen.";
 		}
 
 		return contents;
@@ -48,14 +48,14 @@ namespace maf {
 		} catch (const preprocess_text_error & error) {
 			output += "=Error!=\n\nERROR: ";
 			output += escaped(error.message());
-			output += " in the following string:\n\n@";
+			output += " in the following string:\n\n`";
 			output += escaped(error.input);
 		}
 	}
 
 	void Screen::do_commands(const CmdSequence & commands) {
 		if (commands.size() == 0) {
-			string msg = "=Missing input!=\n\nEntering a blank input has no effect.\n(enter @help@ if you're unsure what to do.)";
+			string msg = "=Missing input!=\n\nEntering a blank input has no effect.\n(enter `help` if you're unsure what to do.)";
 			auto params = TextParams{};
 			throw Generic_error{move(msg), move(params)};
 		} else if (commands_match(commands, {"help", "role", ""})) {

@@ -8,7 +8,7 @@ Gathered outside the town hall are:
 
 As it stands, {!if lynch_target.exists}{lynch_target}{!else}nobody{!end} will be lynched.
 
-$Enter @lynch@ to submit the current lynch votes. Daytime abilities may also be used at this point.
+$Enter `lynch` to submit the current lynch votes. Daytime abilities may also be used at this point.
 {!else}
 ~With little time left in the day, the townsfolk prepare themselves for another night of uncertainty...~
 
@@ -17,5 +17,5 @@ Gathered outside the town hall are:
  - {player}
 {!end}
 
-$Anybody who wishes to use a daytime ability may do so now. Otherwise, enter @night@ to continue.
+$Anybody who wishes to use a daytime ability may do so now. Otherwise, enter `night` to continue.
 {!end}

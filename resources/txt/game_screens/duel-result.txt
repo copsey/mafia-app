@@ -12,4 +12,4 @@ The lifeless body of {loser} falls to the ground. {winner} lets out a sigh of re
 With that, {winner} throws their gun to the ground and flees from the village.
 {!end}
 
-$When you have finished with this screen, enter @ok@.
+$When you have finished with this screen, enter `ok`.

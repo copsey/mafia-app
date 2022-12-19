@@ -267,7 +267,7 @@ namespace maf {
 				auto new_game = begin_preset(i);
 				console().store_game(move(new_game));
 			} else {
-				string msg = "=Error!=\n\nThe string @{str}@ could not be converted into a preset index. (i.e. a relatively-small integer)";
+				string msg = "=Error!=\n\nThe string `{str}` could not be converted into a preset index. (i.e. a relatively-small integer)";
 				auto params = TextParams{};
 				params["str"] = escaped(str);
 
