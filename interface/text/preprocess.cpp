@@ -1152,7 +1152,7 @@ maf::index maf::preprocess_text_error::pos() const {
 		using T = decay<decltype(arg)>;
 
 		static_assert(is_same<T, iterator> || is_same<T, string_view>,
-		"Unexpected type for 'info' parameter in 'preprocess_text_error'");
+		"Unexpected type for 'param' in 'preprocess_text_error'");
 
 		if constexpr (is_same<T, iterator>) {
 			return arg;
