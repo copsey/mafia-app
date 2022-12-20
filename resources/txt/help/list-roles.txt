@@ -21,20 +21,19 @@ These are all of the roles in the game:
 
 $Further help:
  - To see more information about role `<X>`, enter `help role <X>`.
+{!if show_all}
+{!else}
+ - To show all of the roles, enter `list roles`.
+{!end}
 {!if show_village}
- - To show all of the roles, enter `list roles`.
- - To show just the mafia roles, enter `list roles mafia`.
- - To show just the freelance roles, enter `list roles freelance`.
-{!else_if show_mafia}
- - To show all of the roles, enter `list roles`.
- - To show just the village roles, enter `list roles village`.
- - To show just the freelance roles, enter `list roles freelance`.
-{!else_if show_freelance}
- - To show all of the roles, enter `list roles`.
- - To show just the village roles, enter `list roles village`.
- - To show just the mafia roles, enter `list roles mafia`.
 {!else}
  - To show just the village roles, enter `list roles village`.
+{!end}
+{!if show_mafia}
+{!else}
  - To show just the mafia roles, enter `list roles mafia`.
+{!end}
+{!if show_freelance}
+{!else}
  - To show just the freelance roles, enter `list roles freelance`.
 {!end}
