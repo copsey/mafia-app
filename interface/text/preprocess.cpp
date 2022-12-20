@@ -1007,7 +1007,8 @@ namespace maf::_preprocess_text_impl {
 	inline iterator conditional::parse(iterator begin, iterator end,
 		string_view input)
 	{
-		auto i = this->_first = begin;
+		this->_first = begin;
+		auto i = begin;
 		i = _parse_first_cond_subexpr(i, end, input);
 		i = _parse_remaining_subexprs(i, end, input);
 		i = _parse_end(i, end, input);
