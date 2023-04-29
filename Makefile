@@ -41,9 +41,9 @@ clean:
 
 $(OBJECTS): build/%.o: %.cpp
 	@ mkdir -p $(dir $@)
-	$(COMPILE.cpp) -o $@ -- $<
+	$(COMPILE.cpp) -o $@ $<
 
 $(EXE): $(OBJECTS)
-	$(LINK.cpp) -o $@ -- $^
+	$(LINK.cpp) -o $@ $^
 
 .PHONY: build run clean
