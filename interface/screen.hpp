@@ -1,6 +1,7 @@
 #ifndef MAFIA_INTERFACE_SCREEN_H
 #define MAFIA_INTERFACE_SCREEN_H
 
+#include "../util/filesystem.hpp"
 #include "../util/memory.hpp"
 #include "../util/string.hpp"
 
@@ -28,11 +29,11 @@ namespace maf {
 		// resources from the file system.
 		virtual string_view id() const = 0;
 
-		// A string indicating which subdirectory of "resources/" contains the
-		// ".txt" file for this screen. Defaults to "txt/".
-		virtual string_view txt_subdir() const { return "txt/"; }
-		// A string with the complete path of the ".txt" file for this screen.
-		string txt_path() const;
+		// A string indicating which subdirectory of "resources" contains the
+		// ".txt" file for this screen. Defaults to "txt".
+		virtual fs::path txt_subdir() const { return "txt"; }
+		// The complete path of the ".txt" file for this screen.
+		fs::path txt_path() const;
 		// Open the ".txt" file for this screen and read its contents into a
 		// string.
 		string load_txt() const;

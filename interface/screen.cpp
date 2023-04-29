@@ -8,15 +8,16 @@
 #include "screen.hpp"
 
 namespace maf {
-	string Screen::txt_path() const {
+	fs::path Screen::txt_path() const {
 		// FIXME: This is horrendously fragile.
-		string fname = "/Users/Jack/Documents/Developer/Projects/mafia/";
+		string_view root{"/Users/Jack/Documents/Developer/Projects/mafia"};
 
-		fname += "resources/";
-		fname += this->txt_subdir();
-		fname += this->id();
-		fname += ".txt";
-		return fname;
+		fs::path path{root};
+		path /= "resources";
+		path /= this->txt_subdir();
+		path /= this->id();
+		path += ".txt";
+		return path;
 	}
 
 	string Screen::load_txt() const {
@@ -30,7 +31,7 @@ namespace maf {
 			contents += "=Error!=\n\nERROR: No text found for the `";
 			contents += escaped(this->id());
 			contents += "` screen.\n\nIt should be located at `";
-			contents += escaped(path);
+			contents += escaped(path.native());
 			contents += "`.\n\n$Enter `ok` to return to the previous screen.";
 		}
 

@@ -15,7 +15,7 @@ namespace maf {
 	struct Help_Screen: Screen {
 		Help_Screen(Console & console): Screen{console} { }
 
-		string_view txt_subdir() const override { return "txt/help/"; }
+		fs::path txt_subdir() const override { return "txt/help"; }
 
 		void do_commands(const CmdSequence & commands) override;
 	};
@@ -37,7 +37,7 @@ namespace maf {
 
 		string_view id() const final { return core::alias(_role_id); }
 
-		string_view txt_subdir() const override { return "txt/help/roles/"; }
+		fs::path txt_subdir() const override { return "txt/help/roles"; }
 
 		void set_params(TextParams & params) const override;
 

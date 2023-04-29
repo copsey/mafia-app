@@ -10,7 +10,7 @@ namespace maf {
 	struct Question: Screen {
 		using Screen::Screen;
 
-		string_view txt_subdir() const override { return "txt/questions/"; }
+		fs::path txt_subdir() const override { return "txt/questions"; }
 	};
 
 

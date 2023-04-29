@@ -23,7 +23,7 @@ namespace maf {
 		Game_log & game_log();
 		const Game_log & game_log() const;
 
-		string_view txt_subdir() const override { return "txt/game_screens/"; }
+		fs::path txt_subdir() const override { return "txt/game_screens"; }
 
 		void do_commands(const CmdSequence & commands) override;
 
