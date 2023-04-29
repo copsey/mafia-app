@@ -433,8 +433,9 @@ namespace maf {
 	}
 
 	void Console::end_game() {
-		// TODO: Choose file location where history is saved
-		fs::path path{"/Users/Jack/Documents/Developer/Projects/mafia/misc/game_history.txt"};
+		auto path = Screen::root_dir();
+		path /= "misc";
+		path /= "game_history.txt";
 
 		if (has_game()) {
 			std::time_t t = std::time(nullptr);

@@ -29,6 +29,9 @@ namespace maf {
 		// resources from the file system.
 		virtual string_view id() const = 0;
 
+		// The root directory containing all the source code.
+		static fs::path root_dir();
+
 		// A string indicating which subdirectory of "resources" contains the
 		// ".txt" file for this screen. Defaults to "txt".
 		virtual fs::path txt_subdir() const { return "txt"; }

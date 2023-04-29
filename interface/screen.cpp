@@ -8,11 +8,14 @@
 #include "screen.hpp"
 
 namespace maf {
-	fs::path Screen::txt_path() const {
-		// FIXME: This is horrendously fragile.
-		string_view root{"/Users/Jack/Documents/Developer/Projects/mafia"};
+	fs::path Screen::root_dir() {
+		// TODO: This would be better as runtime configuration
+		// than a hard-coded value.
+		return MAFIA_ROOT_DIR;
+	}
 
-		fs::path path{root};
+	fs::path Screen::txt_path() const {
+		auto path = Screen::root_dir();
 		path /= "resources";
 		path /= this->txt_subdir();
 		path /= this->id();
