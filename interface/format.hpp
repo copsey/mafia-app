@@ -190,10 +190,10 @@ namespace maf {
 
 		StyledString() = default;
 
-		StyledString(string string, attributes_t attributes)
-		: string{string}, attributes{attributes} { }
+		StyledString(string str, attributes_t attributes)
+		: str{str}, attributes{attributes} { }
 
-		string string;
+		string str;
 		attributes_t attributes;
 	};
 
