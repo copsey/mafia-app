@@ -9,9 +9,8 @@
 
 namespace maf {
 	fs::path Screen::root_dir() {
-		// TODO: This would be better as runtime configuration
-		// than a hard-coded value.
-		return MAFIA_ROOT_DIR;
+		// TODO: Set this at run-time instead of compile-time.
+		return APPLICATION_ROOT_DIR;
 	}
 
 	fs::path Screen::txt_path() const {

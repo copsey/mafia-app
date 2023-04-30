@@ -29,7 +29,7 @@ OBJECTS = $(addprefix $(BUILDDIR)/,$(SOURCE:.cpp=.o))
 CXXSTANDARD = c++20
 # Extra flags passed to the C++ compiler.
 CXXFLAGS += -std=$(CXXSTANDARD)
-CXXFLAGS += -D 'MAFIA_ROOT_DIR="$(shell pwd)"'
+CXXFLAGS += -D 'APPLICATION_ROOT_DIR="$(shell pwd)"'
 
 build: $(EXE)
 
