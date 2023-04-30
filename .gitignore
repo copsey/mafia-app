@@ -2,6 +2,7 @@
 /mafia
 build
 mac/build
+include
 
 # Xcode
 mac/Mafia.xcodeproj/xcuserdata

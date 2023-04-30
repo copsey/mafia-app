@@ -21,6 +21,8 @@ SOURCE = \
 	cli/main.cpp \
 # Directory where intermediate build artifacts are stored.
 BUILDDIR = build
+# Directory where additional headers are stored.
+INCLUDEDIR = include
 # List of C++ object files.
 OBJECTS = $(addprefix $(BUILDDIR)/,$(SOURCE:.cpp=.o))
 
@@ -29,6 +31,7 @@ OBJECTS = $(addprefix $(BUILDDIR)/,$(SOURCE:.cpp=.o))
 CXXSTANDARD = c++20
 # Extra flags passed to the C++ compiler.
 CXXFLAGS += -std=$(CXXSTANDARD)
+CXXFLAGS += -I include
 CXXFLAGS += -D 'APPLICATION_ROOT_DIR="$(shell pwd)"'
 
 build: $(EXE)
@@ -38,6 +41,7 @@ run: build
 
 clean:
 	$(RM) -r $(BUILDDIR)
+	$(RM) -r $(INCLUDEDIR)
 	$(RM) $(EXE)
 
 $(OBJECTS): build/%.o: %.cpp
@@ -48,3 +52,10 @@ $(EXE): $(OBJECTS)
 	$(LINK.cpp) -o $@ $^
 
 .PHONY: build run clean
+
+# Microsoft's Guidlines Support Library (GSL)
+include/gsl:
+	curl -sL https://github.com/microsoft/GSL/archive/refs/tags/v4.0.0.tar.gz \
+	  | tar -xz GSL-4.0.0/include/gsl --strip-components=1
+
+$(OBJECTS): include/gsl
