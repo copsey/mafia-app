@@ -8,13 +8,8 @@
 #include "screen.hpp"
 
 namespace maf {
-	fs::path Screen::root_dir() {
-		// TODO: Set this at run-time instead of compile-time.
-		return APPLICATION_ROOT_DIR;
-	}
-
 	fs::path Screen::txt_path() const {
-		auto path = Screen::root_dir();
+		auto path = application::root_dir();
 		path /= "resources";
 		path /= this->txt_subdir();
 		path /= this->id();

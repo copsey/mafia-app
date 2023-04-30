@@ -30,14 +30,14 @@ namespace maf {
 	}
 
 	void Game_screen::summarise(string & output) const {
-		// FIXME: This is horrendously fragile.
-		string fname = "/Users/Jack/Documents/Developer/Projects/mafia/resources/";
+		auto path = application::root_dir();
+		path /= "resources";
+		path /= "txt";
+		path /= "events";
+		path /= this->id();
+		path += ".txt";
 
-		fname += "txt/events/";
-		fname += this->id();
-		fname += ".txt";
-
-		if (ifstream input{fname}; input) {
+		if (ifstream input{path}; input) {
 			output += util::read_all(input);
 		}
 	}

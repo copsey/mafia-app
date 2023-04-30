@@ -433,7 +433,7 @@ namespace maf {
 	}
 
 	void Console::end_game() {
-		auto path = Screen::root_dir();
+		auto path = application::root_dir();
 		path /= "misc";
 		path /= "game_history.txt";
 
