@@ -53,9 +53,10 @@ $(EXE): $(OBJECTS)
 
 .PHONY: build run clean
 
-# Microsoft's Guidlines Support Library (GSL)
+# Microsoft's Guidelines Support Library (GSL)
+GSL_VERSION = 4.0.0
+GSL_URL = https://github.com/microsoft/GSL/archive/refs/tags/v$(GSL_VERSION).tar.gz
 include/gsl:
-	curl -sL https://github.com/microsoft/GSL/archive/refs/tags/v4.0.0.tar.gz \
-	  | tar -xz GSL-4.0.0/include/gsl --strip-components=1
-
+	curl -sL $(GSL_URL) \
+	  | tar -xz GSL-$(GSL_VERSION)/include/gsl --strip-components=1
 $(OBJECTS): include/gsl
