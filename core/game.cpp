@@ -480,11 +480,12 @@ namespace maf::core {
 	}
 
 	Player & Game::find_player(Player::ID id) {
-		if (id < _players.size()) {
-			return _players[id];
-		} else {
+		auto index = static_cast<decltype(_players.size())>(id);
+		if (index >= _players.size()) {
 			throw Player_not_found{id};
 		}
+
+		return _players[index];
 	}
 
 	bool Game::try_to_end_night() {

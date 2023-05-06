@@ -5,9 +5,9 @@
 
 namespace maf {
 	void print(const StyledText & text, ostream & out) {
-		using style_option = StyledString::attributes_t::style_option;
-		using weight_option = StyledString::attributes_t::weight_option;
-		using typeface_option = StyledString::attributes_t::typeface_option;
+		// using style_option     = StyledString::attributes_t::style_option;
+		// using weight_option    = StyledString::attributes_t::weight_option;
+		using typeface_option  = StyledString::attributes_t::typeface_option;
 		using semantics_option = StyledString::attributes_t::semantics_option;
 
 		out << "\n";

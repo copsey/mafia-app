@@ -60,7 +60,7 @@ namespace maf {
 			try {
 				const core::Role & role = console().active_rulebook().look_up(commands[2]);
 				console().show_help_screen<Role_Info_Screen>(role);
-			} catch (std::out_of_range) {
+			} catch (std::out_of_range const&) {
 				throw core::Rulebook::Missing_role_alias{std::string(commands[2])};
 			}
 		} else if (commands_match(commands, {"list", "roles"})) {

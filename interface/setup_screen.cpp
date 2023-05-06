@@ -97,7 +97,7 @@ namespace maf {
 			auto id = role.id();
 
 			return _role_ids.count(id) != 0 && _role_ids.at(id) != 0;
-		} catch (std::out_of_range) {
+		} catch (std::out_of_range const&) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
 		}
 	}
@@ -144,7 +144,7 @@ namespace maf {
 			auto& role = _rulebook.look_up(r_ref);
 			auto& count = _role_ids[role.id()];
 			++count;
-		} catch (std::out_of_range) {
+		} catch (std::out_of_range const&) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
 		}
 	}
@@ -179,7 +179,7 @@ namespace maf {
 			} else {
 				--count;
 			}
-		} catch (std::out_of_range) {
+		} catch (std::out_of_range const&) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
 		}
 	}
@@ -205,7 +205,7 @@ namespace maf {
 		try {
 			auto& role = _rulebook.look_up(r_ref);
 			_role_ids[role.id()] = 0;
-		} catch (std::out_of_range) {
+		} catch (std::out_of_range const&) {
 			throw core::Rulebook::Missing_role_alias{string(alias)};
 		}
 	}
@@ -243,7 +243,7 @@ namespace maf {
 			Game_parameters params = _presets.at(i);
 			return make_unique<Game_log>(console(), params.player_names,
 				params.role_ids, params.wildcard_ids, params.rulebook);
-		} catch (const std::out_of_range &) {
+		} catch (std::out_of_range const&) {
 			throw Missing_preset{i};
 		}
 	}

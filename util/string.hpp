@@ -21,8 +21,8 @@ namespace maf::util {
 	inline bool equal_up_to_case(string_view s1, string_view s2) {
 		if (s1.size() != s2.size()) return false;
 
-		for (index i = 0; i != s1.size(); ++i) {
-			if (!equal_up_to_case(s1[i], s2[i])) return false;
+		for (auto i1 = s1.begin(), i2 = s2.begin(); i1 != s1.end(); ++i1, ++i2) {
+			if (!equal_up_to_case(*i1, *i2)) return false;
 		}
 
 		return true;

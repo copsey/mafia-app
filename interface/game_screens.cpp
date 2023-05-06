@@ -310,7 +310,7 @@ namespace maf {
 				const core::Role & fake_role = game_log().look_up(commands[1]);
 				game_log().choose_fake_role(_player->id(), fake_role.id());
 				_fake_role = _player->fake_role();
-			} catch (std::out_of_range) {
+			} catch (std::out_of_range const&) {
 				throw core::Rulebook::Missing_role_alias{string{commands[1]}};
 			}
 		} else {
