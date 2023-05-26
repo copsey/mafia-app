@@ -1,10 +1,7 @@
-# Build
 /mafia
-build
-mac/build
-include
 
-# Xcode
-mac/Mafia.xcodeproj/xcuserdata
-mac/Mafia.xcodeproj/project.xcworkspace/xcuserdata
+/build/
+/include/
+
+xcuserdata/
 
