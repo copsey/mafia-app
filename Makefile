@@ -58,5 +58,8 @@ GSL_VERSION = 4.0.0
 GSL_URL = https://github.com/microsoft/GSL/archive/refs/tags/v$(GSL_VERSION).tar.gz
 include/gsl:
 	curl -sL $(GSL_URL) \
-	  | tar -xz GSL-$(GSL_VERSION)/include/gsl --strip-components=1
+	  | tar -xz GSL-$(GSL_VERSION)/include/gsl
+	@ mkdir -p $(INCLUDEDIR)
+	@ mv GSL-$(GSL_VERSION)/include/gsl $(INCLUDEDIR)/gsl
+	@ $(RM) -r GSL-$(GSL_VERSION)
 $(OBJECTS): include/gsl
