@@ -377,7 +377,8 @@
 		F84FE07A1AF3B9E000BF4992 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = Mafia/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jackcopsey.$(PRODUCT_NAME:rfc1034identifier)";
@@ -388,7 +389,8 @@
 		F84FE07B1AF3B9E000BF4992 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "-";
 				INFOPLIST_FILE = Mafia/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jackcopsey.$(PRODUCT_NAME:rfc1034identifier)";
