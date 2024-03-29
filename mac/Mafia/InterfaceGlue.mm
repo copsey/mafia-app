@@ -61,7 +61,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 	bool clearWhitespaceFromFront = false;
 
 	for (auto & styled_str : _console.output()) {
-		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
+		NSString *string = [NSString stringWithUTF8String:styled_str.str.c_str()];
 
 		// Strip whitespace from front if last style was "title".
 		if (clearWhitespaceFromFront) {
@@ -131,7 +131,7 @@ using semantics_option = maf::StyledString::attributes_t::semantics_option;
 	bool clearWhitespaceFromFront = false;
 
 	for (auto & styled_str : _console.error_message()) {
-		NSString *string = [NSString stringWithUTF8String:styled_str.string.c_str()];
+		NSString *string = [NSString stringWithUTF8String:styled_str.str.c_str()];
 		auto attributes = styled_str.attributes;
 
 		// Strip whitespace from front if last style was "title".
