@@ -74,6 +74,8 @@ namespace maf {
 		} else if (commands_match(commands, {"info", ""})) {
 			auto& player = console().game_log().find_player(commands[1]);
 			console().show_help_screen<Player_Info_Screen>(player);
+		} else if (commands_match(commands, {"refresh"})) {
+			// do nothing
 		} else {
 			throw Bad_commands{};
 		}
